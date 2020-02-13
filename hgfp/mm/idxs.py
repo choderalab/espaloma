@@ -6,14 +6,14 @@ import numpy as np
 # =============================================================================
 # module functions
 # =============================================================================
-def get_idxs(adjacency_map):
+def from_adjaceny_matrix(adjacency_matrix):
 
     # bond idxs are where adjacency matrix is greater than zero.
     bond_idxs =  np.stack(
         np.where(
             np.greater(
                 np.triu(
-                    adjacency_map),
+                    adjacency_matrix),
                 0.)),
         axis=1)
 
@@ -119,10 +119,6 @@ def get_idxs(adjacency_map):
 
     # nonbonded idxs are those that cannot be connected by
     # 1-, 2-, and 3-walks
-    adjacency_map_full = np.add(
-        adjacency_map,
-        np.transpose(
-            adjacency_map))
 
     nonbonded_idxs = np.stack(
         np.where(
@@ -130,19 +126,19 @@ def get_idxs(adjacency_map):
                 np.sum(
                     [
                         # 1-walk
-                        adjacency_map_full,
+                        adjacency_matrix,
 
                         # 2-walk
                         np.matmul(
-                            adjacency_map_full,
-                            adjacency_map_full),
+                            adjacency_matrix,
+                            adjacency_matrix),
 
                         # 3-walk
                         np.matmul(
-                            adjacency_map_full,
+                            adjacency_matrix,
                             np.matmul(
-                                adjacency_map_full,
-                                adjacency_map_full))
+                                adjacency_matrix,
+                                adjacency_matrix))
                     ],
                     axis=0),
                 0.)),

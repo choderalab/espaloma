@@ -7,6 +7,9 @@ import torch
 import dgl
 import hgfp
 
+# =============================================================================
+# MODULE CLASS
+# =============================================================================
 gcn_msg = dgl.function.copy_src(src='h', out='m')
 gcn_reduce = dgl.function.sum(msg='m', out='h')
 
@@ -26,7 +29,9 @@ class GCN(torch.nn.Module):
 
     def forward(self, g, feature):
         g.ndata['h'] = feature
-        g.update_all(gcn_msg, gcn_reduce)
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h'))
         g.apply_nodes(func=self.apply_mod)
         return g.ndata.pop('h')
 
@@ -72,11 +77,11 @@ class Net(torch.nn.Module):
 
     def forward(self, g, training=True):
         x =  torch.zeros(
-            g.ndata['atoms'].shape[0], 10, dtype=torch.float32)
+            g.ndata['type'].shape[0], 10, dtype=torch.float32)
 
         x[
-            torch.arange(g.ndata['atoms'].shape[0]),
-            torch.squeeze(g.ndata['atoms']).long()] = 1.0
+            torch.arange(g.ndata['type'].shape[0]),
+            torch.squeeze(g.ndata['type']).long()] = 1.0
 
         for exe in self.exes:
             if training == False:

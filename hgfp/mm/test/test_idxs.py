@@ -15,6 +15,8 @@ def test_idxs_ethane():
          [0, 0, 0, 0, 0, 0, 0, 0]],
         dtype=np.float32)
 
+    adjacency_matrix = np.transpose(adjacency_matrix) + adjacency_matrix
+
     bond_idxs, angle_idxs, torsion_idxs, one_four_idxs, nonbonded_idxs = hgfp.geometry.idxs.get_idxs(
         adjacency_matrix)
 

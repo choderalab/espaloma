@@ -1,3 +1,5 @@
 import hgfp.data
 import hgfp.models
-import hgfp.geometry
+import hgfp.mm
+import hgfp.heterograph
+import hgfp.graph

@@ -40,28 +40,8 @@ def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb
                     # get its u298
                     u = torch.squeeze(torch.Tensor([df_u298[name]]))
 
-                    # put molecule in graph list
-                    g = dgl.DGLGraph()
-                    g.add_nodes(n_atoms)
-                    g.ndata['atoms'] = torch.Tensor(
-                        [[atom.GetAtomicNum()] for atom in mol.GetAtoms()])
-                    conformer = mol.GetConformer()
-                    g.ndata['xyz'] = torch.Tensor(
-                        [
-                            [
-                                conformer.GetAtomPosition(idx).x,
-                                conformer.GetAtomPosition(idx).y,
-                                conformer.GetAtomPosition(idx).z
-                            ] for idx in range(n_atoms)
-                        ])
+                    g = hgfp.graph.from_rdkit_mol(mol)
 
-                    bonds = list(mol.GetBonds())
-                    bonds_begin_idxs = [bond.GetBeginAtomIdx() for bond in bonds]
-                    bonds_end_idxs = [bond.GetEndAtomIdx() for bond in bonds]
-                    bonds_types = [bond.GetBondType().real for bond in bonds]
-
-                    g.add_edges(bonds_begin_idxs, bonds_end_idxs)
-                    g.edata['type'] = torch.Tensor(bonds_types)[:, None]
 
                     idx += 1
                     yield(g, u)
