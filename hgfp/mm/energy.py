@@ -6,12 +6,11 @@ import torch
 # =============================================================================
 # module functions
 # =============================================================================
-def bond(x, k, l):
-
-    return 0.5 * k * (x - l) ** 2
+def bond(x, k, eq):
+    return 0.5 * k * (x - eq) ** 2
 
 def angle(x, k, l):
-    return 0.5 * k * (x - l) ** 2
+    return 0.5 * k * (x - eq) ** 2
     return torch.mul(
         torch.mul(
             0.5,
@@ -19,10 +18,10 @@ def angle(x, k, l):
         tf.math.square(
             tf.math.subtract(
                 x,
-                l)))
+                eq)))
 
-def torsion(x, k, l):
-    return k * (1 + torch.cos(x - l))
+def torsion(x, k, eq):
+    return k * (1 + torch.cos(x - eq))
 
 def lj(
         x,

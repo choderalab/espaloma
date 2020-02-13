@@ -5,6 +5,7 @@ import torch
 import dgl
 import hgfp
 
+
 # =============================================================================
 # module functions
 # =============================================================================
@@ -19,13 +20,26 @@ def from_graph(g):
         ('atom', 'atom_neighbors_atom', 'atom'): [],
         ('angle', 'angle_has_center_atom', 'atom'): [],
         ('angle', 'angle_has_side_atom', 'atom'): [],
-        ('torsion', 'torsion_has_center_atom', 'atom'): [],
-        ('torsion', 'torsion_has_side_atom', 'atom'): []
         ('atom', 'atom_in_bond', 'bond'): [],
-        ('atom', 'atom_as_center_in_angle', 'atom'): [],
+
+        ('atom', 'atom_as_center_in_angle', 'angle'): [],
         ('atom', 'atom_as_side_in_angle', 'angle'): [],
-        ('atom', 'atom_as_center_in_torsion', 'torsion'): [],
-        ('atom', 'atom_as_side_in_torsion', 'torsion'): []}
+
+        ('torsion', 'torsion_has_0_atom', 'atom'): [],
+        ('torsion', 'torsion_has_1_atom', 'atom'): [],
+        ('torsion', 'torsion_has_2_atom', 'atom'): [],
+        ('torsion', 'torsion_has_3_atom', 'atom'): [],
+        ('atom', 'atom_as_0_in_torsion', 'torsion'): [],
+        ('atom', 'atom_as_1_in_torsion', 'torsion'): [],
+        ('atom', 'atom_as_2_in_torsion', 'torsion'): [],
+        ('atom', 'atom_as_3_in_torsion', 'torsion'): [],
+
+
+        ('atom', 'atom_in_one_four', 'one_four'): [],
+        ('one_four', 'one_four_has_atom', 'atom'): [],
+
+        ('atom', 'atom_in_nonbonded', 'nonbonded'): [],
+        ('nonbonded', 'nonbonded_has_atom', 'atom'): []}
 
     # get the adjacency matrix of the graph
     adjacency_matrix = g.adjacency_matrix().to_dense().numpy()
@@ -59,14 +73,27 @@ def from_graph(g):
 
     # add torsions
     for idx in range(torsion_idxs.shape[0]):
-        hg[('torsion', 'torsion_has_center_atom', 'atom')].append((idx, torsion_idxs[idx, 1]))
-        hg[('torsion', 'torsion_has_center_atom', 'atom')].append((idx, torsion_idxs[idx, 2]))
-        hg[('torsion', 'torsion_has_side_atom', 'atom')].append((idx, torsion_idxs[idx, 0]))
-        hg[('torsion', 'torsion_has_side_atom', 'atom')].append((idx, torsion_idxs[idx, 3]))
-        hg[('atom', 'atom_as_center_in_torsion', 'torsion')].append((torsion_idxs[idx, 1], idx))
-        hg[('atom', 'atom_as_center_in_torsion', 'torsion')].append((torsion_idxs[idx, 2], idx))
-        hg[('atom', 'atom_as_side_in_torsion', 'torsion')].append((torsion_idxs[idx, 0], idx))
-        hg[('atom', 'atom_as_side_in_torsion', 'torsion')].append((torsion_idxs[idx, 3], idx))
+        hg[('torsion', 'torsion_has_0_atom', 'atom')].append((idx, torsion_idxs[idx, 0]))
+        hg[('torsion', 'torsion_has_1_atom', 'atom')].append((idx, torsion_idxs[idx, 1]))
+        hg[('torsion', 'torsion_has_2_atom', 'atom')].append((idx, torsion_idxs[idx, 2]))
+        hg[('torsion', 'torsion_has_3_atom', 'atom')].append((idx, torsion_idxs[idx, 3]))
+        hg[('atom', 'atom_as_0_in_torsion', 'torsion')].append((torsion_idxs[idx, 0], idx))
+        hg[('atom', 'atom_as_1_in_torsion', 'torsion')].append((torsion_idxs[idx, 1], idx))
+        hg[('atom', 'atom_as_2_in_torsion', 'torsion')].append((torsion_idxs[idx, 2], idx))
+        hg[('atom', 'atom_as_3_in_torsion', 'torsion')].append((torsion_idxs[idx, 3], idx))
+
+    # add one_four
+    for idx in range(one_four_idxs.shape[0]):
+        hg[('one_four', 'one_four_has_atom', 'atom')].append((idx, one_four_idxs[idx, 0]))
+        hg[('one_four', 'one_four_has_atom', 'atom')].append((idx, one_four_idxs[idx, 1]))
+        hg[('atom', 'atom_in_one_four', 'one_four')].append((one_four_idxs[idx, 0], idx))
+        hg[('atom', 'atom_in_one_four', 'one_four')].append((one_four_idxs[idx, 1], idx))
+
+    for idx in range(nonbonded_idxs.shape[0]):
+        hg[('nonbonded', 'nonbonded_has_atom', 'atom')].append((idx, nonbonded_idxs[idx, 0]))
+        hg[('nonbonded', 'nonbonded_has_atom', 'atom')].append((idx, nonbonded_idxs[idx, 1]))
+        hg[('atom', 'atom_in_nonbonded', 'nonbonded')].append((nonbonded_idxs[idx, 0], idx))
+        hg[('atom', 'atom_in_nonbonded', 'nonbonded')].append((nonbonded_idxs[idx, 1], idx))
 
     hg = dgl.heterograph(hg)
 

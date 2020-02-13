@@ -12,7 +12,7 @@ def get_distance_matrix(coordinates):
 
     $$
     D_{ij}^2 = <X_i, X_i> - 2<X_i, X_j> + <X_j, X_j>
-
+    $$
     Parameters
     ----------
     coordinates: tf.Tensor, shape=(n_atoms, 3)
