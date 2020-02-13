@@ -89,6 +89,23 @@ class ParamReadout(torch.nn.Module):
                     dgl.function.sum(msg='m', out='h')))
             },
             'stack')
+
+        g.apply_nodes(
+            lambda node: self.apply_node(node, fn=self.fr_atom),
+            ntype='atom')
+
+        g.apply_nodes(
+            lambda node: self.apply_node(node, fn=self.fr_atom),
+            ntype='bond')
+
+        g.apply_nodes(
+            lambda node: self.apply_node(node, fn=self.fr_atom),
+            ntype='angle')
+
+        g.apply_nodes(
+            lambda node: self.apply_node(node, fn=self.fr_atom),
+            ntype='torsion')
+
         return g
 
 class Net(hgfp.models.gcn.Net):
@@ -97,6 +114,7 @@ class Net(hgfp.models.gcn.Net):
 
         dim = 10
         self.exes = []
+
 
         for idx, exe in enumerate(config):
             if exe.isnumeric():
@@ -130,6 +148,9 @@ class Net(hgfp.models.gcn.Net):
                     lambda g, x: dropout(x, exe))
                 self.exes.append('o' + str(idx))
 
+            self.readout = ParamReadout(
+                readout_units=readout_units,
+                in_dim=dim)
 
     def foward(self, g, training=True):
         x =  torch.zeros(
@@ -147,5 +168,6 @@ class Net(hgfp.models.gcn.Net):
             x = getattr(self, exe)(g, x)
 
         g.nodes.data['h'] = torch.squeeze(x)
-        y = dgl.sum_nodes(g, 'h')
+
+
         return y
