@@ -29,113 +29,132 @@ class GCN(torch.nn.Module):
 
         g.apply_nodes(func=self.apply_mod, ntype='atom')
 
-        return g.node['atom'].data['h']
+        return g.nodes['atom'].data['h']
 
 class ParamReadout(torch.nn.Module):
     def __init__(self, in_dim, readout_units=32):
         super(ParamReadout, self).__init__()
 
-        for term in ['bond', 'bond', 'angle', 'torsion']:
+        for term in ['atom', 'bond', 'angle', 'torsion']:
             setattr(
                 self,
                 'fr_' + term,
                 torch.nn.Sequential(
                     torch.nn.Linear(in_dim, readout_units),
                     torch.nn.Tanh(),
-                    torch.nn.Linear(readout_units, 2)))
+                    torch.nn.Linear(readout_units, 2),
+                    ))
+
+        setattr(
+            self,
+            'fr_mol',
+            torch.nn.Sequential(
+                torch.nn.Linear(in_dim, readout_units),
+                torch.nn.Tanh(),
+                torch.nn.Linear(readout_units, 1)))
 
     def apply_node(self, node, fn):
         h = node.data['h']
 
         # everything should be positive
-        k_and_eq = torch.abs(torch.squeeze(fn(h)))
+        k_and_eq = torch.abs(fn(h))
 
-        k = k_and_eq[0]
-        eq = k_and_eq[1]
+        k = k_and_eq[:, 0]
+        eq = k_and_eq[:, 1]
 
         return {'k': k, 'eq': eq}
 
     def forward(self, g):
-        g.multi_update_all(
-            {
-                'atom_in_bond':(
-                    dgl.function.copy_src(src='h', out='m'),
-                    dgl.function.sum(msg='m', out='h')),
-                'atom_as_center_in_angle':(
-                    dgl.function.copy_src(src='h', out='m'),
-                    dgl.function.sum(msg='m', out='h')),
-                'atom_as_side_in_angle':(
-                    dgl.function.copy_src(src='h', out='m'),
-                    dgl.function.sum(msg='m', out='h')),
-            },
-            'stack')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h'),
+            etype='atom_in_mol')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h'),
+            etype='atom_in_bond')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h_center'),
+            etype='atom_as_center_in_angle')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h_side'),
+            etype='atom_as_side_in_angle')
+
+        g.apply_nodes(
+            lambda node: {'h': node.data['h_center'] + node.data['h_side']},
+            ntype='angle')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h'),
+            etype='atom_as_side_in_angle')
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
             dgl.function.sum(msg='m', out='h_01'),
-            etype='torsion_has_0_atom')
+            etype='atom_as_0_in_torsion')
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
             dgl.function.sum(msg='m', out='h_01'),
-            etype='torsion_has_1_atom')
+            etype='atom_as_1_in_torsion')
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
             dgl.function.sum(msg='m', out='h_32'),
-            etype='torsion_has_3_atom')
+            etype='atom_as_2_in_torsion')
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
             dgl.function.sum(msg='m', out='h_01'),
-            etype='torsion_has_2_atom')
+            etype='atom_as_3_in_torsion')
 
         g.apply_nodes(
-            lambda node: (node.data['h_01'] + node.data['h_32']),
+            lambda node: {'h': node.data['h_01'] + node.data['h_32']},
             ntype='torsion')
 
-        g.apply_nodes(
-            lambda node: self.apply_node(node, fn=self.fr_atom),
-            ntype='atom')
+        for term in ['atom', 'bond', 'angle', 'torsion']:
+            g.apply_nodes(
+                lambda node: self.apply_node(node, fn=getattr(self, 'fr_' + term)),
+                ntype=term)
 
         g.apply_nodes(
-            lambda node: self.apply_node(node, fn=self.fr_bond),
-            ntype='bond')
-
-        g.apply_nodes(
-            lambda node: self.apply_node(node, fn=self.fr_bond),
-            ntype='angle')
-
-        g.apply_nodes(
-            lambda node: self.apply_node(node, fn=self.fr_bond),
-            ntype='torsion')
-
+            lambda node: {'u0': torch.squeeze(self.fr_mol(node.data['h']))},
+            ntype='mol')
 
         # combine sigma and epsilon
         g.multi_update_all(
             {
                 'atom_in_one_four':(
-                    dgl.function.copy_src(src='k', out='sigma'),
-                    dgl.function.mean(msg='sigma', out='sigma_pair')),
-                'atom_in_nonbonded':(
-                    dgl.function.copy_src(src='k', out='sigma'),
-                    dgl.func.mean(msg='sigma', out='sigma_pair')),
-                'atom_in_one_four':(
-                    dgl.function.copy_src(src='eq', out='epsilon'),
+                    dgl.function.copy_src(src='k', out='epsilon'),
                     dgl.function.prod(msg='epsilon', out='epsilon_pair')),
                 'atom_in_nonbonded':(
-                    dgl.function.copy_src(src='eq', out='epsilon'),
+                    dgl.function.copy_src(src='k', out='epsilon'),
                     dgl.function.prod(msg='epsilon', out='epsilon_pair'))
             },
             'stack')
 
-        g.apply_nodes(
-            lambda node: {'epsilon_pair', torch.sqrt(node.data['epsilon_pair'])},
-            ntype='one_four')
+        g.multi_update_all(
+            {
+                'atom_in_one_four':(
+                    dgl.function.copy_src(src='eq', out='sigma'),
+                    dgl.function.prod(msg='sigma', out='sigma_pair')),
+                'atom_in_nonbonded':(
+                    dgl.function.copy_src(src='eq', out='sigma'),
+                    dgl.function.prod(msg='sigma', out='sigma_pair'))
+            },
+            'stack')
 
-        g.apply_nodes(
-            lambda node: {'epsilon_pair', torch.sqrt(node.data['epsilon_pair'])},
-            ntype='nonbonded')
+        for term in ['one_four', 'nonbonded']:
+            g.apply_nodes(
+                lambda node: {'epsilon_pair': torch.sqrt(node.data['epsilon_pair'])},
+                ntype=term)
 
         return g
 
@@ -183,13 +202,14 @@ class Net(torch.nn.Module):
                 readout_units=readout_units,
                 in_dim=dim)
 
-    def foward(self, g, training=True):
+    def forward(self, g, training=True):
+
         x =  torch.zeros(
-            nodes['atom'].data['type'].shape[0], 10, dtype=torch.float32)
+            g.nodes['atom'].data['type'].shape[0], 10, dtype=torch.float32)
 
         x[
-            torch.arange(nodes['atom'].data['type'].shape[0]),
-            torch.squeeze(nodes['atom'].data['type']).long()] = 1.0
+            torch.arange(g.nodes['atom'].data['type'].shape[0]),
+            torch.squeeze(g.nodes['atom'].data['type']).long()] = 1.0
 
         for exe in self.exes:
             if training == False:
@@ -198,12 +218,22 @@ class Net(torch.nn.Module):
 
             x = getattr(self, exe)(g, x)
 
-
         g.nodes['atom'].data['h'] = x
-        g_geo = hgfp.mm.geometry_in_heterograph.from_heterograph_with_xyz(
+
+        g = self.readout(g)
+
+        g = hgfp.mm.geometry_in_heterograph.from_heterograph_with_xyz(
             g)
 
-        energy = hgfp.mm.energy_in_heterograph.u(g, g_geo)
+        g = hgfp.mm.energy_in_heterograph.u(g)
 
+        u = torch.sum(
+                torch.cat(
+                [
+                    g.nodes['mol'].data['u' + term][:, None] for term in [
+                        'bond', 'angle', 'torsion', 'one_four', 'nonbonded', '0'
+                ]],
+                dim=1),
+            dim=1)
 
-        return y
+        return u

@@ -6,20 +6,23 @@ from itertools import islice
 import random
 
 class BatchedDataset():
-    def __init__(self, iterable, batch_size, n_batches_in_buffer=12, cache=False):
+    def __init__(self, iterable, batch_size, n_batches_in_buffer=12, cache=False, hetero=False):
         self.iterable = iterable
         self.batch_size = batch_size
         self.n_batches_in_buffer= n_batches_in_buffer
         self.cache = cache
+        self.hetero=hetero
 
-        if cache == True:
-            self.finished = False
-            self.cached_data = []
+        self.finished = False
+        self.cached_data = []
 
     def __iter__(self):
-        if self.cache == True:
-            if self.finished == True:
-                return iter(self.cached_data)
+
+        if self.cache == True and self.finished == True:
+
+            for x in self.cached_data:
+                yield x
+
 
         else:
             for x in self._iter():
@@ -28,7 +31,7 @@ class BatchedDataset():
             self.finished = True
 
 
-    def __iter__(self):
+    def _iter(self):
         iterable = self.iterable()
 
         while True:
@@ -54,7 +57,11 @@ class BatchedDataset():
                         gs.append(g)
                         ys.append(y)
 
-                    g_batched = dgl.batch(gs)
+                    if self.hetero is True:
+                        g_batched = dgl.batch_hetero(gs)
+                    else:
+                        g_batched = dgl.batch(gs)
+
                     y_batched = torch.stack(ys, axis=0)
 
                     if self.cache == True:
@@ -77,7 +84,11 @@ class BatchedDataset():
                     gs.append(g)
                     ys.append(y)
 
-                g_batched = dgl.batch(gs)
+                if self.hetero is True:
+                    g_batched = dgl.batch_hetero(gs)
+                else:
+                    g_batched = dgl.batch(gs)
+
                 y_batched = torch.stack(ys, axis=0)
 
                 if self.cache == True:

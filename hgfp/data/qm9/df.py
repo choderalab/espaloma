@@ -13,7 +13,12 @@ import hgfp
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb9.sdf.csv'):
+def mean_and_std(csv_path='../data/qm9/gdb9.sdf.csv'):
+    df_csv = pd.read_csv(csv_path, index_col=0)
+    df_u298 = df_csv['u298_atom']
+    return df_u298.mean(), df_u298.std()
+
+def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb9.sdf.csv', hetero=False):
     """ Put qm9 molecules in a dataset.
     """
     # parse data
@@ -24,7 +29,6 @@ def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb
     df_u298 = df_csv['u298_atom']
 
     # initialize graph list to be empty
-
     def qm9_iter():
         idx = 0
         while True:
@@ -42,6 +46,8 @@ def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb
 
                     g = hgfp.graph.from_rdkit_mol(mol)
 
+                    if hetero is True:
+                        g = hgfp.heterograph.from_graph(g)
 
                     idx += 1
                     yield(g, u)
@@ -54,9 +60,12 @@ def batched(
         csv_path='../data/qm9/gdb9.sdf.csv',
         n_batches_in_buffer=12,
         batch_size=32,
-        cache=True):
+        cache=True,
+        hetero=False):
+
     return hgfp.data.utils.BatchedDataset(
-        unbatched(num=num, sdf_path=sdf_path, csv_path=csv_path),
+        unbatched(num=num, sdf_path=sdf_path, csv_path=csv_path, hetero=hetero),
         n_batches_in_buffer=n_batches_in_buffer,
         batch_size=batch_size,
-        cache=cache)
+        cache=cache,
+        hetero=hetero)

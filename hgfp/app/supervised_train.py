@@ -16,7 +16,12 @@ def run(args):
             num=args.size,
             batch_size=args.batch_size,
             cache=args.cache,
-            n_batches_in_buffer=args.n_batches_in_buffer)
+            n_batches_in_buffer=args.n_batches_in_buffer,
+            hetero=args.hetero)
+
+    ds_mean, ds_std = getattr(
+        hgfp.data,
+        args.data.lower()).df.mean_and_std()
 
     ds_tr, ds_te, ds_vl = hgfp.data.utils.split(
         ds,
@@ -60,7 +65,11 @@ def run(args):
     for epoch in range(args.n_epochs):
         for g, u in ds_tr:
             u_hat = net(g)
+            u_hat = u_hat * ds_std + ds_mean
             loss = loss_fn(u, u_hat)
+
+            print(u)
+            print(u_hat)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -110,24 +119,25 @@ def run(args):
                     u_vl,
                     u_hat_vl))
 
+            plt.style.use('fivethirtyeight')
+            plt.figure()
+            plt.plot(rmse_tr, label=r'$RMSE_\mathtt{TRAIN}$')
+            plt.plot(rmse_vl, label=r'$RMSE_\mathtt{TEST}$')
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(time_str + '/RMSE.jpg')
+            plt.figure()
+            plt.plot(r2_tr, label=r'$R^2_\mathtt{TRAIN}$')
+            plt.plot(r2_vl, label=r'$R^2_\mathtt{TEST}$')
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(time_str + '/R2.jpg')
+            plt.figure()
+            plt.plot(losses[1:])
+            plt.tight_layout()
+            plt.savefig(time_str + '/loss.jpg')
+
     if args.report == True:
-        plt.style.use('fivethirtyeight')
-        plt.figure()
-        plt.plot(rmse_tr, label=r'$RMSE_\mathtt{TRAIN}$')
-        plt.plot(rmse_vl, label=r'$RMSE_\mathtt{TEST}$')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(time_str + '/RMSE.jpg')
-        plt.figure()
-        plt.plot(r2_tr, label=r'$R^2_\mathtt{TRAIN}$')
-        plt.plot(r2_vl, label=r'$R^2_\mathtt{TEST}$')
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(time_str + '/R2.jpg')
-        plt.figure()
-        plt.plot(losses)
-        plt.tight_layout()
-        plt.savefig(time_str + '/loss.jpg')
 
         time1 = time.time()
 
@@ -135,7 +145,6 @@ def run(args):
         f_handle.write(str(net))
         f_handle.write('\n')
         f_handle.write('\n')
-
 
         f_handle.write('# Time Used \n')
         f_handle.write('%.2f' % (time1 - time0))
@@ -162,7 +171,6 @@ def run(args):
         for g, u in ds_te:
             u_te = np.concatenate([u_te, u.detach().numpy()], axis=0)
             u_hat_te = np.concatenate([u_hat_te, net(g).detach().numpy()], axis=0)
-
 
         u_tr = u_tr[1:]
         u_te = u_te[1:]
@@ -209,28 +217,27 @@ def run(args):
         f_handle.write('\n')
 
         f_handle.write('{:<15}'.format('|'))
-        f_handle.write('{:<15}'.format('|RMSEs'))
-        f_handle.write('{:<15}'.format('|R2')+ '|' + '\n')
+        f_handle.write('{:<15}'.format('|R2'))
+        f_handle.write('{:<15}'.format('|RMSE')+ '|' + '\n')
 
-        f_handle.write('{:<15}'.format('|' + '-' * 11))
-        f_handle.write('{:<15}'.format('|' + '-' * 11))
-        f_handle.write('{:<15}'.format('|' + '-' * 11))
+        f_handle.write('{:<15}'.format('|' + '-' * 13))
+        f_handle.write('{:<15}'.format('|' + '-' * 13))
+        f_handle.write('{:<15}'.format('|' + '-' * 13))
         f_handle.write('|' + '\n')
 
         f_handle.write('{:<15}'.format('|TRAIN'))
         f_handle.write('{:<15}'.format('|%.2f' % r2_tr))
-        f_handle.write('{:<15}'.format('|%.2f' % rmse_tr + '|' + '\n'))
+        f_handle.write('{:<15}'.format('|%.2f' % rmse_tr) + '|' + '\n')
 
         f_handle.write('{:<15}'.format('|VALIDATION'))
         f_handle.write('{:<15}'.format('|%.2f' % r2_vl))
-        f_handle.write('{:<15}'.format('|%.2f' % rmse_vl + '|' + '\n'))
+        f_handle.write('{:<15}'.format('|%.2f' % rmse_vl) + '|' + '\n')
 
         f_handle.write('{:<15}'.format('|TEST'))
         f_handle.write('{:<15}'.format('|%.2f' % r2_te))
-        f_handle.write('{:<15}'.format('|%.2f' % rmse_te + '|' + '\n'))
+        f_handle.write('{:<15}'.format('|%.2f' % rmse_te) + '|' + '\n')
 
         f_handle.close()
-
 
 
 if __name__=='__main__':
@@ -238,6 +245,7 @@ if __name__=='__main__':
 
     parser.add_argument('--model', default='GCN')
     parser.add_argument('--config', required=True, nargs='*')
+    parser.add_argument('--hetero', default=False, type=bool, nargs='?')
     parser.add_argument('--data', default='QM9')
     parser.add_argument('--batch_size', default=32, type=int)
     parser.add_argument('--n_epochs', default='30', type=int)

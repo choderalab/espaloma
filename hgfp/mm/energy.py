@@ -9,16 +9,8 @@ import torch
 def bond(x, k, eq):
     return 0.5 * k * (x - eq) ** 2
 
-def angle(x, k, l):
+def angle(x, k, eq):
     return 0.5 * k * (x - eq) ** 2
-    return torch.mul(
-        torch.mul(
-            0.5,
-            k),
-        tf.math.square(
-            tf.math.subtract(
-                x,
-                eq)))
 
 def torsion(x, k, eq):
     return k * (1 + torch.cos(x - eq))
@@ -33,9 +25,11 @@ def lj(
 
     """
 
+
     sigma_over_r = torch.where(
         torch.gt(x, switch),
         sigma_pair / (x + damping),
         torch.zeros(x.size()))
+
 
     return 4 * epsilon_pair * (torch.pow(sigma_over_r, 12) - torch.pow(sigma_over_r, 6))
