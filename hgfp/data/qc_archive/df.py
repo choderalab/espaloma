@@ -42,7 +42,8 @@ def unbatched(num=-1, hetero=False):
 
     def _iter():
         for record_name in records:
-
+            try:
+                r = ds_qc.get_record(record_name, specification='default')
 
                 if r is not None:
                     traj = r.get_trajectory()
@@ -50,15 +51,10 @@ def unbatched(num=-1, hetero=False):
                     if traj is not None:
                         for snapshot in traj:
                             energy = snapshot.properties.scf_total_energy
-                            print(energy)
                             mol = snapshot.get_molecule()
-                            
-                            print(mol)
 
                             mol = cmiles.utils.load_molecule(mol.dict(encoding='json'),
                                 toolkit='rdkit')
-                            
-                            print(mol)
 
                             u = torch.squeeze(torch.Tensor([energy]))
                             g = hgfp.graph.from_rdkit_mol(mol)
@@ -66,11 +62,10 @@ def unbatched(num=-1, hetero=False):
                             if hetero is True:
                                 g = hgfp.heterograph.from_graph(g)
 
-                            
-                            print(u)
                             yield(g, u)
 
-
+            except:
+                pass
 
     return _iter
 
