@@ -33,7 +33,10 @@ def unbatched(num=-1, sdf_path='gdb9.sdf', csv_path='gdb9.sdf.csv', hetero=False
     idx = 0
 
     while True:
-        mol = next(df_sdf)
+        try:
+            mol = next(df_sdf)
+        else:
+            break
         if num != -1 and idx > num:
             break
         if mol != None:
