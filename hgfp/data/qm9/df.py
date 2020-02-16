@@ -13,12 +13,12 @@ import hgfp
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def mean_and_std(csv_path='../data/qm9/gdb9.sdf.csv'):
+def mean_and_std(csv_path='gdb9.sdf.csv'):
     df_csv = pd.read_csv(csv_path, index_col=0)
     df_u298 = df_csv['u298_atom']
     return df_u298.mean(), df_u298.std()
 
-def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb9.sdf.csv', hetero=False):
+def unbatched(num=-1, sdf_path='gdb9.sdf', csv_path='gdb9.sdf.csv', hetero=False):
     """ Put qm9 molecules in a dataset.
     """
     # parse data
@@ -56,8 +56,8 @@ def unbatched(num=-1, sdf_path='../data/qm9/gdb9.sdf', csv_path='../data/qm9/gdb
 
 def batched(
         num=-1,
-        sdf_path='../data/qm9/gdb9.sdf',
-        csv_path='../data/qm9/gdb9.sdf.csv',
+        sdf_path='gdb9.sdf',
+        csv_path='gdb9.sdf.csv',
         n_batches_in_buffer=12,
         batch_size=32,
         cache=True,

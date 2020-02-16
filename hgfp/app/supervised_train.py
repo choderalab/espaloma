@@ -23,6 +23,12 @@ def run(args):
         hgfp.data,
         args.data.lower()).df.mean_and_std()
 
+    def unnorm(x):
+        return x * ds_std + ds_mean
+
+    def norm(x):
+        return (x - ds_mean) / ds_std
+
     ds_tr, ds_te, ds_vl = hgfp.data.utils.split(
         ds,
         args.n_batches_te,
@@ -65,11 +71,10 @@ def run(args):
     for epoch in range(args.n_epochs):
         for g, u in ds_tr:
             u_hat = net(g)
-            u_hat = u_hat * ds_std + ds_mean
+            u = norm(u)
+
             loss = loss_fn(u, u_hat)
 
-            print(u)
-            print(u_hat)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -78,19 +83,23 @@ def run(args):
                 losses = np.concatenate([losses, [loss.detach().numpy()]], axis=0)
 
         if args.report == True:
+            net.eval()
             u_tr = np.array([0.])
             u_hat_tr = np.array([0.])
 
             u_vl = np.array([0.])
             u_hat_vl = np.array([0.])
 
-            for g, u in ds_tr:
-                u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
-                u_hat_tr = np.concatenate([u_hat_tr, net(g).detach().numpy()], axis=0)
+            with torch.no_grad():
+                for g, u in ds_tr:
+                    u_hat = unnorm(net(g))
+                    u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
+                    u_hat_tr = np.concatenate([u_hat_tr, u_hat.detach().numpy()], axis=0)
 
-            for g, u in ds_te:
-                u_vl = np.concatenate([u_vl, u.detach().numpy()], axis=0)
-                u_hat_vl = np.concatenate([u_hat_vl, net(g).detach().numpy()], axis=0)
+                for g, u in ds_te:
+                    u_hat = unnorm(net(g))
+                    u_vl = np.concatenate([u_vl, u.detach().numpy()], axis=0)
+                    u_hat_vl = np.concatenate([u_hat_vl, u_hat.detach().numpy()], axis=0)
 
             u_tr = u_tr[1:]
             u_vl = u_vl[1:]
@@ -121,27 +130,36 @@ def run(args):
 
             plt.style.use('fivethirtyeight')
             plt.figure()
-            plt.plot(rmse_tr, label=r'$RMSE_\mathtt{TRAIN}$')
-            plt.plot(rmse_vl, label=r'$RMSE_\mathtt{TEST}$')
+            plt.plot(rmse_tr[1:], label=r'$RMSE_\mathtt{TRAIN}$')
+            plt.plot(rmse_vl[1:], label=r'$RMSE_\mathtt{VALIDATION}$')
             plt.legend()
             plt.tight_layout()
             plt.savefig(time_str + '/RMSE.jpg')
+            plt.close()
             plt.figure()
-            plt.plot(r2_tr, label=r'$R^2_\mathtt{TRAIN}$')
-            plt.plot(r2_vl, label=r'$R^2_\mathtt{TEST}$')
+            plt.plot(r2_tr[1:], label=r'$R^2_\mathtt{TRAIN}$')
+            plt.plot(r2_vl[1:], label=r'$R^2_\mathtt{VALIDATION}$')
             plt.legend()
             plt.tight_layout()
             plt.savefig(time_str + '/R2.jpg')
+            plt.close()
             plt.figure()
-            plt.plot(losses[1:])
+            plt.plot(losses[10:])
             plt.tight_layout()
             plt.savefig(time_str + '/loss.jpg')
+            plt.close()
 
     if args.report == True:
 
         time1 = time.time()
 
         f_handle.write('# Model Summary\n')
+
+        for arg in vars(args):
+            f_handle.write(arg+ '=' + str(getattr(args, arg)))
+            f_handle.write('\n')
+
+        f_handle.write('\n')
         f_handle.write(str(net))
         f_handle.write('\n')
         f_handle.write('\n')
@@ -150,6 +168,14 @@ def run(args):
         f_handle.write('%.2f' % (time1 - time0))
         f_handle.write('\n')
         f_handle.write('\n')
+
+        np.save(time_str + '/loss', losses)
+        np.save(time_str + '/rmse_tr', rmse_tr)
+        np.save(time_str + '/rmse_vl', rmse_vl)
+        np.save(time_str + '/r2_tr', r2_tr)
+        np.save(time_str + '/r2_vl', r2_vl)
+
+        f_handle.write('# Performance')
 
         u_tr = np.array([0.])
         u_hat_tr = np.array([0.])
@@ -161,23 +187,26 @@ def run(args):
         u_hat_vl = np.array([0.])
 
         for g, u in ds_tr:
+
             u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
-            u_hat_tr = np.concatenate([u_hat_tr, net(g).detach().numpy()], axis=0)
+            u_hat_tr = np.concatenate([u_hat_tr, unnorm(net(g)).detach().numpy()], axis=0)
 
         for g, u in ds_vl:
             u_vl = np.concatenate([u_te, u.detach().numpy()], axis=0)
-            u_hat_vl = np.concatenate([u_hat_te, net(g).detach().numpy()], axis=0)
+            u_hat_vl = np.concatenate([u_hat_vl, unnorm(net(g)).detach().numpy()], axis=0)
 
         for g, u in ds_te:
             u_te = np.concatenate([u_te, u.detach().numpy()], axis=0)
-            u_hat_te = np.concatenate([u_hat_te, net(g).detach().numpy()], axis=0)
+            u_hat_te = np.concatenate([u_hat_te, unnorm(net(g)).detach().numpy()], axis=0)
 
-        u_tr = u_tr[1:]
-        u_te = u_te[1:]
-        u_vl = u_vl[1:]
-        u_hat_tr = u_hat_tr[1:]
-        u_hat_te = u_hat_te[1:]
-        u_hat_vl = u_hat_vl[1:]
+
+        np.save(time_str + '/u_tr', u_tr)
+        np.save(time_str + '/u_te', u_te)
+        np.save(time_str + '/u_vl', u_vl)
+
+        np.save(time_str + '/u_hat_tr', u_hat_tr)
+        np.save(time_str + '/u_hat_vl', u_hat_vl)
+        np.save(time_str + '/u_hat_te', u_hat_te)
 
         rmse_tr = (
             np.sqrt(
@@ -212,7 +241,7 @@ def run(args):
                 u_vl,
                 u_hat_vl))
 
-        f_handle.write('# Performance')
+
         f_handle.write('\n')
         f_handle.write('\n')
 
@@ -239,6 +268,8 @@ def run(args):
 
         f_handle.close()
 
+    torch.save(net.state_dict(), time_str + '/model')
+
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
@@ -258,7 +289,6 @@ if __name__=='__main__':
     parser.add_argument('--n_batches_te', default=10, type=int)
     parser.add_argument('--n_batches_vl', default=10, type=int)
     parser.add_argument('--report', default=True)
-    parser.add_argument('--save_itermediate_weights', default=True)
 
     args = parser.parse_args()
     run(args)
