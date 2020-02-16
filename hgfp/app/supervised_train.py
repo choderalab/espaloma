@@ -95,7 +95,7 @@ def run(args):
                     u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
                     u_hat_tr = np.concatenate([u_hat_tr, u_hat.detach().numpy()], axis=0)
 
-                for g, u in ds_te:
+                for g, u in ds_vl:
                     u_hat = unnorm(net(g))
                     u_vl = np.concatenate([u_vl, u.detach().numpy()], axis=0)
                     u_hat_vl = np.concatenate([u_hat_vl, u_hat.detach().numpy()], axis=0)
@@ -278,9 +278,9 @@ def run(args):
 
         f_handle.write('<div align="center"><img src="loss.jpg" width="600"></div>')
         f_handle.write('\n')
-        f_handle.write('<div align="center"><img src="rmse.jpg" width="600"></div>')
+        f_handle.write('<div align="center"><img src="RMSE.jpg" width="600"></div>')
         f_handle.write('\n')
-        f_handle.write('<div align="center"><img src="r2.jpg" width="600"></div>')
+        f_handle.write('<div align="center"><img src="R2.jpg" width="600"></div>')
 
         f_handle.close()
 
