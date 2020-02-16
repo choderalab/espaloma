@@ -40,7 +40,6 @@ class BatchedDataset():
                     buffer = [ # grab some data from self.iterable
                         next(iterable) for _ in range(
                             self.n_batches_in_buffer * self.batch_size)]
-
                     random.shuffle(buffer)
                 except:
                     break

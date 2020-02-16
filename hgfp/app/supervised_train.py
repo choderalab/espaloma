@@ -72,7 +72,6 @@ def run(args):
         for g, u in ds_tr:
             u_hat = net(g)
             u = norm(u)
-
             loss = loss_fn(u, u_hat)
 
             optimizer.zero_grad()
@@ -145,6 +144,7 @@ def run(args):
             plt.close()
             plt.figure()
             plt.plot(losses[10:])
+            plt.title('loss')
             plt.tight_layout()
             plt.savefig(time_str + '/loss.jpg')
             plt.close()
@@ -162,7 +162,6 @@ def run(args):
         f_handle.write('\n')
         f_handle.write(str(net))
         f_handle.write('\n')
-        f_handle.write('\n')
 
         f_handle.write('# Time Used \n')
         f_handle.write('%.2f' % (time1 - time0))
@@ -174,8 +173,6 @@ def run(args):
         np.save(time_str + '/rmse_vl', rmse_vl)
         np.save(time_str + '/r2_tr', r2_tr)
         np.save(time_str + '/r2_vl', r2_vl)
-
-        f_handle.write('# Performance')
 
         u_tr = np.array([0.])
         u_hat_tr = np.array([0.])
@@ -192,7 +189,7 @@ def run(args):
             u_hat_tr = np.concatenate([u_hat_tr, unnorm(net(g)).detach().numpy()], axis=0)
 
         for g, u in ds_vl:
-            u_vl = np.concatenate([u_te, u.detach().numpy()], axis=0)
+            u_vl = np.concatenate([u_vl, u.detach().numpy()], axis=0)
             u_hat_vl = np.concatenate([u_hat_vl, unnorm(net(g)).detach().numpy()], axis=0)
 
         for g, u in ds_te:
@@ -207,6 +204,16 @@ def run(args):
         np.save(time_str + '/u_hat_tr', u_hat_tr)
         np.save(time_str + '/u_hat_vl', u_hat_vl)
         np.save(time_str + '/u_hat_te', u_hat_te)
+
+        f_handle.write('# Dataset Size')
+        f_handle.write('\n')
+        f_handle.write('Training samples: ')
+        f_handle.write('\n')
+        f_handle.write('Training: %s, Validation: %s, Test: %s' % (
+            u_tr.shape[0],
+            u_vl.shape[0],
+            u_te.shape[0]))
+        f_handle.write('\n')
 
         rmse_tr = (
             np.sqrt(
@@ -242,7 +249,8 @@ def run(args):
                 u_hat_vl))
 
 
-        f_handle.write('\n')
+        f_handle.write('# Performance')
+
         f_handle.write('\n')
 
         f_handle.write('{:<15}'.format('|'))
@@ -265,6 +273,14 @@ def run(args):
         f_handle.write('{:<15}'.format('|TEST'))
         f_handle.write('{:<15}'.format('|%.2f' % r2_te))
         f_handle.write('{:<15}'.format('|%.2f' % rmse_te) + '|' + '\n')
+
+        f_handle.write('\n')
+
+        f_handle.write('<div align="center"><img src="loss.jpg" width="600"></div>')
+        f_handle.write('\n')
+        f_handle.write('<div align="center"><img src="rmse.jpg" width="600"></div>')
+        f_handle.write('\n')
+        f_handle.write('<div align="center"><img src="r2.jpg" width="600"></div>')
 
         f_handle.close()
 
