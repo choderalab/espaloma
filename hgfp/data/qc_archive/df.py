@@ -33,22 +33,32 @@ def unbatched(num=-1, hetero=False):
     ds_qc = client.get_collection("OptimizationDataset", "OpenFF Full Optimization Benchmark 1")
 
     # initialize graph list to be empty
-    def _iter():
-        for record_name in random.sample(list(ds_qc.data.records), num):
-            try:
 
-                print(record_name, flush=True)
-                r = ds_qc.get_record(record_name, specification='default')
+    records = list(ds_qc.data.records)
+    if num != -1:
+        records = random.sample(records, num)
+    else:
+        random.shuffle(records)
+
+    def _iter():
+        for record_name in records:
+
+
                 if r is not None:
                     traj = r.get_trajectory()
+                    print(traj, flush=True)
                     if traj is not None:
                         for snapshot in traj:
                             energy = snapshot.properties.scf_total_energy
-
+                            print(energy)
                             mol = snapshot.get_molecule()
+                            
+                            print(mol)
 
                             mol = cmiles.utils.load_molecule(mol.dict(encoding='json'),
                                 toolkit='rdkit')
+                            
+                            print(mol)
 
                             u = torch.squeeze(torch.Tensor([energy]))
                             g = hgfp.graph.from_rdkit_mol(mol)
@@ -56,11 +66,10 @@ def unbatched(num=-1, hetero=False):
                             if hetero is True:
                                 g = hgfp.heterograph.from_graph(g)
 
-
+                            
+                            print(u)
                             yield(g, u)
 
-            except:
-                pass
 
 
     return _iter
