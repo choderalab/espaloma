@@ -62,10 +62,11 @@ def unbatched(num=-1, hetero=False):
                             if hetero is True:
                                 g = hgfp.heterograph.from_graph(g)
 
+                            print(u)
                             yield(g, u)
 
             except:
-                pass
+                continue
 
     return _iter
 
