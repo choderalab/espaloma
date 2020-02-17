@@ -55,7 +55,7 @@ def get_distances(idxs, coordinates):
 
 def get_angles(angle_idxs, coordinates, return_cos=False):
     """ Calculate angles from a set of indices and coordinates.
-
+    TODO: return_cos unused
     """
     # get the coordinates of the atoms forming the angle
     # (batch_size, n_angles, 3, 3)
@@ -92,6 +92,7 @@ def get_torsions(torsion_idxs, coordinates, return_cos=False):
     ----------
     coordinates: tf.Tensor, shape=(n_atoms, 3)
     torsion_idxs: # TODO: describe
+    TODO: return_cos unused
     """
     # get the coordinates of the atoms forming the dihedral
     # (batch_size, n_torsions, 4, 3)
@@ -108,6 +109,7 @@ def get_torsions(torsion_idxs, coordinates, return_cos=False):
         torsion_idxs[:, :, 2, :] - torsion_idxs[:, :, 1, :])
 
     # (batch_size, n_torsions, )
+    # TODO: should this be torch.cross instead of tf.linalg.cross?
     dihedrals = torch.atan2(
         torch.norm(
             tf.linalg.cross(

@@ -15,6 +15,8 @@ def from_graph(g):
     representing bonds, angles, torsions, and pairwise interactions.
 
     """
+    # TODO: reduce reliance on commenting out code-blocks here
+    # TODO: describe choices in deriving "heterograph" from input graph
     # initialize heterograph
     hg = {
         # ('bond', 'bond_has_atom', 'atom'):[],
@@ -227,7 +229,7 @@ def from_graph(g):
     hg.nodes['angle'].data['idxs'] = angle_idxs
     hg.nodes['torsion'].data['idxs'] = torsion_idxs
 
-
+    # TODO: catch more specific error here : do we want to have two modes, with or without geometry?
     try:
         hg.nodes['atom'].data['xyz'] = g.ndata['xyz']
     except:

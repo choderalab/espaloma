@@ -13,7 +13,11 @@ def angle(x, k, eq):
     return 0.5 * k * (x - eq) ** 2
 
 def torsion(x, k, eq):
+    # TODO: rename eq to phase
+    # TODO: allow periodicity > 1
     return k * (1 + torch.cos(x - eq))
+
+# TODO: should coulomb be here too?
 
 def lj(
         x,

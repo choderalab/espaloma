@@ -14,3 +14,5 @@ g = hgfp.graph.from_rdkit_mol(mol)
 hg = hgfp.heterograph.from_graph(g)
 
 print(hgfp.mm.geometry_in_heterograph.from_heterograph_with_xyz(hg))
+
+# TODO: add tests comparing OpenMM energies with cloned energies

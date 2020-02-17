@@ -3,11 +3,13 @@
 # =============================================================================
 import rdkit
 from rdkit import Chem
+# TODO: add pandas to requirements.txt
 import pandas as pd
 import dgl
 import torch
 import os
 import hgfp
+# TODO: add qcportal to requirements.txt
 import qcportal as ptl
 
 
@@ -15,6 +17,7 @@ import qcportal as ptl
 # MODULE FUNCTIONS
 # =============================================================================
 def mean_and_std():
+    # TODO: is this used anywhere?
     return 0.0, 1.0
 
 def unbatched(num=-1, hetero=False):
@@ -26,6 +29,7 @@ def unbatched(num=-1, hetero=False):
     from openforcefield.topology import Topology
     from openforcefield.typing.engines.smirnoff import ForceField
     FF = ForceField('test_forcefields/smirnoff99Frosst.offxml')
+    # TODO: add cmiles to requirements.txt
     import cmiles
     from simtk import openmm
     import random
