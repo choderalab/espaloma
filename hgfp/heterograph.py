@@ -222,6 +222,12 @@ def from_graph(g):
     # put all atom data into heterograph
     hg.nodes['atom'].data['type'] = g.ndata['type']
 
+    # put indices in bonds, angles, and torsions
+    hg.nodes['bond'].data['idxs'] = bond_idxs
+    hg.nodes['angle'].data['idxs'] = angle_idxs
+    hg.nodes['torsion'].data['idxs'] = torsion_idxs
+
+
     try:
         hg.nodes['atom'].data['xyz'] = g.ndata['xyz']
     except:
