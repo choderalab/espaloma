@@ -14,7 +14,7 @@ import qcportal as ptl
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def mean_and_std(ds):
+def mean_and_std(ds=ds):
     us = [u.numpy() for g, u in ds]
     us = np.array(us)
 
@@ -43,7 +43,8 @@ def unbatched(num=-1, hetero=False):
         records = random.sample(records, num)
     else:
         random.shuffle(records)
-
+    
+    global ds
     ds = []
 
     for record_name in records:
@@ -73,9 +74,9 @@ def unbatched(num=-1, hetero=False):
                             ds.append((g, u))
         except:
             pass
+    
 
     random.shuffle(ds)
-
     return lambda: iter(ds)
 
 def batched(

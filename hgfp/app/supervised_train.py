@@ -10,18 +10,18 @@ def run(args):
         args.model.lower()).Net(
             args.config)
 
-    ds = getattr(
+    df = getattr(
         hgfp.data,
-        args.data.lower()).df.batched(
+        args.data.lower()).df
+    
+    ds = df.batched(
             num=args.size,
             batch_size=args.batch_size,
             cache=args.cache,
             n_batches_in_buffer=args.n_batches_in_buffer,
             hetero=args.hetero)
 
-    ds_mean, ds_std = getattr(
-        hgfp.data,
-        args.data.lower()).df.mean_and_std()
+    ds_mean, ds_std = df.mean_and_std()
 
     def unnorm(x):
         return x * ds_std + ds_mean
@@ -47,12 +47,14 @@ def run(args):
     if args.report == True:
         from matplotlib import pyplot as plt
         import time
-        from time import localtime, strftime
+        from datetime import datetime
         from sklearn.metrics import mean_squared_error
         from sklearn.metrics import r2_score
         import os
 
-        time_str = strftime("%Y-%m-%d_%H_%M_%S", localtime())
+        now = datetime.now()
+
+        time_str = now.strftime("%Y-%m-%d-%H%M%S%f")
         os.mkdir(time_str)
 
         losses = np.array([0.])
@@ -63,7 +65,7 @@ def run(args):
         time0 = time.time()
 
         f_handle = open(time_str + '/report.md', 'w')
-        f_handle.write(strftime("%Y-%m-%d %H:%M:%S", localtime()))
+        f_handle.write(time_str)
         f_handle.write('\n')
         f_handle.write('===========================')
         f_handle.write('\n')
