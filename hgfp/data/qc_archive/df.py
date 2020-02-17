@@ -14,8 +14,11 @@ import qcportal as ptl
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def mean_and_std():
-    return 0.0, 1.0
+def mean_and_std(ds):
+    us = [u.numpy() for g, u in ds]
+    us = np.array(us)
+
+    return np.mean(us), np.std(us)
 
 def unbatched(num=-1, hetero=False):
     """ Put qm9 molecules in a dataset.
@@ -29,6 +32,7 @@ def unbatched(num=-1, hetero=False):
     import cmiles
     from simtk import openmm
     import random
+    import numpy as np
 
     ds_qc = client.get_collection("OptimizationDataset", "OpenFF Full Optimization Benchmark 1")
 
@@ -40,14 +44,14 @@ def unbatched(num=-1, hetero=False):
     else:
         random.shuffle(records)
 
-    def _iter():
-        for record_name in records:
-            try:
+    ds = []
+
+    for record_name in records:
+        try:
                 r = ds_qc.get_record(record_name, specification='default')
 
                 if r is not None:
                     traj = r.get_trajectory()
-                    print(traj, flush=True)
                     if traj is not None:
                         for snapshot in traj:
                             energy = snapshot.properties.scf_total_energy
@@ -58,17 +62,21 @@ def unbatched(num=-1, hetero=False):
 
                             u = torch.squeeze(torch.Tensor([energy]))
                             g = hgfp.graph.from_rdkit_mol(mol)
+                    
+                            if np.any(np.greater(g.ndata['type'].numpy(), 9)):
+                                continue
 
                             if hetero is True:
                                 g = hgfp.heterograph.from_graph(g)
+                            
+                            
+                            ds.append((g, u))
+        except:
+            pass
 
-                            print(u)
-                            yield(g, u)
+    random.shuffle(ds)
 
-            except:
-                continue
-
-    return _iter
+    return lambda: iter(ds)
 
 def batched(
         num=-1,
