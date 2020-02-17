@@ -17,9 +17,11 @@ def run(args):
 
 
     def unnorm(x):
+        # TODO : ds_std, ds_mean undefined -- should these be ds.std, ds.mean or something?
         return x * ds_std + ds_mean
 
     def norm(x):
+        # TODO : ds_std, ds_mean undefined -- should these be ds.std, ds.mean or something?
         return (x - ds_mean) / ds_std
 
     ds_tr, ds_te, ds_vl = hgfp.data.utils.split(
