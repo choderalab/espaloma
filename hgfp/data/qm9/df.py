@@ -18,7 +18,6 @@ def mean_and_std(csv_path='gdb9.sdf.csv'):
     df_u298 = df_csv['u298_atom']
     return df_u298.mean(), df_u298.std()
 
-
 def unbatched(num=-1, sdf_path='gdb9.sdf', csv_path='gdb9.sdf.csv', hetero=False):
     # parse data
     df_csv = pd.read_csv(csv_path, index_col=0)

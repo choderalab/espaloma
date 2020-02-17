@@ -99,6 +99,18 @@ class BatchedDataset():
                 yield g_batched, y_batched
 
 
+class BatchedParamGraph():
+    def __init__(self, iterable, batch_size=32):
+        self.iterable = iterable
+        self.batch_size = batch_size
+
+    def __iter__(self):
+        while True:
+            try:
+                yield dgl.batch_hetero([next(self.iterable) for _ in range(self.batch_size)])
+            except:
+                break
+
 def split(ds, n_batches_te=10, n_batches_vl=10):
 
     ds_iter = iter(ds)
