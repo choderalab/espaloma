@@ -2,6 +2,7 @@ import hgfp
 import argparse
 import torch
 import numpy as np
+import itertools
 
 
 def run(args):
@@ -16,18 +17,20 @@ def run(args):
             num=args.size,
             batch_size=args.batch_size)
 
-    
-    print(ds)
 
+    ds_all = dgl.batch_hetero(list(itertools.chain.from_iterable(
+        [dgl.unbatch_hetero(g) for g in ds()])))
 
-    for x in ds:
-        print(x)
+    mean_and_std_dict = {}
 
-    def unnorm(x):
-        return x * ds_std + ds_mean
+    for term in ['atom', 'bond', 'angle']:
+        for param in ['k', 'eq']:
+            x = ds_all.nodes[term].data[param + '_ref']
+            mean = np.mean(x.numpy())
+            std = np.std(x.numpy())
+            mean_and_std_dict[term][param]['mean'] = mean
+            mean_and_std_dict[term][param]['std'] = std
 
-    def norm(x):
-        return (x - ds_mean) / ds_std
 
     ds_tr, ds_te, ds_vl = hgfp.data.utils.split(
         ds,
@@ -55,11 +58,6 @@ def run(args):
         time_str = strftime("%Y-%m-%d_%H_%M_%S", localtime())
         os.mkdir(time_str)
 
-        losses = np.array([0.])
-        rmse_vl = []
-        r2_vl = []
-        rmse_tr = []
-        r2_tr = []
         time0 = time.time()
 
         f_handle = open(time_str + '/report.md', 'w')
@@ -72,6 +70,8 @@ def run(args):
         for g, u in ds_tr:
             u_hat = net(g)
             u = norm(u)
+
+
             loss = loss_fn(u, u_hat)
 
             optimizer.zero_grad()
@@ -80,74 +80,6 @@ def run(args):
 
             if args.report == True:
                 losses = np.concatenate([losses, [loss.detach().numpy()]], axis=0)
-
-        if args.report == True:
-            net.eval()
-            u_tr = np.array([0.])
-            u_hat_tr = np.array([0.])
-
-            u_vl = np.array([0.])
-            u_hat_vl = np.array([0.])
-
-            with torch.no_grad():
-                for g, u in ds_tr:
-                    u_hat = unnorm(net(g))
-                    u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
-                    u_hat_tr = np.concatenate([u_hat_tr, u_hat.detach().numpy()], axis=0)
-
-                for g, u in ds_vl:
-                    u_hat = unnorm(net(g))
-                    u_vl = np.concatenate([u_vl, u.detach().numpy()], axis=0)
-                    u_hat_vl = np.concatenate([u_hat_vl, u_hat.detach().numpy()], axis=0)
-
-            u_tr = u_tr[1:]
-            u_vl = u_vl[1:]
-            u_hat_tr = u_hat_tr[1:]
-            u_hat_vl = u_hat_vl[1:]
-
-            rmse_tr.append(
-                np.sqrt(
-                    mean_squared_error(
-                        u_tr,
-                        u_hat_tr)))
-
-            rmse_vl.append(
-                np.sqrt(
-                    mean_squared_error(
-                        u_vl,
-                        u_hat_vl)))
-
-            r2_tr.append(
-                r2_score(
-                    u_tr,
-                    u_hat_tr))
-
-            r2_vl.append(
-                r2_score(
-                    u_vl,
-                    u_hat_vl))
-
-            plt.style.use('fivethirtyeight')
-            plt.figure()
-            plt.plot(rmse_tr[1:], label=r'$RMSE_\mathtt{TRAIN}$')
-            plt.plot(rmse_vl[1:], label=r'$RMSE_\mathtt{VALIDATION}$')
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig(time_str + '/RMSE.jpg')
-            plt.close()
-            plt.figure()
-            plt.plot(r2_tr[1:], label=r'$R^2_\mathtt{TRAIN}$')
-            plt.plot(r2_vl[1:], label=r'$R^2_\mathtt{VALIDATION}$')
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig(time_str + '/R2.jpg')
-            plt.close()
-            plt.figure()
-            plt.plot(losses[10:])
-            plt.title('loss')
-            plt.tight_layout()
-            plt.savefig(time_str + '/loss.jpg')
-            plt.close()
 
     if args.report == True:
 
@@ -167,43 +99,6 @@ def run(args):
         f_handle.write('%.2f' % (time1 - time0))
         f_handle.write('\n')
         f_handle.write('\n')
-
-        np.save(time_str + '/loss', losses)
-        np.save(time_str + '/rmse_tr', rmse_tr)
-        np.save(time_str + '/rmse_vl', rmse_vl)
-        np.save(time_str + '/r2_tr', r2_tr)
-        np.save(time_str + '/r2_vl', r2_vl)
-
-        u_tr = np.array([0.])
-        u_hat_tr = np.array([0.])
-
-        u_te = np.array([0.])
-        u_hat_te = np.array([0.])
-
-        u_vl = np.array([0.])
-        u_hat_vl = np.array([0.])
-
-        for g, u in ds_tr:
-
-            u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
-            u_hat_tr = np.concatenate([u_hat_tr, unnorm(net(g)).detach().numpy()], axis=0)
-
-        for g, u in ds_vl:
-            u_vl = np.concatenate([u_vl, u.detach().numpy()], axis=0)
-            u_hat_vl = np.concatenate([u_hat_vl, unnorm(net(g)).detach().numpy()], axis=0)
-
-        for g, u in ds_te:
-            u_te = np.concatenate([u_te, u.detach().numpy()], axis=0)
-            u_hat_te = np.concatenate([u_hat_te, unnorm(net(g)).detach().numpy()], axis=0)
-
-
-        np.save(time_str + '/u_tr', u_tr)
-        np.save(time_str + '/u_te', u_te)
-        np.save(time_str + '/u_vl', u_vl)
-
-        np.save(time_str + '/u_hat_tr', u_hat_tr)
-        np.save(time_str + '/u_hat_vl', u_hat_vl)
-        np.save(time_str + '/u_hat_te', u_hat_te)
 
         f_handle.write('# Dataset Size')
         f_handle.write('\n')
@@ -247,7 +142,6 @@ def run(args):
             r2_score(
                 u_vl,
                 u_hat_vl))
-
 
         f_handle.write('# Performance')
 
