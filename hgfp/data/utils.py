@@ -20,11 +20,14 @@ class BatchedDataset():
 
         if self.cache == True and self.finished == True:
 
+            random.shuffle(self.cached_data)
+
             for x in self.cached_data:
                 yield x
 
 
         else:
+            
             for x in self._iter():
                 yield x
 
