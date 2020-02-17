@@ -26,22 +26,22 @@ def mol_to_param_graph(mol, g):
 
     g.apply_nodes(
         lambda node: {'k_ref': torch.Tensor(
-                [forces['Bonds'][tuple(node.data['idxs'][idx])].k._value for idx in range(node.data['idxs'].shape[0])])},
+                [forces['Bonds'][tuple(node.data['idxs'][idx].numpy())].k._value for idx in range(node.data['idxs'].shape[0])])},
         ntype='bond')
 
     g.apply_nodes(
         lambda node: {'eq_ref': torch.Tensor(
-                [forces['Bonds'][tuple(node.data['idxs'][idx])].length._value for idx in range(node.data['idxs'].shape[0])])},
+                [forces['Bonds'][tuple(node.data['idxs'][idx].numpy())].length._value for idx in range(node.data['idxs'].shape[0])])},
         ntype='bond')
 
     g.apply_nodes(
         lambda node: {'k_ref': torch.Tensor(
-                [forces['Angles'][tuple(node.data['idxs'][idx])].k._value for idx in range(node.data['idxs'].shape[0])])},
+                [forces['Angles'][tuple(node.data['idxs'][idx].numpy())].k._value for idx in range(node.data['idxs'].shape[0])])},
         ntype='angle')
 
     g.apply_nodes(
         lambda node: {'eq_ref': torch.Tensor(
-                [forces['Angles'][tuple(node.data['idxs'][idx])].angle._value for idx in range(node.data['idxs'].shape[0])])},
+                [forces['Angles'][tuple(node.data['idxs'][idx].numpy())].angle._value for idx in range(node.data['idxs'].shape[0])])},
         ntype='angle')
 
     g.apply_nodes(
@@ -91,7 +91,6 @@ def unbatched(num=-1, sdf_path='gdb9.sdf'):
     random.shuffle(ds)
 
     return lambda: iter(ds)
-
 
 def batched(num=-1, sdf_path='gdb9.sdf', batch_size=32):
     hgfp.data.utils.BatchedParamGraph(
