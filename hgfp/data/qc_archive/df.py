@@ -9,15 +9,15 @@ import torch
 import os
 import hgfp
 import qcportal as ptl
-
+import numpy as np
 
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def mean_and_std(ds=ds):
+def mean_and_std():
     us = [u.numpy() for g, u in ds]
     us = np.array(us)
-
+    print(us.shape)
     return np.mean(us), np.std(us)
 
 def unbatched(num=-1, hetero=False):
@@ -69,14 +69,14 @@ def unbatched(num=-1, hetero=False):
 
                             if hetero is True:
                                 g = hgfp.heterograph.from_graph(g)
-                            
-                            
+                                    
                             ds.append((g, u))
         except:
-            pass
+            continue
     
 
     random.shuffle(ds)
+
     return lambda: iter(ds)
 
 def batched(

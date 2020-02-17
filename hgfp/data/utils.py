@@ -105,9 +105,11 @@ class BatchedParamGraph():
         self.batch_size = batch_size
 
     def __iter__(self):
+        _iter = self.iterable()
+
         while True:
             try:
-                yield dgl.batch_hetero([next(self.iterable) for _ in range(self.batch_size)])
+                yield dgl.batch_hetero([next(_iter) for _ in range(self.batch_size)])
             except:
                 break
 

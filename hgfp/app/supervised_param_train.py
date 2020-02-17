@@ -13,8 +13,15 @@ def run(args):
     ds = getattr(
         hgfp.data,
         args.data.lower()).param.batched(
-            batch_size=args.data.batch_size)
+            num=args.size,
+            batch_size=args.batch_size)
 
+    
+    print(ds)
+
+
+    for x in ds:
+        print(x)
 
     def unnorm(x):
         return x * ds_std + ds_mean

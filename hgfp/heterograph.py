@@ -223,9 +223,9 @@ def from_graph(g):
     hg.nodes['atom'].data['type'] = g.ndata['type']
 
     # put indices in bonds, angles, and torsions
-    hg.nodes['bond'].data['idxs'] = bond_idxs
-    hg.nodes['angle'].data['idxs'] = angle_idxs
-    hg.nodes['torsion'].data['idxs'] = torsion_idxs
+    hg.nodes['bond'].data['idxs'] = torch.Tensor(bond_idxs)
+    hg.nodes['angle'].data['idxs'] = torch.Tensor(angle_idxs)
+    hg.nodes['torsion'].data['idxs'] = torch.Tensor(torsion_idxs)
 
 
     try:

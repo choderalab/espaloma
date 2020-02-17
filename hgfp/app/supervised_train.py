@@ -23,6 +23,9 @@ def run(args):
 
     ds_mean, ds_std = df.mean_and_std()
 
+    print(ds_mean)
+    print(ds_std)
+
     def unnorm(x):
         return x * ds_std + ds_mean
 

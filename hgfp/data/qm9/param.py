@@ -93,6 +93,6 @@ def unbatched(num=-1, sdf_path='gdb9.sdf'):
     return lambda: iter(ds)
 
 def batched(num=-1, sdf_path='gdb9.sdf', batch_size=32):
-    hgfp.data.utils.BatchedParamGraph(
+    return hgfp.data.utils.BatchedParamGraph(
         unbatched(num=num, sdf_path=sdf_path),
         batch_size=batch_size)
