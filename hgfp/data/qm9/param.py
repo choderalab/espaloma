@@ -51,7 +51,7 @@ def mol_to_param_graph(mol, g):
 
     g.apply_nodes(
         lambda node: {'eq_ref': torch.Tensor(
-                [forces['vdW'][(idx, )].epsilon._value for idx in range(g.number_of_nodes('atom'))])},
+                [forces['vdW'][(idx, )].rmin_half._value for idx in range(g.number_of_nodes('atom'))])},
         ntype='atom')
 
     return g

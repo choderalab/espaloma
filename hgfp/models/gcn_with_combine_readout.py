@@ -24,7 +24,7 @@ class GCN(torch.nn.Module):
         g.multi_update_all(
             {'atom_neighbors_atom':(
                 dgl.function.copy_src(src='h', out='m'),
-                dgl.function.sum(msg='m', out='h'))},
+                dgl.function.max(msg='m', out='h'))},
             'sum')
 
         g.apply_nodes(func=self.apply_mod, ntype='atom')
@@ -32,7 +32,7 @@ class GCN(torch.nn.Module):
         return g.nodes['atom'].data['h']
 
 class ParamReadout(torch.nn.Module):
-    def __init__(self, in_dim, readout_units=32):
+    def __init__(self, in_dim, readout_units=128):
         super(ParamReadout, self).__init__()
 
         for term in ['atom', 'bond', 'angle', 'torsion']:
@@ -41,7 +41,6 @@ class ParamReadout(torch.nn.Module):
                 'fr_' + term,
                 torch.nn.Sequential(
                     torch.nn.Linear(in_dim, readout_units),
-                    torch.nn.Tanh(),
                     torch.nn.Linear(readout_units, 2),
                     ))
 
@@ -57,8 +56,8 @@ class ParamReadout(torch.nn.Module):
         h = node.data['h']
 
         # everything should be positive
-        k_and_eq = torch.abs(fn(h))
-
+        # k_and_eq = torch.abs(fn(h))
+        k_and_eq = fn(h)
         k = k_and_eq[:, 0]
         eq = k_and_eq[:, 1]
 
@@ -127,8 +126,9 @@ class ParamReadout(torch.nn.Module):
         g.apply_nodes(
             lambda node: {'u0': torch.squeeze(self.fr_mol(node.data['h']))},
             ntype='mol')
-
+        
         # combine sigma and epsilon
+
         g.multi_update_all(
             {
                 'atom_in_one_four':(
@@ -139,6 +139,7 @@ class ParamReadout(torch.nn.Module):
                     dgl.function.prod(msg='epsilon', out='epsilon_pair'))
             },
             'stack')
+
 
         g.multi_update_all(
             {
@@ -151,9 +152,10 @@ class ParamReadout(torch.nn.Module):
             },
             'stack')
 
+
         for term in ['one_four', 'nonbonded']:
             g.apply_nodes(
-                lambda node: {'epsilon_pair': torch.sqrt(node.data['epsilon_pair'])},
+                lambda node: {'epsilon_pair': torch.sqrt(torch.abs(node.data['epsilon_pair']))},
                 ntype=term)
 
         return g
@@ -202,7 +204,7 @@ class Net(torch.nn.Module):
                 readout_units=readout_units,
                 in_dim=dim)
 
-    def forward(self, g, training=True):
+    def forward(self, g, return_graph=False):
 
         x =  torch.zeros(
             g.nodes['atom'].data['type'].shape[0], 10, dtype=torch.float32)
@@ -212,15 +214,14 @@ class Net(torch.nn.Module):
             torch.squeeze(g.nodes['atom'].data['type']).long()] = 1.0
 
         for exe in self.exes:
-            if training == False:
-                if exe.startswith('o'):
-                    continue
-
             x = getattr(self, exe)(g, x)
 
         g.nodes['atom'].data['h'] = x
 
         g = self.readout(g)
+
+        if return_graph == True:
+            return g
 
         g = hgfp.mm.geometry_in_heterograph.from_heterograph_with_xyz(
             g)
