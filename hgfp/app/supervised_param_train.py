@@ -3,6 +3,7 @@ import argparse
 import torch
 import numpy as np
 import itertools
+import dgl
 
 
 def run(args):
@@ -18,19 +19,45 @@ def run(args):
             batch_size=args.batch_size)
 
 
-    ds_all = dgl.batch_hetero(list(itertools.chain.from_iterable(
-        [dgl.unbatch_hetero(g) for g in ds()])))
+    ds_all = []
+    for g in ds:
+        ds_all += dgl.unbatch_hetero(g)
+    
+    ds_all = dgl.batch_hetero(ds_all)
 
     mean_and_std_dict = {}
 
     for term in ['atom', 'bond', 'angle']:
+        mean_and_std_dict[term] = {}
         for param in ['k', 'eq']:
+            mean_and_std_dict[term][param] = {}
             x = ds_all.nodes[term].data[param + '_ref']
             mean = np.mean(x.numpy())
             std = np.std(x.numpy())
             mean_and_std_dict[term][param]['mean'] = mean
             mean_and_std_dict[term][param]['std'] = std
 
+    def norm(g):
+        for term in ['atom', 'bond', 'angle']:
+            for param in ['k', 'eq']:
+                g.apply_nodes(
+                    lambda node: {param + '_ref':
+                        (node.data[param + '_ref'] - mean_and_std_dict[term][param]['mean'])/\
+                        mean_and_std_dict[term][param]['std']},
+                    ntype=term)
+        return g
+
+    def unnorm(g):
+        for term in ['atom', 'bond', 'angle']:
+            for param in ['k', 'eq']:
+                g.apply_nodes(
+                    lambda node: {param:
+                        (node.data[param] * \
+                        mean_and_std_dict[term][param]['std'] + mean_and_std_dict[term][param]['mean'])},
+                    ntype=term)
+        return g
+
+    list(ds)
 
     ds_tr, ds_te, ds_vl = hgfp.data.utils.split(
         ds,
@@ -47,6 +74,13 @@ def run(args):
         torch.nn.functional,
         args.loss_fn)
 
+    def graph_loss(g, loss_fn=loss_fn):
+        g = norm(g)
+        return torch.sum(torch.stack([loss_fn(
+            g.nodes[term].data[param + '_ref'], 
+            g.nodes[term].data[param]) for term in ['atom', 'bond', 'angle']\
+                    for param in ['k', 'eq']]))
+
     if args.report == True:
         from matplotlib import pyplot as plt
         import time
@@ -61,25 +95,20 @@ def run(args):
         time0 = time.time()
 
         f_handle = open(time_str + '/report.md', 'w')
-        f_handle.write(strftime("%Y-%m-%d %H:%M:%S", localtime()))
+        f_handle.write(strftime(time_str))
         f_handle.write('\n')
         f_handle.write('===========================')
         f_handle.write('\n')
 
     for epoch in range(args.n_epochs):
-        for g, u in ds_tr:
-            u_hat = net(g)
-            u = norm(u)
-
-
-            loss = loss_fn(u, u_hat)
+        for g in ds_tr:
+            g_ = net(g, return_graph=True)
+            loss = graph_loss(g_)
+            print(loss, flush=True)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
-            if args.report == True:
-                losses = np.concatenate([losses, [loss.detach().numpy()]], axis=0)
 
     if args.report == True:
 
@@ -105,76 +134,127 @@ def run(args):
         f_handle.write('Training samples: ')
         f_handle.write('\n')
         f_handle.write('Training: %s, Validation: %s, Test: %s' % (
-            u_tr.shape[0],
-            u_vl.shape[0],
-            u_te.shape[0]))
+            len(list(ds_tr)) * args.batch_size,
+            len(list(ds_vl)) * args.batch_size,
+            len(list(ds_te)) * args.batch_size))
+
         f_handle.write('\n')
 
-        rmse_tr = (
-            np.sqrt(
-                mean_squared_error(
-                    u_tr,
-                    u_hat_tr)))
+        
+        res = {}
 
-        rmse_te = (
-            np.sqrt(
-                mean_squared_error(
-                    u_te,
-                    u_hat_te)))
+        for term in ['atom', 'bond', 'angle']:
+            res[term] = {} 
+            for param in ['k', 'eq']:
+                res[term][param] = {}
+                for part in ['tr', 'vl', 'te']:
+                    res[term][param][part] = {}
+                    for label in ['true', 'pred']:
+                        res[term][param][part][label] = np.array([0.])
+                        res[term][param][part][label] = np.array([0.])
+        
+        for part, ds_ in {'tr':ds_tr, 'vl':ds_vl, 'te':ds_te}.items():
+            for g in ds_:
+                g_ = net(g, return_graph = True)
+                g_ = unnorm(g_) 
+                for term in ['atom', 'bond', 'angle']:
+                    for param in ['k', 'eq']:
+                        res[term][param][part]['true'] = np.concatenate(
+                        [
+                            res[term][param][part]['true'],
+                            g_.nodes[term].data[param + '_ref'].detach().numpy()
+                        ])
 
-        rmse_vl = (
-            np.sqrt(
-                mean_squared_error(
-                    u_vl,
-                    u_hat_vl)))
+                        res[term][param][part]['pred'] = np.concatenate(
+                        [
+                            res[term][param][part]['pred'],
+                            g_.nodes[term].data[param].detach().numpy()
+                        ])
 
-        r2_tr = (
-            r2_score(
-                u_tr,
-                u_hat_tr))
-
-        r2_te = (
-            r2_score(
-                u_te,
-                u_hat_te))
-
-        r2_vl = (
-            r2_score(
-                u_vl,
-                u_hat_vl))
 
         f_handle.write('# Performance')
 
-        f_handle.write('\n')
+        for term in ['atom', 'bond', 'angle']:
+            for param in ['k', 'eq']:
+                f_handle.write('\n')
+                f_handle.write(term + '_' + param)
+                f_handle.write('\n')
+                y_tr = res[term][param]['tr']['true'][1:]
+                y_hat_tr = res[term][param]['tr']['pred'][1:]
 
-        f_handle.write('{:<15}'.format('|'))
-        f_handle.write('{:<15}'.format('|R2'))
-        f_handle.write('{:<15}'.format('|RMSE')+ '|' + '\n')
+                y_vl = res[term][param]['vl']['true'][1:]
+                y_hat_vl = res[term][param]['vl']['pred'][1:]
 
-        f_handle.write('{:<15}'.format('|' + '-' * 13))
-        f_handle.write('{:<15}'.format('|' + '-' * 13))
-        f_handle.write('{:<15}'.format('|' + '-' * 13))
-        f_handle.write('|' + '\n')
+                y_te = res[term][param]['te']['true'][1:]
+                y_hat_te = res[term][param]['te']['pred'][1:]
 
-        f_handle.write('{:<15}'.format('|TRAIN'))
-        f_handle.write('{:<15}'.format('|%.2f' % r2_tr))
-        f_handle.write('{:<15}'.format('|%.2f' % rmse_tr) + '|' + '\n')
 
-        f_handle.write('{:<15}'.format('|VALIDATION'))
-        f_handle.write('{:<15}'.format('|%.2f' % r2_vl))
-        f_handle.write('{:<15}'.format('|%.2f' % rmse_vl) + '|' + '\n')
+                np.save(time_str + '/' + term + '_' +param + '_y_tr.npy', y_tr)
+                np.save(time_str + '/' + term + '_' + param + '_y_hat_tr.npy', y_hat_tr)
 
-        f_handle.write('{:<15}'.format('|TEST'))
-        f_handle.write('{:<15}'.format('|%.2f' % r2_te))
-        f_handle.write('{:<15}'.format('|%.2f' % rmse_te) + '|' + '\n')
+                np.save(time_str + '/' + term + '_' + param + '_y_vl.npy', y_vl)
+                np.save(time_str + '/' + term + '_' + param + '_y_hat_vl.npy', y_hat_vl)
 
-        f_handle.write('\n')
+                np.save(time_str + '/' + term + '_' + param + '_y_te.npy', y_te)
+                np.save(time_str + '/' + term + '_' + param + '_y_hat_te.npy', y_hat_te)
 
-        f_handle.write('<div align="center"><img src="loss.jpg" width="600"></div>')
-        f_handle.write('\n')
-        f_handle.write('<div align="center"><img src="RMSE.jpg" width="600"></div>')
-        f_handle.write('\n')
-        f_handle.write('<div align="center"><img src="R2.jpg" width="600"></div>')
+                rmse_tr = (
+                    np.sqrt(
+                        mean_squared_error(
+                            y_tr,
+                            y_hat_tr)))
+
+                rmse_te = (
+                    np.sqrt(
+                        mean_squared_error(
+                            y_te,
+                            y_hat_te)))
+
+                rmse_vl = (
+                    np.sqrt(
+                        mean_squared_error(
+                            y_vl,
+                            y_hat_vl)))
+
+                r2_tr = (
+                    r2_score(
+                        y_tr,
+                        y_hat_tr))
+
+                r2_te = (
+                    r2_score(
+                        y_te,
+                        y_hat_te))
+
+                r2_vl = (
+                    r2_score(
+                        y_vl,
+                        y_hat_vl))
+
+                f_handle.write('\n')
+
+                f_handle.write('{:<15}'.format('|'))
+                f_handle.write('{:<15}'.format('|R2'))
+                f_handle.write('{:<15}'.format('|RMSE')+ '|' + '\n')
+
+                f_handle.write('{:<15}'.format('|' + '-' * 13))
+                f_handle.write('{:<15}'.format('|' + '-' * 13))
+                f_handle.write('{:<15}'.format('|' + '-' * 13))
+                f_handle.write('|' + '\n')
+
+                f_handle.write('{:<15}'.format('|TRAIN'))
+                f_handle.write('{:<15}'.format('|%.2f' % r2_tr))
+                f_handle.write('{:<15}'.format('|%.2f' % rmse_tr) + '|' + '\n')
+
+                f_handle.write('{:<15}'.format('|VALIDATION'))
+                f_handle.write('{:<15}'.format('|%.2f' % r2_vl))
+                f_handle.write('{:<15}'.format('|%.2f' % rmse_vl) + '|' + '\n')
+
+                f_handle.write('{:<15}'.format('|TEST'))
+                f_handle.write('{:<15}'.format('|%.2f' % r2_te))
+                f_handle.write('{:<15}'.format('|%.2f' % rmse_te) + '|' + '\n')
+
+                f_handle.write('\n')
 
         f_handle.close()
 
