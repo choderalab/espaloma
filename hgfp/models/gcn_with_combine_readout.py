@@ -12,24 +12,37 @@ import hgfp
 # =============================================================================
 # MODULE CLASS
 # =============================================================================
-class GCN(torch.nn.Module):
+class GN(torch.nn.Module):
     def __init__(self, in_dim, out_dim):
-        super(GCN, self).__init__()
-        self.apply_mod = hgfp.models.gcn.NodeFullyConnect(in_dim, out_dim)
+        super(GN, self).__init__()
+        self.d_phi_e = torch.nn.Linear(2 * in_dim, out_dim)
+        self.d_phi_v = torch.nn.Linear(2 * in_dim, out_dim)
 
-    def forward(self, g, feature):
-        # in this forward function we only operate on the nodes 'atom'
-        g.nodes['atom'].data['h'] = feature
+    def phi_e(self, edges):
+        h_src = edges.src['h']
+        h_e = edges.data['h']
+        h = torch.cat([h_src, h_e], dim=-1)
+        h = self.d_phi_e(h)
+        return {'h': h}
 
-        g.multi_update_all(
-            {'atom_neighbors_atom':(
-                dgl.function.copy_src(src='h', out='m'),
-                dgl.function.max(msg='m', out='h'))},
-            'sum')
+    def phi_v(self, nodes):
+        h_e = torch.sum(nodes.mailbox['m'], dim=1)
+        h_v = nodes.data['h']
+        h = torch.cat([h_v, h_e], dim=-1)
+        h = self.d_phi_v(h)
+        return {'h': h}
 
-        g.apply_nodes(func=self.apply_mod, ntype='atom')
+    def forward(self, g):
+        g.apply_edges(
+            self.phi_e,
+            etype='atom_neighbors_atom')
 
-        return g.nodes['atom'].data['h']
+        g.update_all(
+            dgl.function.copy_src('h', 'm'),
+            self.phi_v,
+            etype='atom_neighbors_atom')
+
+        return g
 
 class ParamReadout(torch.nn.Module):
     def __init__(self, in_dim, readout_units=128):
@@ -43,6 +56,8 @@ class ParamReadout(torch.nn.Module):
                     torch.nn.Linear(in_dim, readout_units),
                     torch.nn.Linear(readout_units, 2),
                     ))
+
+        self.fr_angle_0 = torch.nn.Linear(3 * in_dim, in_dim)
 
         setattr(
             self,
@@ -77,22 +92,45 @@ class ParamReadout(torch.nn.Module):
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h_center'),
-            etype='atom_as_center_in_angle')
+            dgl.function.sum(msg='m', out='h0'),
+            etype='atom_as_0_in_angle')
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h_side'),
-            etype='atom_as_side_in_angle')
+            dgl.function.sum(msg='m', out='h1'),
+            etype='atom_as_1_in_angle')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m'),
+            dgl.function.sum(msg='m', out='h2'),
+            etype='atom_as_2_in_angle')
 
         g.apply_nodes(
-            lambda node: {'h': node.data['h_center'] + node.data['h_side']},
+            lambda node: {'h012': torch.cat(
+                [
+                    node.data['h0'],
+                    node.data['h1'],
+                    node.data['h2']
+                ],
+                axis=-1
+            )},
             ntype='angle')
 
-        g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h'),
-            etype='atom_as_side_in_angle')
+        g.apply_nodes(
+            lambda node: {'h210': torch.cat(
+                [
+                    node.data['h2'],
+                    node.data['h1'],
+                    node.data['h0']
+                ],
+                axis=-1
+            )},
+            ntype='angle')
+
+        g.apply_nodes(
+            lambda node: {'h':
+                self.fr_angle_0(node.data['h012']) + self.fr_angle_0(node.data['h210'])},
+            ntype='angle')
 
         g.update_all(
             dgl.function.copy_src(src='h', out='m'),
@@ -126,7 +164,7 @@ class ParamReadout(torch.nn.Module):
         g.apply_nodes(
             lambda node: {'u0': torch.squeeze(self.fr_mol(node.data['h']))},
             ntype='mol')
-        
+
         # combine sigma and epsilon
 
         g.multi_update_all(
@@ -161,24 +199,42 @@ class ParamReadout(torch.nn.Module):
         return g
 
 class Net(torch.nn.Module):
-    def __init__(self, config, readout_units=32):
+    def __init__(self, config, readout_units=128, input_units=128):
         super(Net, self).__init__()
 
-        dim = 10
+        dim = input_units
         self.exes = []
 
+        self.f_in = torch.nn.Sequential(
+            torch.nn.Linear(10, input_units),
+            torch.nn.Tanh())
+
+        self.f_in_e = torch.nn.Sequential(
+            torch.nn.Linear(13, input_units),
+            torch.nn.Tanh())
+
+        def apply_atom_in_graph(fn):
+            def _fn(g):
+                g.apply_nodes(
+                    lambda node: {'h': fn(node.data['h'])}, ntype='atom')
+                return g
+            return _fn
 
         for idx, exe in enumerate(config):
-            if exe.isnumeric():
+
+            try:
                 exe = float(exe)
+
                 if exe >= 1:
                     exe = int(exe)
+            except:
+                pass
 
             if type(exe) == int:
                 setattr(
                     self,
                     'd' + str(idx),
-                    GCN(dim, exe))
+                    GN(dim, exe))
 
                 dim = exe
                 self.exes.append('d' + str(idx))
@@ -189,15 +245,17 @@ class Net(torch.nn.Module):
                 setattr(
                     self,
                     'a' + str(idx),
-                    lambda g, x: activation(x))
+                    apply_atom_in_graph(activation))
+
                 self.exes.append('a' + str(idx))
 
             elif type(exe) == float:
-                dropout = torch.nn.functional.Dropout
+                dropout = torch.nn.Dropout(exe)
                 setattr(
                     self,
                     'o' + str(idx),
-                    lambda g, x: dropout(x, exe))
+                    apply_atom_in_graph(dropout))
+
                 self.exes.append('o' + str(idx))
 
             self.readout = ParamReadout(
@@ -213,10 +271,23 @@ class Net(torch.nn.Module):
             torch.arange(g.nodes['atom'].data['type'].shape[0]),
             torch.squeeze(g.nodes['atom'].data['type']).long()] = 1.0
 
-        for exe in self.exes:
-            x = getattr(self, exe)(g, x)
+        x = self.f_in(x)
+
+        x_e = torch.zeros(
+            g.edges['atom_neighbors_atom'].data['type'].shape[0], 13, dtype=torch.float32)
+
+        x_e[
+            torch.arange(g.edges['atom_neighbors_atom'].data['type'].shape[0]),
+            torch.squeeze(g.edges['atom_neighbors_atom'].data['type']).long()] = 1.0
+
+        x_e = self.f_in_e(x_e)
+
+        g.edges['atom_neighbors_atom'].data['h'] = x_e
 
         g.nodes['atom'].data['h'] = x
+
+        for exe in self.exes:
+            g = getattr(self, exe)(g)
 
         g = self.readout(g)
 

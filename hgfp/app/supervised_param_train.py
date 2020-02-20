@@ -22,7 +22,7 @@ def run(args):
     ds_all = []
     for g in ds:
         ds_all += dgl.unbatch_hetero(g)
-    
+
     ds_all = dgl.batch_hetero(ds_all)
 
     mean_and_std_dict = {}
@@ -77,7 +77,7 @@ def run(args):
     def graph_loss(g, loss_fn=loss_fn):
         g = norm(g)
         return torch.sum(torch.stack([loss_fn(
-            g.nodes[term].data[param + '_ref'], 
+            g.nodes[term].data[param + '_ref'],
             g.nodes[term].data[param]) for term in ['atom', 'bond', 'angle']\
                     for param in ['k', 'eq']]))
 
@@ -110,6 +110,7 @@ def run(args):
             loss.backward()
             optimizer.step()
 
+    net.eval()
     if args.report == True:
 
         time1 = time.time()
@@ -140,11 +141,11 @@ def run(args):
 
         f_handle.write('\n')
 
-        
+
         res = {}
 
         for term in ['atom', 'bond', 'angle']:
-            res[term] = {} 
+            res[term] = {}
             for param in ['k', 'eq']:
                 res[term][param] = {}
                 for part in ['tr', 'vl', 'te']:
@@ -152,11 +153,11 @@ def run(args):
                     for label in ['true', 'pred']:
                         res[term][param][part][label] = np.array([0.])
                         res[term][param][part][label] = np.array([0.])
-        
+
         for part, ds_ in {'tr':ds_tr, 'vl':ds_vl, 'te':ds_te}.items():
             for g in ds_:
                 g_ = net(g, return_graph = True)
-                g_ = unnorm(g_) 
+                g_ = unnorm(g_)
                 for term in ['atom', 'bond', 'angle']:
                     for param in ['k', 'eq']:
                         res[term][param][part]['true'] = np.concatenate(

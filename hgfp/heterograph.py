@@ -86,30 +86,70 @@ def from_graph(g):
         ],
         axis=0)
 
+    hg[('bond', 'bond_has_atom', 'atom')] = np.concatenate(
+        [
+            np.stack(
+                [
+                    np.arange(bond_idxs.shape[0]),
+                    bond_idxs[:, 0]
+                ],
+                axis=1),
+            np.stack(
+                [
+                    np.arange(bond_idxs.shape[0]),
+                    bond_idxs[:, 1]
+                ],
+                axis=1),
+        ],
+        axis=0)
+
     # add angles
-    hg[('atom', 'atom_as_center_in_angle', 'angle')] = np.stack(
+    # hg[('atom', 'atom_as_center_in_angle', 'angle')] = np.stack(
+    #     [
+    #         angle_idxs[:, 1],
+    #         np.arange(angle_idxs.shape[0])
+    #     ],
+    #     axis=1)
+    #
+    # hg[('atom', 'atom_as_side_in_angle', 'angle')] = np.concatenate(
+    #     [
+    #         np.stack(
+    #             [
+    #                 angle_idxs[:, 0],
+    #                 np.arange(angle_idxs.shape[0])
+    #             ],
+    #             axis=1),
+    #         np.stack(
+    #             [
+    #                 angle_idxs[:, 2],
+    #                 np.arange(angle_idxs.shape[0])
+    #             ],
+    #             axis=1)
+    #     ],
+    #     axis=0)
+
+    # add angles
+    hg[('atom', 'atom_as_0_in_angle', 'angle')] = np.stack(
+        [
+            angle_idxs[:, 0],
+            np.arange(angle_idxs.shape[0])
+        ],
+        axis=1)
+
+    hg[('atom', 'atom_as_1_in_angle', 'angle')] = np.stack(
         [
             angle_idxs[:, 1],
             np.arange(angle_idxs.shape[0])
         ],
         axis=1)
 
-    hg[('atom', 'atom_as_side_in_angle', 'angle')] = np.concatenate(
+    hg[('atom', 'atom_as_2_in_angle', 'angle')] = np.stack(
         [
-            np.stack(
-                [
-                    angle_idxs[:, 0],
-                    np.arange(angle_idxs.shape[0])
-                ],
-                axis=1),
-            np.stack(
-                [
-                    angle_idxs[:, 2],
-                    np.arange(angle_idxs.shape[0])
-                ],
-                axis=1)
+            angle_idxs[:, 2],
+            np.arange(angle_idxs.shape[0])
         ],
-        axis=0)
+        axis=1)
+
 
     # add torsions
     hg[('atom', 'atom_as_0_in_torsion', 'torsion')] = np.stack(
@@ -234,5 +274,10 @@ def from_graph(g):
         pass
 
     hg.edges['atom_neighbors_atom'].data['type'] = g.edata['type']
+
+    hg.nodes['bond'].data['type'] = torch.chunk(
+        g.edata['type'],
+        2,
+        dim=0)[0]
 
     return hg
