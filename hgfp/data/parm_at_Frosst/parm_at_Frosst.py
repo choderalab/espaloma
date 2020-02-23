@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     from rdkit.Chem.rdFingerprintGenerator import GetMorganGenerator
 
-    radius = 4
+    radius = 2
     fpSize = 256
     morgan_generator = GetMorganGenerator(radius=radius, fpSize=fpSize)
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     print('y.shape', y.shape)
 
     print('classifyin...')
-    params = dict(n_estimators=50, verbose=1, max_samples=10000)  # , class_weight='balanced_subsample')
+    params = dict(n_estimators=100, verbose=1, max_samples=10000)  # , class_weight='balanced_subsample')
     hashed_params = hash(tuple(params.keys()) + tuple(params.values()))
     clf = RandomForestClassifier(**params)
 
