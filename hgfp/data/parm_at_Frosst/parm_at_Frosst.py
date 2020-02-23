@@ -183,8 +183,8 @@ if __name__ == '__main__':
     print('total number of predictions (train set): {}'.format(C_train.sum()))
 
     # atoms for which we make the most mistakes
-    num_atoms = C_train.sum(0)
-    num_mistakes = C_train_off_diagonal.sum(0)
+    num_atoms = C_train.sum(1)
+    num_mistakes = C_train_off_diagonal.sum(1)
     inds = np.argsort(-num_mistakes)
     print('training set mistakes:')
     print('atom_type\t#mistakes\t#atoms')
