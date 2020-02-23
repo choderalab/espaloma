@@ -8,6 +8,7 @@ hypernodes.
 import torch
 import dgl
 import hgfp
+import math
 
 # =============================================================================
 # MODULE CLASS
@@ -15,27 +16,15 @@ import hgfp
 class GN(torch.nn.Module):
     def __init__(self, in_dim, out_dim):
         super(GN, self).__init__()
-        self.d_phi_e = torch.nn.Linear(2 * in_dim, out_dim)
-        self.d_phi_v = torch.nn.Linear(2 * in_dim, out_dim)
-
-    def phi_e(self, edges):
-        h_src = edges.src['h']
-        h_e = edges.data['h']
-        h = torch.cat([h_src, h_e], dim=-1)
-        h = self.d_phi_e(h)
-        return {'h': h}
+        # self.d_phi_e = torch.nn.Linear(2 * in_dim, out_dim)
+        self.d_phi_v = torch.nn.Linear(in_dim, out_dim)
 
     def phi_v(self, nodes):
         h_e = torch.sum(nodes.mailbox['m'], dim=1)
-        h_v = nodes.data['h']
-        h = torch.cat([h_v, h_e], dim=-1)
-        h = self.d_phi_v(h)
+        h = self.d_phi_v(nodes.data['h'] + math.pi * h_e)
         return {'h': h}
 
     def forward(self, g):
-        g.apply_edges(
-            self.phi_e,
-            etype='atom_neighbors_atom')
 
         g.update_all(
             dgl.function.copy_src('h', 'm'),
@@ -206,7 +195,7 @@ class Net(torch.nn.Module):
         self.exes = []
 
         self.f_in = torch.nn.Sequential(
-            torch.nn.Linear(10, input_units),
+            torch.nn.Linear(117, input_units),
             torch.nn.Tanh())
 
         self.f_in_e = torch.nn.Sequential(
@@ -264,13 +253,8 @@ class Net(torch.nn.Module):
 
     def forward(self, g, return_graph=False):
 
-        x =  torch.zeros(
-            g.nodes['atom'].data['type'].shape[0], 10, dtype=torch.float32)
-
-        x[
-            torch.arange(g.nodes['atom'].data['type'].shape[0]),
-            torch.squeeze(g.nodes['atom'].data['type']).long()] = 1.0
-
+        x = g.nodes['atom'].data['h0']
+        # print(x.shape)
         x = self.f_in(x)
 
         x_e = torch.zeros(

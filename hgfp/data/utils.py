@@ -6,13 +6,14 @@ from itertools import islice
 import random
 
 class BatchedDataset():
-    def __init__(self, iterable, batch_size, n_batches_in_buffer=12, cache=False, hetero=False):
+    def __init__(self, iterable, batch_size, n_batches_in_buffer=12, cache=False, hetero=False,
+            cat_not_stack=False):
         self.iterable = iterable
         self.batch_size = batch_size
         self.n_batches_in_buffer= n_batches_in_buffer
         self.cache = cache
         self.hetero=hetero
-
+        self.cat_not_stack = cat_not_stack
         self.finished = False
         self.cached_data = []
 
@@ -27,7 +28,7 @@ class BatchedDataset():
 
 
         else:
-            
+
             for x in self._iter():
                 yield x
 
@@ -64,7 +65,10 @@ class BatchedDataset():
                     else:
                         g_batched = dgl.batch(gs)
 
-                    y_batched = torch.stack(ys, axis=0)
+                    if self.cat_not_stack == True:
+                        y_batched = torch.cat(ys, axis=0)
+                    else:
+                        y_batched = torch.stack(ys, axis=0)
 
                     if self.cache == True:
                         self.cached_data.append((g_batched, y_batched))

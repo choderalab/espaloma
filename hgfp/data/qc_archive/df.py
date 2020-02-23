@@ -17,7 +17,6 @@ import numpy as np
 def mean_and_std():
     us = [u.numpy() for g, u in ds]
     us = np.array(us)
-    print(us.shape)
     return np.mean(us), np.std(us)
 
 def unbatched(num=-1, hetero=False):
@@ -43,7 +42,7 @@ def unbatched(num=-1, hetero=False):
         records = random.sample(records, num)
     else:
         random.shuffle(records)
-    
+
     global ds
     ds = []
 
@@ -63,17 +62,17 @@ def unbatched(num=-1, hetero=False):
 
                             u = torch.squeeze(torch.Tensor([energy]))
                             g = hgfp.graph.from_rdkit_mol(mol)
-                    
+
                             if np.any(np.greater(g.ndata['type'].numpy(), 9)):
                                 continue
 
                             if hetero is True:
                                 g = hgfp.heterograph.from_graph(g)
-                                    
+
                             ds.append((g, u))
         except:
             continue
-    
+
 
     random.shuffle(ds)
 

@@ -261,6 +261,7 @@ def from_graph(g):
 
     # put all atom data into heterograph
     hg.nodes['atom'].data['type'] = g.ndata['type']
+    hg.nodes['atom'].data['h0'] = g.ndata['h0']
 
     # put indices in bonds, angles, and torsions
     hg.nodes['bond'].data['idxs'] = torch.Tensor(bond_idxs)
