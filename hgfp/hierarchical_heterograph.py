@@ -21,19 +21,15 @@ Connection types:
 """
 
 import dgl
-from openforcefield.topology import Molecule
-
-# TODO: atom in bond
-
-# TODO: atom in unoriented plane
-
-# TODO: bond in angle
-
-# TODO: bond in ring?
-
 # TODO: make the message-passing functions decision-trees or decision-DAGs
 #   rather than neural nets
 import numpy as np
+from openforcefield.topology import Molecule
+
+# TODO: atom in bond
+# TODO: atom in unoriented plane
+# TODO: bond in angle
+# TODO: bond in ring?
 
 atom_feature_dimension = 8
 
@@ -41,19 +37,20 @@ bond_feature_dimension = 3
 
 ring_feature_dimension = 2
 
+
 ## GET FEATURE VECTORS FOR EACH OF THE ENTITIES ##
 
 # atoms
 def get_info_about_one_atom_rd(rd_atom):
     atom_info_tuple = (
-        rd_atom.GetAtomicNum(), # int
-        rd_atom.GetFormalCharge(), # int
-        rd_atom.GetTotalDegree(), # int
+        rd_atom.GetAtomicNum(),  # int
+        rd_atom.GetFormalCharge(),  # int
+        rd_atom.GetTotalDegree(),  # int
         # GetHvyDegree()?
-        rd_atom.GetHybridization().numerator, # get int in [0,1, ... 7]
-        rd_atom.GetTotalNumHs(), # int
-        rd_atom.GetTotalValence(), # int
-        rd_atom.GetIsAromatic(), # bool
+        rd_atom.GetHybridization().numerator,  # get int in [0,1, ... 7]
+        rd_atom.GetTotalNumHs(),  # int
+        rd_atom.GetTotalValence(),  # int
+        rd_atom.GetIsAromatic(),  # bool
         rd_atom.IsInRing()  # bool
     )
     return atom_info_tuple
@@ -61,6 +58,7 @@ def get_info_about_one_atom_rd(rd_atom):
 
 def get_atom_info_rd(rdmol):
     return np.array(list(map(get_info_about_one_atom_rd, rdmol.GetAtoms())))
+
 
 # TODO bonds
 
@@ -72,13 +70,13 @@ def get_info_about_one_bond_rd(b):
     )
     return bond_info_tuple
 
+
 def get_bond_info_rd(rdmol):
     bonds = list(rdmol.GetBonds())
     return np.array(list(map(get_info_about_one_bond_rd, bonds)))
 
 
 # rings
-
 
 
 # rdkit to extract rings
@@ -88,23 +86,21 @@ def get_ring_memberships_rd(rdmol):
     return ring_info.AtomRings()
 
 
-
 def get_ring_info_rd(rdmol):
     # TODO: should I say a ring is aromatic only if all of the atoms involved are aromatic?
     atom_rings = get_ring_memberships_rd(rdmol)
     aromatic_atoms = set(rdmol.GetAromaticAtoms())
 
     ring_info = np.zeros((len(atom_rings), ring_feature_dimension))
-    ring_info[:,1] = 1
+    ring_info[:, 1] = 1
 
     for i, ring in enumerate(atom_rings):
-        ring_info[i,0] = len(ring)
+        ring_info[i, 0] = len(ring)
         for atom in ring:
             if not atom in aromatic_atoms:
-            #if not atom.GetIsAromatic():
+                # if not atom.GetIsAromatic():
                 ring_info[i, 1] = 0
     return ring_info
-
 
 
 # TODO: angles
@@ -126,7 +122,8 @@ def get_atom_bond_edges(mol):
 def get_atom_ring_edges(rdmol):
     rings = get_ring_memberships_rd(rdmol)
     atom_in_ring_edges = []
-    atom_in_ring_type = ('atom', 'atom_in_ring', 'ring')  # TODO: question: can I use "in" multiple times? seems to throw error, but annoying to be redundant...
+    atom_in_ring_type = ('atom', 'atom_in_ring',
+                         'ring')  # TODO: question: can I use "in" multiple times? seems to throw error, but annoying to be redundant...
     for i, ring in enumerate(rings):
         for atom in ring:
             atom_in_ring_edges.append((atom, i))
@@ -134,7 +131,15 @@ def get_atom_ring_edges(rdmol):
     #   aromatic?
     #   number of members?
 
-    return {atom_in_ring_type : atom_in_ring_edges}
+    return {atom_in_ring_type: atom_in_ring_edges}
+
+
+def form_reverse_edges(edge_dict):
+    reverse_edge_dict = {}
+    for key in edge_dict:
+        reverse_edge_dict['reverse_' + key] = [(destination, source) for (source, destination) in edge_dict[key]]
+    return reverse_edge_dict
+
 
 def form_heterograph(mol):
     # TODO: allow constructor to use a subset of {atom, bond, ring, angle, torsion, ...}
@@ -143,25 +148,33 @@ def form_heterograph(mol):
     # TODO: add also edges in the opposite direction
     rdmol = mol.to_rdkit()
     all_edges = {}
-    all_edges.update(get_atom_bond_edges(mol))
-    all_edges.update(get_atom_ring_edges(rdmol))
+    # atom <--> bond
+    atom_bond_edges = get_atom_bond_edges(mol)
+    all_edges.update(atom_bond_edges)
+    all_edges.update(form_reverse_edges(atom_bond_edges))
+
+    # atom <--> ring
+    atom_ring_edges = get_atom_ring_edges(rdmol)
+    all_edges.update(atom_ring_edges)
+    all_edges.update(form_reverse_edges(atom_ring_edges))
     return dgl.heterograph(all_edges)
 
 
 # TODO: form atom classification task
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import dgl.function as fn
+
 
 class HeteroRGCNLayer(nn.Module):
     def __init__(self, in_size_dict, out_size_dict, canonical_etypes):
         super(HeteroRGCNLayer, self).__init__()
         # W_r for each relation
         self.weight = nn.ModuleDict({
-                etype : nn.Linear(in_size_dict[srctype], out_size_dict[dsttype]) for (srctype, etype, dsttype) in canonical_etypes
-            })
+            etype: nn.Linear(in_size_dict[srctype], out_size_dict[dsttype]) for (srctype, etype, dsttype) in
+            canonical_etypes
+        })
 
     def forward(self, G, feat_dict):
         # The input is a dictionary of node features for each type
@@ -181,7 +194,8 @@ class HeteroRGCNLayer(nn.Module):
         # "min", "mean", "stack"
         G.multi_update_all(funcs, 'sum')
         # return the updated node feature dictionary
-        return {ntype : G.nodes[ntype].data['h'] for ntype in G.ntypes}
+        return {ntype: G.nodes[ntype].data['h'] for ntype in G.ntypes}
+
 
 class HeteroRGCN(nn.Module):
     def __init__(self, canonical_etypes, in_size_dict, hidden_size_dict, out_size_dict):
@@ -195,7 +209,7 @@ class HeteroRGCN(nn.Module):
 
     def forward(self, G, feature_dict):
         h_dict = self.layer1(G, feature_dict)
-        h_dict = {k : F.leaky_relu(h) for k, h in h_dict.items()}
+        h_dict = {k: F.leaky_relu(h) for k, h in h_dict.items()}
         h_dict = self.layer2(G, h_dict)
         return h_dict['atom']
 
@@ -208,13 +222,13 @@ def form_feature_dict(mol):
         'ring': get_ring_info_rd(rdmol)
     }
 
+
 from pickle import load
+
 if __name__ == '__main__':
     smiles = 'c1ccc2c(c1)cc3ccc4cccc5ccc2c3c45'
     mol = Molecule.from_smiles(smiles)
     print(mol)
-
-
 
     path = '/Users/joshuafass/Documents/GitHub/hgfp/hgfp/data/parm_at_Frosst/p_f_zinc_mols_and_targets.pkl'
     with open(path, 'rb') as f:
@@ -228,7 +242,7 @@ if __name__ == '__main__':
 
     target_dim = ys[0].shape[1]
     hidden_dim = 100
-    in_size_dict = {name:feature_dicts[0][name].shape[1] for name in feature_dicts[0]}
+    in_size_dict = {name: feature_dicts[0][name].shape[1] for name in feature_dicts[0]}
 
     hidden_size_dict = {name: hidden_dim for name in feature_dicts[0]}
     # TODO: for now ignoring the other types, going to output the same size on all entities
@@ -238,15 +252,5 @@ if __name__ == '__main__':
     print(hg)
     print(hg.etypes)
 
-
-
     model = HeteroRGCN(hg.canonical_etypes, in_size_dict, hidden_size_dict, out_size_dict)
     predictions = model.forward(heterographs[0], feature_dicts[0])
-
-
-
-
-
-
-
-
