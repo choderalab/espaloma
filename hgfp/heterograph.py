@@ -63,6 +63,14 @@ def from_graph(g):
         nonbonded_idxs
     ) = hgfp.mm.idxs.from_adjaceny_matrix(adjacency_matrix)
 
+    # add self loop
+    hg[('atom', 'atom_is_self_atom', 'atom')] = np.stack(
+        [
+            np.arange(adjacency_matrix.shape[0]),
+            np.arange(adjacency_matrix.shape[0])
+        ],
+        axis=1)
+
     # atom neighboring
     # for message passing
     hg[('atom', 'atom_neighbors_atom', 'atom')] = np.argwhere(
