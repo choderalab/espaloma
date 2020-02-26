@@ -31,7 +31,7 @@ def unbatched(num=-1):
 
     zinc_p_f_types = [l.strip() for l in zinc_p_f_types_file.readlines()]
 
-    zinc_mols = Chem.ForwardSDMolSupplier(zinc_file)
+    zinc_mols = Chem.ForwardSDMolSupplier(zinc_file, removeHs=False)
 
     # archive.close()
 
@@ -39,6 +39,7 @@ def unbatched(num=-1):
     unique_types = sorted(list(set(zinc_p_f_types)))
     n_types = len(unique_types)
     type_to_int = dict(zip(unique_types, range(len(unique_types))))
+    int_to_type = dict(zip(range(len(unique_types)), unique_types))
     type_ints = np.array([type_to_int[t] for t in zinc_p_f_types])
 
 
@@ -54,6 +55,10 @@ def unbatched(num=-1):
 
             y = np.zeros((mol.GetNumAtoms(), n_types))
             for i in range(mol.GetNumAtoms()):
+
+                assert(int_to_type[type_ints[current_index]].decode('utf-8').startswith(str(mol.GetAtomWithIdx(i).GetSymbol())[0]))
+
+
                 y[i, type_ints[current_index]] = 1
                 current_index += 1
             #

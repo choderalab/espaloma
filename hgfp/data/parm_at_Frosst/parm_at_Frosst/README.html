@@ -1,0 +1,77 @@
+<html>
+<head><title>The README File</title></head>
+<body>
+<h3>The README File</h3>
+<p>An Informal AMBER Small Molecule Force Field:
+ <b>parm@Frosst</b><br>
+<br>
+Credit<br>
+Christopher Bayly, lead the effort between (1992-2010)<br>
+Daniel McKay, contributed between (1997-2010)<br>
+Jean-François Truchon, contributed between (2002-2010)<br>
+<br>
+This presents a molecular mechanics force field (FF) extending the AMBER FF
+to bioorganic small molecules of pharmaceutical interest. The presented
+<b>parm@Frosst</b> FF enables the simulation of biomolecules (enzymes, DNA,
+peptides, etc.) in the presence of complex organic molecules such as
+inhibitor and cofactors. As such it can be used as a small-molecule
+supplement to the AMBER parm9x or ffxx biomolecular force fields, as an
+alternative to e.g. gaff. The development took place at Merck Frosst Canada,
+a subsidiary of Merck &amp; Co, between 1992 and 2010 in the context of
+numerous drug-discovery projects. As a result, <b>parm@Frosst</b>, when used to
+extend one of the &quot;standard&quot; AMBER force fields such as ff99sb,
+could successfully parameterize approximately 85% of the Merck corporate
+collection (of small molecules) in 2009 (personal communication to CIB from
+V. Hornak).
+
+Merck &amp; Co generously cleared this material to be released to the
+scientific community.
+
+John Irwin and Brian Schoichet generously permitted us to use a fraction of
+the ZINC dataset (zinc.docking.org).
+
+This data repository contains enough information to 1) implement the
+<b>parm@Frosst</b> force field and validate the implementation 2) validate the atom
+and bond typing of an implementation of the AM1BCC charge model as
+originally published. <br />
+</p>
+<h3>File List for parm_at_Frosst Directory</h3>
+<ul>
+<li><a href="parm_Frosst_note.pdf"
+    target="_blank">parm_Frosst_note.pdf</a> [<tt>321</tt>kB] : 
+     Note about the history and the content of the <b>parm@Frosst</b> FF.<br /></li>
+<li><a href="mmff94_am1bcc_atypes.txt"
+    target="_blank">mmff94_am1bcc_atypes.txt</a> [<tt>101</tt>kB] : 
+    The MMFF94 set AM1-BCC atom types. One type per line. This exactly matches the atom ordering found in the mmff94.sdf file.<br /></li>
+<li><a href="mmff94_am1bcc_btypes.txt"
+    target="_blank">mmff94_am1bcc_btypes.txt</a> [<tt>35</tt>kB] : 
+    The MMFF94 set AM1-BCC bond types. One type per line. This exactly matches the bond list found in mmff94.sdf file.<br /></li>
+<li><a href="parm_Frosst.frcmod"
+    target="_blank">parm_Frosst.frcmod</a> [<tt>151</tt>kB] : The AMBER FF
+    parameters specific to small bioorganic.<br /></li>
+<li><a href="parm_Frosst.pcp"
+    target="_blank">parm_Frosst.pcp</a> [<tt>6</tt>kB] : The typing rules in
+    PATTY format.<br /></li>
+<li><a href="zinc.sdf"
+    target="_blank">zinc.sdf</a> [<tt>20500</tt>kB] : 
+    ZINC set: three dimensional structures in the MDL SD format from a subset of the ZINC dataset.<br /></li>
+<li><a href="zinc_p_f_types.txt"
+    target="_blank">zinc_p_f_types.txt</a> [<tt>622</tt>kB] : 
+    The ZINC set <b>parm@Frosst</b> atom types. One type per line. This exactly matches the atom ordering found in the zinc.sdf file.<br /></li>
+<li><a href="zinc_am1bcc_atypes.txt"
+    target="_blank">zinc_am1bcc_atypes.txt</a> [<tt>1275</tt>kB] : 
+    The ZINC set AM1-BCC atom types. One type per line. This exactly matches the atom ordering found in the zinc.sdf file.<br /></li>
+<li><a href="zinc_am1bcc_btypes.txt"
+    target="_blank">zinc_am1bcc_btypes.txt</a> [<tt>449</tt>kB] : 
+    The ZINC set AM1-BCC bond types. One type per line. This exactly matches the bond list found in the zinc.sdf file.<br /></li>
+<li><a href="mmff94.sdf"
+    target="_blank">mmff94.sdf</a> [<tt>1628</tt>kB] : 
+    MMFF94 validation : three dimensional structures in the MDL SD format.<br /></li>
+<li><a href="mmff94_p_f_types.txt"
+    target="_blank">mmff94_p_f_types.txt</a> [<tt>48</tt>kB] : 
+    The <b>parm@Frosst</b> atom types of MMFF94 set. One type per line. This exactly match the atom ordering found in the mmff94.sdf file.<br /></li>
+
+</ul>
+
+</body>
+</html>
