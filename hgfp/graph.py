@@ -19,7 +19,7 @@ def fp(atom):
                 [
                     atom.GetTotalDegree(),
                     atom.GetTotalValence(),
-                    atom.GetTotalValence(),
+                    atom.GetExplicitValence(),
                     atom.GetFormalCharge(),
                     atom.GetIsAromatic() * 1.0,
                     atom.GetMass(),
