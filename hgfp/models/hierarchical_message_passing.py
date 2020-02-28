@@ -65,4 +65,4 @@ class HMP(torch.nn.Module):
                     [nodes.data['h'], nodes.data['h_down']], dim=-1))},
                 ntype='g%s' % (g_idx - 1))
 
-            return g
+        return g
