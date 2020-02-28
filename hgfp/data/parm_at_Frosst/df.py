@@ -12,7 +12,7 @@ import numpy as np
 from openforcefield.topology import Molecule
 import torch
 
-def unbatched(num=-1):
+def unbatched(num=-1, use_fp=True):
     fname = 'parm_at_Frosst.tgz'
     url = 'http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz'
 
@@ -58,15 +58,13 @@ def unbatched(num=-1):
 
                 assert(int_to_type[type_ints[current_index]].decode('utf-8').startswith(str(mol.GetAtomWithIdx(i).GetSymbol())[0]))
 
-
                 y[i, type_ints[current_index]] = 1
                 current_index += 1
             #
             # assert (y.shape == (mol.GetNumAtoms(), n_types))
             # assert ((y.sum(1) == 1).all())
             idx += 1
-            yield (hgfp.heterograph.from_graph(
-                hgfp.graph.from_rdkit_mol(mol)),
+            yield (hgfp.hierachical_graph.from_rdkit_mol(mol),
                 torch.Tensor(y))
 
 
@@ -75,10 +73,11 @@ def unbatched(num=-1):
 def batched(
         num=-1,
         batch_size=32,
-        cache=True):
+        cache=True,
+        use_fp=True):
 
     return hgfp.data.utils.BatchedDataset(
-        unbatched(num=num),
+        unbatched(num=num, use_fp=use_fp),
         batch_size=batch_size,
         cache=cache,
         hetero=True,

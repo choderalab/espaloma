@@ -35,7 +35,7 @@ def fp(atom):
         ],
         dim=0)
 
-def from_rdkit_mol(mol):
+def from_rdkit_mol(mol, use_fp=True):
     # initialize graph
     g = dgl.DGLGraph()
 
@@ -56,12 +56,13 @@ def from_rdkit_mol(mol):
         [fp(atom) for atom in mol.GetAtoms()],
         axis=0)
 
-    h_v = torch.cat(
-        [
-            h_v,
-            h_v_fp
-        ],
-        dim=-1) # (n_atoms, 117)
+    if use_fp == True:
+        h_v = torch.cat(
+            [
+                h_v,
+                h_v_fp
+            ],
+            dim=-1) # (n_atoms, 117)
 
     g.ndata['h0'] = h_v
 
