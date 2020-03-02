@@ -64,8 +64,10 @@ def unbatched(num=-1, use_fp=True):
             # assert (y.shape == (mol.GetNumAtoms(), n_types))
             # assert ((y.sum(1) == 1).all())
             idx += 1
-            yield (hgfp.hierachical_graph.from_rdkit_mol(mol),
-                torch.Tensor(y))
+            # yield (hgfp.hierarchical_graph.from_rdkit_mol(mol),
+            #     torch.Tensor(y))
+            yield (hgfp.heterograph.from_graph(
+                hgfp.graph.from_rdkit_mol(mol, use_fp=True)), torch.Tensor(y))
 
 
     return _iter

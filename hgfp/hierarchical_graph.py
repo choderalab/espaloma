@@ -48,32 +48,33 @@ def from_rdkit_mol(mol):
             ],
             axis=1)
 
-    for v_idx in range(2):
-        hg[
-            (
-                'g1',
-                'g1_as_%s_in_g2' % v_idx,
-                'g2'
-            )
-        ] = np.stack(
-            [
-                g2_idxs[:, v_idx],
-                np.arange(g2_idxs.shape[0])
-            ],
-            axis=1)
+    for g_idx in range(2, 5):
+        for v_idx in range(g_idx):
+            hg[
+                (
+                    'g1',
+                    'g1_as_%s_in_g%s' % (v_idx, g_idx),
+                    'g%s' % g_idx
+                )
+            ] = np.stack(
+                [
+                    locals()['g%s_idxs' % g_idx][:, v_idx],
+                    np.arange(locals()['g%s_idxs' % g_idx].shape[0])
+                ],
+                axis=1)
 
-        hg[
-            (
-                'g2',
-                'g2_has_%s_g1' % v_idx,
-                'g1'
-            )
-        ] = np.stack(
-            [
-                np.arange(g2_idxs.shape[0]),
-                g2_idxs[:, v_idx]
-            ],
-            axis=1)
+            hg[
+                (
+                    'g%s' % g_idx,
+                    'g%s_has_%s_g1' % (g_idx, v_idx),
+                    'g1'
+                )
+            ] = np.stack(
+                [
+                    np.arange(locals()['g%s_idxs' % g_idx].shape[0]),
+                    locals()['g%s_idxs' % g_idx][:, v_idx],
+                ],
+                axis=1)
 
     for g_idx in range(3, 5):
         for sub_g_idx in range(2):
