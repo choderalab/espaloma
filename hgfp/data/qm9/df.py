@@ -47,6 +47,7 @@ def unbatched(num=-1, sdf_path='gdb9.sdf', csv_path='gdb9.sdf.csv', hetero=False
                 # get its u298
                 u = torch.squeeze(torch.Tensor([df_u298[name]]))
 
+            
                 g = hgfp.graph.from_rdkit_mol(mol)
 
                 if hetero is True:

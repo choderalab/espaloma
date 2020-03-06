@@ -17,21 +17,49 @@ def from_rdkit_mol(mol):
 
     # get the bonds, angles, torsions, and pairwise indices
     (
-        g2_idxs,
-        g3_idxs,
-        g4_idxs,
+        bond_idxs,
+        angle_idxs,
+        torsion_idxs,
         one_four_idxs,
         nonbonded_idxs
     ) = hgfp.mm.idxs.from_adjaceny_matrix(adjacency_matrix)
 
-    g2_idxs = np.concatenate([g2_idxs, np.flip(g2_idxs, axis=1)], axis=0)
-    g3_idxs = np.concatenate([g3_idxs, np.flip(g3_idxs, axis=1)], axis=0)
-    g4_idxs = np.concatenate([g4_idxs, np.flip(g4_idxs, axis=1)], axis=0)
+    g2_idxs = np.concatenate([bond_idxs, np.flip(bond_idxs, axis=1)], axis=0)
+    g3_idxs = np.concatenate([angle_idxs, np.flip(angle_idxs, axis=1)], axis=0)
+    g4_idxs = np.concatenate([torsion_idxs, np.flip(torsion_idxs, axis=1)], axis=0)
 
     g2_dict = {tuple(g2_idx): idx for (idx, g2_idx) in enumerate(list(g2_idxs))}
     g3_dict = {tuple(g3_idx): idx for (idx, g3_idx) in enumerate(list(g3_idxs))}
 
     hg = {}
+
+    hg['g1', 'g1_in_atom', 'atom'] = np.stack(
+        [
+            np.arange(n_atoms),
+            np.arange(n_atoms)
+        ],
+        axis=1)
+
+    hg[('g2', 'g2_in_bond', 'bond')] = np.stack(
+        [
+            np.arange(g2_idxs.shape[0]),
+            np.concatenate([np.arange(bond_idxs.shape[0]), np.arange(bond_idxs.shape[0])])
+        ],
+        axis=1)
+
+    hg[('g3', 'g3_in_angle', 'angle')] = np.stack(
+        [
+            np.arange(g3_idxs.shape[0]),
+            np.concatenate([np.arange(angle_idxs.shape[0]), np.arange(angle_idxs.shape[0])])
+        ],
+        axis=1)
+
+    hg[('g4', 'g4_in_torsion', 'torsion')] = np.stack(
+        [
+            np.arange(g4_idxs.shape[0]),
+            np.concatenate([np.arange(torsion_idxs.shape[0]), np.arange(torsion_idxs.shape[0])])
+        ],
+        axis=1)
 
     hg[('g1', 'g1_in_g', 'g')] = np.stack(
         [
@@ -132,8 +160,18 @@ def from_rdkit_mol(mol):
         torch.arange(x.shape[0]),
         torch.squeeze(elements).long()] = 1.0
 
+    x = torch.cat(
+        [
+            x,
+            torch.stack([hgfp.graph.fp(atom) for atom in mol.GetAtoms()], dim=0)
+        ],
+        dim=1)
+
     hg = dgl.heterograph({k: list(v) for k, v in hg.items()})
 
     hg.nodes['g1'].data['h0'] = x
+    hg.nodes['bond'].data['idxs'] = torch.Tensor(bond_idxs)
+    hg.nodes['angle'].data['idxs'] = torch.Tensor(angle_idxs)
+    hg.nodes['torsion'].data['idxs'] = torch.Tensor(torsion_idxs)
 
     return hg

@@ -118,7 +118,7 @@ class BatchedParamGraph():
                 break
 
 def split(ds, n_batches_te=10, n_batches_vl=10):
-
+    
     ds_iter = iter(ds)
 
     ds_te = [next(ds_iter) for _ in range(n_batches_te)]

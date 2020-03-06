@@ -77,22 +77,19 @@ def from_graph(g):
         np.greater(adjacency_matrix, 0))
 
     # add bonds
-    hg[('atom', 'atom_in_bond', 'bond')] = np.concatenate(
+    hg[('atom', 'atom_as_0_in_bond', 'bond')] = np.stack(
         [
-            np.stack(
-                [
-                    bond_idxs[:, 0],
-                    np.arange(bond_idxs.shape[0])
-                ],
-                axis=1),
-            np.stack(
-                [
-                    bond_idxs[:, 1],
-                    np.arange(bond_idxs.shape[0])
-                ],
-                axis=1),
+            bond_idxs[:, 0],
+            np.arange(bond_idxs.shape[0])
         ],
-        axis=0)
+        axis=1)
+
+    hg[('atom', 'atom_as_1_in_bond', 'bond')] = np.stack(
+        [
+            bond_idxs[:, 1],
+            np.arange(bond_idxs.shape[0])
+        ],
+        axis=1)
 
     hg[('bond', 'bond_has_atom', 'atom')] = np.concatenate(
         [

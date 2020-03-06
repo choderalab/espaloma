@@ -9,28 +9,27 @@ import torch
 import dgl
 import hgfp
 import math
+from dgl.nn import pytorch as dgl_pytorch
 
 # =============================================================================
 # MODULE CLASS
 # =============================================================================
 class GN(torch.nn.Module):
-    def __init__(self, in_dim, out_dim):
+    def __init__(
+            self,
+            in_feat,
+            out_feat,
+            model=dgl_pytorch.conv.SAGEConv,
+            kwargs={'aggregator_type': 'mean'}):
         super(GN, self).__init__()
-        # self.d_phi_e = torch.nn.Linear(2 * in_dim, out_dim)
-        self.d_phi_v = torch.nn.Linear(in_dim, out_dim)
-
-    def phi_v(self, nodes):
-        h_e = torch.sum(nodes.mailbox['m'], dim=1)
-        h = self.d_phi_v(nodes.data['h'] + math.pi * h_e)
-        return {'h': h}
+        self.gn = model(in_feat, out_feat, **kwargs)
 
     def forward(self, g):
-
-        g.update_all(
-            dgl.function.copy_src('h', 'm'),
-            self.phi_v,
-            etype='atom_neighbors_atom')
-
+        x = g.nodes['atom'].data['h']
+        g_sub = dgl.to_homo(
+            g.edge_type_subgraph(['atom_neighbors_atom']))
+        x = self.gn(g_sub, x)
+        g.nodes['atom'].data['h'] = x
         return g
 
 class ParamReadout(torch.nn.Module):
@@ -47,6 +46,8 @@ class ParamReadout(torch.nn.Module):
                     ))
 
         self.fr_angle_0 = torch.nn.Linear(3 * in_dim, in_dim)
+        self.fr_torsion_0 = torch.nn.Linear(4 * in_dim, in_dim)
+        self.fr_bond_0 = torch.nn.Linear(2 * in_dim, in_dim)
 
         setattr(
             self,
@@ -60,8 +61,8 @@ class ParamReadout(torch.nn.Module):
         h = node.data['h']
 
         # everything should be positive
-        # k_and_eq = torch.abs(fn(h))
-        k_and_eq = fn(h)
+        k_and_eq = torch.abs(fn(h))
+        # k_and_eq = fn(h)
         k = k_and_eq[:, 0]
         eq = k_and_eq[:, 1]
 
@@ -75,23 +76,53 @@ class ParamReadout(torch.nn.Module):
             etype='atom_in_mol')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h'),
-            etype='atom_in_bond')
+            dgl.function.copy_src(src='h', out='m0'),
+            dgl.function.sum(msg='m0', out='h0'),
+            etype='atom_as_0_in_bond')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h0'),
+            dgl.function.copy_src(src='h', out='m1'),
+            dgl.function.sum(msg='m1', out='h1'),
+            etype='atom_as_1_in_bond')
+
+        g.apply_nodes(
+            lambda node: {'h01': torch.cat(
+                [
+                    node.data['h0'],
+                    node.data['h1'],
+                ],
+                axis=-1
+            )},
+            ntype='bond')
+
+        g.apply_nodes(
+            lambda node: {'h10': torch.cat(
+                [
+                    node.data['h1'],
+                    node.data['h0'],
+                ],
+                axis=-1
+            )},
+            ntype='bond')
+
+        g.apply_nodes(
+            lambda node: {'h':
+                self.fr_bond_0(node.data['h01']) + self.fr_bond_0(node.data['h10'])},
+            ntype='bond')
+
+        g.update_all(
+            dgl.function.copy_src(src='h', out='m0'),
+            dgl.function.sum(msg='m0', out='h0'),
             etype='atom_as_0_in_angle')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h1'),
+            dgl.function.copy_src(src='h', out='m1'),
+            dgl.function.sum(msg='m1', out='h1'),
             etype='atom_as_1_in_angle')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h2'),
+            dgl.function.copy_src(src='h', out='m2'),
+            dgl.function.sum(msg='m2', out='h2'),
             etype='atom_as_2_in_angle')
 
         g.apply_nodes(
@@ -122,27 +153,52 @@ class ParamReadout(torch.nn.Module):
             ntype='angle')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h_01'),
+            dgl.function.copy_src(src='h', out='m0'),
+            dgl.function.sum(msg='m0', out='h0'),
             etype='atom_as_0_in_torsion')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h_01'),
+            dgl.function.copy_src(src='h', out='m1'),
+            dgl.function.sum(msg='m1', out='h1'),
             etype='atom_as_1_in_torsion')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h_32'),
+            dgl.function.copy_src(src='h', out='m2'),
+            dgl.function.sum(msg='m2', out='h2'),
             etype='atom_as_2_in_torsion')
 
         g.update_all(
-            dgl.function.copy_src(src='h', out='m'),
-            dgl.function.sum(msg='m', out='h_01'),
+            dgl.function.copy_src(src='h', out='m3'),
+            dgl.function.sum(msg='m3', out='h3'),
             etype='atom_as_3_in_torsion')
 
         g.apply_nodes(
-            lambda node: {'h': node.data['h_01'] + node.data['h_32']},
+            lambda node: {'h0123': torch.cat(
+                [
+                    node.data['h0'],
+                    node.data['h1'],
+                    node.data['h2'],
+                    node.data['h3']
+                ],
+                axis=-1
+            )},
+            ntype='torsion')
+
+        g.apply_nodes(
+            lambda node: {'h3210': torch.cat(
+                [
+                    node.data['h3'],
+                    node.data['h2'],
+                    node.data['h1'],
+                    node.data['h0']
+                ],
+                axis=-1
+            )},
+            ntype='torsion')
+
+        g.apply_nodes(
+            lambda node: {'h':
+                self.fr_torsion_0(node.data['h0123']) + self.fr_torsion_0(node.data['h3210'])},
             ntype='torsion')
 
         for term in ['atom', 'bond', 'angle', 'torsion']:
@@ -198,10 +254,6 @@ class Net(torch.nn.Module):
             torch.nn.Linear(117, input_units),
             torch.nn.Tanh())
 
-        self.f_in_e = torch.nn.Sequential(
-            torch.nn.Linear(13, input_units),
-            torch.nn.Tanh())
-
         def apply_atom_in_graph(fn):
             def _fn(g):
                 g.apply_nodes(
@@ -253,22 +305,9 @@ class Net(torch.nn.Module):
 
     def forward(self, g, return_graph=False):
 
-        x = g.nodes['atom'].data['h0']
-        # print(x.shape)
-        x = self.f_in(x)
-
-        x_e = torch.zeros(
-            g.edges['atom_neighbors_atom'].data['type'].shape[0], 13, dtype=torch.float32)
-
-        x_e[
-            torch.arange(g.edges['atom_neighbors_atom'].data['type'].shape[0]),
-            torch.squeeze(g.edges['atom_neighbors_atom'].data['type']).long()] = 1.0
-
-        x_e = self.f_in_e(x_e)
-
-        g.edges['atom_neighbors_atom'].data['h'] = x_e
-
-        g.nodes['atom'].data['h'] = x
+        g.apply_nodes(
+            lambda nodes: {'h': self.f_in(nodes.data['h0'])},
+            ntype='atom')
 
         for exe in self.exes:
             g = getattr(self, exe)(g)

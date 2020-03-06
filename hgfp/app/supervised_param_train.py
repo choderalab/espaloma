@@ -7,6 +7,7 @@ import dgl
 
 
 def run(args):
+
     net = getattr(
         hgfp.models,
         args.model.lower()).Net(
@@ -14,10 +15,9 @@ def run(args):
 
     ds = getattr(
         hgfp.data,
-        args.data.lower()).param.batched(
+        args.data).param.batched(
             num=args.size,
             batch_size=args.batch_size)
-
 
     ds_all = []
     for g in ds:
@@ -100,13 +100,14 @@ def run(args):
         f_handle.write('===========================')
         f_handle.write('\n')
 
+    net.train()
     for epoch in range(args.n_epochs):
         for g in ds_tr:
+            optimizer.zero_grad()
             g_ = net(g, return_graph=True)
             loss = graph_loss(g_)
             print(loss, flush=True)
 
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
@@ -273,11 +274,10 @@ if __name__=='__main__':
     parser.add_argument('--n_epochs', default='30', type=int)
     parser.add_argument('--size', default=-1, type=int)
     parser.add_argument('--optimizer', default='Adam')
-    parser.add_argument('--learning_rate', default=1e-3, type=float)
+    parser.add_argument('--learning_rate', default=1e-5, type=float)
     parser.add_argument('--loss_fn', default='mse_loss')
-
-    parser.add_argument('--n_batches_te', default=10, type=int)
-    parser.add_argument('--n_batches_vl', default=10, type=int)
+    parser.add_argument('--n_batches_te', default=1, type=int)
+    parser.add_argument('--n_batches_vl', default=1, type=int)
     parser.add_argument('--report', default=True)
 
     args = parser.parse_args()
