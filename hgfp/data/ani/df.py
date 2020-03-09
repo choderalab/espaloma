@@ -3,6 +3,40 @@ import h5py
 import os
 import hgfp
 
+def get_ani_mol(coordinate, species, smiles):
+    """ Given smiles string and list of elements as reference,
+    get the RDKit mol with xyz.
+
+    """
+    # get the rdkit ref mol
+    ref_mol = Chem.MolFromSmiles(smiles, sanitize=False)
+
+    # count the number of bond types
+    bond_dict = {}
+
+    bonds = list(mol.GetBonds())
+
+    for bond in bonds:
+        bond_begin = bond.GetBeginAtom().GetSymbol()
+        bond_end = bond.GetEndAtom().GetSymbol()
+        bond_type = bond.GetBondType()
+
+        if bond_dict.get((bond_begin, bond_end)) == None:
+            bond_dict[(bond_begin, bond_end)] = 1
+            bond_dict[(bond_end, bond_end)] = 1
+
+        else:
+            bond_dict[(bond_begin, bond_end)] += 1
+            bond_dict[(bond_end, bond_end)] += 1
+
+    # initialize a new molecule
+    new_mol = Chem.RWMol(Chem.mol())
+
+
+
+
+
+
 def unbatched(ani_path='.'):
     def _iter():
         for path in os.listdir(ani_path):
