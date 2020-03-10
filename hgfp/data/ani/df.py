@@ -2,36 +2,38 @@ from rdkit import Chem
 import h5py
 import os
 import hgfp
+from openeye import oechem
+import tempfile
 
-def get_ani_mol(coordinate, species, smiles):
+def get_ani_mol(coordinates, species, smiles):
     """ Given smiles string and list of elements as reference,
     get the RDKit mol with xyz.
 
     """
-    # get the rdkit ref mol
-    ref_mol = Chem.MolFromSmiles(smiles, sanitize=False)
+    # make xyz
+    fd, path = tempfile.mkstemp()
 
-    # count the number of bond types
-    bond_dict = {}
+    with os.fdopen(fd, 'w') as f_handle:
+        f_handle.write(str(len(species)))
+        f_handle.write('\n')
+        f_handle.write('\n')
+        f_handle.writelines(
+            ['{:8s} {:8.5f} {:8.5f} {:8.5f}'.format(
+                species[idx],
+                coordinates[idx][0],
+                coordinates[idx][1],
+                coordinates[idx][2]
+            ) for idx in range(len(species))])
 
-    bonds = list(mol.GetBonds())
+    # read xyz into openeye
+    ifs = oechem.oemolistream()
 
-    for bond in bonds:
-        bond_begin = bond.GetBeginAtom().GetSymbol()
-        bond_end = bond.GetEndAtom().GetSymbol()
-        bond_type = bond.GetBondType()
+    if ifs.open(path):
+        mol = next(ifs.GetOEGraphMols())
 
-        if bond_dict.get((bond_begin, bond_end)) == None:
-            bond_dict[(bond_begin, bond_end)] = 1
-            bond_dict[(bond_end, bond_end)] = 1
+    g = hgfp.graph.from_oemol(mol, use_fp=True)
 
-        else:
-            bond_dict[(bond_begin, bond_end)] += 1
-            bond_dict[(bond_end, bond_end)] += 1
-
-    # initialize a new molecule
-    new_mol = Chem.RWMol(Chem.mol())
-
+    return g
 
 def unbatched(ani_path='.'):
     def _iter():
@@ -46,16 +48,9 @@ def unbatched(ani_path='.'):
                         energies = f[d0][d1]['energies'].value
                         species = [x.decode('utf-8') for x in f[d0][d1]['species'].value]
 
-                        mol = Chem.MolFromSmiles(smiles)
-                        mol = Chem.AddHs(mol)
+                        low_energy_idx = np.argsort()
 
-                        print([atom.GetSymbol() for atom in mol.GetAtoms()])
-                        print(species)
-                        assert [atom.GetSymbol() for atom in mol.GetAtoms()] == species
-
-                        g = hgfp.heterograph.from_graph(
-                            hgfp.graph.from_rdkit_mol(
-                                mol))
+                        g = get_ani_mol()
 
                         for idx_frame in range(energies.shape[0]):
 
