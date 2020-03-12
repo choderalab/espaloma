@@ -1,8 +1,9 @@
 import dgl
 import torch
 from rdkit import Chem
+from openeye import oechem
 
-HYBRIDIZATION_OE = {
+HYBRIDIZATION_RDKIT = {
     Chem.rdchem.HybridizationType.SP: torch.tensor([1, 0, 0, 0, 0], dtype=torch.float32),
     Chem.rdchem.HybridizationType.SP2: torch.tensor([0, 1, 0, 0, 0], dtype=torch.float32),
     Chem.rdchem.HybridizationType.SP3: torch.tensor([0, 0, 1, 0, 0], dtype=torch.float32),
@@ -11,13 +12,13 @@ HYBRIDIZATION_OE = {
     Chem.rdchem.HybridizationType.S: torch.tensor([0, 0, 0, 0, 0], dtype=torch.float32)
 }
 
-HYBRIDIZATION_RDKIT = {
-    oe.OEHybridization.sp: torch.tensor([1, 0, 0, 0, 0], dtype=torch.float32),
-    oe.OEHybridization.sp2: torch.tensor([0, 1, 0, 0, 0], dtype=torch.float32),
-    oe.OEHybridization.sp3: torch.tensor([0, 0, 1, 0, 0], dtype=torch.float32),
-    oe.OEHybridization.sp3d: torch.tensor([0, 0, 0, 1, 0], dtype=torch.float32),
-    oe.OEHybridization.sp3d2: torch.tensor([0, 0, 0, 0, 1], dtype=torch.float32),
-    oe.OEHybridization.Unknown: torch.tensor([0, 0, 0, 0, 0], dtype=torch.float32)
+HYBRIDIZATION_OE = {
+    oechem.OEHybridization_sp: torch.tensor([1, 0, 0, 0, 0], dtype=torch.float32),
+    oechem.OEHybridization_sp2: torch.tensor([0, 1, 0, 0, 0], dtype=torch.float32),
+    oechem.OEHybridization_sp3: torch.tensor([0, 0, 1, 0, 0], dtype=torch.float32),
+    oechem.OEHybridization_sp3d: torch.tensor([0, 0, 0, 1, 0], dtype=torch.float32),
+    oechem.OEHybridization_sp3d2: torch.tensor([0, 0, 0, 0, 1], dtype=torch.float32),
+    oechem.OEHybridization_Unknown: torch.tensor([0, 0, 0, 0, 0], dtype=torch.float32)
 }
 
 def fp_oe(atom):
@@ -29,7 +30,7 @@ def fp_oe(atom):
                     atom.GetValence(),
                     atom.GetExplicitValence(),
                     atom.GetFormalCharge(),
-                    atom.GetIsAromatic() * 1.0,
+                    atom.IsAromatic() * 1.0,
                     atom.GetIsotope(),
                     oechem.OEAtomIsInRingSize(atom, 3) * 1.0,
                     oechem.OEAtomIsInRingSize(atom, 4) * 1.0,
@@ -39,7 +40,7 @@ def fp_oe(atom):
                     oechem.OEAtomIsInRingSize(atom, 8) * 1.0,
                 ],
                 dtype=torch.float32),
-            HYBRIDIZATION[atom.GetHybridization()]
+            HYBRIDIZATION_OE[atom.GetHyb()]
         ],
         dim=0)
 
@@ -84,7 +85,7 @@ def from_oemol(mol, use_fp=True):
         torch.squeeze(g.ndata['type']).long()] = 1.0
 
     h_v_fp = torch.stack(
-        [fp_rdkit(atom) for atom in mol.GetAtoms()],
+        [fp_oe(atom) for atom in mol.GetAtoms()],
         axis=0)
 
     if use_fp == True:
@@ -113,9 +114,9 @@ def from_oemol(mol, use_fp=True):
 
     # enter bonds
     bonds = list(mol.GetBonds())
-    bonds_begin_idxs = [bond.GetBeginAtomIdx() for bond in bonds]
-    bonds_end_idxs = [bond.GetEndAtomIdx() for bond in bonds]
-    bonds_types = [bond.GetBondType().real for bond in bonds]
+    bonds_begin_idxs = [bond.GetBgnIdx() for bond in bonds]
+    bonds_end_idxs = [bond.GetEndIdx() for bond in bonds]
+    bonds_types = [bond.GetOrder() for bond in bonds]
 
     # NOTE: dgl edges are directional
     g.add_edges(bonds_begin_idxs, bonds_end_idxs)

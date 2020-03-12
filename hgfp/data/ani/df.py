@@ -4,58 +4,104 @@ import os
 import hgfp
 from openeye import oechem
 import tempfile
+import numpy as np
+import torch
+
+ATOM_WEIGHT = {'H':-0.500607632585, 'C':-37.8302333826, 'N':-54.5680045287, 'O':-54.5680045287}
 
 def get_ani_mol(coordinates, species, smiles):
     """ Given smiles string and list of elements as reference,
     get the RDKit mol with xyz.
 
     """
-    # make xyz
-    fd, path = tempfile.mkstemp()
 
-    with os.fdopen(fd, 'w') as f_handle:
-        f_handle.write(str(len(species)))
-        f_handle.write('\n')
-        f_handle.write('\n')
-        f_handle.writelines(
-            ['{:8s} {:8.5f} {:8.5f} {:8.5f}'.format(
-                species[idx],
-                coordinates[idx][0],
-                coordinates[idx][1],
-                coordinates[idx][2]
-            ) for idx in range(len(species))])
+    mol = oechem.OEGraphMol()
+    
+    for symbol in species:
+        mol.NewAtom(getattr(oechem, 'OEElemNo_' + symbol))
 
-    # read xyz into openeye
-    ifs = oechem.oemolistream()
+    mol.SetCoords(coordinates.reshape([-1]))
+    mol.SetDimension(3)
+    oechem.OEDetermineConnectivity(mol)
+    oechem.OEFindRingAtomsAndBonds(mol)
+    oechem.OEPerceiveBondOrders(mol)
 
-    if ifs.open(path):
-        mol = next(ifs.GetOEGraphMols())
+    smiles_can = oechem.OECreateCanSmiString(mol)
+
+    ims = oechem.oemolistream()
+    ims.SetFormat(oechem.OEFormat_SMI)
+    ims.openstring(smiles)
+    mol_ref = next(ims.GetOEMols())
+    smiles_ref = oechem.OECreateCanSmiString(mol_ref)
+    
+    assert smiles_can == smiles_ref
 
     g = hgfp.graph.from_oemol(mol, use_fp=True)
-
+    
     return g
 
-def unbatched(ani_path='.'):
+
+def mean_and_std():
+    return 0.0, 1.0
+
+def unbatched(num=-1, ani_path='.'):
     def _iter():
+        idx = 0 
         for path in os.listdir(ani_path):
+            if idx > num and num != -1:
+                break
             if path.endswith('.h5'):
                 f = h5py.File(path, 'r')
                 for d0 in list(f.keys()):
+                    if idx > num and num != -1:
+                        break
                     for d1 in list(f[d0].keys()):
-                        smiles = ''.join([
-                            x.decode('utf-8') for x in f[d0][d1]['smiles'].value.tolist()])
-                        coordinates = f[d0][d1]['coordinates'].value
-                        energies = f[d0][d1]['energies'].value
-                        species = [x.decode('utf-8') for x in f[d0][d1]['species'].value]
+                        if idx > num and num != -1:
+                            break
+                        try:
+                            smiles = ''.join([
+                                x.decode('utf-8') for x in f[d0][d1]['smiles'].value.tolist()])
+                            coordinates = f[d0][d1]['coordinates'].value
+                            energies = f[d0][d1]['energies'].value
+                            species = [x.decode('utf-8') for x in f[d0][d1]['species'].value]
 
-                        low_energy_idx = np.argsort()
+                            low_energy_idx = np.argsort(energies)[0]
 
-                        g = get_ani_mol()
+                            g = hgfp.heterograph.from_graph(
+                                    get_ani_mol(
+                                        coordinates[low_energy_idx], 
+                                        species, 
+                                        smiles))
+                            
+                            
+                            u0 = np.sum([ATOM_WEIGHT[x] for x in species])
+                            u_min = energies[low_energy_idx] - u0
 
-                        for idx_frame in range(energies.shape[0]):
-
-                            g.nodes['atom'].data['xyz'] = torch.Tensor(coordinates[idx_frame, :, :])
-                            u = energies[idx_frame]
-
-                            yield (g, u)
+                            for idx_frame in range(energies.shape[0]):
+                                u = energies[idx_frame] - u0
+                                
+                                if u < u_min + 0.44:
+                                    g.nodes['atom'].data['xyz'] = torch.Tensor(coordinates[idx_frame, :, :])
+                                    u = torch.squeeze(torch.Tensor([u]))                           
+                                    idx += 1
+                                    
+                                    yield (g, u)
+                        
+                        except:
+                            continue
+    
     return _iter
+
+def batched(
+        num=-1,
+        n_batches_in_buffer=12,
+        batch_size=32,
+        cache=True,
+        hetero=True):
+
+    return hgfp.data.utils.BatchedDataset(
+        unbatched(num=num),
+        n_batches_in_buffer=n_batches_in_buffer,
+        batch_size=batch_size,
+        cache=cache,
+        hetero=hetero)

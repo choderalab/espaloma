@@ -78,7 +78,6 @@ def run(args):
             u_hat = net(g)
             u = norm(u)
             loss = loss_fn(u, u_hat)
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -189,7 +188,6 @@ def run(args):
         u_hat_vl = np.array([0.])
 
         for g, u in ds_tr:
-
             u_tr = np.concatenate([u_tr, u.detach().numpy()], axis=0)
             u_hat_tr = np.concatenate([u_hat_tr, unnorm(net(g)).detach().numpy()], axis=0)
 
@@ -202,13 +200,13 @@ def run(args):
             u_hat_te = np.concatenate([u_hat_te, unnorm(net(g)).detach().numpy()], axis=0)
 
 
-        np.save(time_str + '/u_tr', u_tr)
-        np.save(time_str + '/u_te', u_te)
-        np.save(time_str + '/u_vl', u_vl)
+        # np.save(time_str + '/u_tr', u_tr[1:])
+        # np.save(time_str + '/u_te', u_te[1:])
+        # np.save(time_str + '/u_vl', u_vl[1:])
 
-        np.save(time_str + '/u_hat_tr', u_hat_tr)
-        np.save(time_str + '/u_hat_vl', u_hat_vl)
-        np.save(time_str + '/u_hat_te', u_hat_te)
+        # np.save(time_str + '/u_hat_tr', u_hat_tr[1:])
+        # np.save(time_str + '/u_hat_vl', u_hat_vl[1:])
+        # np.save(time_str + '/u_hat_te', u_hat_te[1:])
 
         f_handle.write('# Dataset Size')
         f_handle.write('\n')

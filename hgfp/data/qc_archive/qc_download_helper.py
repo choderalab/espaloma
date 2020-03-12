@@ -75,9 +75,9 @@ def f(record_name):
             
 
 if __name__ == '__main__':
-    p = Pool(32)
+    p = Pool(128)
     us_gs_array = p.map(f, records)
-    us = torch.stack(list(itertools.chain.from_iterable([x[0] for x in us_gs_array if x is not None])))
-    gs = list(itertools.chain.from_iterable([x[1] for x in us_gs_array if x is not None]))
+    us = torch.stack(list(itertools.chain.from_iterable([x[1] for x in us_gs_array if x is not None])))
+    gs = list(itertools.chain.from_iterable([x[0] for x in us_gs_array if x is not None]))
 
     dgl.data.utils.save_graphs('qc_archive_1.bin', gs, {'u': us})
