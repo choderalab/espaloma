@@ -16,7 +16,7 @@ def get_ani_mol(coordinates, species, smiles):
     """
 
     mol = oechem.OEGraphMol()
-    
+
     for symbol in species:
         mol.NewAtom(getattr(oechem, 'OEElemNo_' + symbol))
 
@@ -33,11 +33,11 @@ def get_ani_mol(coordinates, species, smiles):
     ims.openstring(smiles)
     mol_ref = next(ims.GetOEMols())
     smiles_ref = oechem.OECreateCanSmiString(mol_ref)
-    
+
     assert smiles_can == smiles_ref
 
     g = hgfp.graph.from_oemol(mol, use_fp=True)
-    
+
     return g
 
 
@@ -46,7 +46,7 @@ def mean_and_std():
 
 def unbatched(num=-1, ani_path='.'):
     def _iter():
-        idx = 0 
+        idx = 0
         for path in os.listdir(ani_path):
             if idx > num and num != -1:
                 break
@@ -69,27 +69,87 @@ def unbatched(num=-1, ani_path='.'):
 
                             g = hgfp.heterograph.from_graph(
                                     get_ani_mol(
-                                        coordinates[low_energy_idx], 
-                                        species, 
+                                        coordinates[low_energy_idx],
+                                        species,
                                         smiles))
-                            
-                            
+
+
                             u0 = np.sum([ATOM_WEIGHT[x] for x in species])
                             u_min = energies[low_energy_idx] - u0
 
                             for idx_frame in range(energies.shape[0]):
                                 u = energies[idx_frame] - u0
-                                
+
                                 if u < u_min + 0.44:
                                     g.nodes['atom'].data['xyz'] = torch.Tensor(coordinates[idx_frame, :, :])
-                                    u = torch.squeeze(torch.Tensor([u]))                           
+                                    u = torch.squeeze(torch.Tensor([u]))
                                     idx += 1
-                                    
+
                                     yield (g, u)
-                        
+
                         except:
                             continue
-    
+
+    return _iter
+
+
+def topology_batched(num_mol=-1, ani_path='.'):
+    def _iter():
+        idx = 0
+        for path in os.listdir(ani_path):
+            if idx > num and num != -1:
+                break
+            if path.endswith('.h5'):
+                f = h5py.File(path, 'r')
+                for d0 in list(f.keys()):
+                    if idx > num and num != -1:
+                        break
+                    for d1 in list(f[d0].keys()):
+                        if idx > num and num != -1:
+                            break
+                        try:
+                            smiles = ''.join([
+                                x.decode('utf-8') for x in f[d0][d1]['smiles'].value.tolist()])
+                            coordinates = f[d0][d1]['coordinates'].value
+                            energies = f[d0][d1]['energies'].value
+                            species = [x.decode('utf-8') for x in f[d0][d1]['species'].value]
+
+                            low_energy_idx = np.argsort(energies)[0]
+
+                            g = hgfp.heterograph.from_graph(
+                                    get_ani_mol(
+                                        coordinates[low_energy_idx],
+                                        species,
+                                        smiles))
+
+
+                            u0 = np.sum([ATOM_WEIGHT[x] for x in species])
+                            u_min = energies[low_energy_idx] - u0
+
+                            gs = []
+                            us = []
+
+                            for idx_frame in range(energies.shape[0]):
+                                u = energies[idx_frame] - u0
+
+                                if u < u_min + 0.44:
+                                    g.nodes['atom'].data['xyz'] = torch.Tensor(coordinates[idx_frame, :, :])
+                                    u = torch.squeeze(torch.Tensor([u]))
+                                    idx += 1
+
+                                    gs.append(g)
+                                    us.append(u)
+
+                            gs = dgl.batch(gs)
+                            us = torch.stack(us)
+
+                            idx += 1
+
+                            yield gs, us
+
+                        except:
+                            continue
+
     return _iter
 
 def batched(
