@@ -227,6 +227,13 @@ def from_graph(g):
         ],
         axis=1)
 
+    hg[('mol', 'mol_has_atom', 'atom')] = np.stack(
+        [
+            np.zeros((adjacency_matrix.shape[0], )),
+            np.arange(adjacency_matrix.shape[0])
+        ],
+        axis=1)
+
     hg[('bond', 'bond_in_mol', 'mol')] = np.stack(
         [
             np.arange(bond_idxs.shape[0]),
