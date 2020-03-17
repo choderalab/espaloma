@@ -144,7 +144,7 @@ def from_rdkit_mol(mol, use_fp=True):
         torch.squeeze(g.ndata['type']).long()] = 1.0
 
     h_v_fp = torch.stack(
-        [fp(atom) for atom in mol.GetAtoms()],
+        [fp_rdkit(atom) for atom in mol.GetAtoms()],
         axis=0)
 
     if use_fp == True:
