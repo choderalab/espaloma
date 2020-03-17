@@ -87,6 +87,7 @@ def run(args):
 
         if args.report == True:
             net.eval()
+            torch.save(net.state_dict(), time_str + '/model' + str(epoch))
             u_tr = np.array([0.])
             u_hat_tr = np.array([0.])
 
