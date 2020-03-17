@@ -13,7 +13,7 @@ def run(args):
     df = getattr(
         hgfp.data,
         args.data.lower()).df
-    
+
     ds = df.batched(
             num=args.size,
             batch_size=args.batch_size,
