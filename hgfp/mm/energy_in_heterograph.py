@@ -23,22 +23,28 @@ def u(
     scaling = {'one_four': one_four_scaling, 'nonbonded': 1.0}
 
     for term in ['bond', 'angle', 'torsion']:
-        x = g.nodes[term].data['x']
-        k = g.nodes[term].data['k']
-        eq = g.nodes[term].data['eq']
-        u = getattr(
-            hgfp.mm.energy,
-            term)(x, k, eq)
-        g.nodes[term].data['energy'] = u
+        if 'x' in g.nodes[term].data and 'k' in g.nodes[term].data:
+            x = g.nodes[term].data['x']
+            k = g.nodes[term].data['k']
+            eq = g.nodes[term].data['eq']
+            
+            u = getattr(
+                hgfp.mm.energy,
+                term)(x, k, eq)
+            g.nodes[term].data['energy'] = u
+
+        else:
+            g.nodes[term].data['energy'] = torch.zeros((g.number_of_nodes(ntype=term)))
 
     for term in ['one_four', 'nonbonded']:
-
-        x = g.nodes[term].data['x']
-        sigma_pair = g.nodes[term].data['sigma_pair']
-        epsilon_pair = g.nodes[term].data['epsilon_pair']
-        u = scaling[term] * hgfp.mm.energy.lj(x, sigma_pair, epsilon_pair, switch=switch, damping=damping)
-        g.nodes[term].data['energy'] = u
-
+        if 'x' in g.nodes[term].data and 'sigma_pair' in g.nodes[term].data:
+            x = g.nodes[term].data['x']
+            sigma_pair = g.nodes[term].data['sigma_pair']
+            epsilon_pair = g.nodes[term].data['epsilon_pair']
+            u = scaling[term] * hgfp.mm.energy.lj(x, sigma_pair, epsilon_pair, switch=switch, damping=damping)
+            g.nodes[term].data['energy'] = u
+        else:
+            g.nodes[term].data['energy'] = torch.zeros((g.number_of_nodes(ntype=term)))
 
     g.multi_update_all(
         {

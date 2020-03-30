@@ -40,7 +40,7 @@ def get_ani_mol(coordinates, species, smiles):
 
     g = hgfp.graph.from_oemol(mol, use_fp=True)
 
-    return g
+    return g, mol
 
 
 def mean_and_std():
@@ -69,11 +69,12 @@ def unbatched(num=-1, ani_path='.'):
 
                             low_energy_idx = np.argsort(energies)[0]
 
-                            g = hgfp.heterograph.from_graph(
-                                    get_ani_mol(
+                            g, mol = get_ani_mol(
                                         coordinates[low_energy_idx],
                                         species,
-                                        smiles))
+                                        smiles)
+
+                            g = hgfp.heterograph.from_graph(g)
 
 
                             u0 = np.sum([ATOM_WEIGHT[x] for x in species])
@@ -95,7 +96,7 @@ def unbatched(num=-1, ani_path='.'):
     return _iter
 
 
-def topology_batched(num=-1, ani_path='.', *args, **kwargs):
+def topology_batched(num=-1, ani_path='.', mm=False, *args, **kwargs):
     class _iter():
         def __iter__(self):
             idx = 0
@@ -107,50 +108,76 @@ def topology_batched(num=-1, ani_path='.', *args, **kwargs):
                     for d0 in list(f.keys()):
                         if idx > num and num != -1:
                             break
-                        try:
-                            for d1 in list(f[d0].keys()):
-                                if idx > num and num != -1:
-                                    break
-                                smiles = ''.join([
-                                    x.decode('utf-8') for x in f[d0][d1]['smiles'].value.tolist()])
-                                coordinates = f[d0][d1]['coordinates'].value
-                                energies = f[d0][d1]['energies'].value
-                                species = [x.decode('utf-8') for x in f[d0][d1]['species'].value]
+                        for d1 in list(f[d0].keys()):
+                            if idx > num and num != -1:
+                                break
+                            smiles = ''.join([
+                                x.decode('utf-8') for x in f[d0][d1]['smiles'].value.tolist()])
+                            coordinates = f[d0][d1]['coordinates'].value
+                            energies = f[d0][d1]['energies'].value
+                            species = [x.decode('utf-8') for x in f[d0][d1]['species'].value]
+                            
 
-                                low_energy_idx = np.argsort(energies)[0]
-
-                                g = hgfp.heterograph.from_graph(
-                                        get_ani_mol(
+                            low_energy_idx = np.argsort(energies)[0]
+                            
+                            try:
+                                g, mol = get_ani_mol(
                                             coordinates[low_energy_idx],
                                             species,
-                                            smiles))
+                                            smiles)
+                                
+                            except:
+                                continue
 
+                            
+                            g = hgfp.heterograph.from_graph(g)
 
-                                u0 = np.sum([ATOM_WEIGHT[x] for x in species])
-                                u_min = energies[low_energy_idx] - u0
+                            u0 = np.sum([ATOM_WEIGHT[x] for x in species])
+                            u_min = energies[low_energy_idx] - u0
 
-                                gs = []
-                                us = []
+                            if mm == True:
+                                try:
+                                    g_ = hgfp.data.mm_energy.u(mol, toolkit='openeye', return_graph=True)
+                                except:
+                                    continue
 
-                                for idx_frame in range(energies.shape[0]):
-                                    u = energies[idx_frame] - u0
+                            gs = []
+                            us = []
+                            
+                            for idx_frame in range(energies.shape[0]):
+                                u = energies[idx_frame] - u0
+                                if u < u_min + 0.44:
+                                    g = copy.deepcopy(g_)
+                                    g.apply_nodes(lambda node: {
+                                        'xyz': torch.Tensor(coordinates[idx_frame, :, :])},
+                                        ntype='atom')
 
-                                    if u < u_min + 0.44:
-                                        g.apply_nodes(lambda node: {
-                                            'xyz': torch.Tensor(coordinates[idx_frame, :, :])},
-                                            ntype='atom')
-                                        u = torch.squeeze(torch.Tensor([u]))
-                                        gs.append(copy.deepcopy(g))
-                                        us.append(u)
+                                    if mm == True:
 
-                                gs = dgl.batch_hetero(gs)
-                                us = torch.stack(us)
+                                        g = hgfp.mm.geometry_in_heterograph.from_heterograph_with_xyz(g)
 
-                                idx += 1
-                                yield gs, us
-                        
-                        except:
-                            continue
+                                        g = hgfp.mm.energy_in_heterograph.u(g)
+
+                                        u = torch.sum(
+                                                torch.cat(
+                                                [
+                                                    g.nodes['mol'].data['u' + term][:, None] for term in [
+                                                        'bond'#, 'angle', 'torsion', 'one_four', 'nonbonded', '0'
+                                                ] if 'u' + term in g.nodes['mol'].data],
+                                                dim=1),
+                                            dim=1)
+
+                                       
+
+                                    gs.append(g)
+                                    us.append(u)
+                                
+                            gs = dgl.batch_hetero(gs)
+                            us = torch.stack(us)
+
+                            idx += 1
+                            yield gs, us
+                    
 
     return _iter()
 

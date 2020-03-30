@@ -326,10 +326,9 @@ class Net(torch.nn.Module):
                 torch.cat(
                 [
                     g.nodes['mol'].data['u' + term][:, None] for term in [
-                        'bond', 'angle', 'torsion', 'one_four', 'nonbonded', '0'
+                        'bond', # 'angle', 'torsion', 'one_four', 'nonbonded', '0'
                 ]],
                 dim=1),
             dim=1)
-
 
         return u

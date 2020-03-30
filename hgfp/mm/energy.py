@@ -19,12 +19,11 @@ def lj(
         x,
         sigma_pair,
         epsilon_pair,
-        switch=0.0,
+        switch=1.0,
         damping=0.0):
     """ Calculate the 12-6 Lenard Jones energy.
 
     """
-
 
     sigma_over_r = torch.where(
         torch.gt(x, switch),
@@ -32,4 +31,4 @@ def lj(
         torch.zeros(x.size()))
 
 
-    return 4 * epsilon_pair * (torch.pow(sigma_over_r, 12) - torch.pow(sigma_over_r, 6))
+    return epsilon_pair * (torch.pow(sigma_over_r, 12) - torch.pow(sigma_over_r, 6))

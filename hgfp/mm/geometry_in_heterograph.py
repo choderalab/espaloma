@@ -145,8 +145,12 @@ def from_heterograph_with_xyz(g):
 
     g.apply_nodes(bond_length, ntype='bond')
     g.apply_nodes(angle_vl, ntype='angle')
-    g.apply_nodes(torsion_vl, ntype='torsion')
-    g.apply_nodes(distance, ntype='one_four')
-    g.apply_nodes(distance, ntype='nonbonded')
+    try:
+        g.apply_nodes(torsion_vl, ntype='torsion')
+        g.apply_nodes(distance, ntype='one_four')
+        g.apply_nodes(distance, ntype='nonbonded')
+
+    except:
+        pass
 
     return g

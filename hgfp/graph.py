@@ -2,6 +2,7 @@ import dgl
 import torch
 from rdkit import Chem
 from openeye import oechem
+import numpy as np
 
 HYBRIDIZATION_RDKIT = {
     Chem.rdchem.HybridizationType.SP: torch.tensor([1, 0, 0, 0, 0], dtype=torch.float32),
@@ -97,20 +98,13 @@ def from_oemol(mol, use_fp=True):
             dim=-1) # (n_atoms, 117)
 
     g.ndata['h0'] = h_v
+    
 
-    try:
-        # enter xyz in if there is conformer
-        conformer = mol.GetConformer()
-        g.ndata['xyz'] = torch.Tensor(
-            [
-                [
-                    conformer.GetAtomPosition(idx).x,
-                    conformer.GetAtomPosition(idx).y,
-                    conformer.GetAtomPosition(idx).z
-                ] for idx in range(n_atoms)
-            ])
-    except:
-        pass
+    # enter xyz in if there is conformer
+    # conformer = mol.GetConf()
+    
+    g.ndata['xyz'] = torch.Tensor(
+        np.array(list(mol.GetCoords().values())))
 
     # enter bonds
     bonds = list(mol.GetBonds())
