@@ -21,6 +21,8 @@ def run(args):
             n_batches_in_buffer=args.n_batches_in_buffer,
             hetero=args.hetero)
 
+    print(len(list(ds)), flush=True)
+
     ds_mean, ds_std = df.mean_and_std()
 
     print(ds_mean)
@@ -76,7 +78,9 @@ def run(args):
     for epoch in range(args.n_epochs):
         for g, u in ds_tr:
             u_hat = net(g)
+            print(u_hat)
             u = norm(u)
+            print(u)
             loss = loss_fn(u, u_hat)
             optimizer.zero_grad()
             loss.backward()

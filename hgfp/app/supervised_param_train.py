@@ -18,44 +18,11 @@ def run(args):
         args.data).param.batched(
             num=args.size,
             batch_size=args.batch_size)
+    
+    norm_dict = hgfp.data.utils.get_norm_dict(ds)
 
-    ds_all = []
-    for g in ds:
-        ds_all += dgl.unbatch_hetero(g)
+    norm, unnorm = hgfp.data.utils.get_norm_fn(norm_dict)
 
-    ds_all = dgl.batch_hetero(ds_all)
-
-    mean_and_std_dict = {}
-
-    for term in ['atom', 'bond', 'angle']:
-        mean_and_std_dict[term] = {}
-        for param in ['k', 'eq']:
-            mean_and_std_dict[term][param] = {}
-            x = ds_all.nodes[term].data[param + '_ref']
-            mean = np.mean(x.numpy())
-            std = np.std(x.numpy())
-            mean_and_std_dict[term][param]['mean'] = mean
-            mean_and_std_dict[term][param]['std'] = std
-
-    def norm(g):
-        for term in ['atom', 'bond', 'angle']:
-            for param in ['k', 'eq']:
-                g.apply_nodes(
-                    lambda node: {param + '_ref':
-                        (node.data[param + '_ref'] - mean_and_std_dict[term][param]['mean'])/\
-                        mean_and_std_dict[term][param]['std']},
-                    ntype=term)
-        return g
-
-    def unnorm(g):
-        for term in ['atom', 'bond', 'angle']:
-            for param in ['k', 'eq']:
-                g.apply_nodes(
-                    lambda node: {param:
-                        (node.data[param] * \
-                        mean_and_std_dict[term][param]['std'] + mean_and_std_dict[term][param]['mean'])},
-                    ntype=term)
-        return g
 
     list(ds)
 
@@ -99,6 +66,8 @@ def run(args):
         f_handle.write('\n')
         f_handle.write('===========================')
         f_handle.write('\n')
+
+        torch.save(norm_dict, time_str + '/norm_dict')
 
     net.train()
     for epoch in range(args.n_epochs):
