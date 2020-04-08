@@ -5,9 +5,9 @@ from rdkit import Chem
 import numpy as np
 
 
-def from_rdkit_mol(mol):
+def from_oemol(mol):
 
-    g = hgfp.graph.from_rdkit_mol(mol)
+    g = hgfp.graph.from_oemol(mol)
 
     # get the adjacency matrix of the graph
     adjacency_matrix = g.adjacency_matrix().to_dense().numpy()
@@ -134,6 +134,7 @@ def from_rdkit_mol(mol):
                 ],
                 axis=1)
 
+    '''
     rings = mol.GetRingInfo().AtomRings()
     rings = rings + tuple([ring[::-1] for ring in rings])
 
@@ -150,6 +151,8 @@ def from_rdkit_mol(mol):
             ring = ring[1:] + ring[:1]
             ring_idx += 1
 
+    '''
+
     elements = torch.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()])
 
@@ -163,7 +166,7 @@ def from_rdkit_mol(mol):
     x = torch.cat(
         [
             x,
-            torch.stack([hgfp.graph.fp(atom) for atom in mol.GetAtoms()], dim=0)
+            torch.stack([hgfp.graph.fp_oe(atom) for atom in mol.GetAtoms()], dim=0)
         ],
         dim=1)
 

@@ -9,6 +9,15 @@ import torch
 import os
 import hgfp
 import random
+import numpy as np
+from simtk.openmm.app import *
+from simtk.openmm import *
+from simtk.unit import *
+from openeye import oechem
+from openforcefield.topology import Molecule
+from openforcefield.topology import Topology
+from openforcefield.typing.engines.smirnoff import ForceField
+FF = ForceField('test_forcefields/smirnoff99Frosst.offxml')
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -17,6 +26,58 @@ def mean_and_std(csv_path='gdb9.sdf.csv'):
     df_csv = pd.read_csv(csv_path, index_col=0)
     df_u298 = df_csv['u298_atom']
     return df_u298.mean(), df_u298.std()
+
+
+def topology_batched(num=-1, batch_size=16, step_size=100, sdf_path='gdb9.sdf'):
+    ifs = oechem.oemolistream(sdf_path)
+    mol = oechem.OEGraphMol()
+
+    idx = 0
+
+    while True:
+        try:
+            mol = next(ifs.GetOEMols())
+        except:
+            break
+
+        if num != -1 and idx > num:
+            break
+        
+        if mol != None:
+            # get the name of the molecule
+
+            g = hgfp.graph.from_oemol(mol)
+
+            g = hgfp.heterograph.from_graph(g)
+
+            mol = Molecule.from_openeye(mol)
+
+            topology = Topology.from_molecules(mol)
+
+            mol_sys = FF.create_openmm_system(topology)
+
+            integrator = LangevinIntegrator(300*kelvin, 1/picosecond, 0.002*picoseconds)
+
+            simulation = Simulation(topology.to_openmm(), mol_sys, integrator)
+
+            simulation.context.setPositions(
+                0.1 * g.nodes['atom'].data['xyz'].numpy())
+
+            xs = []
+
+            for _ in range(batch_size):
+                simulation.step(step_size)
+
+                xs.append(
+                        simulation.context.getState(
+                            getPositions=True
+                        ).getPositions(asNumpy=True) / angstrom)
+
+            idx += 1
+
+            yield g, torch.tensor(np.array(xs))
+
+
 
 def unbatched(num=-1, sdf_path='gdb9.sdf', csv_path='gdb9.sdf.csv', hetero=False):
     # parse data

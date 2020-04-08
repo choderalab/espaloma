@@ -177,8 +177,8 @@ def get_norm_fn(mean_and_std_dict):
         for term in ['atom', 'bond', 'angle']:
             for param in ['k', 'eq']:
                 g.apply_nodes(
-                    lambda node: {param + '_ref':
-                        (node.data[param + '_ref'] - mean_and_std_dict[term][param]['mean'])/\
+                    lambda node: {param:
+                        (node.data[param] - mean_and_std_dict[term][param]['mean'])/\
                         mean_and_std_dict[term][param]['std']},
                     ntype=term)
         return g
@@ -190,6 +190,47 @@ def get_norm_fn(mean_and_std_dict):
                     lambda node: {param:
                         (node.data[param] * \
                         mean_and_std_dict[term][param]['std'] + mean_and_std_dict[term][param]['mean'])},
+                    ntype=term)
+        return g
+
+    return norm, unnorm
+
+def get_norm_fn_log_normal(mean_and_std_dict):
+    import math
+
+    for term in ['atom', 'bond', 'angle']:
+        for param in ['k', 'eq']:
+
+            exp_mu_plus_half_sigma_2 = mean_and_std_dict[term][param]['mean']
+            exp_sigma_2 = mean_and_std_dict[term][param]['std'] ** 2 / (exp_mu_plus_half_sigma_2 ** 2) + 1
+            sigma_2 = math.log(exp_sigma_2)
+            sigma = sigma_2 ** 0.5
+            mu = math.log(exp_mu_plus_half_sigma_2) - 0.5 * sigma_2
+
+            mean_and_std_dict[term][param]['mu'] = mu
+            mean_and_std_dict[term][param]['sigma'] = sigma
+            
+    def norm(g, mean_and_std_dict=mean_and_std_dict):
+        for term in ['atom', 'bond', 'angle']:
+            for param in ['k', 'eq']:
+                mu = mean_and_std_dict[term][param]['mu']
+                sigma = mean_and_std_dict[term][param]['sigma']
+
+                g.apply_nodes(
+                    lambda node: {param:
+                        (torch.log(node.data[param]) - mu)/ sigma},
+                    ntype=term)
+        return g
+
+    def unnorm(g, mean_and_std_dict=mean_and_std_dict):
+        for term in ['atom', 'bond', 'angle']:
+            for param in ['k', 'eq']:
+                mu = mean_and_std_dict[term][param]['mu']
+                sigma = mean_and_std_dict[term][param]['sigma']
+                
+                g.apply_nodes(
+                    lambda node: {param:
+                        torch.exp(node.data[param] * sigma + mu)},
                     ntype=term)
         return g
 
