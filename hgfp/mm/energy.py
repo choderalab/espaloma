@@ -32,3 +32,6 @@ def lj(
 
 
     return epsilon_pair * (torch.pow(sigma_over_r, 12) - torch.pow(sigma_over_r, 6))
+
+
+

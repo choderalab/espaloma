@@ -103,34 +103,34 @@ def from_heterograph_with_xyz(g):
     g.multi_update_all(
         {
             'atom_as_0_in_bond':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz0')),
+                dgl.function.copy_src(src='xyz', out='m_xyz0'),
+                reduce_stack(msg='m_xyz0', out='xyz0')),
             'atom_as_1_in_bond':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz1')),
+                dgl.function.copy_src(src='xyz', out='m_xyz1'),
+                reduce_stack(msg='m_xyz1', out='xyz1')),
 
             'atom_as_0_in_angle':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz0')),
+                dgl.function.copy_src(src='xyz', out='m_xyz0'),
+                reduce_stack(msg='m_xyz0', out='xyz0')),
             'atom_as_1_in_angle':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz1')),
+                dgl.function.copy_src(src='xyz', out='m_xyz1'),
+                reduce_stack(msg='m_xyz1', out='xyz1')),
             'atom_as_2_in_angle':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz2')),
+                dgl.function.copy_src(src='xyz', out='m_xyz2'),
+                reduce_stack(msg='m_xyz2', out='xyz2')),
 
             'atom_as_0_in_torsion':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz0')),
+                dgl.function.copy_src(src='xyz', out='m_xyz0'),
+                reduce_stack(msg='m_xyz0', out='xyz0')),
             'atom_as_1_in_torsion':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz1')),
+                dgl.function.copy_src(src='xyz', out='m_xyz1'),
+                reduce_stack(msg='m_xyz1', out='xyz1')),
             'atom_as_2_in_torsion':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz2')),
+                dgl.function.copy_src(src='xyz', out='m_xyz2'),
+                reduce_stack(msg='m_xyz2', out='xyz2')),
             'atom_as_3_in_torsion':(
-                dgl.function.copy_src(src='xyz', out='m'),
-                reduce_stack(msg='m', out='xyz3')),
+                dgl.function.copy_src(src='xyz', out='m_xyz3'),
+                reduce_stack(msg='m_xyz3', out='xyz3')),
 
             'atom_in_one_four':(
                 dgl.function.copy_src(src='xyz', out='m'),
@@ -153,4 +153,28 @@ def from_heterograph_with_xyz(g):
     except:
         pass
 
+    g.multi_update_all(
+        {
+            'bond_as_%s_in_angle' % idx: (
+                dgl.function.copy_src(src='x', out='m_x%s' % idx),
+                reduce_stack(msg='m_x%s' % idx, out='x_%s_bond' % idx)) for idx in range(2)},
+        'stack')
+
+    g.multi_update_all(
+        {
+            'bond_as_%s_in_torsion' % idx: (
+                dgl.function.copy_src(src='x', out='m_x%s' % idx),
+                reduce_stack(msg='m_x%s' % idx, out='x_%s_bond' % idx)) for idx in range(3)},
+        'stack')
+
+    g.multi_update_all(
+        {
+            'angle_as_%s_in_torsion' % idx: (
+                dgl.function.copy_src(src='x', out='m_x%s' % idx),
+                reduce_stack(msg='m_x%s' % idx, out='x_%s_angle' % idx)) for idx in range(2)},
+        'stack')
+
+
+
+    
     return g
