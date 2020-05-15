@@ -18,7 +18,7 @@ from openforcefield.typing.engines.smirnoff import ForceField
 FF = ForceField('test_forcefields/smirnoff99Frosst.offxml')
 
 
-ATOM_WEIGHT = {'H':-0.500607632585, 'C':-37.8302333826, 'N':-54.5680045287, 'O':-54.5680045287}
+ATOM_WEIGHT = {'H':-0.500607632585, 'C':-37.8302333826, 'N':-54.5680045287, 'O':-75.0362229210}
 
 def get_ani_mol(coordinates, species, smiles):
     """ Given smiles string and list of elements as reference,
@@ -203,8 +203,6 @@ def topology_batched(num=-1, ani_path='.', mm=False, batch_size=64, *args, **kwa
                             except:
                                 continue
 
-                            g_h = hgfp.hierarchical_graph.from_oemol(mol)
-
                             g = hgfp.heterograph.from_graph(g)
 
                             u0 = np.sum([ATOM_WEIGHT[x] for x in species])
@@ -223,11 +221,11 @@ def topology_batched(num=-1, ani_path='.', mm=False, batch_size=64, *args, **kwa
                             
                             idxs = idxs[energies[idxs] < u_min + 0.1]
                             
-                            us = torch.tensor(energies[idxs])
+                            us = torch.tensor(energies[idxs]) - u0
                             xs = torch.tensor(coordinates[idxs])
 
                             idx += 1
-                            yield g, xs, us, g_h
+                            yield g, xs, us
                     
 
     return _iter()

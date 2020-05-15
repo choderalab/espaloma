@@ -125,7 +125,7 @@ class ParamReadout(torch.nn.Module):
         return g
 
 class Net(torch.nn.Module):
-    def __init__(self, config, readout_units=128, input_units=128):
+    def __init__(self, config, readout_units=512, input_units=512):
         super(Net, self).__init__()
 
         self.exes = []

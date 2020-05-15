@@ -19,6 +19,59 @@ def mean_and_std():
     us = np.array(us)
     return np.mean(us), np.std(us)
 
+
+def topology_batched(num=-1, hetero=False):
+    client = ptl.FractalClient()
+    from openforcefield.topology import Molecule
+    from openforcefield.topology import Topology
+    from openforcefield.typing.engines.smirnoff import ForceField
+    FF = ForceField('test_forcefields/smirnoff99Frosst.offxml')
+    import cmiles
+    from simtk import openmm
+    import random
+    import numpy as np
+
+    ds_qc = client.get_collection("OptimizationDataset", "OpenFF Full Optimization Benchmark 1")
+
+    # initialize graph list to be empty
+
+    records = list(ds_qc.data.records)
+    if num != -1:
+        records = random.sample(records, num)
+    else:
+        random.shuffle(records)
+
+    for record_name in records:
+        try:
+                r = ds_qc.get_record(record_name, specification='default')
+                
+                mol = snapshot.get_molecule()
+
+                mol = cmiles.utils.load_molecule(mol.dict(encoding='json'),
+                    toolkit='rdkit')
+
+
+                if r is not None:
+                    traj = r.get_trajectory()
+                    if traj is not None:
+                        for snapshot in traj:
+                            energy = snapshot.properties.scf_total_energy
+                            u = torch.squeeze(torch.Tensor([energy]))
+                            g = hgfp.graph.from_rdkit_mol(mol)
+
+                            if np.any(np.greater(g.ndata['type'].numpy(), 9)):
+                                continue
+
+                            if hetero is True:
+                                g = hgfp.heterograph.from_graph(g)
+
+        except:
+            continue
+
+
+
+
+
 def unbatched(num=-1, hetero=False):
     """ Put qm9 molecules in a dataset.
     """

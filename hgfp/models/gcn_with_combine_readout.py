@@ -36,32 +36,39 @@ class ParamReadout(torch.nn.Module):
     def __init__(self, in_dim, readout_units=512):
         super(ParamReadout, self).__init__()
 
-        for term in ['atom', 'bond', 'angle', 'torsion']:
+        for term in ['bond', 'angle', 'torsion', 'atom']:
             setattr(
                 self,
                 'fr_' + term,
                 torch.nn.Sequential(
+                    # torch.nn.BatchNorm1d(in_dim, track_running_stats=True),
                     torch.nn.Linear(in_dim, readout_units),
                     torch.nn.Tanh(),
                     torch.nn.Linear(readout_units, 2),
                     ))
 
         self.fr_angle_0 = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(3 * in_dim, track_running_stats=True),
             torch.nn.Linear(3 * in_dim, 3 * in_dim),
             torch.nn.Tanh(),
             torch.nn.Linear(3 * in_dim, in_dim),
             torch.nn.Tanh())
+
         self.fr_torsion_0 = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(4 * in_dim, track_running_stats=True),
             torch.nn.Linear(4 * in_dim, 4 * in_dim),
             torch.nn.Tanh(),
             torch.nn.Linear(4 * in_dim, in_dim),
             torch.nn.Tanh())
+        
         self.fr_bond_0 = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(2 * in_dim, track_running_stats=True),
             torch.nn.Linear(2 * in_dim, 2 * in_dim),
             torch.nn.Tanh(),
             torch.nn.Linear(2 * in_dim, in_dim),
             torch.nn.Tanh())
 
+        '''
         setattr(
             self,
             'fr_mol',
@@ -69,12 +76,13 @@ class ParamReadout(torch.nn.Module):
                 torch.nn.Linear(in_dim, readout_units),
                 torch.nn.Tanh(),
                 torch.nn.Linear(readout_units, 1)))
+        '''
 
     def apply_node(self, node, fn):
         h = node.data['h']
 
         # everything should be positive
-        # k_and_eq = torch.abs(fn(h))
+        # k_and_eq = torch.exp(fn(h))
         k_and_eq = fn(h)
         k = k_and_eq[:, 0]
         eq = k_and_eq[:, 1]
@@ -117,6 +125,7 @@ class ParamReadout(torch.nn.Module):
                 axis=-1
             )},
             ntype='bond')
+
 
         g.apply_nodes(
             lambda node: {'h':
@@ -218,10 +227,12 @@ class ParamReadout(torch.nn.Module):
             g.apply_nodes(
                 lambda node: self.apply_node(node, fn=getattr(self, 'fr_' + term)),
                 ntype=term)
-
+        
+        '''
         g.apply_nodes(
             lambda node: {'u0': self.fr_mol(node.data['h'])},
             ntype='mol')
+        '''
 
         # combine sigma and epsilon
 
@@ -294,7 +305,11 @@ class Net(torch.nn.Module):
                 self.exes.append('d' + str(idx))
 
             elif type(exe) == str:
-                activation = getattr(torch.nn.functional, exe)
+                if exe == 'b':
+                    activation = torch.nn.BatchNorm1d(dim)
+
+                else:
+                    activation = getattr(torch.nn.functional, exe)
 
                 setattr(
                     self,

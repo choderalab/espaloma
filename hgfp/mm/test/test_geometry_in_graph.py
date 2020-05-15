@@ -1,14 +1,13 @@
+import hgfp
 import torch
 import dgl
 import numpy
 import numpy.testing as npt
-import hgfp
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-mol = Chem.AddHs(Chem.MolFromSmiles('Cc1ccccc1'))
+mol = Chem.AddHs(Chem.MolFromSmiles('CCCC'))
 AllChem.EmbedMolecule(mol)
-
 g = hgfp.graph.from_rdkit_mol(mol)
 
 hg = hgfp.heterograph.from_graph(g)

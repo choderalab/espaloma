@@ -269,17 +269,56 @@ def from_graph(g):
         ],
         axis=1)
 
+    bond_idxs_dict = {tuple(idxs): idx for idx, idxs in enumerate(list(bond_idxs))}
+    
+    bond_idxs_dict.update(
+         {tuple(np.flip(idxs)): idx for idx, idxs in enumerate(list(bond_idxs))})
+    
+    angle_idxs_dict = {tuple(idxs): idx for idx, idxs in enumerate(list(angle_idxs))}
+    
+    angle_idxs_dict.update(
+        {tuple(np.flip(idxs)): idx for idx, idxs in enumerate(list(angle_idxs))})
+
+    for term_idx in range(2):
+
+        hg[('bond', 'bond_as_%s_in_angle' % term_idx, 'angle')] = np.stack(
+            [
+                np.array([bond_idxs_dict[tuple(idxs)] for idxs in angle_idxs[:, term_idx:(term_idx+2)]]),
+                np.arange(angle_idxs.shape[0])
+            ],
+            axis=1)
+
+
+    for term_idx in range(3):
+
+        hg[('bond', 'bond_as_%s_in_torsion' % term_idx, 'torsion')] = np.stack(
+            [
+                np.array([bond_idxs_dict[tuple(idxs)] for idxs in torsion_idxs[:, term_idx:(term_idx+2)]]),
+                np.arange(torsion_idxs.shape[0])
+            ],
+            axis=1)
+
+
+    for term_idx in range(2):
+
+        hg[('angle', 'angle_as_%s_in_torsion' % term_idx, 'torsion')] = np.stack(
+            [
+                np.array([angle_idxs_dict[tuple(idxs)] for idxs in torsion_idxs[:, term_idx:(term_idx+3)]]),
+                np.arange(torsion_idxs.shape[0])
+            ],
+            axis=1)
+
     hg = dgl.heterograph({k: list(v) for k, v in hg.items()})
 
     # put all atom data into heterograph
     hg.nodes['atom'].data['type'] = g.ndata['type']
     hg.nodes['atom'].data['h0'] = g.ndata['h0']
 
+
     # put indices in bonds, angles, and torsions
     hg.nodes['bond'].data['idxs'] = torch.Tensor(bond_idxs)
     hg.nodes['angle'].data['idxs'] = torch.Tensor(angle_idxs)
     hg.nodes['torsion'].data['idxs'] = torch.Tensor(torsion_idxs)
-
 
     try:
         hg.nodes['atom'].data['xyz'] = g.ndata['xyz']

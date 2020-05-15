@@ -10,7 +10,8 @@ HYBRIDIZATION_RDKIT = {
     Chem.rdchem.HybridizationType.SP3: torch.tensor([0, 0, 1, 0, 0], dtype=torch.float32),
     Chem.rdchem.HybridizationType.SP3D: torch.tensor([0, 0, 0, 1, 0], dtype=torch.float32),
     Chem.rdchem.HybridizationType.SP3D2: torch.tensor([0, 0, 0, 0, 1], dtype=torch.float32),
-    Chem.rdchem.HybridizationType.S: torch.tensor([0, 0, 0, 0, 0], dtype=torch.float32)
+    Chem.rdchem.HybridizationType.S: torch.tensor([0, 0, 0, 0, 0], dtype=torch.float32),
+    Chem.rdchem.HybridizationType.UNSPECIFIED: torch.tensor([0, 0, 0, 0, 0], dtype=torch.float32)
 }
 
 HYBRIDIZATION_OE = {
