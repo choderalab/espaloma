@@ -36,58 +36,50 @@ class ParamReadout(torch.nn.Module):
     def __init__(self, in_dim, readout_units=512):
         super(ParamReadout, self).__init__()
 
-        for term in ['bond', 'angle', 'torsion', 'atom']:
-            setattr(
-                self,
-                'fr_' + term,
-                torch.nn.Sequential(
-                    torch.nn.BatchNorm1d(in_dim, track_running_stats=True),
-                    torch.nn.Linear(in_dim, readout_units),
-                    torch.nn.Tanh(),
-                    torch.nn.Linear(readout_units, 2),
-                    ))
-
         self.fr_angle_0 = torch.nn.Sequential(
-            # torch.nn.BatchNorm1d(3 * in_dim, track_running_stats=True),
             torch.nn.Linear(3 * in_dim, 3 * in_dim),
             torch.nn.Tanh(),
             torch.nn.Linear(3 * in_dim, in_dim),
             torch.nn.Tanh())
-
+        
         self.fr_torsion_0 = torch.nn.Sequential(
-            # torch.nn.BatchNorm1d(4 * in_dim, track_running_stats=True),
             torch.nn.Linear(4 * in_dim, 4 * in_dim),
             torch.nn.Tanh(),
             torch.nn.Linear(4 * in_dim, in_dim),
             torch.nn.Tanh())
         
         self.fr_bond_0 = torch.nn.Sequential(
-            # torch.nn.BatchNorm1d(2 * in_dim, track_running_stats=True),
             torch.nn.Linear(2 * in_dim, 2 * in_dim),
             torch.nn.Tanh(),
             torch.nn.Linear(2 * in_dim, in_dim),
             torch.nn.Tanh())
 
-        '''
-        setattr(
-            self,
-            'fr_mol',
-            torch.nn.Sequential(
+ 
+        self.fr_atom = torch.nn.Sequential(
+            torch.nn.Linear(in_dim, readout_units),
+            torch.nn.Tanh(),
+            torch.nn.Linear(readout_units, 3)) # sigma, epsilon, q
+
+        self.fr_bond = torch.nn.Sequential(
+            torch.nn.Linear(in_dim, readout_units),
+            torch.nn.Tanh(),
+            torch.nn.Linear(readout_units, 4)) # k, eq
+
+        self.fr_angle = torch.nn.Sequential(
+            torch.nn.Linear(in_dim, readout_units),
+            torch.nn.Tanh(),
+            torch.nn.Linear(readout_units, 6)) # k, eq, k_bond_bond, k_angle_bond
+        
+        # k, k_angle_angle, k_torsion_angle, k_torsion_bond, k_torsion_angle_angle
+        self.fr_torsion = torch.nn.Sequential(
+            torch.nn.Linear(in_dim, readout_units),
+            torch.nn.Tanh(),
+            torch.nn.Linear(readout_units, 14)) 
+        
+        self.fr_mol = torch.nn.Sequential(
                 torch.nn.Linear(in_dim, readout_units),
                 torch.nn.Tanh(),
-                torch.nn.Linear(readout_units, 1)))
-        '''
-
-    def apply_node(self, node, fn):
-        h = node.data['h']
-
-        # everything should be positive
-        # k_and_eq = torch.exp(fn(h))
-        k_and_eq = fn(h)
-        k = k_and_eq[:, 0]
-        eq = k_and_eq[:, 1]
-
-        return {'k': k, 'eq': eq}
+                torch.nn.Linear(readout_units, 1))
 
     def forward(self, g):
 
@@ -125,7 +117,6 @@ class ParamReadout(torch.nn.Module):
                 axis=-1
             )},
             ntype='bond')
-
 
         g.apply_nodes(
             lambda node: {'h':
@@ -223,27 +214,51 @@ class ParamReadout(torch.nn.Module):
                 self.fr_torsion_0(node.data['h0123']) + self.fr_torsion_0(node.data['h3210'])},
             ntype='torsion')
 
-        for term in ['atom', 'bond', 'angle', 'torsion']:
-            g.apply_nodes(
-                lambda node: self.apply_node(node, fn=getattr(self, 'fr_' + term)),
-                ntype=term)
-        
-        '''
         g.apply_nodes(
             lambda node: {'u0': self.fr_mol(node.data['h'])},
             ntype='mol')
-        '''
+
+
+        for term in ['bond', 'angle', 'torsion']:
+            g.nodes[term].data['h'] = getattr(self, 'fr_' + term)(
+                g.nodes[term].data['h'])
+
+        # atom
+        g.nodes['atom'].data['sigma'] = g.nodes['atom'].data['h'][:, 0]
+        g.nodes['atom'].data['epsilon'] = g.nodes['atom'].data['h'][:, 1]
+        g.nodes['atom'].data['q'] = g.nodes['atom'].data['h'][:, 2]
+
+        # bond
+        # 4 dimensions total
+        g.nodes['bond'].data['k'] = g.nodes['bond'].data['h'][:, :3]
+        g.nodes['bond'].data['eq'] = g.nodes['bond'].data['h'][:, 3]
+        
+        # angle
+        # 6 dimensions total
+        g.nodes['angle'].data['k'] = g.nodes['angle'].data['h'][:, :3]
+        g.nodes['angle'].data['eq'] = g.nodes['angle'].data['h'][:, 3]
+        g.nodes['angle'].data['k_bond_bond'] = g.nodes['angle'].data['h'][:, 4]
+        g.nodes['angle'].data['k_angle_bond'] = g.nodes['angle'].data['h'][:, 5]
+
+        # torsion
+        g.nodes['torsion'].data['k'] = g.nodes['torsion'].data['h'][:, :3]
+        g.nodes['torsion'].data['eq'] = g.nodes['torsion'].data['h'][:, 3]
+        g.nodes['torsion'].data['k_angle_angle'] = g.nodes['torsion'].data['h'][:, 4]
+        g.nodes['torsion'].data['k_torsion_bond_center'] = g.nodes['torsion'].data['h'][:, 4:7]
+        g.nodes['torsion'].data['k_torsion_bond_side'] = g.nodes['torsion'].data['h'][:, 7:10]
+        g.nodes['torsion'].data['k_torsion_angle'] = g.nodes['torsion'].data['h'][:, 10:13]
+        g.nodes['torsion'].data['k_torsion_angle_angle'] = g.nodes['torsion'].data['h'][:, 13]
 
         # combine sigma and epsilon
 
         g.multi_update_all(
             {
                 'atom_in_one_four':(
-                    dgl.function.copy_src(src='k', out='epsilon'),
-                    dgl.function.prod(msg='epsilon', out='epsilon_pair')),
+                    dgl.function.copy_src(src='epsilon', out='m_epsilon'),
+                    dgl.function.prod(msg='m_epsilon', out='epsilon_pair')),
                 'atom_in_nonbonded':(
-                    dgl.function.copy_src(src='k', out='epsilon'),
-                    dgl.function.prod(msg='epsilon', out='epsilon_pair'))
+                    dgl.function.copy_src(src='epsilon', out='m_epsilon'),
+                    dgl.function.prod(msg='m_epsilon', out='epsilon_pair')),
             },
             'stack')
 
@@ -251,13 +266,25 @@ class ParamReadout(torch.nn.Module):
         g.multi_update_all(
             {
                 'atom_in_one_four':(
-                    dgl.function.copy_src(src='eq', out='sigma'),
-                    dgl.function.prod(msg='sigma', out='sigma_pair')),
+                    dgl.function.copy_src(src='sigma', out='m_sigma'),
+                    dgl.function.prod(msg='m_sigma', out='sigma_pair')),
                 'atom_in_nonbonded':(
-                    dgl.function.copy_src(src='eq', out='sigma'),
-                    dgl.function.prod(msg='sigma', out='sigma_pair'))
+                    dgl.function.copy_src(src='sigma', out='m_sigma'),
+                    dgl.function.prod(msg='m_sigma', out='sigma_pair'))
             },
             'stack')
+
+        g.multi_update_all(
+            {
+                'atom_in_one_four':(
+                    dgl.function.copy_src(src='q', out='m_q'),
+                    dgl.function.prod(msg='m_q', out='q_pair')),
+                'atom_in_nonbonded':(
+                    dgl.function.copy_src(src='q', out='m_q'),
+                    dgl.function.prod(msg='m_q', out='q_pair'))
+            },
+            'stack')
+
 
 
         for term in ['one_four', 'nonbonded']:
@@ -305,11 +332,7 @@ class Net(torch.nn.Module):
                 self.exes.append('d' + str(idx))
 
             elif type(exe) == str:
-                if exe == 'b':
-                    activation = torch.nn.BatchNorm1d(dim)
-
-                else:
-                    activation = getattr(torch.nn.functional, exe)
+                activation = getattr(torch.nn.functional, exe)
 
                 setattr(
                     self,
@@ -332,7 +355,7 @@ class Net(torch.nn.Module):
                 in_dim=dim)
 
     def forward(self, g, return_graph=False):
-
+        
         g.apply_nodes(
             lambda nodes: {'h': self.f_in(nodes.data['h0'])},
             ntype='atom')
@@ -354,7 +377,7 @@ class Net(torch.nn.Module):
                 torch.cat(
                 [
                     g.nodes['mol'].data['u' + term][:, None] for term in [
-                        'bond', # 'angle', 'torsion', 'one_four', 'nonbonded', '0'
+                        'bond', 'angle', 'torsion', 'one_four', 'nonbonded', '0'
                 ]],
                 dim=1),
             dim=1)
