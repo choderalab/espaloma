@@ -2,16 +2,42 @@ espaloma
 ==============================
 [//]: # (Badges)
 [![Travis Build Status](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/espaloma.svg?branch=master)](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/espaloma)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/espaloma/branch/master/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/espaloma/branch/master)
 
 Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm
 
-### Copyright
+# Manifest
 
-Copyright (c) 2020, Yuanqing Wang @ choderalab // MSKCC
+* `espaloma/` core code for graph-parametrized potential energy functions.
+    * `graphs/` data objects that contain various level of information we need.
+        * `graph.py` base modules for graphs.
+        * `molecule_graph.py` provide APIs to various molecular modelling toolkits.
+        * `homogeneous_graph.py` simplest graph representation of a molecule.
+        * `heterogeneous_graph.py` graph representation of a molecule that contains information regarding membership of lower-level nodes to higher-level nodes.
+        * `parametrized_graph.py` graph representation of a molecule with all parameters needed for energy evaluation.
+    * `nn/` neural network models that facilitates translation between graphs.
+        * `dgl_legacy.py` API to dgl models for atom-level message passing.
+    * `mm/` molecular mechanics functionalities for energy evaluation.
+        * `i/` energy terms used in Class-I force field.
+            * `bond.py` bond energy
+            * `angle.py` angle energy
+            * `torsion.py` torsion energy
+            * `nonbonded.py` nonbonded energy
+        * `ii/` energy terms used in Class-II force field.
+            * `coupling.py` coupling terms
+            * `polynomial.py` higher order polynomials.
+            
+        
+            
 
+# License
 
-#### Acknowledgements
- 
-Project based on the 
-[Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.2.
+This software is licensed under [MIT license](https://opensource.org/licenses/MIT).
+
+# Copyright
+
+Copyright (c) 2020, Chodera Lab at Memorial Sloan Kettering Cancer Center and Authors:
+Authors:
+- Yuanqing Wang
+- Josh Fass
+- John D. Chodera
+
