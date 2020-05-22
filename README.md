@@ -3,7 +3,16 @@ espaloma
 [//]: # (Badges)
 [![Travis Build Status](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/espaloma.svg?branch=master)](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/espaloma)
 
-Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm
+** Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithms **
+
+Rather than:
+
+molecule ---(atom typing schemes)---> atom-types ---(atom typing schemes)---> bond-, angle-, torsion-types ---(table lookup)---> force field parameters
+
+we want to have
+
+molecule ---(graph nets)---> atom-embedding ---(pooling)---> hypernode-embedding ---(feedforward neural networks)---> force field parameters
+
 
 # Manifest
 
