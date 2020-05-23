@@ -13,7 +13,7 @@ class Graph(abc.ABC):
     """
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def _stage(self):
         pass
 

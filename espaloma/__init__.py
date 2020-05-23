@@ -4,7 +4,10 @@ Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-pas
 """
 
 # Add imports here
-from .espaloma import *
+import espaloma
+import espaloma.graphs
+
+from espaloma.graphs.graph import *
 
 # Handle versioneer
 from ._version import get_versions

@@ -17,4 +17,6 @@ class HomogeneousGraph(espaloma.graph, dgl.Graph):
     def __init__(self):
         super(HomogeneousGraph, self).__init__()
 
+    def _stage(self):
+        return 'homogeneous'
 
