@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches: 
+      - '*'
+  schedule:
+    # Nightly tests run on master by default:
+    #   Scheduled workflows run on the latest commit on the default or base branch.
+    #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
+    - cron: "0 0 * * *"
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }} + Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
+        os:
+          - ubuntu-latest
+          # disabling macOS test because they're always failing for some RAM issue
+          # - macOS-latest
+
+    env:
+      CI_OS: ${{ matrix.os }}
+      PYVER: ${{ matrix.python-version }}
+      OE_LICENSE: ${{ github.workspace }}/oe_license.txt
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Additional info about the build
+        shell: bash
+        run: |
+          uname -a
+          df -h
+          ulimit -a
+
+      - name: Fix conda permissions in MacOS
+        shell: bash
+        if: startsWith(matrix.os, 'macOS')
+        run: |
+          sudo chown -R $(id -u):$(id -g) ${CONDA}
+
+      - name: Configure conda
+        shell: bash
+        run: |
+          . devtools/gh-actions/initialize_conda.sh
+          conda activate
+          conda config --set always_yes yes
+          conda config --add channels conda-forge
+          conda install --quiet conda conda-build jinja2 anaconda-client
+          conda update --quiet --all
+          conda info --all
+          conda list
+
+      - name: Prepare test environment
+        shell: bash
+        run: |
+          . devtools/gh-actions/initialize_conda.sh
+          conda activate
+          python devtools/scripts/create_conda_env.py -n=test -p=$PYVER devtools/conda-envs/espaloma.yaml
+          conda activate test
+          python -m pip install --no-deps .
+
+      - name: Test the package
+        shell: bash
+        run: |
+          . devtools/gh-actions/initialize_conda.sh
+          conda activate test
+          pytest -v
