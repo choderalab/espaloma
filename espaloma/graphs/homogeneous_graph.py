@@ -1,14 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma
+import espaloma as esp
 import abc
 import dgl
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class HomogeneousGraph(espaloma.Graph, dgl.DGLGraph):
+class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
     r""" Homogeneous graph that contains no more than connectivity and
     atom attributes.
 
@@ -33,10 +33,8 @@ class HomogeneousGraph(espaloma.Graph, dgl.DGLGraph):
         return 'homogeneous'
 
     def from_rdkit(self, mol):
-        from utils.read_homogeneous_graph import from_rdkit_mol
-        from_rdkit_mol(self, mol)
+        esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(self, mol)
 
     def from_openeye(self, mol):
-        from utils.read_homogeneous_graph import from_oemol
-        from_openeye_mol(self, mol)
+        esp.graphs.utils.read_homogeneous_graph.from_openeye_mol(self, mol)
 
