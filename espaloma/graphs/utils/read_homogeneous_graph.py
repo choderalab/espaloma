@@ -139,7 +139,7 @@ def from_oemol(g, mol, use_fp=True):
     g.add_edges(bonds_begin_idxs, bonds_end_idxs)
     g.add_edges(bonds_end_idxs, bonds_begin_idxs)
 
-    g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
+    # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
 
     return g
 
@@ -178,6 +178,6 @@ def from_rdkit_mol(g, mol, use_fp=True):
     g.add_edges(bonds_begin_idxs, bonds_end_idxs)
     g.add_edges(bonds_end_idxs, bonds_begin_idxs)
 
-    g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
+    # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
 
     return g
