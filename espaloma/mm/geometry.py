@@ -10,7 +10,7 @@ import torch
 
 def distance(x0, x1):
     return torch.norm(
-            r0 - r1,
+            x0 - x1,
             p=2,
             dim=-1)
 
@@ -37,8 +37,8 @@ def _dihedral(r0, r1):
     return _angle(r0, r1)
 
 def dihedral(x0, x1, x2, x3):
-    left = torch.cross(x1 - x0)
-    right = torch.cross(x2 - x3)
+    left = torch.cross(x1 - x0, x1 - x2)
+    right = torch.cross(x2 - x1, x2 - x3)
     return _dihedral(left, right)
 
 
