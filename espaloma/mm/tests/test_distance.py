@@ -13,14 +13,14 @@ def test_distance():
     x1 = distribution.sample()
 
     npt.assert_almost_equal(
-            esp.mm.geometry.distance(
+            esp.distance(
                 x0,
                 x1).numpy(),
             torch.sqrt(
                 (x0 - x1).pow(2).sum(dim=-1)).numpy())
 
     npt.assert_almost_equal(
-            esp.mm.geometry.distance(
+            esp.distance(
                 x0,
                 x0).numpy(),
             0.0)
