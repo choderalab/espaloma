@@ -4,6 +4,8 @@
 import espaloma as esp
 import abc
 import dgl
+import rdkit
+import openforcefield
 
 # =============================================================================
 # MODULE CLASSES
@@ -21,14 +23,18 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
         super(HomogeneousGraph, self).__init__()
         
         if mol is not None:
-            if 'rdkit' in str(type(mol)):
+            if isinstance(mol, rdkit.Chem.rdchem.Mol):
                 self.from_rdkit(mol)
 
-            elif 'oe' in str(type(mol)):
+            elif isinstance(mol, openforcefield.topology.molecule.Molecule):
+                self.from_rdkit(mol.to_rdkit())
+
+            elif 'oe' in str(type(mol)): # we don't want to depend on OE
                 self.from_openeye(mol)
 
-            elif 'openforcefield' in str(type(mol)):
-                self.from_rdkit(mol.to_rdkit())
+            else: 
+                raise RuntimeError("Input molecule could only be"
+                        " one of RDKit, OpenEye, or OpenForceField.")
 
 
     @property
