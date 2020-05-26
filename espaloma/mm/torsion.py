@@ -26,5 +26,3 @@ def periodic_torsion(x, k, eq):
 
     """
     return esp.mm.functional.periodic(x, k, eq)
-
-

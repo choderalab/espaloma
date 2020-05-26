@@ -23,15 +23,13 @@ class HeterogeneousGraph(esp.Graph):
 
 
     """
+
     def __init__(self, homogeneous_graph):
-    
-        self._graph = esp.graphs.utils.read_heterogeneous_graph\
-                .heterogeneous_graph_from_homogeneous(
-                        homogeneous_graph)
-        
+
+        self._graph = esp.graphs.utils.read_heterogeneous_graph.heterogeneous_graph_from_homogeneous(
+            homogeneous_graph
+        )
+
     @property
     def _stage(self):
-        return 'heterogeneous'
-
-
-
+        return "heterogeneous"
