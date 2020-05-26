@@ -15,3 +15,16 @@ def test_idxs_idxs():
 
     # TODO:
     # more tests
+
+def test_read_heterogeneous_graph():
+    import espaloma as esp
+    
+    from rdkit import Chem
+    m = Chem.MolFromSmiles('c1ccccc1')
+
+    g = esp.HomogeneousGraph(m)
+
+    hg = esp.graphs.utils.read_heterogeneous_graph.heterogeneous_graph_from_homogeneous(g)
+
+
+

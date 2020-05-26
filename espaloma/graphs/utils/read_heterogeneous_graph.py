@@ -6,6 +6,7 @@
 # =============================================================================
 import dgl
 import torch
+import numpy as np
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -31,12 +32,12 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
     idxs = {}
 
     # get the indices of n2
-    idxs['idxs_n2'] = a._indices().t().detach() # just in case
+    idxs['n2'] = a._indices().t().detach() # just in case
 
     # loop through the levels
     for level in range(3, max_size+1):
         # get the indices that is the basis of the level
-        base_idxs = idxs['idxs_n%s' % (level-1)]
+        base_idxs = idxs['n%s' % (level-1)]
         
         # enumerate all the possible pairs at base level
         base_pairs = torch.cat(
@@ -65,28 +66,9 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
                 ],
                 dim=-1)
 
-        idxs['idxs_n%s' % level] = idxs_level
+        idxs['n%s' % level] = idxs_level
 
     return idxs
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def heterogeneous_graph_from_homogeneous(g):
@@ -115,6 +97,15 @@ def heterogeneous_graph_from_homogeneous(g):
     # initialize empty dictionary
     hg = {}
 
+    # get all the indices
+    idxs = relationship_indices_from_adjacency_matrix(g.adjacency_matrix())
+
+    # make them all numpy
+    idxs = {key: value.numpy() for key, value in idxs.items()}
+
+    # also include n1
+    idxs['n1'] = np.arange(g.number_of_nodes())[:, None]
+
     # NOTE:
     # here we only define the neighboring relationship
     # on atom level
@@ -123,8 +114,15 @@ def heterogeneous_graph_from_homogeneous(g):
             'n%s' % idx,
             'n%s_neighbors_n%s' % (idx, idx),
             'n%s' % idx
-            )] = []
+            )] = idxs['n2']
 
+    # build a mapping between indices and the ordering
+    idxs_to_ordering = {}
+
+    for term in ['n1', 'n2', 'n3', 'n4']:
+        idxs_to_ordering[term] = {
+                tuple(subgraph_idxs): ordering
+                for (ordering, subgraph_idxs) in enumerate(list(idxs[term]))}
     
     # NOTE:
     # here we define all the possible
@@ -134,19 +132,38 @@ def heterogeneous_graph_from_homogeneous(g):
     for small_idx in range(1, 5):
         for big_idx in range(small_idx+1, 5):
             for pos_idx in range(big_idx - small_idx):
-                hg[(
-                    'n%s' % small_idx,
-                    'n%s_as_%s_in_n%s' % (small_idx, pos_idx, big_idx),
-                    'n%s' % big_idx
-                    )] = []
+                hg[
+                    (
+                        'n%s' % small_idx,
+                        'n%s_as_%s_in_n%s' % (small_idx, pos_idx, big_idx),
+                        'n%s' % big_idx
+                    ) 
+                ] = np.stack(
+                        [
+                            np.array([idxs_to_ordering['n%s' % small_idx][tuple(x)]
+                                for x in idxs['n%s' % big_idx][:, pos_idx:pos_idx+small_idx]]),
+                            np.arange(idxs['n%s' % big_idx].shape[0])
+                        ],
+                        axis=1)
 
-                hg[(
-                    'n%s' % big_idx,
-                    'n%s_has_%s_n%s' % (big_idx, pos_idx, small_idx),
-                    'n%s' % small_idx
-                   )] = []
+                hg[
+                    (
+                        'n%s' % big_idx,
+                        'n%s_has_%s_n%s' % (big_idx, pos_idx, small_idx),
+                        'n%s' % small_idx
+                    )
+                ] = np.stack(
+                        [
+                            np.arange(idxs['n%s' % big_idx].shape[0]),
+                            np.array([idxs_to_ordering['n%s' % small_idx][tuple(x)]
+                                for x in idxs['n%s' % big_idx][:, pos_idx:pos_idx+small_idx]])
+                        ],
+                        axis=1)
 
+    hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 
+    hg.nodes['n1'].data['h0'] = g.ndata['h0']
 
+    return hg
 
 
