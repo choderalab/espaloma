@@ -13,13 +13,10 @@ def test_from_rdkit():
     
     from rdkit import Chem
     m = Chem.MolFromSmiles('c1ccccc1')
-    print(m)
 
     g = esp.HomogeneousGraph(m)
 
     adjacency_matrix = g.adjacency_matrix()
-   
-    print(adjacency_matrix)
 
     npt.assert_almost_equal(
             adjacency_matrix.coalesce().values().detach().numpy(),
