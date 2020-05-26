@@ -17,7 +17,8 @@ def test_distance():
                 x0,
                 x1).numpy(),
             torch.sqrt(
-                (x0 - x1).pow(2).sum(dim=-1)).numpy())
+                (x0 - x1).pow(2).sum(dim=-1)).numpy(),
+            decimal=3)
 
     npt.assert_almost_equal(
             esp.distance(
