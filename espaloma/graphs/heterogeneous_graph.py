@@ -8,7 +8,7 @@ import dgl
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class HeterogeneousGraph(esp.Graph, dgl.DGLGraph):
+class HeterogeneousGraph(esp.Graph, dgl.DGLHeteroGraph):
     r""" Homogeneous graph that contains no more than connectivity and
     atom attributes.
 
@@ -17,11 +17,19 @@ class HeterogeneousGraph(esp.Graph, dgl.DGLGraph):
     mol : a `rdkit.Chem.Molecule` or `openeye.GraphMol` object
 
     """
-    def __init__(self, mol=None):
-        super(HeteroGraph, self).__init__()
+    def __init__(self, homogeneous_graph=None):
+        # super(HeterogeneousGraph, self).__init__()
+        
+        if homogeneous_graph is not None:
+            self = esp.graphs.utils.read_heterogeneous_graph\
+                    .heterogeneous_graph_from_homogeneous(
+                            homogeneous_graph)
+
+
         
     @property
     def _stage(self):
         return 'heterogeneous'
+
 
 
