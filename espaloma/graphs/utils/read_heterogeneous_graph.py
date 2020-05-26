@@ -71,7 +71,7 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
     return idxs
 
 
-def heterogeneous_graph_from_homogeneous(g):
+def from_homogeneous(g):
     r""" Build heterogeneous graph from homogeneous ones.
 
     
