@@ -26,5 +26,6 @@ def test_read_heterogeneous_graph():
 
     hg = esp.graphs.utils.read_heterogeneous_graph.heterogeneous_graph_from_homogeneous(g)
 
-
+    # TODO:
+    # more tests
 
