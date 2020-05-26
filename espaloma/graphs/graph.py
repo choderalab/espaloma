@@ -16,4 +16,3 @@ class Graph(abc.ABC):
     @abc.abstractmethod
     def _stage(self):
         pass
-

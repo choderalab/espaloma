@@ -7,7 +7,7 @@ import espaloma as esp
 # =============================================================================
 # CONSTANTS
 # =============================================================================
-K_E = 332.0636 # kcal angstrom / (mol e ** 2)
+K_E = 332.0636  # kcal angstrom / (mol e ** 2)
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -29,7 +29,8 @@ def lj_12_6(x, k, eq):
 
     return esp.mm.functional.lj(x, k)
 
-def columb(x, q_prod, k_e = K_E):
+
+def columb(x, q_prod, k_e=K_E):
     """ Columb interaction without cutoff.
 
     Parameters
@@ -43,4 +44,4 @@ def columb(x, q_prod, k_e = K_E):
 
     
     """
-    return k_e * x / q_prod 
+    return k_e * x / q_prod
