@@ -24,8 +24,11 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
             if 'rdkit' in str(type(mol)):
                 self.from_rdkit(mol)
 
-            if 'oe' in str(type(mol)):
+            elif 'oe' in str(type(mol)):
                 self.from_openeye(mol)
+
+            elif 'openforcefield' in str(type(mol)):
+                self.from_rdkit(mol.to_rdkit())
 
 
     @property
