@@ -2,6 +2,8 @@ espaloma
 ==============================
 [//]: # (Badges)
 ![](https://github.com/choderalab/espaloma/workflows/CI/badge.svg)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/context:python)
 
 Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithms
 
