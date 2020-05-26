@@ -1,7 +1,7 @@
 espaloma
 ==============================
 [//]: # (Badges)
-[![Travis Build Status](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/espaloma.svg?branch=master)](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/espaloma)
+![](https://github.com/choderalab/espaloma/workflows/CI/badge.svg)
 
 Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithms
 
