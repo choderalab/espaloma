@@ -134,3 +134,9 @@ dmypy.json
 
 # Parm@Frosst download
 parm_at_Frosst.tgz
+
+# PyCharm
+.idea
+
+
+.DS_Store
