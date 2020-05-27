@@ -18,7 +18,7 @@ def test_angle_random_vectors():
 
     cos_hat = torch.cos(esp.mm.geometry._angle(left, right))
 
-    npt.assert_almost_equal(cos_ref.numpy(), cos_hat.numpy())
+    npt.assert_almost_equal(cos_ref.numpy(), cos_hat.numpy(), decimal=3)
 
 
 def test_angle_random_points():
@@ -41,7 +41,7 @@ def test_angle_random_points():
 
     cos_hat = torch.cos(esp.angle(x0, x1, x2))
 
-    npt.assert_almost_equal(cos_ref.numpy(), cos_hat.numpy())
+    npt.assert_almost_equal(cos_ref.numpy(), cos_hat.numpy(), decimal=3)
 
 
 def test_zero():
