@@ -140,3 +140,7 @@ parm_at_Frosst.tgz
 
 
 .DS_Store
+
+# AlkEthOH dataset
+hgfp/data/alkethoh/AlkEthOH_rings.npz
+hgfp/data/alkethoh/AlkEthOH_rings.smi
