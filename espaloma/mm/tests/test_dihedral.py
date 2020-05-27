@@ -17,6 +17,7 @@ def test_dihedral_vectors():
     npt.assert_almost_equal(
         esp.mm.geometry._angle(left, right).numpy(),
         esp.mm.geometry._dihedral(left, right).numpy(),
+        decimal=3
     )
 
 
@@ -39,4 +40,5 @@ def test_dihedral_points():
     npt.assert_almost_equal(
         esp.mm.geometry._angle(left, right).numpy(),
         esp.dihedral(x0, x1, x2, x3).numpy(),
+        decimal=3
     )
