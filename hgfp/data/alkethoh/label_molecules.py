@@ -2,6 +2,7 @@
 
 import os
 import urllib
+from pickle import dump
 
 import numpy as np
 from openforcefield.topology import Molecule
@@ -63,6 +64,9 @@ if __name__ == '__main__':
     with open(alkethoh_local_path, 'r') as f:
         ring_names = [l.split()[1] for l in f.readlines()]
     mols = [Molecule.from_smiles(s, allow_undefined_stereo=True) for s in ring_smiles]
+
+    with open('AlkEthOH_rings_offmols.pkl', 'wb') as f:
+        dump(mols, f)
 
     # Label molecules using forcefield
     # Takes about ~200ms per molecule -- can do ~1000 molecules in ~5-6 minutes, sequentially
