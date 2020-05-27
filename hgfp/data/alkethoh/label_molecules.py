@@ -51,7 +51,7 @@ from functools import partial
 get_labeled_atoms = partial(get_inds_and_labels, type_name='vdW')
 get_labeled_bonds = partial(get_inds_and_labels, type_name='Bonds')
 get_labeled_angles = partial(get_inds_and_labels, type_name='Angles')
-get_labeled_torsions = partial(get_inds_and_labels, type_name='Torsions')
+get_labeled_torsions = partial(get_inds_and_labels, type_name='ProperTorsions')
 
 if __name__ == '__main__':
     # download, if it isn't already present
