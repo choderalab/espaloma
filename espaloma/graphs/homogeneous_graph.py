@@ -6,6 +6,7 @@ import abc
 import dgl
 import rdkit
 import openforcefield
+import torch
 
 # =============================================================================
 # MODULE CLASSES
