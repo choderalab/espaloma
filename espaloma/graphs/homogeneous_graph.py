@@ -23,6 +23,7 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
 
     def __init__(self, mol=None):
         super(HomogeneousGraph, self).__init__()
+        self.set_stage(type='homogeneous')
 
         if mol is not None:
             if isinstance(mol, rdkit.Chem.rdchem.Mol):

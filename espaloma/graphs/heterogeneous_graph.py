@@ -76,6 +76,8 @@ class HeterogeneousGraph(esp.Graph):
             mol=None,
         ):
 
+        super(HeterogeneousGraph, self).__init__()
+
         if homogeneous_graph is not None:
             self._g = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
                 homogeneous_graph
