@@ -60,13 +60,13 @@ if __name__ == '__main__':
 
     # load molecules
     with open(alkethoh_local_path, 'r') as f:
-        ring_smiles = [l.split()[0] for l in f.readlines()]
+        smiles = [l.split()[0] for l in f.readlines()]
     with open(alkethoh_local_path, 'r') as f:
-        ring_names = [l.split()[1] for l in f.readlines()]
+        names = [l.split()[1] for l in f.readlines()]
 
     mols = dict()
-    for i in range(len(ring_names)):
-        mols[ring_names[i]] = Molecule.from_smiles(ring_smiles[i], allow_undefined_stereo=True)
+    for i in range(len(names)):
+        mols[names[i]] = Molecule.from_smiles(smiles[i], allow_undefined_stereo=True)
 
     with open('AlkEthOH_rings_offmols.pkl', 'wb') as f:
         dump(mols, f)
@@ -74,15 +74,24 @@ if __name__ == '__main__':
     # Label molecules using forcefield
     # Takes about ~200ms per molecule -- can do ~1000 molecules in ~5-6 minutes, sequentially
     labeled_mols = dict()
-    for name in tqdm(ring_names):
+    for name in tqdm(names):
         labeled_mols[name] = label_mol(mols[name])
 
     label_dict = dict()
-    for (name, labeled_mol) in zip(ring_names, labeled_mols):
-        label_dict[name + '_atom_inds'], label_dict[name + '_atom_labels'] = get_labeled_atoms(labeled_mol)
-        label_dict[name + '_bond_inds'], label_dict[name + '_bond_labels'] = get_labeled_bonds(labeled_mol)
-        label_dict[name + '_angle_inds'], label_dict[name + '_angle_labels'] = get_labeled_angles(labeled_mol)
-        label_dict[name + '_torsion_inds'], label_dict[name + '_torsion_labels'] = get_labeled_torsions(labeled_mol)
+    n_atoms, n_bonds, n_angles, n_torsions = 0, 0, 0, 0
+
+    for name in names:
+        labeled_mol = labeled_mols[name]
+        label_dict[f'{name}_atom_inds'], label_dict[f'{name}_atom_labels'] = get_labeled_atoms(labeled_mol)
+        n_atoms += len(label_dict[f'{name}_atom_inds'])
+        label_dict[f'{name}_bond_inds'], label_dict[f'{name}_bond_labels'] = get_labeled_bonds(labeled_mol)
+        n_bonds += len(label_dict[f'{name}_bond_inds'])
+        label_dict[f'{name}_angle_inds'], label_dict[f'{name}_angle_labels'] = get_labeled_angles(labeled_mol)
+        n_angles += len(label_dict[f'{name}_angle_inds'])
+        label_dict[f'{name}_torsion_inds'], label_dict[f'{name}_torsion_labels'] = get_labeled_torsions(labeled_mol)
+        n_torsions += len(label_dict[f'{name}_torsion_inds'])
+    summary = f'# atoms: {n_atoms}, # bonds: {n_bonds}, # angles: {n_angles}, # torsions: {n_torsions}'
+    print(summary)
 
     # save to compressed array
     description = f"""
@@ -97,7 +106,9 @@ if __name__ == '__main__':
         
         such as 'AlkEthOH_r0_atom_inds' or 'AlkEthOH_r0_torsion_labels'
         
-    and values are integer arrays
+    and values are integer arrays.
+    
+    {summary}
     """
 
     np.savez_compressed('AlkEthOH_rings.npz',
