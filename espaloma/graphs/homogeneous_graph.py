@@ -78,12 +78,16 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
         assert self.stage['legacy_typed'] == True
         return self.ndata['legacy_type'] 
    
-    def gn_typing(self):
-        pass
+    def nn_typing(self):
+        assert self.stage['neuralized'] == True
+        return self.ndata['nn_type']
 
     def _loss_node_classification(
             self, 
             loss_fn=torch.nn.functional.cross_entropy):
 
-        raise NotImplementedError
-                
+        return loss_fn(
+                self.legacy_typing(),
+                self.nn_typing())
+
+

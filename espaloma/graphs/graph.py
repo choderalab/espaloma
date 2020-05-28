@@ -15,9 +15,10 @@ class Graph(abc.ABC):
     _stage = {
             'type': 'base',
             'batched': False,
-            'neuralized': False,
+            'nn_typed': False,
             'legacy_typed': False,
             'has_coordinate': False
+            'has_energy': False
         }
 
     @property
