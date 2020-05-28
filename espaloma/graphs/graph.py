@@ -17,7 +17,7 @@ class Graph(abc.ABC):
             'batched': False,
             'nn_typed': False,
             'legacy_typed': False,
-            'has_coordinate': False
+            'has_coordinate': False,
             'has_energy': False
         }
 
