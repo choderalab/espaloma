@@ -15,18 +15,19 @@ class AlkEthOHDataset(Dataset):
             self._mols = load(f)
 
         self._label_dict = np.load('AlkEthOH_rings.npz')
+        self._mol_names = sorted(list(self._mols.keys()))
 
-    def _get_inds(self, index: str, type_name: str) -> Tensor:
-        return tensor(self._label_dict[f'{index}_{type_name}_inds'])
+    def _get_inds(self, mol_name: str, type_name: str) -> Tensor:
+        return tensor(self._label_dict[f'{mol_name}_{type_name}_inds'])
 
-    def _get_labels(self, index: str, type_name:str) -> Tensor:
-        return tensor(self._label_dict[f'{index}_{type_name}_labels'])
+    def _get_labels(self, mol_name: str, type_name: str) -> Tensor:
+        return tensor(self._label_dict[f'{mol_name}_{type_name}_labels'])
 
-    def _get_mol_inds_labels(self, index: str, type_name: str) -> Tuple[Molecule, Tensor, Tensor]:
-        assert (index in self._mols)
-        mol = self._mols[index]
-        inds = self._get_inds(index, type_name)
-        labels = self._get_labels(index, type_name)
+    def _get_mol_inds_labels(self, index: int, type_name: str) -> Tuple[Molecule, Tensor, Tensor]:
+        mol_name = self._mol_names[index]
+        mol = self._mols[mol_name]
+        inds = self._get_inds(mol_name, type_name)
+        labels = self._get_labels(mol_name, type_name)
         return mol, inds, labels
 
 
@@ -55,15 +56,13 @@ class AlkEthOHTorsionTypesDataset(AlkEthOHDataset):
 
 
 if __name__ == '__main__':
-
     # TODO: move this from __main__ into doctests
 
-    index = 'AlkEthOH_r0'
     # atoms
-    print(AlkEthOHAtomTypesDataset()[index])
+    print(AlkEthOHAtomTypesDataset()[0])
     # bonds
-    print(AlkEthOHBondTypesDataset()[index])
+    print(AlkEthOHBondTypesDataset()[0])
     # angles
-    print(AlkEthOHAngleTypesDataset()[index])
+    print(AlkEthOHAngleTypesDataset()[0])
     # torsions
-    print(AlkEthOHTorsionTypesDataset()[index])
+    print(AlkEthOHTorsionTypesDataset()[0])
