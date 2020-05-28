@@ -26,8 +26,12 @@ def batch(graphs):
     # put batched graph back into HeterogeneousGraph object
     
     # TODO: allow more stuff to be done here
-    return HeterogeneousGraph(dgl_hetero_graph = _graphs)
+    hg = HeterogeneousGraph(dgl_hetero_graph = _graphs)
 
+    # mark stage
+    hg.set_stage(batched=True)
+
+    return hg
 
 def unbatch(graph):
     r""" Unbatch multiple heterogeneous graph.
@@ -82,7 +86,17 @@ class HeterogeneousGraph(esp.Graph):
             self._g = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
                 homogeneous_graph
             )
+
+        self._stage = {'batched': False}
         
     @property
-    def _stage(self):
-        return "heterogeneous"
+    def stage(self):
+        return self._stage
+
+    def set_stage(self, **kwargs):
+        for key, value in kwargs.items():
+            self._stage[key] = value
+
+
+
+

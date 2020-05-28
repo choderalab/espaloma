@@ -14,5 +14,5 @@ class Graph(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def _stage(self):
+    def stage(self):
         pass

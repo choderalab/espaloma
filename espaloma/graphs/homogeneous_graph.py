@@ -40,10 +40,12 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
                 )
 
     @property
-    def _stage(self):
-        return "homogeneous"
+    def stage(self):
+        return {'type': 'homogeneous'}
 
     def from_rdkit(self, mol):
+        # TODO: raise error if this is called after a class has been
+        # initialized
         esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(self, mol)
 
     def from_openeye(self, mol):

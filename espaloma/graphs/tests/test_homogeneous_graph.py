@@ -8,7 +8,7 @@ def test_init():
 
     g = esp.HomogeneousGraph()
 
-    assert g._stage == "homogeneous"
+    assert g.stage['type'] == "homogeneous"
 
 
 def test_from_rdkit():
