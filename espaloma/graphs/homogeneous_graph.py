@@ -30,6 +30,7 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
                 mol.to_homogeneous_graph(self)
             else:
                 mol = esp.MoleculeGraph(mol)
+
                 mol.to_homogeneous_graph(self)
 
     def loss(self, level, *args, **kwargs):
