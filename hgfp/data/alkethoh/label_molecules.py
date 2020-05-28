@@ -63,16 +63,19 @@ if __name__ == '__main__':
         ring_smiles = [l.split()[0] for l in f.readlines()]
     with open(alkethoh_local_path, 'r') as f:
         ring_names = [l.split()[1] for l in f.readlines()]
-    mols = [Molecule.from_smiles(s, allow_undefined_stereo=True) for s in ring_smiles]
+
+    mols = dict()
+    for i in range(len(ring_names)):
+        mols[ring_names[i]] = Molecule.from_smiles(ring_smiles[i], allow_undefined_stereo=True)
 
     with open('AlkEthOH_rings_offmols.pkl', 'wb') as f:
         dump(mols, f)
 
     # Label molecules using forcefield
     # Takes about ~200ms per molecule -- can do ~1000 molecules in ~5-6 minutes, sequentially
-    labeled_mols = []
-    for mol in tqdm(mols):
-        labeled_mols.append(label_mol(mol))
+    labeled_mols = dict()
+    for name in tqdm(ring_names):
+        labeled_mols[name] = label_mol(mols[name])
 
     label_dict = dict()
     for (name, labeled_mol) in zip(ring_names, labeled_mols):
