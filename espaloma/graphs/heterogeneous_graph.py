@@ -18,15 +18,15 @@ def batch(graphs):
     """
 
     # extract dgl graphs 
-    _graphs = [graph._graph for graph in graphs]
+    _graphs = [graph._g for graph in graphs]
 
     # batch dgl graph
-    _graphs = dgl.batched_heterograph(_graphs)
+    _graphs = dgl.batch_hetero(_graphs)
 
     # put batched graph back into HeterogeneousGraph object
     
     # TODO: allow more stuff to be done here
-    return HeterogeneousGraph(heterogeneous_graph = _graphs)
+    return HeterogeneousGraph(dgl_hetero_graph = _graphs)
 
 
 def unbatch(graph):
@@ -35,12 +35,12 @@ def unbatch(graph):
     """
 
     # extract dgl graph
-    _graphs = graph._graph
+    _graphs = graph._g
 
     # unbatch dgl graph
     _graphs = dgl.unbatch_hetero(_graphs)
 
-    return [HeterogeneousGraph(heterogeneous_graph=g) for g in _graphs]
+    return [HeterogeneousGraph(dgl_hetero_graph=g) for g in _graphs]
 
 
 # =============================================================================
@@ -62,14 +62,27 @@ class HeterogeneousGraph(esp.Graph):
 
     """
 
-    def __init__(self, homogeneous_graph=None, 
-            heterogeneous_graph=None # allow the option to rebuild
+    def __init__(
+            self, 
+            homogeneous_graph=None,
+            dgl_hetero_graph=None,
+            mol=None,
         ):
 
-        self._graph = esp.graphs.utils.read_heterogeneous_graph.heterogeneous_graph_from_homogeneous(
-            homogeneous_graph
-        )
+        if homogeneous_graph is not None:
+            self._g = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
+                homogeneous_graph
+            )
 
+        elif dgl_hetero_graph is not None:
+            self._g = dgl_hetero_graph
+
+        elif mol is not None:
+            homogeneous_graph = esp.HomogeneousGraph(mol)
+            self._g = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
+                homogeneous_graph
+            )
+        
     @property
     def _stage(self):
         return "heterogeneous"
