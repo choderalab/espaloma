@@ -39,6 +39,7 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
                     " one of RDKit, OpenEye, or OpenForceField."
                 )
 
+
     @property
     def stage(self):
         return {'type': 'homogeneous'}

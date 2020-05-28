@@ -12,7 +12,20 @@ class Graph(abc.ABC):
     
     """
 
+    _stage = {
+            'type': 'base',
+            'batched': False,
+            'neuralized': False,
+            'legacy_typed': False,
+            'has_coordinate': False
+        }
+
     @property
-    @abc.abstractmethod
     def stage(self):
-        pass
+        return _stage
+
+    def set_stage(self, **kwargs):
+        for key, value in kwargs.items():
+            self._stage[key] = value
+
+

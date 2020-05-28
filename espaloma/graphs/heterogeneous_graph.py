@@ -44,8 +44,11 @@ def unbatch(graph):
     # unbatch dgl graph
     _graphs = dgl.unbatch_hetero(_graphs)
 
-    return [HeterogeneousGraph(dgl_hetero_graph=g) for g in _graphs]
+    hgs = [HeterogeneousGraph(dgl_hetero_graph=g) for g in _graphs]
 
+    [hg.set_stage(batched=False) for hg in hgs]
+
+    return hgs
 
 # =============================================================================
 # MODULE CLASSES
@@ -87,16 +90,8 @@ class HeterogeneousGraph(esp.Graph):
                 homogeneous_graph
             )
 
-        self._stage = {'batched': False}
+        self.set_stage(type='heterogeneous')
         
-    @property
-    def stage(self):
-        return self._stage
-
-    def set_stage(self, **kwargs):
-        for key, value in kwargs.items():
-            self._stage[key] = value
-
 
 
 
