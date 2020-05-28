@@ -1,46 +1,32 @@
+from typing import Iterable
+
 import numpy as np
-from hgfp.data.alkethoh.label_molecules import get_labeled_atoms
+from openforcefield.topology import Molecule, Atom
+
 
 # baseline rule-based classifiers
-
-def get_elements(mol, atom_indices):
+def get_elements(mol: Molecule, atom_indices: Iterable[Iterable[int]]) -> np.ndarray:
+    """array of atomic numbers within a molecule"""
     elements = np.array([a.element.atomic_number for a in mol.atoms])
     return elements[atom_indices]
 
 
-def get_element_tuples(mol, atom_indices):
-    """return the same tuple regardless of whether atom_indices are running forward or backward
-
-    for torsions, get_element_tuples(i,j,k,l)
-
-    """
+def get_element_tuples(mol: Molecule, atom_indices: Iterable[Iterable[int]]) -> list:
+    """the same tuple regardless of whether atom_indices are running forward or backward"""
     return [min(tuple(t), tuple(t[::-1])) for t in get_elements(mol, atom_indices)]
 
-def is_carbon(atom):
-    return atom.atomic_number == 6
+
+is_carbon = lambda atom: atom.atomic_number == 6
+is_hydrogen = lambda atom: atom.atomic_number == 1
+is_oxygen = lambda atom: atom.atomic_number == 8
+
+neighboring_carbons = lambda atom: list(filter(is_carbon, atom.bonded_atoms))
+neighboring_hydrogens = lambda atom: list(filter(is_hydrogen, atom.bonded_atoms))
+neighboring_oxygens = lambda atom: list(filter(is_oxygen, atom.bonded_atoms))
 
 
-def is_hydrogen(atom):
-    return atom.atomic_number == 1
-
-
-def is_oxygen(atom):
-    return atom.atomic_number == 8
-
-
-def neighboring_carbons(atom):
-    return list(filter(is_carbon, atom.bonded_atoms))
-
-
-def neighboring_hydrogens(atom):
-    return list(filter(is_hydrogen, atom.bonded_atoms))
-
-
-def neighboring_oxygens(atom):
-    return list(filter(is_oxygen, atom.bonded_atoms))
-
-
-def classify_atom(atom):
+## atoms
+def classify_atom(atom: Atom) -> int:
     if is_hydrogen(atom):
         carbon_neighborhood = neighboring_carbons(atom)
         if len(carbon_neighborhood) == 1:
@@ -64,11 +50,14 @@ def classify_atom(atom):
             return 18
 
 
-def classify_atoms(mol):
-    return np.array([classify_atom(a) for a in mol.atoms])
+def classify_atoms(mol: Molecule, atom_inds: np.ndarray) -> np.ndarray:
+    assert (atom_inds.shape)[1] == 1
+    atoms = mol.atoms
+    return np.array([classify_atom(atoms[i]) for i in atom_inds[:, 0]])
 
 
-def classify_bond(atom1, atom2):
+## bonds
+def classify_bond(atom1: Atom, atom2: Atom) -> int:
     # both carbon
     if is_carbon(atom1) and is_carbon(atom2):
         return 1
@@ -102,12 +91,14 @@ def classify_bond(atom1, atom2):
     else:
         return 87
 
-def classify_bonds(mol, bond_inds):
+
+def classify_bonds(mol: Molecule, bond_inds: Iterable) -> np.ndarray:
     atoms = list(mol.atoms)
-    return np.array([classify_bond(atoms[i], atoms[j]) for (i,j) in bond_inds])
+    return np.array([classify_bond(atoms[i], atoms[j]) for (i, j) in bond_inds])
 
 
-def classify_angle(atom1, atom2, atom3):
+## angles
+def classify_angle(atom1: Atom, atom2: Atom, atom3: Atom) -> int:
     if is_hydrogen(atom1) and is_hydrogen(atom3):
         return 2
     elif is_oxygen(atom2):
@@ -116,26 +107,13 @@ def classify_angle(atom1, atom2, atom3):
         return 1
 
 
-def classify_angles(mol, angle_inds):
+def classify_angles(mol: Molecule, angle_inds: Iterable[Iterable[int]]) -> np.ndarray:
     return np.array([
         classify_angle(mol.atoms[i], mol.atoms[j], mol.atoms[k]) for (i, j, k) in angle_inds])
 
 
+## torsions
 # simple torsion classifier: look at element identities of atom1, atom2, atom3, and atom4
-from collections import defaultdict
-
-def learn_torsion_lookup():
-    # TODO: collect rest of missing logic...
-    torsion_tuple_counts = defaultdict(lambda: defaultdict(lambda: 0))
-    for i in range(len(mols)):
-        torsion_inds, torsion_labels = get_labeled_torsions(labeled_mols[i])
-        element_tuples = get_element_tuples(mols[i], torsion_inds)
-        for j in range(len(torsion_labels)):
-            torsion_tuple_counts[element_tuples[j]][torsion_labels[j]] += 1
-
-
-
-# the learned classifier
 torsion_prediction_dict = {
     (6, 6, 6, 8): 1, (1, 6, 6, 6): 4, (1, 8, 6, 6): 85, (6, 6, 8, 6): 87,
     (6, 8, 6, 8): 89, (1, 6, 8, 6): 86, (8, 6, 6, 8): 5, (1, 6, 6, 8): 9,
@@ -145,57 +123,30 @@ torsion_prediction_dict = {
 }
 
 
-def classify_torsions(mol, torsion_inds):
+def classify_torsions(mol: Molecule, torsion_inds: Iterable[Iterable[int]]):
     return np.array([torsion_prediction_dict[t] for t in get_element_tuples(mol, torsion_inds)])
 
 
 if __name__ == '__main__':
     from pickle import load
+
     with open('AlkEthOH_rings_offmols.pkl', 'rb') as f:
         mols = load(f)
 
     label_dict = np.load('AlkEthOH_rings.npz')
 
-    # atoms
-    n_correct, n_total = 0, 0
-    for name in mols:
-        mol = mols[name]
-        inds, labels = label_dict[f'{name}_atom_inds'], label_dict[f'{name}_atom_labels']
+    for type_name, classifier in [
+        ('atom', classify_atoms),
+        ('bond', classify_bonds),
+        ('angle', classify_angles),
+        ('torsion', classify_torsions)
+    ]:
+        n_correct, n_total = 0, 0
+        for name in mols:
+            mol = mols[name]
+            inds, labels = label_dict[f'{name}_{type_name}_inds'], label_dict[f'{name}_{type_name}_labels']
 
-        ## TODO: track this down
-        #n_correct += sum(classify_atoms(mols[name])[inds] == labels) # problem: atom_inds and atom_labels aren't the same shape!
-
-        # TODO: update classify_atoms signature to accept indices, just like bonds/angles/torsions
-        n_correct += sum(classify_atoms(mols[name]) == labels)
-        n_total += mol.n_atoms
-    print('atoms: ', n_correct, n_total)
-
-    # bonds
-    n_correct, n_total = 0, 0
-    for name in mols:
-        mol = mols[name]
-        inds, labels = label_dict[f'{name}_bond_inds'], label_dict[f'{name}_bond_labels']
-
-        n_correct += sum(classify_bonds(mols[name], inds) == labels)
-        n_total += len(labels)
-    print('bonds: ', n_correct, n_total)
-
-    # angles
-    n_correct, n_total = 0, 0
-    for name in mols:
-        mol = mols[name]
-        inds, labels = label_dict[f'{name}_angle_inds'], label_dict[f'{name}_angle_labels']
-
-        n_correct += sum(classify_angles(mols[name], inds) == labels)
-        n_total += len(labels)
-    print('angles: ', n_correct, n_total)
-
-    # torsions
-    n_correct, n_total = 0, 0
-    for name in mols:
-        mol = mols[name]
-        inds, labels = label_dict[f'{name}_torsion_inds'], label_dict[f'{name}_torsion_labels']
-
-        n_correct += sum(classify_torsions(mols[name], inds) == labels)
-        n_total += len(labels)
-    print('torsions: ', n_correct, n_total)
+            n_correct += sum(classifier(mols[name], inds) == labels)
+            n_total += len(labels)
+        print(f'{type_name}s:\n\t# correct: {n_correct}\n\t# total: {n_total}\n\taccuracy: ' + '{:.4f}%'.format(
+            100 * n_correct / n_total))
