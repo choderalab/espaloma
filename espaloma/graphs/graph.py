@@ -12,7 +12,24 @@ class Graph(abc.ABC):
     
     """
 
+    def __init__(self):
+        super(Graph, self).__init__()
+
+        self._stage = {
+                'type': 'base',
+                'batched': False,
+                'nn_typed': False,
+                'legacy_typed': False,
+                'has_coordinate': False,
+                'has_energy': False
+            }
+
     @property
-    @abc.abstractmethod
-    def _stage(self):
-        pass
+    def stage(self):
+        return self._stage
+
+    def set_stage(self, **kwargs):
+        for key, value in kwargs.items():
+            self._stage[key] = value
+
+

@@ -8,6 +8,4 @@ def test_import():
 
 def test_init():
     import espaloma as esp
-
-    with pytest.raises(TypeError):
-        g = esp.Graph()
+    g = esp.Graph()
