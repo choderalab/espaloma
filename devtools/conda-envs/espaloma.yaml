@@ -14,7 +14,7 @@ dependencies:
   - numpy
   - matplotlib
   - scipy
-  - openforcefield
+  #- openforcefield # TODO: revert this when 0.7.0 is released
   - openmmforcefields
   # Testing
   - pytest
@@ -27,3 +27,5 @@ dependencies:
   - pip:
       - torch
       - dgl
+      # TODO: revert this when 0.7.0 is released (needed for https://github.com/openforcefield/openforcefield/pull/517 )
+      - git+https://github.com/openforcefield/openforcefield.git@97d31e6f5f789f8d2c0db8f0f22a3e8078184e1b
