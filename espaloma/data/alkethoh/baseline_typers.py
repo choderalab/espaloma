@@ -129,11 +129,15 @@ def classify_torsions(mol: Molecule, torsion_inds: Iterable[Iterable[int]]):
 
 if __name__ == '__main__':
     from pickle import load
+    from pkg_resources import resource_filename
 
-    with open('AlkEthOH_rings_offmols.pkl', 'rb') as f:
+    path_to_offmols = resource_filename('espaloma.data.alkethoh', 'AlkEthOH_rings_offmols.pkl')
+    path_to_npz = resource_filename('espaloma.data.alkethoh', 'AlkEthOH_rings.npz')
+
+    with open(path_to_offmols, 'rb') as f:
         mols = load(f)
 
-    label_dict = np.load('AlkEthOH_rings.npz')
+    label_dict = np.load(path_to_npz)
 
     for type_name, classifier in [
         ('atom', classify_atoms),
