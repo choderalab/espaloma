@@ -8,16 +8,16 @@ import torch
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class MoleculeDataset(abc.ABC, torch.utils.data.Dataset):
+class Dataset(abc.ABC, torch.utils.data.Dataset):
     """ The base class of map-style dataset.
 
     """
-    def __init__(self, mols=None):
-        super(MoleculeDataset, self).__init__()
+    def __init__(self, graphs=None):
+        super(Dataset, self).__init__()
         self.mols = mols
 
     def __len__(self):
-        if self.mols is None:
+        if self.graphs is None:
             return 0
         
         else:
@@ -28,6 +28,23 @@ class MoleculeDataset(abc.ABC, torch.utils.data.Dataset):
             raise RuntimeError('Empty molecule dataset.')
 
         return self.mols[idx]
+
+class MoleculeIterableDataset(abc.ABC, torch.utils.data.IterableDataset):
+    """ The bass class of iterable-style dataset.
+
+    """
+    def __init__(self, mols):
+        super(MoleculeDataset, self).__init__()
+        self.mols = mols
+
+    def __iter__(self):
+        return iter(self.mols)
+
+class MoleculeDataset(Dataset):
+    """ Dataset consist of `openforcefield.topology.Molecule` objects,
+    and support save and load. 
+
+    """
 
     def save(self, path):
         import pickle
@@ -44,21 +61,22 @@ class MoleculeDataset(abc.ABC, torch.utils.data.Dataset):
                 Molecule.from_dict(
                     _g)) for _g in pickle.load(path)]
 
-
-class MoleculeIterableDataset(abc.ABC, torch.utils.data.IterableDataset):
-    """ The bass class of iterable-style dataset.
+class HomogeneousGraphDataset(Dataset):
+    """ The base class of homogeneous graph dataset.
 
     """
-    def __init__(self, mols):
-        super(MoleculeDataset, self).__init__()
-        self.mols = mols
+    def __init__(self, graphs=None):
+        super(HomogeneousGraphDataset, self).__init__()
+        self.graphs = graphs
 
-    def __iter__(self):
-        return iter(self.mols)
+    def save(self, path):
+        from dgl.data.utils import save_graphs
+        save_graphs(path, graphs)
 
+    def load(self, path):
+        from dgl.data.utils import load_graphs
+        # NOTE:
+        # Assume no labels here
+        graphs, _ = load_graphs(path)
+        self.graphs = graphs
 
-
-
-
-
-    

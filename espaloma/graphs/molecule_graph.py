@@ -48,3 +48,5 @@ class MoleculeGraph(esp.Graph):
         # Use openforcefield-generic grammar
         esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(
             g, self._g.to_rdkit())
+
+        return g

@@ -139,7 +139,7 @@ class LegacyForceField:
         if g is None:
             g = esp.HomogeneousGraph(mol)
 
-        g.ndata["legacy_type_idx"] = torch.tensor(
+        g.ndata["legacy_type"] = torch.tensor(
             [self._str_2_idx[atom] for atom in gaff_types]
         )
 

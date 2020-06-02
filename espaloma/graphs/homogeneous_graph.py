@@ -54,10 +54,3 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
         assert self.stage['neuralized'] == True
         return self.ndata['nn_type']
 
-    def _loss_node_classification(
-            self,
-            loss_fn=torch.nn.functional.cross_entropy):
-
-        return loss_fn(
-                self.legacy_typing(),
-                self.nn_typing())
