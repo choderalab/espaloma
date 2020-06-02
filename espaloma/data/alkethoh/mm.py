@@ -1,9 +1,3 @@
-# TODO: one molecule dataset -- configurations only
-
-# TODO: AlkEthOH dataset -- well-sampled
-
-# TODO: parm@frosst set -- bigger set
-
 from time import time
 
 import numpy as np
@@ -99,6 +93,10 @@ def create_entry(name, mol, n_samples, n_steps_per_sample):
     t1 = time()
     print('that took {:.3}s'.format(t1 - t0))
 
+    from simtk.openmm import XmlSerializer
+    with open(prefix + 'system.xml', 'w') as f:
+        f.write(XmlSerializer.serializeSystem(sim.system))
+
     print('collecting samples')
     t0 = time()
     xyz_in_nm = collect_samples(sim, n_samples=n_samples, n_steps_per_sample=n_steps_per_sample)
@@ -115,13 +113,12 @@ def create_entry(name, mol, n_samples, n_steps_per_sample):
     mm_energy_array = get_energies(sim, xyz_in_nm)
 
     # TODO: also forces
-    np.save(prefix + '_molecule_energies.npy', mm_energy_array)
+    np.save(prefix + 'molecule_energies.npy', mm_energy_array)
 
 
 if __name__ == '__main__':
 
-    # n_samples, n_steps_per_sample = 1000, 1000
-    n_samples, n_steps_per_sample = 100, 100
+    n_samples, n_steps_per_sample = 1000, 1000
 
     from pickle import load
 
