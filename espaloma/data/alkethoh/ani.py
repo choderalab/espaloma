@@ -45,7 +45,7 @@ if __name__ == '__main__':
         snapshots, energies = get_snapshots_and_energies(name)
         ani_energies = compute_ani_energies(snapshots)
         ani_energies_kjmol = ani_energies.value_in_unit(unit.kilojoule_per_mole)
-        np.save('snapshots_and_energies/{}_ani1ccx_energies.npz'.format(name), ani_energies_kjmol)
+        np.save('snapshots_and_energies/{}_ani1ccx_energies'.format(name), ani_energies_kjmol)
 
         # note: these will include a large additive offset: interested in stddev of these residuals
         mm_energies_kjmol = (energies * unit.kilojoule_per_mole).value_in_unit(unit.kilojoule_per_mole)
