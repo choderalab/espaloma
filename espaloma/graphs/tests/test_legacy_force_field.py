@@ -28,4 +28,3 @@ def test_type_benzene():
 
     g = gaff.typing(m)
 
-    print(g)

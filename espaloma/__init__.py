@@ -6,6 +6,7 @@ Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-pas
 # Add imports here
 import espaloma
 from espaloma.graphs.graph import Graph
+from espaloma.graphs.molecule_graph import MoleculeGraph
 from espaloma.graphs.homogeneous_graph import HomogeneousGraph
 from espaloma.graphs.heterogeneous_graph import HeterogeneousGraph
 
