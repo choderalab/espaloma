@@ -26,42 +26,12 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
         self.set_stage(type='homogeneous')
 
         if mol is not None:
-            if isinstance(mol, rdkit.Chem.rdchem.Mol):
-                self._from_rdkit(mol)
-
-            elif isinstance(mol, openforcefield.topology.molecule.Molecule):
-                self._from_rdkit(mol.to_rdkit())
-
-            elif "oe" in str(type(mol)):  # we don't want to depend on OE
-                self._from_openeye(mol)
-
+            if isinstance(mol, esp.MoleculeGraph):
+                mol.to_homogeneous_graph(self)
             else:
-                raise RuntimeError(
-                    "Input molecule could only be"
-                    " one of RDKit, OpenEye, or OpenForceField."
-                )
+                mol = esp.MoleculeGraph(mol)
 
-
-    def _from_rdkit(self, mol):
-        """ API to read RDKit mol.
-
-        Parameters
-        ----------
-        mol : `rdkit.Chem.rdchem.Mol` object
-
-        """
-        # TODO: raise error if this is called after a class has been
-        # initialized
-        esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(self, mol)
-
-    def _from_openeye(self, mol):
-        """ API to read OpenEye mol.
-
-        Parameters
-        ----------
-        mol : `openeye.oechem.GraphMol` object
-        """
-        esp.graphs.utils.read_homogeneous_graph.from_openeye_mol(self, mol)
+                mol.to_homogeneous_graph(self)
 
     def loss(self, level, *args, **kwargs):
         """ Loss function between attributes in the graph.
@@ -78,18 +48,16 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
 
     def legacy_typing(self):
         assert self.stage['legacy_typed'] == True
-        return self.ndata['legacy_type'] 
-   
+        return self.ndata['legacy_type']
+
     def nn_typing(self):
         assert self.stage['neuralized'] == True
         return self.ndata['nn_type']
 
     def _loss_node_classification(
-            self, 
+            self,
             loss_fn=torch.nn.functional.cross_entropy):
 
         return loss_fn(
                 self.legacy_typing(),
                 self.nn_typing())
-
-
