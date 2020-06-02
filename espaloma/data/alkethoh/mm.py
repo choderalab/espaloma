@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 distance_unit = unit.nanometer
 energy_unit = unit.kilojoule_per_mole
-force_unit = energy_unit / (distance_unit ** 2)
+force_unit = energy_unit / distance_unit
 
 temperature = 500 * unit.kelvin
 stepsize = 1 * unit.femtosecond
