@@ -46,11 +46,15 @@ class HomogeneousGraph(esp.Graph, dgl.DGLGraph):
         else:
             raise NotImplementedError
 
-    def legacy_typing(self):
-        assert self.stage['legacy_typed'] == True
+    @property
+    def legacy_type(self):
         return self.ndata['legacy_type']
 
-    def nn_typing(self):
-        assert self.stage['neuralized'] == True
+    @property
+    def nn_type(self):
         return self.ndata['nn_type']
+
+    @nn_type.setter
+    def nn_type(self, x):
+        self.ndata['nn_type'] = x
 

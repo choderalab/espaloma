@@ -26,14 +26,29 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     def __getitem__(self, idx):
         if self.graphs is None:
             raise RuntimeError('Empty molecule dataset.')
+        
+        if isinstance(idx, int): # sinlge element
+            return self.graphs[idx]
+        elif isinstance(idx, slice): # implement slicing
+            import copy
+            ds = copy.copy(self)
+            ds.graphs = self.graphs[idx]
+            return ds
 
-        return self.graphs[idx]
+    def __iter__(self):
+        return iter(self.graphs)
 
     def apply(self, fn):
         """ Apply function to all elements in the dataset.
 
+        Note
+        ----
+        This function modifies in-place and also return the list.
         """
-        return [fn(graph) for graph in self.graphs]
+        graphs = [fn(graph) for graph in self.graphs]
+        self.graphs = graphs
+        return graphs
+
 
 class MoleculeIterableDataset(abc.ABC, torch.utils.data.IterableDataset):
     """ The bass class of iterable-style dataset.

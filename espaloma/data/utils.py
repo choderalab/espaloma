@@ -105,4 +105,4 @@ def batch(ds, batch_size, seed=2666):
 
 
 def collate_fn(graphs):
-    return dgl.batch(graphs)
+    return esp.HomogeneousGraph(dgl.batch(graphs))
