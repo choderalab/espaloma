@@ -36,3 +36,18 @@ def test_typing(mol_ds):
     homo_ds = mol_ds.apply_legacy_typing_homogeneous()
     next(iter(homo_ds))
 
+def test_dataloader(mol_ds):
+    import torch
+    import dgl
+    import espaloma as esp
+
+    homo_ds = mol_ds.apply_legacy_typing_homogeneous()
+    
+    collate_fn = esp.data.utils.collate_fn 
+
+
+    dataloader = torch.utils.data.DataLoader(
+            homo_ds,
+            collate_fn=collate_fn)
+
+    print(next(iter(dataloader)))
