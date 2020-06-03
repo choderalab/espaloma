@@ -1,6 +1,7 @@
 import pytest
 
 
+@pytest.mark.skip
 def test_small_net():
     import espaloma as esp
 
