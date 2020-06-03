@@ -403,18 +403,28 @@ def get_nb_energy(sim):
 
 
 if __name__ == '__main__':
-    name = 'AlkEthOH_r1155'
+    name = 'AlkEthOH_r33' # easy example
+    # name = 'AlkEthOH_r1155' # difficult example
     offmol = offmols[name]
-    snapshots, mm, ani = get_snapshots_and_energies(name)
+    snapshots, _, _ = get_snapshots_and_energies(name)
     xyz = snapshots.xyz
 
     all_params = f_2_params, f_3_params, f_4_params
+
+    valence_energies = []
+    sim = get_sim(name)
+    for conf in xyz:
+        set_positions(sim, conf * unit.nanometer)
+        U_tot = get_energy(sim)
+        U_nb = get_nb_energy(sim)
+        valence_energies.append(U_tot - U_nb)
+    valence_target = np.array(valence_energies)
 
 
     def loss(all_params):
         f_2_params, f_3_params, f_4_params = all_params
         U_valence = pred_valence_energy(offmol, xyz, f_2_params, f_3_params, f_4_params)
-        return np.sum((mm - U_valence) ** 2)
+        return np.sum((valence_target - U_valence) ** 2)
 
 
     from jax import grad
