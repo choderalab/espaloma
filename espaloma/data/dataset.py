@@ -68,7 +68,7 @@ class MoleculeDataset(Dataset):
                     _g)) for _g in pickle.load(path)]
 
 
-    def apply_legacy_typing_homogeneous(self, forcefield='gaff-1.81'):
+    def to_homogeneous_with_legacy_typing(self, forcefield='gaff-1.81'):
         """ Apply legacy atom typing scheme to yield a
         `HomogeneousGraphDataset`.
 

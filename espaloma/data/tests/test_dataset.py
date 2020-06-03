@@ -33,12 +33,12 @@ def mol_ds(mols):
     return ds
 
 def test_typing(mol_ds):
-    homo_ds = mol_ds.apply_legacy_typing_homogeneous()
+    homo_ds = mol_ds.to_homogeneous_with_legacy_typing()
     next(iter(homo_ds))
 
 @pytest.fixture
 def homo_ds(mol_ds):
-    return mol_ds.apply_legacy_typing_homogeneous()
+    return mol_ds.to_homogeneous_with_legacy_typing()
 
 def test_dataloader(homo_ds):
     import torch
