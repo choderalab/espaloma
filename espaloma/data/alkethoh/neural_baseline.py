@@ -167,12 +167,12 @@ def extract_angle_term_inputs(offmol):
 
     angles = list(offmol.angles)  # offmol.angles is a set of 3-tuples of atoms
 
-    a1_inds = np.array([a.molecule_atom_index for (a, _, _) in angles])
-    a2_inds = np.array([b.molecule_atom_index for (_, b, _) in angles])
-    a3_inds = np.array([c.molecule_atom_index for (_, _, c) in angles])
+    a1_inds = onp.array([a.molecule_atom_index for (a, _, _) in angles])
+    a2_inds = onp.array([b.molecule_atom_index for (_, b, _) in angles])
+    a3_inds = onp.array([c.molecule_atom_index for (_, _, c) in angles])
 
-    b12_inds = np.array([bond_index_dict[(a.molecule_atom_index, b.molecule_atom_index)] for (a, b, _) in angles])
-    b23_inds = np.array([bond_index_dict[(b.molecule_atom_index, c.molecule_atom_index)] for (_, b, c) in angles])
+    b12_inds = onp.array([bond_index_dict[(a.molecule_atom_index, b.molecule_atom_index)] for (a, b, _) in angles])
+    b23_inds = onp.array([bond_index_dict[(b.molecule_atom_index, c.molecule_atom_index)] for (_, b, c) in angles])
 
     a1 = atoms[a1_inds]
     a2 = atoms[a2_inds]
@@ -196,14 +196,14 @@ def extract_torsion_term_inputs(offmol):
 
     torsions = list(offmol.propers)  # offmol.propers is a set of 4-tuples of atoms
 
-    a1_inds = np.array([a.molecule_atom_index for (a, _, _, _) in torsions])
-    a2_inds = np.array([b.molecule_atom_index for (_, b, _, _) in torsions])
-    a3_inds = np.array([c.molecule_atom_index for (_, _, c, _) in torsions])
-    a4_inds = np.array([d.molecule_atom_index for (_, _, _, d) in torsions])
+    a1_inds = onp.array([a.molecule_atom_index for (a, _, _, _) in torsions])
+    a2_inds = onp.array([b.molecule_atom_index for (_, b, _, _) in torsions])
+    a3_inds = onp.array([c.molecule_atom_index for (_, _, c, _) in torsions])
+    a4_inds = onp.array([d.molecule_atom_index for (_, _, _, d) in torsions])
 
-    b12_inds = np.array([bond_index_dict[(a.molecule_atom_index, b.molecule_atom_index)] for (a, b, _, _) in torsions])
-    b23_inds = np.array([bond_index_dict[(b.molecule_atom_index, c.molecule_atom_index)] for (_, b, c, _) in torsions])
-    b34_inds = np.array([bond_index_dict[(c.molecule_atom_index, d.molecule_atom_index)] for (_, _, c, d) in torsions])
+    b12_inds = onp.array([bond_index_dict[(a.molecule_atom_index, b.molecule_atom_index)] for (a, b, _, _) in torsions])
+    b23_inds = onp.array([bond_index_dict[(b.molecule_atom_index, c.molecule_atom_index)] for (_, b, c, _) in torsions])
+    b34_inds = onp.array([bond_index_dict[(c.molecule_atom_index, d.molecule_atom_index)] for (_, _, c, d) in torsions])
 
     a1 = atoms[a1_inds]
     a2 = atoms[a2_inds]
