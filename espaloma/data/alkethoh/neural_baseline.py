@@ -321,6 +321,30 @@ def compute_periodic_torsion_potential(offmol, xyz, f_4_params):
     return np.sum(periodic_torsion_potential(theta, ks, phases, periodicities_), axis=1)
 
 
+# Nonbonded
+from jax import vmap
+
+
+def pdist(x):
+    """should be consistent with scipy.spatial.pdist:
+    flat, non-redundant pairwise distances"""
+    diffs = np.expand_dims(x, 1) - np.expand_dims(x, 0)
+    squared_distances = np.sum(diffs ** 2, axis=2)
+    inds = onp.triu_indices_from(squared_distances, k=1)
+    return np.sqrt(squared_distances[inds])
+
+
+def pred_nonbonded_energy(offmol, xyz, f_1_params):
+    x = atom_features_from_offmol(offmol)
+
+    distances = vmap(pdist)(xyz)
+    atom_params = f_atom(f_1_params, x)
+
+    # TODO: finish this thought
+
+    raise (NotImplementedError)
+
+
 # Altogether
 def pred_valence_energy(offmol, xyz, f_2_params, f_3_params, f_4_params):
     bond_energy = compute_harmonic_bond_potential(offmol, xyz, f_2_params)
