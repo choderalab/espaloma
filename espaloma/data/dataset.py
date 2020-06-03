@@ -98,7 +98,7 @@ class HomogeneousGraphDataset(Dataset):
 
     def save(self, path):
         from dgl.data.utils import save_graphs
-        save_graphs(path, graphs)
+        save_graphs(path, self.graphs)
 
     def load(self, path):
         from dgl.data.utils import load_graphs
@@ -117,11 +117,26 @@ class HeterogeneousGraphDataset(Dataset):
         self.graphs = graphs
 
     def save(self, path):
+        import dgl
+        from dgl.data.utils import save_graphs
+        graphs = [dgl.to_homo(graph._g) for graph in self.graphs]
+
         # TODO:
-        # we need to find a way to save this in order
-        # to make stable, reproducible experiments
-        raise NotImplementedError
+        # this doesn't need to be all the same
+        assert all(graphs[0]._g.ntype == graph._g.ntype for graph in graphs)
+        assert all(graphs[0]._g.etype == graph._g.etype for graph in graphs)
+
+        labels = {'ntype': graphs[0]._g.ntype, 'etype': graphs[0]._g.etype}
+        save_graphs(path, graphs, labels)
 
     def load(self, path):
-        raise NotImplementedError
+        import dgl
+        from dgl.data.utils import load_graphs
+        graphs, labels = load_graphs(path)
+        graphs = [dgl.to_hetero(
+            graph,
+            ntypes=labels['ntype'],
+            etypes=labels['etype']
+        )]
 
+        self.graphs = graphs

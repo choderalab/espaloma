@@ -36,18 +36,35 @@ def test_typing(mol_ds):
     homo_ds = mol_ds.apply_legacy_typing_homogeneous()
     next(iter(homo_ds))
 
-def test_dataloader(mol_ds):
+@pytest.fixture
+def homo_ds(mol_ds):
+    return mol_ds.apply_legacy_typing_homogeneous()
+
+def test_dataloader(homo_ds):
     import torch
     import dgl
     import espaloma as esp
 
-    homo_ds = mol_ds.apply_legacy_typing_homogeneous()
-    
     collate_fn = esp.data.utils.collate_fn 
-
 
     dataloader = torch.utils.data.DataLoader(
             homo_ds,
             collate_fn=collate_fn)
 
-    print(next(iter(dataloader)))
+def test_save_load_homo(homo_ds):
+    import tempfile
+    import espaloma as esp
+    import torch
+    with tempfile.TemporaryDirectory() as tempdir:
+        homo_ds.save(tempdir + '/ds.esp')
+        new_homo_ds = esp.data.dataset.HomogeneousGraphDataset()
+        new_homo_ds.load(tempdir + '/ds.esp')
+        
+        for old_graph, new_graph in zip(
+                iter(homo_ds), iter(new_homo_ds)):
+            assert old_graph.number_of_nodes() == new_graph.number_of_nodes()
+            assert old_graph.number_of_edges() == new_graph.number_of_edges()
+            assert torch.equal(
+                    old_graph.ndata['h0'], 
+                    new_graph.ndata['h0'])
+
