@@ -21,7 +21,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             return 0
         
         else:
-            return len(self.mols)
+            return len(self.graphs)
 
     def __getitem__(self, idx):
         if self.graphs is None:
