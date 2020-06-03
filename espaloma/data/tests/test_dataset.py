@@ -34,4 +34,5 @@ def mol_ds(mols):
 
 def test_typing(mol_ds):
     homo_ds = mol_ds.apply_legacy_typing_homogeneous()
-    print(list(homo_ds))
+    next(iter(homo_ds))
+
