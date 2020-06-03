@@ -439,3 +439,39 @@ if __name__ == '__main__':
 
     print(f'time to compile gradient: {t1 - t0:.3f}s')
     print(f'time to compute gradient: {t2 - t1:.3f}s')
+
+    # TODO: this, but less ugly-ly
+    #   didn't see where Jax has equivalent of autograd.misc.flatten)
+    #   naively mixing autograd and jax code leads to type-errors within autograd:
+    #       TypeError: Can't differentiate w.r.t. type <class 'jax.interpreters.xla.DeviceArray'>
+    from autograd.misc import flatten
+
+
+    def net_to_numpy(net_params):
+        return [(onp.array(W), onp.array(b)) for (W, b) in net_params]
+
+
+    def all_to_numpy(all_params):
+        return [net_to_numpy(net_params) for net_params in all_params]
+
+
+    flat_params, unflatten = flatten(all_params)
+
+
+    # Defining functions that can talk to scipy optimizers...
+    def fun(flat_params):
+        all_params = unflatten(flat_params)
+        return float(loss(all_params))
+
+
+    def jac(flat_params):
+        all_params = unflatten(flat_params)
+        g = grad(loss)(all_params)
+        g_flat, _ = flatten(all_to_numpy(g))
+        return onp.array(g_flat, dtype=onp.float64)
+
+
+    from scipy.optimize import minimize
+
+    opt_result = minimize(fun, x0=flat_params, jac=jac, method='L-BFGS-B', options=dict(disp=True))
+    print(opt_result)
