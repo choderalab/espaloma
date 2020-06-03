@@ -65,12 +65,12 @@ def bond_index_dict_from_offmol(offmol):
     return bond_index_dict
 
 
-atom_dim = len(atom_to_index)
-bond_dim = 2
+atom_dim = len(atom_to_index)  # one-hot
+bond_dim = 2  # bond order, aromaticity
 
-atom_param_dim = 4
-bond_param_dim = 2
-angle_param_dim = 2
+atom_param_dim = 4  # sigma, epsilon, electronegativity, hardness
+bond_param_dim = 2  # k, r0
+angle_param_dim = 2  # k, theta0
 
 n_periodicities = 6
 periodicities = np.arange(n_periodicities) + 1
