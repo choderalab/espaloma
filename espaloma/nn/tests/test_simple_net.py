@@ -1,14 +1,16 @@
 import pytest
 
-
-@pytest.mark.skip
 def test_small_net():
     import espaloma as esp
+    import torch
 
-    ds = esp.data.esol()[:16]
-    ds = esp.data.utils.batch(ds, 8)
+    ds = torch.utils.data.DataLoader(
+            esp.data.ESOL()[:16].to_homogeneous_with_legacy_typing(),
+            collate_fn=esp.data.utils.collate_fn)
 
     layer = esp.nn.dgl_legacy.gn()
     net = esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"])
 
-    net(ds[0][0])
+    g = next(iter(ds))
+
+    print(net(g))
