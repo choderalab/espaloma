@@ -354,7 +354,52 @@ def pred_valence_energy(offmol, xyz, f_2_params, f_3_params, f_4_params):
     return bond_energy + angle_energy + torsion_energy
 
 
-# TODO: nonbonded
+# openmm
+from simtk import unit
+from simtk import openmm as mm
+from simtk.openmm.app import Simulation
+from simtk.openmm import XmlSerializer
+
+
+def get_sim(name):
+    """nonbonded forces in group 0, all other forces in group 1"""
+    mol = offmols[name]
+
+    # Parametrize the topology and create an OpenMM System.
+    topology = mol.to_topology()
+
+    with open(data_path + 'snapshots_and_energies/{}_system.xml'.format(name), 'r') as f:
+        xml = f.read()
+
+    system = XmlSerializer.deserializeSystem(xml)
+
+    platform = mm.Platform.getPlatformByName('Reference')
+    integrator = mm.VerletIntegrator(1.0)
+
+    sim = Simulation(topology, system, integrator, platform=platform)
+
+    inds_of_nb_forces = [i for i in range(sim.system.getNumForces()) if
+                         'Nonbonded' in sim.system.getForce(i).__class__.__name__]
+
+    for i in range(sim.system.getNumForces()):
+        sim.system.getForce(i).setForceGroup(1)
+    for i in inds_of_nb_forces:
+        sim.system.getForce(i).setForceGroup(0)
+
+    return sim
+
+
+def set_positions(sim, pos):
+    sim.context.setPositions(pos)
+
+
+def get_energy(sim):
+    return sim.context.getState(getEnergy=True).getPotentialEnergy() / unit.kilojoule_per_mole
+
+
+def get_nb_energy(sim):
+    """assumes NonbondedForce is in group 0"""
+    return sim.context.getState(getEnergy=True, groups={0}).getPotentialEnergy() / unit.kilojoule_per_mole
 
 
 if __name__ == '__main__':
