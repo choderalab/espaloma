@@ -27,7 +27,7 @@ class Graph(GraphBase):
         # input molecule
         if isinstance(mol, str):
             from openforcefield.topology import Molecule
-            mol = Molecule.from_smiles(mol)
+            mol = Molecule.from_smiles(mol, allow_undefined_stereo=True)
 
         if mol is not None and homograph is None and heterograph is None:
             homograph = self.get_homograph_from_mol(mol)
@@ -64,6 +64,10 @@ class Graph(GraphBase):
                 .from_homogeneous(graph)
 
         return heterograph
+
+    @property
+    def mol(self):
+        return self._mol
 
     @property
     def homograph(self):

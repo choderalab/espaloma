@@ -42,12 +42,15 @@ class LegacyForceField:
     @staticmethod
     def _convert_to_off(mol):
         import openforcefield
+        
+        if isinstance(mol, esp.Graph):
+            return mol.mol
 
-        if isinstance(mol, openforcefield.topology.molecule.Molecule):
+        elif isinstance(mol, openforcefield.topology.molecule.Molecule):
             return mol
         elif isinstance(mol, rdkit.Chem.rdchem.Mol):
             return Molecule.from_rdkit(mol)
-        elif "openeye" in type(mol):  # because we don't want to depend on OE
+        elif "openeye" in str(type(mol)):  # because we don't want to depend on OE
             return Molecule.from_openeye(mol)
 
     def _prepare_forcefield(self):
@@ -137,7 +140,7 @@ class LegacyForceField:
 
         # put types into graph object
         if g is None:
-            g = esp.HomogeneousGraph(mol)
+            g = esp.Graph(mol)
 
         g.ndata["legacy_type"] = torch.tensor(
             [self._str_2_idx[atom] for atom in gaff_types]
@@ -154,3 +157,6 @@ class LegacyForceField:
 
         else:
             raise NotImplementedError
+
+    def __call__(self, *args, **kwargs):
+        return self.typing(*args, **kwargs)
