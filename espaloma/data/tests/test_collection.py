@@ -4,7 +4,7 @@ import pytest
 @pytest.fixture
 def esol():
     import espaloma as esp
-    return esp.data.ESOL(first=16)
+    return esp.data.esol(first=16)
 
 def test_view(esol):
     view = esol.view(batch_size=4)
@@ -20,4 +20,4 @@ def test_typing(esol):
     esol = esol.apply(typing, in_place=True)
     view = esol.view(batch_size=4)
     for g in view:
-        assert g.ndata['legacy_type'].shape[0] == g.number_of_nodes()
+        assert g.ndata['legacy_typing'].shape[0] == g.number_of_nodes()

@@ -59,7 +59,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         elif isinstance(idx, slice): # implement slicing
             if self.transforms is None:
                 # return a Dataset object rather than list
-                return Dataset(graphs=self.graphs[idx]) 
+                return self.__class__(graphs=self.graphs[idx]) 
             else:
                 graphs = []
                 for graph in self.graphs:
@@ -69,7 +69,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                         graph = transform(graph)
                     graphs.append(graph)
 
-                return Dataset(graphs=graphs)
+                return self.__class__(graphs=graphs)
 
     def __iter__(self):
         if self.transforms is None:
@@ -101,6 +101,19 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return self # to allow grammar: ds = ds.apply(...)
 
+    def split(self, partition):
+        """ Split the dataset according to some partition.
+
+        """
+        n_data = len(self)
+        partition = [int(n_data * x / sum(partition)) for x in partition]
+        ds = []
+        idx = 0
+        for p_size in partition:
+            ds.append(self[idx : idx + p_size])
+            idx += p_size
+
+        return ds
 
 class GraphDataset(Dataset):
     """ Dataset with additional support for only viewing

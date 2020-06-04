@@ -63,7 +63,7 @@ class Sequential(torch.nn.Module):
     
         if x is None:
             x = g.ndata['h0']
-
+        
         x = self.f_in(x)
 
         for exe in self.exes:
@@ -71,5 +71,6 @@ class Sequential(torch.nn.Module):
                 x = getattr(self, exe)(g, x)
             else:
                 x = getattr(self, exe)(x)
-
-        return x
+        
+        g.ndata['h'] = x
+        return g 

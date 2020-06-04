@@ -22,6 +22,16 @@ def test_iter(ds):
     assert all(
             x == x_ for (x, x_) in zip(ds, range(5)))
 
+def test_slice(ds):
+    import espaloma as esp
+    sub_ds = ds[:2]
+    assert isinstance(ds, esp.data.dataset.Dataset)
+    assert len(sub_ds) == 2
+
+def test_split(ds):
+    a, b = ds.split([1, 4])
+    assert len(a) == 1
+    assert len(b) == 4
 
 @pytest.fixture
 def ds_new(ds):
