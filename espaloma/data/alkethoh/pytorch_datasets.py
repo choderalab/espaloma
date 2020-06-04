@@ -1,4 +1,4 @@
-"""provide a pytorch dataset views of the interaction typing dataset"""
+"""provide pytorch dataset views of the interaction typing dataset"""
 
 from pickle import load
 from typing import Tuple
@@ -9,8 +9,6 @@ from openforcefield.topology import Molecule
 from torch import tensor, Tensor
 from torch.nn import CrossEntropyLoss
 from torch.utils.data.dataset import Dataset
-
-categorical_loss = CrossEntropyLoss()
 
 
 class AlkEthOHDataset(Dataset):
@@ -44,11 +42,14 @@ class AlkEthOHDataset(Dataset):
     def loss(self, index: int, predictions: Tensor) -> Tensor:
         raise (NotImplementedError)
 
+    def __len__(self):
+        return len(self._mol_names)
 
-class AlkEthOHAtomTypesDataset(AlkEthOHDataset):
-    def __init__(self):
-        super(AlkEthOHAtomTypesDataset, self).__init__()
-        self.type_name = 'atom'
+
+class AlkEthOHTypesDataset(AlkEthOHDataset):
+    def __init__(self, type_name='atom'):
+        super().__init__()
+        self.type_name = type_name
         all_labels = self._get_all_unique_labels(self.type_name)
 
         self._label_mapping = dict(zip(all_labels, range(len(all_labels))))
@@ -64,44 +65,44 @@ class AlkEthOHAtomTypesDataset(AlkEthOHDataset):
         _, _, target = self[index]
         assert (predictions.shape == (len(target), self.n_classes))
 
-        return categorical_loss(predictions, target)
+        return CrossEntropyLoss()(predictions, target)
 
 
-class AlkEthOHBondTypesDataset(AlkEthOHDataset):
-
-    def __getitem__(self, index) -> Tuple[Molecule, Tensor, Tensor]:
-        return self._get_mol_inds_labels(index, 'bond')
-
-
-class AlkEthOHAngleTypesDataset(AlkEthOHDataset):
-
-    def __getitem__(self, index) -> Tuple[Molecule, Tensor, Tensor]:
-        return self._get_mol_inds_labels(index, 'angle')
+class AlkEthOHAtomTypesDataset(AlkEthOHTypesDataset):
+    def __init__(self):
+        super().__init__(type_name='atom')
 
 
-class AlkEthOHTorsionTypesDataset(AlkEthOHDataset):
+class AlkEthOHBondTypesDataset(AlkEthOHTypesDataset):
+    def __init__(self):
+        super().__init__(type_name='bond')
 
-    def __getitem__(self, index) -> Tuple[Molecule, Tensor, Tensor]:
-        return self._get_mol_inds_labels(index, 'torsion')
+
+class AlkEthOHAngleTypesDataset(AlkEthOHTypesDataset):
+    def __init__(self):
+        super().__init__(type_name='angle')
+
+
+class AlkEthOHTorsionTypesDataset(AlkEthOHTypesDataset):
+    def __init__(self):
+        super().__init__(type_name='torsion')
 
 
 if __name__ == '__main__':
     # TODO: move this from __main__ into doctests
 
-    # atoms
-    atom_type_dataset = AlkEthOHAtomTypesDataset()
-    n_classes = atom_type_dataset.n_classes
+    datasets = [AlkEthOHAtomTypesDataset(), AlkEthOHBondTypesDataset(),
+                AlkEthOHAngleTypesDataset(), AlkEthOHTorsionTypesDataset()]
+    for dataset in datasets:
+        # check that you can differentiate w.r.t. predictions
+        print(dataset.__class__.__name__)
 
-    index = 0
-    n_atoms = atom_type_dataset[index][0].n_atoms
-    predictions = torch.randn(n_atoms, n_classes, requires_grad=True)
-    loss = atom_type_dataset.loss(index, predictions)
-    loss.backward()
-    print(predictions.grad)
+        n_classes = dataset.n_classes
 
-    # bonds
-    print(AlkEthOHBondTypesDataset()[0])
-    # angles
-    print(AlkEthOHAngleTypesDataset()[0])
-    # torsions
-    print(AlkEthOHTorsionTypesDataset()[0])
+        index = np.random.randint(0, len(dataset))
+        mol, inds, labels = dataset[index]
+        n_labeled_entitites = len(labels)
+        predictions = torch.randn(n_labeled_entitites, n_classes, requires_grad=True)
+        loss = dataset.loss(index, predictions)
+        loss.backward()
+        print(predictions.grad)
