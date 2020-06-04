@@ -1,70 +1,58 @@
 import pytest
 
-@pytest.fixture
-def smiles():
-    import os
+def test_tiny_dataset():
     import espaloma as esp
-    import pandas as pd
-    path = os.path.dirname(
-            esp.__file__) + '/data/esol.csv'
+    xs = list(range(5))
+    ds = esp.data.dataset.Dataset(xs)
 
-    df = pd.read_csv(path)
-
-    return df.iloc[:16, -1]
+@pytest.fixture
+def ds():
+    xs = list(range(5))
+    import espaloma as esp
+    return esp.data.dataset.Dataset(xs)
     
-@pytest.fixture
-def mols(smiles):
-    print(smiles)
 
-    import openforcefield
-    from openforcefield.topology import Molecule
-    return [Molecule.from_smiles(
-        _smiles, allow_undefined_stereo=True) for _smiles in smiles]
+def test_get(ds):
+    assert ds[0] == 0
 
+def test_len(ds):
+    assert len(ds) == 5
 
-def test_homo_ds(mols):
-    import espaloma as esp
-    ds = esp.data.dataset.HomogeneousGraphDataset(mols)
+def test_iter(ds):
+    assert all(
+            x == x_ for (x, x_) in zip(ds, range(5)))
+
 
 @pytest.fixture
-def mol_ds(mols):
-    import espaloma as esp
-    ds = esp.data.dataset.MoleculeDataset(mols)
-    return ds
+def ds_new(ds):
+    fn = lambda x: x + 1
+    return ds.apply(fn)
 
-def test_typing(mol_ds):
-    homo_ds = mol_ds.to_homogeneous_with_legacy_typing()
-    next(iter(homo_ds))
+def test_no_change(ds_new):
+    assert all(
+            x == x_ for (x, x_) in zip(ds_new.graphs, range(5)))
+
+def test_get_new(ds_new):
+    assert ds_new[0] == 1
+
+def test_len_new(ds_new):
+    assert len(ds_new) == 5
+
+def test_iter_new(ds_new):
+    assert all(
+            x == x_ + 1 for (x, x_) in zip(ds_new, range(5)))
 
 @pytest.fixture
-def homo_ds(mol_ds):
-    return mol_ds.to_homogeneous_with_legacy_typing()
+def ds_newer(ds):
+    fn = lambda x: x + 1
+    return ds.apply(fn).apply(fn)
 
-def test_dataloader(homo_ds):
-    import torch
-    import dgl
-    import espaloma as esp
+def test_iter_newer(ds_newer):
+    assert all(
+            x == x_ + 2 for (x, x_) in zip(ds_newer, range(5)))
 
-    collate_fn = esp.data.utils.collate_fn 
-
-    dataloader = torch.utils.data.DataLoader(
-            homo_ds,
-            collate_fn=collate_fn)
-
-def test_save_load_homo(homo_ds):
-    import tempfile
-    import espaloma as esp
-    import torch
-    with tempfile.TemporaryDirectory() as tempdir:
-        homo_ds.save(tempdir + '/ds.esp')
-        new_homo_ds = esp.data.dataset.HomogeneousGraphDataset()
-        new_homo_ds.load(tempdir + '/ds.esp')
-        
-        for old_graph, new_graph in zip(
-                iter(homo_ds), iter(new_homo_ds)):
-            assert old_graph.number_of_nodes() == new_graph.number_of_nodes()
-            assert old_graph.number_of_edges() == new_graph.number_of_edges()
-            assert torch.equal(
-                    old_graph.ndata['h0'], 
-                    new_graph.ndata['h0'])
-
+def test_no_return(ds):
+    fn = lambda x: x + 1
+    ds.apply(fn).apply(fn)
+    assert all(
+            x == x_ + 2 for (x, x_) in zip(ds, range(5)))
