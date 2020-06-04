@@ -1,35 +1,109 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma
+import espaloma as esp
 import abc
+import openforcefield
+import dgl
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class Graph(abc.ABC):
+class GraphBase(abc.ABC):
     """ Base class of various graph objects that we host data in.
     
     """
 
     def __init__(self):
-        super(Graph, self).__init__()
+        super(GraphBase, self).__init__()
 
-        self._stage = {
-                'type': 'base',
-                'batched': False,
-                'nn_typed': False,
-                'legacy_typed': False,
-                'has_coordinate': False,
-                'has_energy': False
-            }
+class Graph(GraphBase):
+    """ A unified graph object that support translation to and from
+    message-passing graphs and MM factor graph.
+
+
+    """
+    def __init__(self, mol=None, homograph=None, heterograph=None):
+        # input molecule
+        if isinstance(mol, str):
+            from openforcefield.topology import Molecule
+            mol = Molecule.from_smiles(mol)
+
+        if mol is not None and homograph is None and heterograph is None:
+            homograph = self.get_homograph_from_mol(mol)
+
+        if homograph is not None and heterograph is None:
+            heterograph = self.get_heterograph_from_graph(homograph)
+
+        self._mol = mol
+        self._homograph = homograph
+        self._heterograph = heterograph
+
+    @staticmethod
+    def get_homograph_from_mol(mol):
+        assert isinstance(
+                mol,
+                openforcefield.topology.Molecule
+            ), 'mol can only be OFF Molecule object.'
+
+        #TODO:
+        # rewrite this using OFF-generic grammar
+        graph = esp.graphs.utils.read_homogeneous_graph\
+                .from_rdkit_mol(mol.to_rdkit())
+
+        return graph
+
+    @staticmethod
+    def get_heterograph_from_graph(graph):
+        assert isinstance(
+                graph,
+                dgl.DGLGraph
+            ), 'graph can only be dgl Graph object.'
+
+        heterograph = esp.graphs.utils.read_heterogeneous_graph\
+                .from_homogeneous(graph)
+
+        return heterograph
 
     @property
-    def stage(self):
-        return self._stage
+    def homograph(self):
+        return self._homograph
 
-    def set_stage(self, **kwargs):
-        for key, value in kwargs.items():
-            self._stage[key] = value
+    @property
+    def heterograph(self):
+        return self._heterograph
+
+    @property
+    def ndata(self):
+        return self.homograph.ndata
+
+    @property
+    def edata(self):
+        return self.homograph.edata
+
+    @property
+    def nodes(self):
+        return self.heterograph.nodes
+
+    def save(self, path):
+        import pickle
+        with open(path, 'wb') as f_handle:
+            pickle.dump(
+                    [
+                        self._mol,
+                        self._homograph,
+                        self._heterograph
+                    ],
+                    f_handle)
+
+    def load(self, path):
+        import pickle
+        with open(path, 'rb') as f_handle:
+            (
+                self._mol, 
+                self._homograph, 
+                self._heterograph
+            ) = pickle.load(f_handle)
+
 
 
