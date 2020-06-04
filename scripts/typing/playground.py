@@ -9,9 +9,16 @@ def run():
     typing = esp.graphs.legacy_force_field.LegacyForceField('gaff-1.81')
     esol.apply(typing, in_place=True) # this modify the original data
 
+    # split
+    # NOTE:
+    # I don't like torch-generic splitting function as it requires
+    # specifically the volume of each partition and it is inconsistent
+    # with the specification of __getitem__ method
     ds_tr, ds_te = esol.split([4, 1]) 
     
     # get a loader object that views this dataset in some way
+    # using this specific flag the dataset turns into an iterator
+    # that outputs loss function, per John's suggestion
     loader = ds_tr.view('graph-typing-loss', batch_size=2)
 
     # define a layer
@@ -43,6 +50,8 @@ def run():
    
 
     # test it
+    # NOTE:
+    # one-hot for nn_typing, int for legacy_typing
     nn_typing = torch.cat(
             [readout(representation(g.homograph)).ndata['nn_typing'].argmax(dim=-1) for g in ds_te])
 
@@ -51,11 +60,6 @@ def run():
 
 
     print('Accuracy %s' % (torch.sum(torch.equal(nn_typing, legacy_typing) * 1.0) / len(ds_te)))
-    print(legacy_typing)
-
-
-
-    
 
 if __name__ == '__main__':
     run()
