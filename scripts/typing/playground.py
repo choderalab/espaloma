@@ -19,7 +19,7 @@ def run():
     # get a loader object that views this dataset in some way
     # using this specific flag the dataset turns into an iterator
     # that outputs loss function, per John's suggestion
-    loader = ds_tr.view('graph-typing-loss', batch_size=2)
+    loader = ds_tr.view('graph', batch_size=2)
 
     # define a layer
     layer = esp.nn.layers.dgl_legacy.gn('GraphConv')
@@ -39,27 +39,21 @@ def run():
             list(representation.parameters()) + list(readout.parameters()),
             1e-3)
 
+    loss_fn = esp.loss.GraphLoss(
+        base_loss=torch.nn.CrossEntropyLoss(),
+        between=['nn_typing', 'legacy_typing'])
+
     # train it !
     for _ in range(10):
-        for g, loss_fn in loader:
+        for g in loader:
             opt.zero_grad()
             g_hat = readout(representation(g))
-            loss = loss_fn(g_hat)
+            loss = loss_fn(g, g_hat)
             loss.backward()
             opt.step()
    
+    
 
-    # test it
-    # NOTE:
-    # one-hot for nn_typing, int for legacy_typing
-    nn_typing = torch.cat(
-            [readout(representation(g.homograph)).ndata['nn_typing'].argmax(dim=-1) for g in ds_te])
-
-    legacy_typing = torch.cat(
-            [g.ndata['legacy_typing'] for g in ds_te])
-
-
-    print('Accuracy %s' % (torch.sum(torch.equal(nn_typing, legacy_typing) * 1.0) / len(ds_te)))
 
 if __name__ == '__main__':
     run()

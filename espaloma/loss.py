@@ -46,7 +46,7 @@ class Loss(torch.nn.modules.loss._Loss):
     def __init__(self, size_average=None, reduce=None, reduction='mean'):
         super(Loss, self).__init__(size_average, reduce, reduction)
 
-    @abc.abstracmethod
+    @abc.abstractmethod
     def forward(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -74,7 +74,7 @@ class GraphLoss(Loss):
         }[string]
 
     
-    def forward(g_input, g_target=None):
+    def forward(self, g_input, g_target=None):
         """ Forward function of loss.
 
         """
@@ -86,9 +86,11 @@ class GraphLoss(Loss):
         input_fn, target_fn = self.between
 
         # compute loss using base loss
+        # NOTE:
+        # use keyward argument here since torch is bad with the order with args
         return self.base_loss.forward(
-                input_fn(g_input),
-                target_fn(g_target))
+                input=input_fn(g_input),
+                target=target_fn(g_target))
 
 
 
