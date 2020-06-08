@@ -24,6 +24,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     Attributes
     ----------
     transforms : an iterable of callables that transforms the input.
+        the `__getiem__` method applies these transforms later.
 
     """
     def __init__(self, graphs=None):
@@ -87,6 +88,18 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             return graphs
 
     def apply(self, fn, in_place=False):
+        r""" Apply functions to the elements of the dataset.
+
+        Parameters
+        ----------
+        fn : callable
+        
+        Note
+        ----
+        If in_place is False, `fn` is added to the `transforms` else it is applied
+        to elements and modifies them.
+
+        """
         assert callable(fn)
         assert isinstance(in_place, bool)
 
@@ -104,6 +117,10 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     def split(self, partition):
         """ Split the dataset according to some partition.
 
+        Parameters
+        ----------
+        partition : sequence of integers or floats
+            
         """
         n_data = len(self)
         partition = [int(n_data * x / sum(partition)) for x in partition]
@@ -158,6 +175,15 @@ class GraphDataset(Dataset):
                 'now have %s' % type(graphs[0]))
 
     def view(self, collate_fn='graph', *args, **kwargs):
+        """ Provide a data loader.
+
+        Parameters
+        ----------
+        collate_fn : callable or string
+            see `collate_fn` argument for `torch.utils.data.DataLoader`
+
+
+        """
         if collate_fn == 'graph':
             collate_fn = self.batch
         
