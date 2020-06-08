@@ -105,11 +105,11 @@ def fp_rdkit(atom):
 # =============================================================================
 
 
-def from_oemol(g, mol, use_fp=True):
+def from_oemol(mol, use_fp=True):
     from openeye import oechem
 
     # initialize graph
-    # g = dgl.DGLGraph()
+    g = dgl.DGLGraph()
 
     # enter nodes
     n_atoms = mol.NumAtoms()
@@ -144,11 +144,11 @@ def from_oemol(g, mol, use_fp=True):
     return g
 
 
-def from_rdkit_mol(g, mol, use_fp=True):
+def from_rdkit_mol(mol, use_fp=True):
     from rdkit import Chem
 
     # initialize graph
-    # g = dgl.DGLGraph()
+    g = dgl.DGLGraph()
 
     # enter nodes
     n_atoms = mol.GetNumAtoms()

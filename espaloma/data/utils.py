@@ -102,3 +102,7 @@ def batch(ds, batch_size, seed=2666):
     ]
 
     return list(zip(gs_batched, ys_batched))
+
+
+def collate_fn(graphs):
+    return esp.HomogeneousGraph(dgl.batch(graphs))
