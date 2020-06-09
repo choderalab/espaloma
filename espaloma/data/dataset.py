@@ -132,6 +132,31 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return ds
 
+    def save(self, path):
+        """ Save dataset to path.
+
+        Parameters
+        ----------
+        path : path-like object
+        """
+        import pickle
+        with open(path, 'wb') as f_handle:
+            pickle.dump(
+                    self.graphs,
+                    f_handle)
+
+    def load(self, path):
+        """ Load path to dataset.
+
+        Parameters
+        ----------
+        """
+        import pickle
+        with open(path, 'rb') as f_handle:
+            self.graphs = pickle.load(f_handle)
+
+
+
 class GraphDataset(Dataset):
     """ Dataset with additional support for only viewing
     certain attributes as `torch.utils.data.DataLoader`
