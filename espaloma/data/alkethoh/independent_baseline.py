@@ -14,23 +14,6 @@ def atom_symmetry_classes(offmol: Molecule):
     return symmetry_classes
 
 
-n_unique = 0
-n_total = 0
-
-symmetry_classes = {}
-
-# Atom types
-for name in tqdm(offmols):
-    offmol = offmols[name]
-    symmetry_classes[name] = atom_symmetry_classes(offmol)
-    if offmol.n_atoms != len(symmetry_classes[name]):
-        print(f'{offmol.n_atoms} != {len(symmetry_classes[name])}')
-
-    n_unique += len(set(symmetry_classes[name]))
-    n_total += offmol.n_atoms
-
-print(f'atoms: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
-
 
 def canonicalize_order(tup):
     return min(tup, tup[::-1])
@@ -91,48 +74,38 @@ def get_unique_angles(offmol):
     return triple_inds, angle_inds
 
 
-# Bond types
-n_unique = 0
-n_total = 0
-for name in tqdm(offmols):
-    pair_inds, bond_inds = get_unique_bonds(offmols[name])
 
-    n_unique += len(set(bond_inds))
-    n_total += len(bond_inds)
-print(f'bonds: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
+def get_unique_torsions(offmol):
+    """
+    quad_inds:
+        array of shape (n_angles, 4)
+    torsion_inds:
+        array of shape (n_angles,)
+    """
 
-# Angle types
-n_unique = 0
-n_total = 0
-for name in tqdm(offmols):
-    triple_inds, angle_inds = get_unique_angles(offmols[name])
+    sym = atom_symmetry_classes(offmol)
 
-    n_unique += len(set(angle_inds))
-    n_total += len(angle_inds)
-print(f'angles: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
-
-# Torsion types
-n_unique = 0
-n_total = 0
-for name in tqdm(offmols):
-    offmol = offmols[name]
-    torsions = offmol.propers
-    sym = symmetry_classes[name]
-
+    quad_inds = []
     torsion_tups = []
 
-    for torsion in torsions:
-        # is this off by one?
+    for torsion in offmol.propers:
+        quad_inds.append(tuple((atom.molecule_atom_index for atom in torsion)))
         tup = tuple(sym[atom.molecule_atom_index] for atom in torsion)
         torsion_tups.append(canonicalize_order(tup))
-    n_unique += len(set(torsion_tups))
-    n_total += len(torsion_tups)
-print(f'torsions: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
+
+
+    quad_inds = np.array(quad_inds)
+
+    torsion_set = set(torsion_tups)
+    torsion_ind_map = dict(zip(torsion_set, range(len(torsion_set))))
+    torsion_inds = np.array([torsion_ind_map[tup] for tup in torsion_tups])
+
+    return quad_inds, torsion_inds
 
 
 # TODO: make the import structure clearer
 from espaloma.data.alkethoh.mm_utils import harmonic_bond_potential, harmonic_angle_potential, periodic_torsion_potential
-from espaloma.data.alkethoh.neural_baseline import extract_bond_term_inputs, compute_distances, compute_angles, compute_torsions
+from espaloma.data.alkethoh.neural_baseline import extract_bond_term_inputs, extract_angle_term_inputs, compute_distances, compute_angles, compute_torsions
 from espaloma.data.alkethoh.neural_baseline import get_snapshots_and_energies
 
 def compute_harmonic_bond_potential(offmol, xyz, params, bond_inds):
@@ -143,8 +116,8 @@ def compute_harmonic_bond_potential(offmol, xyz, params, bond_inds):
     :param params:
         array of length 2 * n_unique
     :param bond_inds:
-        numpy array of length offmol.n_atoms,
-        taking integer values in range 1 - n_unique
+        numpy array of length len(offmol.bonds),
+        taking integer values in range 0 through n_unique
     :return:
     """
 
@@ -153,17 +126,107 @@ def compute_harmonic_bond_potential(offmol, xyz, params, bond_inds):
     ks, r0s = params[:n_unique], params[n_unique:]
     k, r0 = ks[bond_inds], r0s[bond_inds]
 
+    # TODO: UGG, these may not be in the same order...
     x, inds = extract_bond_term_inputs(offmol)
     r = compute_distances(xyz, inds)
     return np.sum(harmonic_bond_potential(r, k, r0), axis=1)
 
 
+def compute_harmonic_angle_potential(offmol, xyz, params, angle_inds):
+    """
+
+    :param offmol:
+    :param xyz:
+    :param params:
+        array of length 2 * n_unique
+    :param angle_inds:
+        numpy array of length len(offmol.angles),
+        taking integer values in range 0 through n_unique
+    :return:
+    """
+
+
+    n_unique = int(len(params)/2)
+    ks, theta0s = params[:n_unique], params[n_unique:]
+    k, theta0 = ks[angle_inds], theta0s[angle_inds]
+
+    # TODO: UGG, these may not be in the same order...
+    x, inds = extract_angle_term_inputs(offmol)
+    theta = compute_angles(xyz, inds)
+    return np.sum(harmonic_angle_potential(theta, k, theta0), axis=1)
+
 
 
 
 if __name__ == '__main__':
-    xyz, _ = get_snapshots_and_energies()
+    offmol = offmols['AlkEthOH_r1155']
+    traj, _, ani1ccx_energies = get_snapshots_and_energies()
+    xyz = traj.xyz
+
+    # bonds
+    pair_inds, bond_inds = get_unique_bonds(offmol)
+    n_unique = len(set(bond_inds))
+    params = np.random.randn(2*n_unique)
+
+    bond_energies = compute_harmonic_bond_potential(offmol, xyz, params, bond_inds)
+    print('bond energies', bond_energies)
+
+
+    # angles
+    triple_inds, angle_inds = get_unique_angles(offmol)
+    n_unique = len(set(angle_inds))
+    params = np.random.randn(2 * n_unique)
+    angle_energies = compute_harmonic_angle_potential(offmol, xyz, params, angle_inds)
+    print('angle energies', angle_energies)
+
+    # torsions
+    # TODO: finish
 
 
 
-    compute_harmonic_bond_potential(offmol, )
+
+    # Atom types
+    n_unique = 0
+    n_total = 0
+
+    symmetry_classes = {}
+    for name in tqdm(offmols):
+        offmol = offmols[name]
+        symmetry_classes[name] = atom_symmetry_classes(offmol)
+        if offmol.n_atoms != len(symmetry_classes[name]):
+            print(f'{offmol.n_atoms} != {len(symmetry_classes[name])}')
+
+        n_unique += len(set(symmetry_classes[name]))
+        n_total += offmol.n_atoms
+
+    print(f'atoms: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
+
+    # Bond types
+    n_unique = 0
+    n_total = 0
+    for name in tqdm(offmols):
+        pair_inds, bond_inds = get_unique_bonds(offmols[name])
+
+        n_unique += len(set(bond_inds))
+        n_total += len(bond_inds)
+    print(f'bonds: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
+
+    # Angle types
+    n_unique = 0
+    n_total = 0
+    for name in tqdm(offmols):
+        triple_inds, angle_inds = get_unique_angles(offmols[name])
+
+        n_unique += len(set(angle_inds))
+        n_total += len(angle_inds)
+    print(f'angles: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
+
+    # Torsion types
+    n_unique = 0
+    n_total = 0
+    for name in tqdm(offmols):
+        quad_inds, torsion_inds = get_unique_torsions(offmols[name])
+
+        n_unique += len(set(torsion_inds))
+        n_total += len(torsion_inds)
+    print(f'torsions: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
