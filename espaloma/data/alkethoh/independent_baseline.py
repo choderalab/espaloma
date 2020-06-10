@@ -63,6 +63,34 @@ def get_unique_bonds(offmol):
     return pair_inds, bond_inds
 
 
+def get_unique_angles(offmol):
+    """
+    triple_inds:
+        array of shape (n_angles, 3)
+    angle_inds:
+        array of shape (n_angles,)
+    """
+
+    sym = atom_symmetry_classes(offmol)
+
+    triple_inds = []
+    angle_tups = []
+
+    for angle in offmol.angles:
+        triple_inds.append(tuple((atom.molecule_atom_index for atom in angle)))
+        tup = tuple(sym[atom.molecule_atom_index] for atom in angle)
+        angle_tups.append(canonicalize_order(tup))
+
+
+    triple_inds = np.array(triple_inds)
+
+    angle_set = set(angle_tups)
+    angle_ind_map = dict(zip(angle_set, range(len(angle_set))))
+    angle_inds = np.array([angle_ind_map[tup] for tup in angle_tups])
+
+    return triple_inds, angle_inds
+
+
 # Bond types
 n_unique = 0
 n_total = 0
@@ -77,18 +105,10 @@ print(f'bonds: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
 n_unique = 0
 n_total = 0
 for name in tqdm(offmols):
-    offmol = offmols[name]
-    angles = offmol.angles
-    sym = symmetry_classes[name]
+    triple_inds, angle_inds = get_unique_angles(offmols[name])
 
-    angle_tups = []
-
-    for angle in angles:
-        # is this off by one?
-        tup = tuple(sym[atom.molecule_atom_index] for atom in angle)
-        angle_tups.append(canonicalize_order(tup))
-    n_unique += len(set(angle_tups))
-    n_total += len(angle_tups)
+    n_unique += len(set(angle_inds))
+    n_total += len(angle_inds)
 print(f'angles: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
 
 # Torsion types
