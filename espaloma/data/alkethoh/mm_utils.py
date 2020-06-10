@@ -74,6 +74,7 @@ def compute_torsions(xyz, inds):
 
 @jit
 def periodic_torsion_potential(theta, ks, phases, periodicities):
+    n_periodicities = phases.shape[1]
     return np.sum([ks[:, i] * (1 + np.cos(periodicities[:, i] * theta - phases[:, i])) for i in range(n_periodicities)],
                   axis=0)
 
@@ -96,7 +97,8 @@ from simtk import unit
 from simtk import openmm as mm
 from simtk.openmm.app import Simulation
 from simtk.openmm import XmlSerializer
-
+from pkg_resources import resource_filename
+from espaloma.data.alkethoh.data import offmols
 
 def get_sim(name):
     """nonbonded forces in group 0, all other forces in group 1"""
@@ -105,7 +107,9 @@ def get_sim(name):
     # Parametrize the topology and create an OpenMM System.
     topology = mol.to_topology()
 
-    with open(data_path + 'snapshots_and_energies/{}_system.xml'.format(name), 'r') as f:
+    fname = resource_filename('espaloma.data.alkethoh', 'snapshots_and_energies/{}_system.xml'.format(name))
+
+    with open(fname, 'r') as f:
         xml = f.read()
 
     system = XmlSerializer.deserializeSystem(xml)

@@ -4,12 +4,13 @@
 import mdtraj as md
 import numpy as onp
 from jax import numpy as np
-from .mm_utils import compute_distances, compute_angles, compute_torsions
-from .mm_utils import harmonic_bond_potential, harmonic_angle_potential, periodic_torsion_potential
-from .mm_utils import get_nb_energy, get_sim, get_energy, set_positions
+from espaloma.data.alkethoh.mm_utils import compute_distances, compute_angles, compute_torsions
+from espaloma.data.alkethoh.mm_utils import harmonic_bond_potential, harmonic_angle_potential, periodic_torsion_potential
+from espaloma.data.alkethoh.mm_utils import get_nb_energy, get_sim, get_energy, set_positions
 
-data_path = ''
-path_to_offmols = data_path + 'AlkEthOH_rings_offmols.pkl'
+from espaloma.data.alkethoh.data import path_to_offmols
+from pkg_resources import resource_filename
+
 from pickle import load
 from jax import vmap
 
@@ -18,9 +19,9 @@ with open(path_to_offmols, 'rb') as f:
 
 
 def get_snapshots_and_energies(name='AlkEthOH_r1155'):
-    snapshots_path = data_path + 'snapshots_and_energies/{}_molecule_traj.h5'.format(name)
-    energies_path = data_path + 'snapshots_and_energies/{}_molecule_energies.npy'.format(name)
-    ani1ccx_energies_path = data_path + 'snapshots_and_energies/{}_ani1ccx_energies.npy'.format(name)
+    snapshots_path = resource_filename('espaloma.data.alkethoh', 'snapshots_and_energies/{}_molecule_traj.h5'.format(name))
+    energies_path = resource_filename('espaloma.data.alkethoh', 'snapshots_and_energies/{}_molecule_energies.npy'.format(name))
+    ani1ccx_energies_path = resource_filename('espaloma.data.alkethoh', 'snapshots_and_energies/{}_ani1ccx_energies.npy'.format(name))
 
     snapshots = md.load(snapshots_path)
     energies = onp.load(energies_path)
@@ -225,8 +226,8 @@ def extract_torsion_term_inputs(offmol):
 
 
 def compute_harmonic_bond_potential(offmol, xyz, f_2_params):
-    x, pair_inds = extract_bond_term_inputs(offmol)
-    r = compute_distances(xyz, pair_inds)
+    x, inds = extract_bond_term_inputs(offmol)
+    r = compute_distances(xyz, inds)
     k, r0 = f_bond(f_2_params, x).T
     return np.sum(harmonic_bond_potential(r, k, r0), axis=1)
 
@@ -250,7 +251,7 @@ def compute_periodic_torsion_potential(offmol, xyz, f_4_params):
 
     return np.sum(periodic_torsion_potential(theta, ks, phases, periodicities_), axis=1)
 
-
+from espaloma.data.alkethoh.mm_utils import pdist
 
 def pred_nonbonded_energy(offmol, xyz, f_1_params):
     x = atom_features_from_offmol(offmol)
@@ -271,6 +272,7 @@ def pred_valence_energy(offmol, xyz, f_2_params, f_3_params, f_4_params):
 
     return bond_energy + angle_energy + torsion_energy
 
+from simtk import unit
 
 
 if __name__ == '__main__':
