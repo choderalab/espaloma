@@ -36,22 +36,41 @@ def canonicalize_order(tup):
     return min(tup, tup[::-1])
 
 
+def get_unique_bonds(offmol):
+    """
+    pair_inds:
+        array of shape (n_bonds, 2)
+    bond_inds:
+        array of shape (n_bonds,)
+    """
+
+    sym = atom_symmetry_classes(offmol)
+
+    pair_inds = []
+    bond_tups = []
+
+    for bond in offmol.bonds:
+        pair_inds.append((bond.atom1_index, bond.atom2_index))
+        tup = (sym[bond.atom1_index], sym[bond.atom2_index])
+        bond_tups.append(canonicalize_order(tup))
+
+    pair_inds = np.array(pair_inds)
+
+    bond_set = set(bond_tups)
+    bond_ind_map = dict(zip(bond_set, range(len(bond_set))))
+    bond_inds = np.array([bond_ind_map[tup] for tup in bond_tups])
+
+    return pair_inds, bond_inds
+
+
 # Bond types
 n_unique = 0
 n_total = 0
 for name in tqdm(offmols):
-    offmol = offmols[name]
-    sym = symmetry_classes[name]
-    if offmol.n_atoms != len(sym):
-        print(f'{offmol.n_atoms} != {len(sym)}')
+    pair_inds, bond_inds = get_unique_bonds(offmols[name])
 
-    bond_tups = []
-
-    for bond in offmol.bonds:
-        tup = (sym[bond.atom1_index], sym[bond.atom2_index])
-        bond_tups.append(canonicalize_order(tup))
-    n_unique += len(set(bond_tups))
-    n_total += len(bond_tups)
+    n_unique += len(set(bond_inds))
+    n_total += len(bond_inds)
 print(f'bonds: {n_unique} / {n_total} = {n_unique / n_total:.3f}')
 
 # Angle types
