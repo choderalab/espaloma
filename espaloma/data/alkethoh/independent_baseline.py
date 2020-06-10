@@ -108,13 +108,13 @@ from espaloma.data.alkethoh.mm_utils import harmonic_bond_potential, harmonic_an
 from espaloma.data.alkethoh.neural_baseline import extract_bond_term_inputs, extract_angle_term_inputs, compute_distances, compute_angles, compute_torsions
 from espaloma.data.alkethoh.neural_baseline import get_snapshots_and_energies
 
-def compute_harmonic_bond_potential(offmol, xyz, params, bond_inds):
+def compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds):
     """
-
-    :param offmol:
     :param xyz:
     :param params:
         array of length 2 * n_unique
+    :param pair_inds:
+        array of shape (len(offmol.bonds), 2)
     :param bond_inds:
         numpy array of length len(offmol.bonds),
         taking integer values in range 0 through n_unique
@@ -126,19 +126,18 @@ def compute_harmonic_bond_potential(offmol, xyz, params, bond_inds):
     ks, r0s = params[:n_unique], params[n_unique:]
     k, r0 = ks[bond_inds], r0s[bond_inds]
 
-    # TODO: UGG, these may not be in the same order...
-    x, inds = extract_bond_term_inputs(offmol)
-    r = compute_distances(xyz, inds)
+    r = compute_distances(xyz, pair_inds)
     return np.sum(harmonic_bond_potential(r, k, r0), axis=1)
 
 
-def compute_harmonic_angle_potential(offmol, xyz, params, angle_inds):
+def compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds):
     """
 
-    :param offmol:
     :param xyz:
     :param params:
         array of length 2 * n_unique
+    :param triple_inds:
+        array of shape (len(offmol.angles), 3)
     :param angle_inds:
         numpy array of length len(offmol.angles),
         taking integer values in range 0 through n_unique
@@ -150,12 +149,35 @@ def compute_harmonic_angle_potential(offmol, xyz, params, angle_inds):
     ks, theta0s = params[:n_unique], params[n_unique:]
     k, theta0 = ks[angle_inds], theta0s[angle_inds]
 
-    # TODO: UGG, these may not be in the same order...
-    x, inds = extract_angle_term_inputs(offmol)
-    theta = compute_angles(xyz, inds)
+    theta = compute_angles(xyz, triple_inds)
     return np.sum(harmonic_angle_potential(theta, k, theta0), axis=1)
 
 
+n_periodicities = 6
+periodicities = np.arange(n_periodicities) + 1
+
+def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
+    """
+
+    :param xyz:
+    :param params:
+        length ( 2 * n_unique * n_periodicities )
+    :param quad_inds:
+    :param torsion_inds:
+    :return:
+    """
+    theta = compute_torsions(xyz, quad_inds)
+
+    n_unique = int(len(params) / (2 * n_periodicities))
+    params = np.reshape(params, (n_unique, (2 * n_periodicities)))
+
+
+    ks, phases = params[torsion_inds][:, :n_periodicities], params[torsion_inds][:, n_periodicities:]
+
+    # TODO; clean this up a bit
+    periodicities_ = np.array([periodicities for _ in ks])
+
+    return np.sum(periodic_torsion_potential(theta, ks, phases, periodicities_), axis=1)
 
 
 if __name__ == '__main__':
@@ -168,20 +190,23 @@ if __name__ == '__main__':
     n_unique = len(set(bond_inds))
     params = np.random.randn(2*n_unique)
 
-    bond_energies = compute_harmonic_bond_potential(offmol, xyz, params, bond_inds)
-    print('bond energies', bond_energies)
+    bond_energies = compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds)
+    print('bond energies mean', bond_energies.mean())
 
 
     # angles
     triple_inds, angle_inds = get_unique_angles(offmol)
     n_unique = len(set(angle_inds))
     params = np.random.randn(2 * n_unique)
-    angle_energies = compute_harmonic_angle_potential(offmol, xyz, params, angle_inds)
-    print('angle energies', angle_energies)
+    angle_energies = compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds)
+    print('angle energies mean', angle_energies.mean())
 
     # torsions
-    # TODO: finish
-
+    quad_inds, torsion_inds = get_unique_torsions(offmol)
+    n_unique = len(set(torsion_inds))
+    params = np.random.randn(2 * n_unique * n_periodicities)
+    torsion_energies = compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds)
+    print('torsion energies mean', torsion_energies.mean())
 
 
 
