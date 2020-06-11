@@ -104,6 +104,7 @@ from espaloma.data.alkethoh.mm_utils import harmonic_bond_potential, harmonic_an
     periodic_torsion_potential
 from espaloma.data.alkethoh.neural_baseline import compute_distances, compute_angles, compute_torsions
 from espaloma.data.alkethoh.neural_baseline import get_snapshots_and_energies
+from espaloma.data.alkethoh.mm_utils import get_bond_energy, get_angle_energy, get_torsion_energy, get_nb_energy
 
 
 def compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds):
@@ -186,7 +187,9 @@ if __name__ == '__main__':
     pair_inds, bond_inds = get_unique_bonds(offmol)
     n_unique_bonds = len(set(bond_inds))
     n_bond_params = 2 * n_unique_bonds
-    bond_params = np.random.randn(n_bond_params)
+    bond_params = np.random.randn(n_bond_params) * 0.01
+    bond_params[:n_unique_bonds] += 1000
+    bond_params[n_unique_bonds:] += 0.1
 
     bond_energies = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
     print('bond energies mean', bond_energies.mean())
@@ -212,27 +215,69 @@ if __name__ == '__main__':
     from simtk import unit
     from espaloma.data.alkethoh.mm_utils import get_sim, set_positions, get_energy, get_nb_energy
     valence_energies = []
+    bond_energies = []
     sim = get_sim(name)
     for conf in xyz:
         set_positions(sim, conf * unit.nanometer)
         U_tot = get_energy(sim)
+        U_bond = get_bond_energy(sim)
+        U_angle = get_angle_energy(sim)
+        U_torsion = get_torsion_energy(sim)
         U_nb = get_nb_energy(sim)
+
+        assert(np.allclose(U_tot, U_bond + U_angle + U_torsion + U_nb))
+
+        bond_energies.append(U_bond)
         valence_energies.append(U_tot - U_nb)
+
+    bond_target = np.array(bond_energies)
     valence_target = np.array(valence_energies)
 
+    from jax import jit
+    @jit
     def loss(all_params):
         bond_params = all_params[:n_bond_params]
-        angle_params = all_params[n_bond_params:(n_bond_params + n_angle_params)]
-        torsion_params = all_params[-n_torsion_params:]
+        #angle_params = all_params[n_bond_params:(n_bond_params + n_angle_params)]
+        #torsion_params = all_params[-n_torsion_params:]
 
         bond_energies = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
-        angle_energies = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
-        torsion_energies = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
-        
-        U_valence = bond_energies + angle_energies + torsion_energies
+        return np.sum((bond_target - bond_energies) ** 2)
 
-        return np.sum((valence_target - U_valence) ** 2)
+        #angle_energies = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
+        #torsion_energies = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
+        #U_valence = bond_energies + angle_energies + torsion_energies
+        #return np.sum((valence_target - U_valence) ** 2)
 
+    from jax import grad
+
+    from time import time
+
+    g = grad(loss)
+
+    t0 = time()
+    _ = g(params)
+    t1 = time()
+    _ = g(params)
+    t2 = time()
+
+    print(f'time to compile gradient: {t1 - t0:.3f}s')
+    print(f'time to compute gradient: {t2 - t1:.3f}s')
+
+
+    # Defining functions that can talk to scipy optimizers...
+    def fun(params):
+        return float(loss(params))
+
+
+    import numpy as onp
+    def jac(params):
+        return onp.array(g(params), dtype=onp.float64)
+
+
+    from scipy.optimize import minimize
+
+    opt_result = minimize(fun, x0=params, jac=jac, method='L-BFGS-B', options=dict(disp=True))
+    print(opt_result)
 
 
     # Atom types
