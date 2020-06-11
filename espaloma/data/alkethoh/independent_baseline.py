@@ -7,7 +7,8 @@ from openforcefield.topology import Molecule
 from tqdm import tqdm
 
 
-def atom_symmetry_classes(offmol: Molecule):
+def atom_symmetry_classes(offmol: Molecule) -> np.ndarray:
+    """return integer array of length offmol.n_atoms, labeling symmetry class of each atom"""
     oemol = offmol.to_openeye()
     oechem.OEPerceiveSymmetry(oemol)
     symmetry_classes = np.array([atom.GetSymmetryClass() for atom in oemol.GetAtoms()])
@@ -15,11 +16,14 @@ def atom_symmetry_classes(offmol: Molecule):
 
 
 def canonicalize_order(tup):
+    """want to treat (a,b,c,d) same as (d,c,b,a), so return min((a,b,c,d), (d,c,b,a))"""
     return min(tup, tup[::-1])
 
 
-def get_unique_bonds(offmol):
-    """
+def get_unique_bonds(offmol: Molecule):
+    """based on symmetry classes of atoms, identify symmetry classes of bonds
+
+    returns
     pair_inds:
         array of shape (n_bonds, 2)
     bond_inds:
@@ -46,7 +50,9 @@ def get_unique_bonds(offmol):
 
 
 def get_unique_angles(offmol):
-    """
+    """based on symmetry classes of atoms, identify symmetry classes of angles
+
+    returns
     triple_inds:
         array of shape (n_angles, 3)
     angle_inds:
@@ -73,7 +79,9 @@ def get_unique_angles(offmol):
 
 
 def get_unique_torsions(offmol):
-    """
+    """based on symmetry classes of atoms, identify symmetry classes of torsions
+
+    returns
     quad_inds:
         array of shape (n_angles, 4)
     torsion_inds:
@@ -176,6 +184,9 @@ def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
 
     return np.sum(periodic_torsion_potential(theta, ks, phases, periodicities_), axis=1)
 
+
+# TODO: add coupling terms
+# TODO: free-form-ify the terms
 
 if __name__ == '__main__':
     name = 'AlkEthOH_r1155'
