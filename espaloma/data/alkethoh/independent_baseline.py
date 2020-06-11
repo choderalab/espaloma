@@ -14,7 +14,6 @@ def atom_symmetry_classes(offmol: Molecule):
     return symmetry_classes
 
 
-
 def canonicalize_order(tup):
     return min(tup, tup[::-1])
 
@@ -64,7 +63,6 @@ def get_unique_angles(offmol):
         tup = tuple(sym[atom.molecule_atom_index] for atom in angle)
         angle_tups.append(canonicalize_order(tup))
 
-
     triple_inds = np.array(triple_inds)
 
     angle_set = set(angle_tups)
@@ -72,7 +70,6 @@ def get_unique_angles(offmol):
     angle_inds = np.array([angle_ind_map[tup] for tup in angle_tups])
 
     return triple_inds, angle_inds
-
 
 
 def get_unique_torsions(offmol):
@@ -93,7 +90,6 @@ def get_unique_torsions(offmol):
         tup = tuple(sym[atom.molecule_atom_index] for atom in torsion)
         torsion_tups.append(canonicalize_order(tup))
 
-
     quad_inds = np.array(quad_inds)
 
     torsion_set = set(torsion_tups)
@@ -104,9 +100,11 @@ def get_unique_torsions(offmol):
 
 
 # TODO: make the import structure clearer
-from espaloma.data.alkethoh.mm_utils import harmonic_bond_potential, harmonic_angle_potential, periodic_torsion_potential
-from espaloma.data.alkethoh.neural_baseline import extract_bond_term_inputs, extract_angle_term_inputs, compute_distances, compute_angles, compute_torsions
+from espaloma.data.alkethoh.mm_utils import harmonic_bond_potential, harmonic_angle_potential, \
+    periodic_torsion_potential
+from espaloma.data.alkethoh.neural_baseline import compute_distances, compute_angles, compute_torsions
 from espaloma.data.alkethoh.neural_baseline import get_snapshots_and_energies
+
 
 def compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds):
     """
@@ -121,8 +119,7 @@ def compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds):
     :return:
     """
 
-
-    n_unique = int(len(params)/2)
+    n_unique = int(len(params) / 2)
     ks, r0s = params[:n_unique], params[n_unique:]
     k, r0 = ks[bond_inds], r0s[bond_inds]
 
@@ -144,8 +141,7 @@ def compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds):
     :return:
     """
 
-
-    n_unique = int(len(params)/2)
+    n_unique = int(len(params) / 2)
     ks, theta0s = params[:n_unique], params[n_unique:]
     k, theta0 = ks[angle_inds], theta0s[angle_inds]
 
@@ -155,6 +151,7 @@ def compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds):
 
 n_periodicities = 6
 periodicities = np.arange(n_periodicities) + 1
+
 
 def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
     """
@@ -171,7 +168,6 @@ def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
     n_unique = int(len(params) / (2 * n_periodicities))
     params = np.reshape(params, (n_unique, (2 * n_periodicities)))
 
-
     ks, phases = params[torsion_inds][:, :n_periodicities], params[torsion_inds][:, n_periodicities:]
 
     # TODO; clean this up a bit
@@ -181,32 +177,61 @@ def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
 
 
 if __name__ == '__main__':
-    offmol = offmols['AlkEthOH_r1155']
-    traj, _, ani1ccx_energies = get_snapshots_and_energies()
+    name = 'AlkEthOH_r1155'
+    offmol = offmols[name]
+    traj, _, ani1ccx_energies = get_snapshots_and_energies(name)
     xyz = traj.xyz
 
     # bonds
     pair_inds, bond_inds = get_unique_bonds(offmol)
-    n_unique = len(set(bond_inds))
-    params = np.random.randn(2*n_unique)
+    n_unique_bonds = len(set(bond_inds))
+    n_bond_params = 2 * n_unique_bonds
+    bond_params = np.random.randn(n_bond_params)
 
-    bond_energies = compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds)
+    bond_energies = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
     print('bond energies mean', bond_energies.mean())
-
 
     # angles
     triple_inds, angle_inds = get_unique_angles(offmol)
-    n_unique = len(set(angle_inds))
-    params = np.random.randn(2 * n_unique)
-    angle_energies = compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds)
+    n_unique_angles = len(set(angle_inds))
+    n_angle_params = 2 * n_unique_angles
+    angle_params = np.random.randn(n_angle_params)
+    angle_energies = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
     print('angle energies mean', angle_energies.mean())
 
     # torsions
     quad_inds, torsion_inds = get_unique_torsions(offmol)
-    n_unique = len(set(torsion_inds))
-    params = np.random.randn(2 * n_unique * n_periodicities)
-    torsion_energies = compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds)
+    n_unique_torsions = len(set(torsion_inds))
+    n_torsion_params = 2 * n_unique_torsions * n_periodicities
+    torsion_params = np.random.randn(n_torsion_params)
+    torsion_energies = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
     print('torsion energies mean', torsion_energies.mean())
+
+    params = np.hstack([bond_params, angle_params, torsion_params])
+
+    from simtk import unit
+    from espaloma.data.alkethoh.mm_utils import get_sim, set_positions, get_energy, get_nb_energy
+    valence_energies = []
+    sim = get_sim(name)
+    for conf in xyz:
+        set_positions(sim, conf * unit.nanometer)
+        U_tot = get_energy(sim)
+        U_nb = get_nb_energy(sim)
+        valence_energies.append(U_tot - U_nb)
+    valence_target = np.array(valence_energies)
+
+    def loss(all_params):
+        bond_params = all_params[:n_bond_params]
+        angle_params = all_params[n_bond_params:(n_bond_params + n_angle_params)]
+        torsion_params = all_params[-n_torsion_params:]
+
+        bond_energies = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
+        angle_energies = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
+        torsion_energies = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
+        
+        U_valence = bond_energies + angle_energies + torsion_energies
+
+        return np.sum((valence_target - U_valence) ** 2)
 
 
 
