@@ -185,6 +185,7 @@ if __name__ == '__main__':
 
     # bonds
     pair_inds, bond_inds = get_unique_bonds(offmol)
+    bond_inds = np.arange(len(pair_inds))
     n_unique_bonds = len(set(bond_inds))
     n_bond_params = 2 * n_unique_bonds
     bond_params = np.random.randn(n_bond_params) * 0.01
@@ -216,7 +217,10 @@ if __name__ == '__main__':
     from espaloma.data.alkethoh.mm_utils import get_sim, set_positions, get_energy, get_nb_energy
     valence_energies = []
     bond_energies = []
+    angle_energies = []
+    torsion_energies = []
     sim = get_sim(name)
+
     for conf in xyz:
         set_positions(sim, conf * unit.nanometer)
         U_tot = get_energy(sim)
@@ -228,25 +232,36 @@ if __name__ == '__main__':
         assert(np.allclose(U_tot, U_bond + U_angle + U_torsion + U_nb))
 
         bond_energies.append(U_bond)
+        angle_energies.append(U_angle)
+        torsion_energies.append(U_torsion)
         valence_energies.append(U_tot - U_nb)
 
     bond_target = np.array(bond_energies)
+    angle_target = np.array(angle_energies)
+    torsion_target = np.array(torsion_energies)
     valence_target = np.array(valence_energies)
+    print('bonds', bond_target.mean(), bond_target.std())
+    print('angles', angle_target.mean(), angle_target.std())
+    print('torsions', torsion_target.mean(), torsion_target.std())
+    print('valence', valence_target.mean(), valence_target.std())
+
+    # Should check that I can minimize each of these terms independently
 
     from jax import jit
     @jit
     def loss(all_params):
         bond_params = all_params[:n_bond_params]
-        #angle_params = all_params[n_bond_params:(n_bond_params + n_angle_params)]
-        #torsion_params = all_params[-n_torsion_params:]
+        angle_params = all_params[n_bond_params:(n_bond_params + n_angle_params)]
+        torsion_params = all_params[-n_torsion_params:]
 
-        bond_energies = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
-        return np.sum((bond_target - bond_energies) ** 2)
-
-        #angle_energies = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
-        #torsion_energies = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
-        #U_valence = bond_energies + angle_energies + torsion_energies
-        #return np.sum((valence_target - U_valence) ** 2)
+        U_bond = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
+        U_angle = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
+        U_torsion = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
+        U_valence = U_bond + U_angle + U_torsion
+        return np.std(bond_target - U_bond)
+        # return np.std(angle_target - U_angle)
+        # return np.std(torsion_target - U_torsion)
+        # return np.std(valence_target - U_valence)
 
     from jax import grad
 
@@ -276,9 +291,8 @@ if __name__ == '__main__':
 
     from scipy.optimize import minimize
 
-    opt_result = minimize(fun, x0=params, jac=jac, method='L-BFGS-B', options=dict(disp=True))
-    print(opt_result)
-
+    opt_result = minimize(fun, x0=params, jac=jac, #method='L-BFGS-B',
+                          options=dict(disp=True))
 
     # Atom types
     n_unique = 0
