@@ -233,6 +233,7 @@ if __name__ == '__main__':
         omm_bond_params[tup] = (length, k)
         omm_pair_inds.append(tup)
 
+    # assert that I'm defining bonds on the same pairs of atoms
     print(set(omm_pair_inds))
     print(set(omm_pair_inds).symmetric_difference(set([tuple(p) for p in pair_inds])))
 
@@ -244,6 +245,25 @@ if __name__ == '__main__':
         print(i, length, k)
         params[bond_inds[i]] = k_
         params[bond_inds[i] + n_unique_bonds] = length_
+
+
+    # Also initialize angles
+    harmonic_angle_force = [f for f in sim.system.getForces() if ("HarmonicAngle" in f.__class__.__name__)][0]
+    omm_angle_params = dict()
+
+    for i in range(harmonic_angle_force.getNumAngles()):
+        a, b, c, theta, k = harmonic_angle_force.getAngleParameters(i)
+        tup = canonicalize_order((a,b,c))
+        omm_angle_params[tup] = (theta, k)
+
+    for i in range(len(triple_inds)):
+        theta, k = omm_angle_params[tuple(triple_inds[i])]
+        theta_, k_ = theta / unit.radian, k / (unit.kilojoule_per_mole / (unit.radian**2))
+        print(i, theta, k)
+        offset = n_unique_bonds * 2
+        params[offset + angle_inds[i]] = k_
+        params[offset + angle_inds[i] + n_unique_angles] = theta_
+
 
     # TODO: train on forces...
 
@@ -287,10 +307,10 @@ if __name__ == '__main__':
         U_torsion = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
         U_valence = U_bond + U_angle + U_torsion
 
-        # return np.std(bond_target - U_bond)           # loss 3.2601798e-05
-        # return np.std(angle_target - U_angle)         # loss 9.404970
+        # return np.std(bond_target - U_bond)           # loss 0.000033
+        # return np.std(angle_target - U_angle)         # loss 0.000023
         # return np.std(torsion_target - U_torsion)     # loss 0.000573
-        return np.std(valence_target - U_valence)     # loss 9.234153
+        return np.std(valence_target - U_valence)     # loss 0.000516
 
     from jax import grad
 
