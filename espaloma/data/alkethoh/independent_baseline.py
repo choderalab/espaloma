@@ -180,7 +180,7 @@ def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
 if __name__ == '__main__':
     name = 'AlkEthOH_r1155'
     offmol = offmols[name]
-    traj, _, _ = get_snapshots_and_energies(name)
+    traj, _, ani1ccx_energies = get_snapshots_and_energies(name)
     xyz = traj.xyz
 
     # bonds
@@ -216,10 +216,6 @@ if __name__ == '__main__':
 
     from simtk import unit
     from espaloma.data.alkethoh.mm_utils import get_sim, set_positions, get_energy, get_nb_energy
-    valence_energies = []
-    bond_energies = []
-    angle_energies = []
-    torsion_energies = []
     sim = get_sim(name)
 
     # compare pair inds from harmonic_bond_force and autodiff'd one
@@ -267,7 +263,11 @@ if __name__ == '__main__':
 
     # TODO: train on forces...
 
-
+    valence_energies = []
+    bond_energies = []
+    angle_energies = []
+    torsion_energies = []
+    nb_energies = []
 
     for conf in xyz:
         set_positions(sim, conf * unit.nanometer)
@@ -283,11 +283,13 @@ if __name__ == '__main__':
         angle_energies.append(U_angle)
         torsion_energies.append(U_torsion)
         valence_energies.append(U_tot - U_nb)
+        nb_energies.append(U_nb)
 
     bond_target = np.array(bond_energies)
     angle_target = np.array(angle_energies)
     torsion_target = np.array(torsion_energies)
-    valence_target = np.array(valence_energies)
+    nb_target = np.array(nb_energies)
+    valence_target = ani1ccx_energies - nb_target # np.array(valence_energies)
     print('bonds', bond_target.mean(), bond_target.std())
     print('angles', angle_target.mean(), angle_target.std())
     print('torsions', torsion_target.mean(), torsion_target.std())
@@ -298,6 +300,8 @@ if __name__ == '__main__':
     from jax import jit
     @jit
     def loss(all_params):
+
+        # TODO: also include some regularization
         bond_params = all_params[:n_bond_params]
         angle_params = all_params[n_bond_params:(n_bond_params + n_angle_params)]
         torsion_params = all_params[-n_torsion_params:]
@@ -307,10 +311,12 @@ if __name__ == '__main__':
         U_torsion = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
         U_valence = U_bond + U_angle + U_torsion
 
-        # return np.std(bond_target - U_bond)           # loss 0.000033
-        # return np.std(angle_target - U_angle)         # loss 0.000023
-        # return np.std(torsion_target - U_torsion)     # loss 0.000573
-        return np.std(valence_target - U_valence)     # loss 0.000516
+        # return np.std(bond_target - U_bond)
+        # return np.std(angle_target - U_angle)
+        # return np.std(torsion_target - U_torsion)
+        return np.std(valence_target - U_valence)
+
+
 
     from jax import grad
 
@@ -340,13 +346,18 @@ if __name__ == '__main__':
         return onp.array(g(params), dtype=onp.float64)
 
 
-    from scipy.optimize import minimize
+    from scipy.optimize import minimize, basinhopping
 
     opt_result = minimize(fun, x0=params, jac=jac, #method='L-BFGS-B',
                           options=dict(disp=True))
 
     print(opt_result.x[:n_unique_bonds])
     print(opt_result.x[n_unique_bonds:2*n_unique_bonds])
+
+    # try again, but with basinhopping
+    opt_result = basinhopping(fun, x0=opt_result.x, minimizer_kwargs=dict(jac=jac), disp=True)
+    print(opt_result.x[:n_unique_bonds])
+    print(opt_result.x[n_unique_bonds:2 * n_unique_bonds])
 
     # Atom types
     n_unique = 0
