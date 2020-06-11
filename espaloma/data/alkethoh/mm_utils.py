@@ -101,7 +101,13 @@ from pkg_resources import resource_filename
 from espaloma.data.alkethoh.data import offmols
 
 def get_sim(name):
-    """nonbonded forces in group 0, all other forces in group 1"""
+    """
+    harmonicbondforce in group 0
+    harmonicangleforce in group 1
+    periodictorsionforce in group 2
+    nonbondedforce in group 3
+    anything else in group 4
+    """
     mol = offmols[name]
 
     # Parametrize the topology and create an OpenMM System.
@@ -119,13 +125,19 @@ def get_sim(name):
 
     sim = Simulation(topology, system, integrator, platform=platform)
 
-    inds_of_nb_forces = [i for i in range(sim.system.getNumForces()) if
-                         'Nonbonded' in sim.system.getForce(i).__class__.__name__]
-
     for i in range(sim.system.getNumForces()):
-        sim.system.getForce(i).setForceGroup(1)
-    for i in inds_of_nb_forces:
-        sim.system.getForce(i).setForceGroup(0)
+        class_name = sim.system.getForce(i).__class__.__name__
+        if 'HarmonicBond' in class_name:
+            sim.system.getForce(i).setForceGroup(0)
+        elif 'HarmonicAngle' in class_name:
+            sim.system.getForce(i).setForceGroup(1)
+        elif 'PeriodicTorsion' in class_name:
+            sim.system.getForce(i).setForceGroup(2)
+        elif 'Nonbonded' in class_name:
+            sim.system.getForce(i).setForceGroup(3)
+        else:
+            print('un-recognized force, assigned to group 4')
+            sim.system.getForce(i).setForceGroup(4)
 
     return sim
 
@@ -138,6 +150,22 @@ def get_energy(sim):
     return sim.context.getState(getEnergy=True).getPotentialEnergy() / unit.kilojoule_per_mole
 
 
-def get_nb_energy(sim):
-    """assumes NonbondedForce is in group 0"""
+
+def get_bond_energy(sim):
+    """assumes HarmonicBondForce is in group 0"""
     return sim.context.getState(getEnergy=True, groups={0}).getPotentialEnergy() / unit.kilojoule_per_mole
+
+
+def get_angle_energy(sim):
+    """assumes HarmonicAngleForce is in group 1"""
+    return sim.context.getState(getEnergy=True, groups={1}).getPotentialEnergy() / unit.kilojoule_per_mole
+
+
+def get_torsion_energy(sim):
+    """assumes PeriodicTorsionForce is in group 2"""
+    return sim.context.getState(getEnergy=True, groups={2}).getPotentialEnergy() / unit.kilojoule_per_mole
+
+
+def get_nb_energy(sim):
+    """assumes NonbondedForce is in group 3"""
+    return sim.context.getState(getEnergy=True, groups={3}).getPotentialEnergy() / unit.kilojoule_per_mole
