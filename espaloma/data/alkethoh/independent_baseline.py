@@ -180,17 +180,18 @@ def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
 if __name__ == '__main__':
     name = 'AlkEthOH_r1155'
     offmol = offmols[name]
-    traj, _, ani1ccx_energies = get_snapshots_and_energies(name)
+    traj, _, _ = get_snapshots_and_energies(name)
     xyz = traj.xyz
 
     # bonds
     pair_inds, bond_inds = get_unique_bonds(offmol)
-    bond_inds = np.arange(len(pair_inds))
+    distances = compute_distances(xyz, pair_inds)
+
     n_unique_bonds = len(set(bond_inds))
     n_bond_params = 2 * n_unique_bonds
     bond_params = np.random.randn(n_bond_params) * 0.01
-    bond_params[:n_unique_bonds] += 1000
-    bond_params[n_unique_bonds:] += 0.1
+    bond_params[:n_unique_bonds] += 10000.0
+    bond_params[n_unique_bonds:] += np.median(distances)
 
     bond_energies = compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds)
     print('bond energies mean', bond_energies.mean())
@@ -220,6 +221,24 @@ if __name__ == '__main__':
     angle_energies = []
     torsion_energies = []
     sim = get_sim(name)
+
+    # compare pair inds from harmonic_bond_force and autodiff'd one
+    harmonic_bond_force = [f for f in sim.system.getForces() if ("HarmonicBond" in f.__class__.__name__)][0]
+    omm_pair_inds = []
+    omm_bond_params = dict()
+
+    for i in range(harmonic_bond_force.getNumBonds()):
+        a, b, length, k = harmonic_bond_force.getBondParameters(i)
+        tup = canonicalize_order((a,b))
+        omm_bond_params[tup] = (length, k)
+        omm_pair_inds.append(tup)
+
+    print(set(omm_pair_inds))
+    print(set(omm_pair_inds).symmetric_difference(set([tuple(p) for p in pair_inds])))
+
+    # TODO: train on forces...
+
+
 
     for conf in xyz:
         set_positions(sim, conf * unit.nanometer)
@@ -258,14 +277,17 @@ if __name__ == '__main__':
         U_angle = compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds)
         U_torsion = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
         U_valence = U_bond + U_angle + U_torsion
-        return np.std(bond_target - U_bond)
-        # return np.std(angle_target - U_angle)
-        # return np.std(torsion_target - U_torsion)
-        # return np.std(valence_target - U_valence)
+
+        return np.std(bond_target - U_bond)           # loss 13.491937
+        # return np.std(angle_target - U_angle)         # loss 13.165994
+        # return np.std(torsion_target - U_torsion)     # loss 0.000069
+        # return np.std(valence_target - U_valence)     # loss 13.492843
 
     from jax import grad
 
     from time import time
+
+    print(loss(params))
 
     g = grad(loss)
 
@@ -293,6 +315,9 @@ if __name__ == '__main__':
 
     opt_result = minimize(fun, x0=params, jac=jac, #method='L-BFGS-B',
                           options=dict(disp=True))
+
+    print(opt_result.x[:n_unique_bonds])
+    print(opt_result.x[n_unique_bonds:2*n_unique_bonds])
 
     # Atom types
     n_unique = 0
