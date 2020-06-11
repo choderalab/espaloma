@@ -236,6 +236,15 @@ if __name__ == '__main__':
     print(set(omm_pair_inds))
     print(set(omm_pair_inds).symmetric_difference(set([tuple(p) for p in pair_inds])))
 
+
+    # What if I initialize with MM parameters
+    for i in range(len(pair_inds)):
+        length, k = omm_bond_params[tuple(pair_inds[i])]
+        length_, k_ = length / unit.nanometer, k / (unit.kilojoule_per_mole / (unit.nanometer**2))
+        print(i, length, k)
+        params[bond_inds[i]] = k_
+        params[bond_inds[i] + n_unique_bonds] = length_
+
     # TODO: train on forces...
 
 
@@ -278,10 +287,10 @@ if __name__ == '__main__':
         U_torsion = compute_periodic_torsion_potential(xyz, torsion_params, quad_inds, torsion_inds)
         U_valence = U_bond + U_angle + U_torsion
 
-        return np.std(bond_target - U_bond)           # loss 13.491937
-        # return np.std(angle_target - U_angle)         # loss 13.165994
-        # return np.std(torsion_target - U_torsion)     # loss 0.000069
-        # return np.std(valence_target - U_valence)     # loss 13.492843
+        # return np.std(bond_target - U_bond)           # loss 3.2601798e-05
+        # return np.std(angle_target - U_angle)         # loss 9.404970
+        # return np.std(torsion_target - U_torsion)     # loss 0.000573
+        return np.std(valence_target - U_valence)     # loss 9.234153
 
     from jax import grad
 
