@@ -6,8 +6,9 @@ Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-pas
 # Add imports here
 import espaloma
 from espaloma.graphs.graph import Graph
-import espaloma.loss
-from espaloma.loss import GraphLoss
+import espaloma.metrics
+from espaloma.metrics import GraphMetric
+
 import espaloma.data
 import espaloma.nn
 import espaloma.graphs
