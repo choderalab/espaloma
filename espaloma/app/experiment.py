@@ -3,6 +3,8 @@
 # =============================================================================
 import espaloma as esp
 import abc
+import torch
+import copy
 
 # =============================================================================
 # MODULE CLASSES
@@ -21,20 +23,26 @@ class Train(Experiment):
             self,
             net,
             data,
-            optimizer,
-            metrics,
+            metrics=[esp.metrics.TypingCrossEntropy],
+            optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
             n_epochs=100,
             record_interval=1,
         ):
         super(Train, self).__init__()
 
         # bookkeeping
+        self.net = net
         self.data = data
-        self.optimizer = optimizer
         self.metrics = metrics
         self.n_epochs = n_epochs
         self.record_interval = record_interval
-        self.states = []
+        self.states = {}
+
+        # make optimizer
+        if callable(optimizer):
+            self.optimizer = optimizer(net)
+        else:
+            self.optimizer = optimizer
 
         # compose loss function
         def loss(g):
@@ -81,7 +89,13 @@ class Test(Experiment):
     """ Run sequences of tests on a trained model.
 
     """
-    def __init__(self, net, data, states, metrics, sampler=None):
+    def __init__(
+            self,
+            net,
+            data,
+            states,
+            metrics=[esp.metrics.TypingCrossEntropy],
+            sampler=None):
         # bookkeeping
         self.net = net
         self.data = data
@@ -123,10 +137,9 @@ class TrainAndTest(Experiment):
         net,
         ds_tr,
         ds_te,
-        metrics_tr,
-        metrics_te,
-        optimizer,
-        metrics,
+        metrics_tr=[esp.metrics.TypingCrossEntropy],
+        metrics_te=[esp.metrics.TypingCrossEntropy],
+        optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
         record_interval=1
     ):
