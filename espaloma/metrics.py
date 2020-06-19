@@ -39,24 +39,24 @@ def r2(y, y_hat):
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class Loss(torch.nn.modules.loss._Loss):
+class Metric(torch.nn.modules.loss._Loss):
     """ Base function for loss.
 
     """
     def __init__(self, size_average=None, reduce=None, reduction='mean'):
-        super(Loss, self).__init__(size_average, reduce, reduction)
+        super(Metric, self).__init__(size_average, reduce, reduction)
 
     @abc.abstractmethod
     def forward(self, *args, **kwargs):
         raise NotImplementedError
 
-class GraphLoss(Loss):
+class GraphMetric(Metric):
     """ Loss between nodes attributes of graph or graphs.
 
     """
-    def __init__(self, base_loss, between, *args, **kwargs):
-        super(GraphLoss, self).__init__(*args, **kwargs)
-        
+    def __init__(self, base_metric, between, *args, **kwargs):
+        super(GraphMetric, self).__init__(*args, **kwargs)
+
         # between could be tuple of two strings or two functions
         assert len(between) == 2
 
@@ -64,7 +64,7 @@ class GraphLoss(Loss):
                 self._translation(between[0]),
                 self._translation(between[1]))
 
-        self.base_loss = base_loss
+        self.base_metric = base_metric
 
     @staticmethod
     def _translation(string):
@@ -73,7 +73,7 @@ class GraphLoss(Loss):
             'legacy_typing': lambda g: g.ndata['legacy_typing']
         }[string]
 
-    
+
     def forward(self, g_input, g_target=None):
         """ Forward function of loss.
 
@@ -88,9 +88,12 @@ class GraphLoss(Loss):
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
-        return self.base_loss.forward(
+        return self.base_metric.forward(
                 input=input_fn(g_input),
                 target=target_fn(g_target))
 
-
-
+class TypingCrossEntropy(Metric):
+    def __init__(self):
+        super(TypingCrossEntropy).__init__(
+            base_metric=torch.nn.CrossEntropyLoss(),
+            between=['nn_typing', 'legacy_typing'])

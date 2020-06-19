@@ -13,6 +13,8 @@ import espaloma.data
 import espaloma.nn
 import espaloma.graphs
 import espaloma.mm
+import espaloma.app
+
 
 from espaloma.mm.geometry import *
 

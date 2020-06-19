@@ -42,7 +42,7 @@ class LegacyForceField:
     @staticmethod
     def _convert_to_off(mol):
         import openforcefield
-        
+
         if isinstance(mol, esp.Graph):
             return mol.mol
 
@@ -149,7 +149,7 @@ class LegacyForceField:
         return g
 
     def typing(self, mol, g=None):
-        """ Type a molecular graph. 
+        """ Type a molecular graph.
 
         """
         if "gaff" in self.forcefield:
