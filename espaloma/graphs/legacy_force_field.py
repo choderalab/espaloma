@@ -142,7 +142,7 @@ class LegacyForceField:
         if g is None:
             g = esp.Graph(mol)
 
-        g.ndata["legacy_typing"] = torch.tensor(
+        g.nodes['n1'].data["legacy_typing"] = torch.tensor(
             [self._str_2_idx[atom] for atom in gaff_types]
         )
 

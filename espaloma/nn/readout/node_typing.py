@@ -6,7 +6,7 @@ import dgl
 import espaloma as esp
 
 # =============================================================================
-# MODULE FUNCTIONS
+# MODULE CLASSES
 # =============================================================================
 class NodeTyping(torch.nn.Module):
     """ Simple typing on homograph.
@@ -18,5 +18,6 @@ class NodeTyping(torch.nn.Module):
 
     def forward(self, g):
         g.apply_nodes(
-                lambda node: {'nn_typing': self.c(node.data['h'])})
+                ntype='n1',
+                func=lambda node: {'nn_typing': self.c(node.data['h'])})
         return g

@@ -73,7 +73,7 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
 def from_homogeneous(g):
     r""" Build heterogeneous graph from homogeneous ones.
 
-    
+
     Note
     ----
     For now we name single node, two-, three, and four-,

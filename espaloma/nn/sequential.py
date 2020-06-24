@@ -59,18 +59,45 @@ class Sequential(torch.nn.Module):
 
                 self.exes.append("o" + str(idx))
 
-    def forward(self, g, x=None):
-    
-        if x is None:
-            x = g.ndata['h0']
-        
-        x = self.f_in(x)
+    def _forward(self, g, x):
+        """ Forward pass with graph and features.
 
+        """
         for exe in self.exes:
             if exe.startswith('d'):
                 x = getattr(self, exe)(g, x)
             else:
                 x = getattr(self, exe)(x)
-        
-        g.ndata['h'] = x
-        return g 
+
+        return x
+
+    def forward(self, g, x=None):
+        """ Forward pass.
+
+        Parameters
+        ----------
+        g : `dgl.DGLHeteroGraph`,
+            input graph
+
+        Returns
+        -------
+        g : `dgl.DGLHeteroGraph`
+            output graph
+        """
+
+        # get homogeneous subgraph
+        g_ = dgl.to_homo(
+            g.edge_type_subgraph(['n1_neighbors_n1']))
+
+        if x is None:
+            # get node attributes
+            x = g.nodes['n1'].data['h0']
+            x = self.f_in(x)
+
+        # message passing on homo graph
+        x = self._forward(g_, x)
+
+        # put attribute back in the graph
+        g.nodes['n1'].data['h'] = x
+
+        return g

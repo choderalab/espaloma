@@ -9,15 +9,15 @@ import dgl
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class GraphBase(abc.ABC):
+class BaseGraph(abc.ABC):
     """ Base class of various graph objects that we host data in.
-    
+
     """
 
     def __init__(self):
-        super(GraphBase, self).__init__()
+        super(BaseGraph, self).__init__()
 
-class Graph(GraphBase):
+class Graph(BaseGraph):
     """ A unified graph object that support translation to and from
     message-passing graphs and MM factor graph.
 
@@ -104,10 +104,7 @@ class Graph(GraphBase):
         import pickle
         with open(path, 'rb') as f_handle:
             (
-                self._mol, 
-                self._homograph, 
+                self._mol,
+                self._homograph,
                 self._heterograph
             ) = pickle.load(f_handle)
-
-
-

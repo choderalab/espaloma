@@ -19,7 +19,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     Note
     ----
     This also supports iterative-style dataset by deleting `__getitem__`
-    and `__len__` function. 
+    and `__len__` function.
 
     Attributes
     ----------
@@ -36,7 +36,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         # 0 len if no graphs
         if self.graphs is None:
             return 0
-        
+
         else:
             return len(self.graphs)
 
@@ -60,7 +60,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         elif isinstance(idx, slice): # implement slicing
             if self.transforms is None:
                 # return a Dataset object rather than list
-                return self.__class__(graphs=self.graphs[idx]) 
+                return self.__class__(graphs=self.graphs[idx])
             else:
                 graphs = []
                 for graph in self.graphs:
@@ -93,7 +93,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         Parameters
         ----------
         fn : callable
-        
+
         Note
         ----
         If in_place is False, `fn` is added to the `transforms` else it is applied
@@ -120,7 +120,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         Parameters
         ----------
         partition : sequence of integers or floats
-            
+
         """
         n_data = len(self)
         partition = [int(n_data * x / sum(partition)) for x in partition]
@@ -161,7 +161,7 @@ class GraphDataset(Dataset):
     """ Dataset with additional support for only viewing
     certain attributes as `torch.utils.data.DataLoader`
 
-    
+
     """
 
     def __init__(self, graphs, first=None):
@@ -170,7 +170,7 @@ class GraphDataset(Dataset):
 
         if all(
                 isinstance(
-                    graph, 
+                    graph,
                     Molecule
                 ) or isinstance(
                     graph,
@@ -187,13 +187,13 @@ class GraphDataset(Dataset):
     def batch(graphs):
         import dgl
         if all(isinstance(graph, esp.graphs.graph.Graph) for graph in graphs):
-            return dgl.batch([graph.homograph for graph in graphs])
+            return dgl.batch_hetero([graph.heterograph for graph in graphs])
 
         elif all(isinstance(graph, dgl.DGLGraph) for graph in graphs):
-            return dgl.batch(self.graphs)
-        
+            return dgl.batch(graphs)
+
         elif all(isinstance(graph, dgl.DGLHeteroGraph) for graph in graphs):
-            return dgl.batch_hetero(self.graphs)
+            return dgl.batch_hetero(graphs)
 
         else:
             raise RuntimeError('Can only batch DGLGraph or DGLHeterograph,'
@@ -211,7 +211,17 @@ class GraphDataset(Dataset):
         """
         if collate_fn == 'graph':
             collate_fn = self.batch
-        
+
+        if collate_fn == 'homograph':
+            def collate_fn(graphs):
+                graph = self.batch(
+                    [
+                        g.homograph for g in graphs
+                    ]
+                )
+
+                return graph
+
         elif collate_fn == 'graph-typing':
             def collate_fn(graphs):
                 graph = self.batch(graphs)
@@ -231,7 +241,3 @@ class GraphDataset(Dataset):
                 dataset=self,
                 collate_fn=collate_fn,
                 *args, **kwargs)
-
-
-
-

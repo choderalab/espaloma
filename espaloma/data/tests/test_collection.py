@@ -11,7 +11,7 @@ def test_view(esol):
     import dgl
     graphs = list(view)
     assert len(graphs) == 4
-    assert all(isinstance(graph, dgl.DGLGraph) for graph in graphs)
+    assert all(isinstance(graph, dgl.DGLHeteroGraph) for graph in graphs)
 
 
 def test_typing(esol):
@@ -20,4 +20,4 @@ def test_typing(esol):
     esol = esol.apply(typing, in_place=True)
     view = esol.view(batch_size=4)
     for g in view:
-        assert g.ndata['legacy_typing'].shape[0] == g.number_of_nodes()
+        assert g.nodes['n1'].data['legacy_typing'].shape[0] == g.number_of_nodes()

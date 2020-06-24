@@ -5,6 +5,7 @@ import espaloma as esp
 import abc
 import torch
 import copy
+import dgl
 
 # =============================================================================
 # MODULE CLASSES
@@ -23,7 +24,7 @@ class Train(Experiment):
             self,
             net,
             data,
-            metrics=[esp.metrics.TypingCrossEntropy],
+            metrics=[esp.metrics.TypingCrossEntropy()],
             optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
             n_epochs=100,
             record_interval=1,
@@ -59,13 +60,14 @@ class Train(Experiment):
         """
         for g in self.data: # TODO: does this have to be a single g?
 
-            def closure():
+            def closure(g=g):
                 self.optimizer.zero_grad()
+                g = self.net(g)
                 loss = self.loss(g)
                 loss.backward()
                 return loss
 
-            self.optimizer.step()
+            self.optimizer.step(closure)
 
     def train(self):
         """ Train the model for multiple steps and
@@ -94,7 +96,7 @@ class Test(Experiment):
             net,
             data,
             states,
-            metrics=[esp.metrics.TypingCrossEntropy],
+            metrics=[esp.metrics.TypingCrossEntropy()],
             sampler=None):
         # bookkeeping
         self.net = net
@@ -107,22 +109,26 @@ class Test(Experiment):
         """ Run test.
 
         """
+        results = {}
+
         # loop through the metrics
-        for metric in metrics:
+        for metric in self.metrics:
             results[metric.__name__] = {}
 
         # make it just one giant graph
-        g = data[0:-1]
+        g = list(self.data)
+        g = dgl.batch_hetero(g)
 
         for state_name, state in self.states.items(): # loop through states
             # load the state dict
             self.net.load_state_dict(state)
 
-            # loop through the metrics
-            results[metric.__name__][state_name] = metric(
-                self.net,
-                g,
-                sampler=self.sampler).detach().cpu().numpy()
+            for metric in self.metrics:
+
+                # loop through the metrics
+                results[metric.__name__][state_name] = metric(
+                    g_input=self.net(g),
+                ).detach().cpu().numpy()
 
         # point this to self
         self.results = results
@@ -137,8 +143,8 @@ class TrainAndTest(Experiment):
         net,
         ds_tr,
         ds_te,
-        metrics_tr=[esp.metrics.TypingCrossEntropy],
-        metrics_te=[esp.metrics.TypingCrossEntropy],
+        metrics_tr=[esp.metrics.TypingCrossEntropy()],
+        metrics_te=[esp.metrics.TypingCrossEntropy()],
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
         record_interval=1
@@ -150,6 +156,8 @@ class TrainAndTest(Experiment):
         self.ds_te = ds_te
         self.optimizer = optimizer
         self.n_epochs = n_epochs
+        self.metrics_tr = metrics_tr
+        self.metrics_te = metrics_te
 
     def __str__(self):
         _str = ''
@@ -180,7 +188,8 @@ class TrainAndTest(Experiment):
             net=self.net,
             data=self.ds_tr,
             optimizer=self.optimizer,
-            n_epochs=self.n_epochs
+            n_epochs=self.n_epochs,
+            metrics=self.metrics_tr
         )
 
         train.train()
@@ -190,9 +199,8 @@ class TrainAndTest(Experiment):
         test = Test(
             net=self.net,
             data=self.ds_te,
-            metrics=self.metrics,
+            metrics=self.metrics_te,
             states=self.states,
-            sampler=self.sampler
         )
 
         test.test()
@@ -202,13 +210,12 @@ class TrainAndTest(Experiment):
         test = Test(
             net=self.net,
             data=self.ds_tr,
-            metrics=self.metrics,
+            metrics=self.metrics_te,
             states=self.states,
-            sampler=self.sampler
         )
 
         test.test()
 
         self.results_tr = test.results
 
-        return{'test': self.results_te, 'train': self.results_tr}
+        return {'test': self.results_te, 'train': self.results_tr}
