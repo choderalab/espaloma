@@ -43,12 +43,13 @@ def run():
         ds_tr=loader,
         ds_te=loader,
         net=net,
-        metrics_te=[esp.metrics.TypingAccuracy()]
+        metrics_te=[esp.metrics.TypingAccuracy()],
+        n_epochs=500,
     )
 
     results = exp.run()
 
-    print(results)
+    print(esp.app.report.markdown(results))
 
 
 
