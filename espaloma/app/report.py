@@ -40,9 +40,7 @@ def curve(results_dict):
         for ds_name, results in results_dict.items():
 
             # get all the recorded indices
-            idxs = list(
-                [key for key in results[metric].keys() if isinstance(key, int)]
-            )
+            idxs = list([key for key in results[metric].keys() if isinstance(key, int)])
 
             curve_dict[(metric, ds_name)] = np.array(
                 [results[metric][idx] for idx in idxs]
@@ -78,16 +76,12 @@ def visual(results_dict):
         for ds_name, results in results_dict.items():
 
             # get all the recorded indices
-            idxs = list(
-                [key for key in results[metric].keys() if isinstance(key, int)]
-            )
+            idxs = list([key for key in results[metric].keys() if isinstance(key, int)])
 
             # sort it ascending
             idxs.sort()
 
-            ax.plot(
-                idxs, [results[metric][idx] for idx in idxs], label=ds_name
-            )
+            ax.plot(idxs, [results[metric][idx] for idx in idxs], label=ds_name)
 
         ax.set_xlabel("epochs")
         ax.set_ylabel(metric)
@@ -125,11 +119,7 @@ def visual_multiple(results_dicts):
 
                 # get all the recorded indices
                 idxs = list(
-                    [
-                        key
-                        for key in results[metric].keys()
-                        if isinstance(key, int)
-                    ]
+                    [key for key in results[metric].keys() if isinstance(key, int)]
                 )
 
                 # sort it ascending
@@ -146,9 +136,7 @@ def visual_multiple(results_dicts):
                     idxs,
                     [results[metric][idx] for idx in idxs],
                     label=label,
-                    c=cm.gist_rainbow(
-                        (float(idx_result) / len(results_dicts))
-                    ),
+                    c=cm.gist_rainbow((float(idx_result) / len(results_dicts))),
                     linestyle=linestyle,
                     alpha=0.8,
                 )
@@ -226,12 +214,8 @@ def html_multiple_train_and_test_2d_grid(results):
     assert len(param_names) == 2
     param_col_name, param_row_name = param_names
 
-    param_col_values = list(
-        set([result[0][param_col_name] for result in results])
-    )
-    param_row_values = list(
-        set([result[0][param_row_name] for result in results])
-    )
+    param_col_values = list(set([result[0][param_col_name] for result in results]))
+    param_row_values = list(set([result[0][param_row_name] for result in results]))
 
     param_col_values.sort()
     param_row_values.sort()
@@ -266,9 +250,7 @@ def html_multiple_train_and_test_2d_grid(results):
     )
 
     for param_col in param_col_values:
-        html_string += (
-            "<th style='border: 1px solid black'>" + str(param_col) + "</th>"
-        )
+        html_string += "<th style='border: 1px solid black'>" + str(param_col) + "</th>"
 
     html_string += "</tr></thread>"
 
@@ -278,9 +260,7 @@ def html_multiple_train_and_test_2d_grid(results):
 
         # html_string += "<td></td>"
 
-        html_string += (
-            "<th style='border: 1px solid black'>" + param_row + " </th>"
-        )
+        html_string += "<th style='border: 1px solid black'>" + param_row + " </th>"
 
         for idx_col, param_col in enumerate(param_col_values):
             html_string += (

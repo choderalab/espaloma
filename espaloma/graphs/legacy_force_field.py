@@ -142,8 +142,98 @@ class LegacyForceField:
         if g is None:
             g = esp.Graph(mol)
 
-        g.nodes['n1'].data["legacy_typing"] = torch.tensor(
+        g.nodes["n1"].data["legacy_typing"] = torch.tensor(
             [self._str_2_idx[atom] for atom in gaff_types]
+        )
+
+        return g
+
+    def _parametrize_gaff(self, mol, g=None):
+        raise NotImplementedError
+
+    def _parametrize_smirnoff(self, mol, g=None):
+        mol = self._convert_to_off(mol)
+
+        from openforcefield.typing.engines.smirnoff import ForceField
+
+        FF = ForceField("test_forcefields/%s.xml" % self.forcefield)
+
+        forces = FF.label_molecules(mol.to_topology())[0]
+
+        g.apply_nodes(
+            lambda node: {
+                "k_ref": torch.Tensor(
+                    [
+                        forces["Bonds"][tuple(node.data["idxs"][idx].numpy())].k._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="bond",
+        )
+
+        g.apply_nodes(
+            lambda node: {
+                "eq_ref": torch.Tensor(
+                    [
+                        forces["Bonds"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].length._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="bond",
+        )
+
+        g.apply_nodes(
+            lambda node: {
+                "k_ref": torch.Tensor(
+                    [
+                        forces["Angles"][tuple(node.data["idxs"][idx].numpy())].k._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="angle",
+        )
+
+        g.apply_nodes(
+            lambda node: {
+                "eq_ref": torch.Tensor(
+                    [
+                        forces["Angles"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].angle._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="angle",
+        )
+
+        g.apply_nodes(
+            lambda node: {
+                "k_ref": torch.Tensor(
+                    [
+                        forces["vdW"][(idx,)].epsilon._value
+                        for idx in range(g.number_of_nodes("atom"))
+                    ]
+                )
+            },
+            ntype="atom",
+        )
+
+        g.apply_nodes(
+            lambda node: {
+                "eq_ref": torch.Tensor(
+                    [
+                        forces["vdW"][(idx,)].rmin_half._value
+                        for idx in range(g.number_of_nodes("atom"))
+                    ]
+                )
+            },
+            ntype="atom",
         )
 
         return g

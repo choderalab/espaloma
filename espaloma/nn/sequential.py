@@ -3,16 +3,14 @@
 import torch
 import dgl
 
+
 class _Sequential(torch.nn.Module):
     """ Sequentially staggered neural networks.
 
     """
+
     def __init__(
-        self,
-        layer,
-        config,
-        in_features,
-        model_kwargs={},
+        self, layer, config, in_features, model_kwargs={},
     ):
         super(_Sequential, self).__init__()
 
@@ -56,7 +54,7 @@ class _Sequential(torch.nn.Module):
 
     def forward(self, g, x):
         for exe in self.exes:
-            if exe.startswith('d'):
+            if exe.startswith("d"):
                 if g is not None:
                     x = getattr(self, exe)(g, x)
                 else:
@@ -66,17 +64,14 @@ class _Sequential(torch.nn.Module):
 
         return x
 
+
 class Sequential(torch.nn.Module):
     """ Sequential neural network with input layers.
 
     """
+
     def __init__(
-        self,
-        layer,
-        config,
-        feature_units=117,
-        input_units=128,
-        model_kwargs={},
+        self, layer, config, feature_units=117, input_units=128, model_kwargs={},
     ):
         super(Sequential, self).__init__()
 
@@ -86,19 +81,15 @@ class Sequential(torch.nn.Module):
         )
 
         self._sequential = _Sequential(
-            layer,
-            config,
-            in_features=input_units,
-            model_kwargs=model_kwargs
+            layer, config, in_features=input_units, model_kwargs=model_kwargs
         )
-
 
     def _forward(self, g, x):
         """ Forward pass with graph and features.
 
         """
         for exe in self.exes:
-            if exe.startswith('d'):
+            if exe.startswith("d"):
                 x = getattr(self, exe)(g, x)
             else:
                 x = getattr(self, exe)(x)
@@ -120,18 +111,17 @@ class Sequential(torch.nn.Module):
         """
 
         # get homogeneous subgraph
-        g_ = dgl.to_homo(
-            g.edge_type_subgraph(['n1_neighbors_n1']))
+        g_ = dgl.to_homo(g.edge_type_subgraph(["n1_neighbors_n1"]))
 
         if x is None:
             # get node attributes
-            x = g.nodes['n1'].data['h0']
+            x = g.nodes["n1"].data["h0"]
             x = self.f_in(x)
 
         # message passing on homo graph
         x = self._sequential(g_, x)
 
         # put attribute back in the graph
-        g.nodes['n1'].data['h'] = x
+        g.nodes["n1"].data["h"] = x
 
         return g

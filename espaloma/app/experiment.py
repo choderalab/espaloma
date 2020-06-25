@@ -14,21 +14,24 @@ class Experiment(abc.ABC):
     """ Base class for espaloma experiment.
 
     """
+
     def __init__(self):
         super(Experiment, self).__init__()
+
 
 class Train(Experiment):
     """ Train a model for a while.
     """
+
     def __init__(
-            self,
-            net,
-            data,
-            metrics=[esp.metrics.TypingCrossEntropy()],
-            optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
-            n_epochs=100,
-            record_interval=1,
-        ):
+        self,
+        net,
+        data,
+        metrics=[esp.metrics.TypingCrossEntropy()],
+        optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
+        n_epochs=100,
+        record_interval=1,
+    ):
         super(Train, self).__init__()
 
         # bookkeeping
@@ -47,7 +50,7 @@ class Train(Experiment):
 
         # compose loss function
         def loss(g):
-            _loss = 0.
+            _loss = 0.0
             for metric in self.metrics:
                 _loss += metric(g)
             return _loss
@@ -58,7 +61,7 @@ class Train(Experiment):
         """ Train the model for one batch.
 
         """
-        for g in self.data: # TODO: does this have to be a single g?
+        for g in self.data:  # TODO: does this have to be a single g?
 
             def closure(g=g):
                 self.optimizer.zero_grad()
@@ -82,7 +85,7 @@ class Train(Experiment):
                 self.states[epoch_idx] = copy.deepcopy(self.net.state_dict())
 
         # record final state
-        self.states['final'] = copy.deepcopy(self.net.state_dict())
+        self.states["final"] = copy.deepcopy(self.net.state_dict())
 
         return self.net
 
@@ -91,13 +94,15 @@ class Test(Experiment):
     """ Run sequences of tests on a trained model.
 
     """
+
     def __init__(
-            self,
-            net,
-            data,
-            states,
-            metrics=[esp.metrics.TypingCrossEntropy()],
-            sampler=None):
+        self,
+        net,
+        data,
+        states,
+        metrics=[esp.metrics.TypingCrossEntropy()],
+        sampler=None,
+    ):
         # bookkeeping
         self.net = net
         self.data = data
@@ -119,25 +124,27 @@ class Test(Experiment):
         g = list(self.data)
         g = dgl.batch_hetero(g)
 
-        for state_name, state in self.states.items(): # loop through states
+        for state_name, state in self.states.items():  # loop through states
             # load the state dict
             self.net.load_state_dict(state)
 
             for metric in self.metrics:
 
                 # loop through the metrics
-                results[metric.__name__][state_name] = metric(
-                    g_input=self.net(g),
-                ).detach().cpu().numpy()
+                results[metric.__name__][state_name] = (
+                    metric(g_input=self.net(g),).detach().cpu().numpy()
+                )
 
         # point this to self
         self.results = results
         return dict(results)
 
+
 class TrainAndTest(Experiment):
     """ Train a model and then test it.
 
     """
+
     def __init__(
         self,
         net,
@@ -147,7 +154,7 @@ class TrainAndTest(Experiment):
         metrics_te=[esp.metrics.TypingCrossEntropy()],
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
-        record_interval=1
+        record_interval=1,
     ):
 
         # bookkeeping
@@ -160,24 +167,24 @@ class TrainAndTest(Experiment):
         self.metrics_te = metrics_te
 
     def __str__(self):
-        _str = ''
-        _str += '# model'
-        _str += '\n'
+        _str = ""
+        _str += "# model"
+        _str += "\n"
         _str += str(self.net)
-        _str += '\n'
-        if hasattr(self.net, 'noise_model'):
-            _str += '# noise model'
-            _str += '\n'
+        _str += "\n"
+        if hasattr(self.net, "noise_model"):
+            _str += "# noise model"
+            _str += "\n"
             _str += str(self.net.noise_model)
-            _str += '\n'
-        _str += '# optimizer'
-        _str += '\n'
+            _str += "\n"
+        _str += "# optimizer"
+        _str += "\n"
         _str += str(self.optimizer)
-        _str += '\n'
-        _str += '# n_epochs'
-        _str += '\n'
+        _str += "\n"
+        _str += "# n_epochs"
+        _str += "\n"
         _str += str(self.n_epochs)
-        _str += '\n'
+        _str += "\n"
         return _str
 
     def run(self):
@@ -189,7 +196,7 @@ class TrainAndTest(Experiment):
             data=self.ds_tr,
             optimizer=self.optimizer,
             n_epochs=self.n_epochs,
-            metrics=self.metrics_tr
+            metrics=self.metrics_tr,
         )
 
         train.train()
@@ -197,10 +204,7 @@ class TrainAndTest(Experiment):
         self.states = train.states
 
         test = Test(
-            net=self.net,
-            data=self.ds_te,
-            metrics=self.metrics_te,
-            states=self.states,
+            net=self.net, data=self.ds_te, metrics=self.metrics_te, states=self.states,
         )
 
         test.test()
@@ -208,14 +212,11 @@ class TrainAndTest(Experiment):
         self.results_te = test.results
 
         test = Test(
-            net=self.net,
-            data=self.ds_tr,
-            metrics=self.metrics_te,
-            states=self.states,
+            net=self.net, data=self.ds_tr, metrics=self.metrics_te, states=self.states,
         )
 
         test.test()
 
         self.results_tr = test.results
 
-        return {'test': self.results_te, 'train': self.results_tr}
+        return {"test": self.results_te, "train": self.results_tr}
