@@ -97,7 +97,8 @@ class JanossyPooling(torch.nn.Module):
                             dim=1
                         )
                     ))
-                }
+                },
+                ntype='n%s' % big_idx
             )
 
         return g
