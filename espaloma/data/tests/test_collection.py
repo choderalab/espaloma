@@ -20,4 +20,5 @@ def test_typing(esol):
     esol = esol.apply(typing, in_place=True)
     view = esol.view(batch_size=4)
     for g in view:
-        assert g.nodes['n1'].data['legacy_typing'].shape[0] == g.number_of_nodes()
+        assert g.nodes['n1'].data['legacy_typing']\
+            .shape[0] == g.number_of_nodes(ntype='n1')

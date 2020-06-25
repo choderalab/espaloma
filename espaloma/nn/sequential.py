@@ -3,28 +3,23 @@
 import torch
 import dgl
 
+class _Sequential(torch.nn.Module):
+    """ Sequentially staggered neural networks.
 
-class Sequential(torch.nn.Module):
+    """
     def __init__(
         self,
         layer,
         config,
-        feature_units=117,
-        input_units=128,
+        in_features,
         model_kwargs={},
     ):
-        super(Sequential, self).__init__()
+        super(_Sequential, self).__init__()
 
-        # the initial dimensionality
-        dim = input_units
-
-        # record the name of the layers in a list
         self.exes = []
 
-        # initial featurization
-        self.f_in = torch.nn.Sequential(
-            torch.nn.Linear(feature_units, input_units), torch.nn.Tanh()
-        )
+        # init dim
+        dim = in_features
 
         # parse the config
         for idx, exe in enumerate(config):
@@ -58,6 +53,45 @@ class Sequential(torch.nn.Module):
                 setattr(self, "o" + str(idx), dropout)
 
                 self.exes.append("o" + str(idx))
+
+    def forward(self, g, x):
+        for exe in self.exes:
+            if exe.startswith('d'):
+                if g is not None:
+                    x = getattr(self, exe)(g, x)
+                else:
+                    x = getattr(self, exe)(x)
+            else:
+                x = getattr(self, exe)(x)
+
+        return x
+
+class Sequential(torch.nn.Module):
+    """ Sequential neural network with input layers.
+
+    """
+    def __init__(
+        self,
+        layer,
+        config,
+        feature_units=117,
+        input_units=128,
+        model_kwargs={},
+    ):
+        super(Sequential, self).__init__()
+
+        # initial featurization
+        self.f_in = torch.nn.Sequential(
+            torch.nn.Linear(feature_units, input_units), torch.nn.Tanh()
+        )
+
+        self._sequential = _Sequential(
+            layer,
+            config,
+            in_features=input_units,
+            model_kwargs=model_kwargs
+        )
+
 
     def _forward(self, g, x):
         """ Forward pass with graph and features.
@@ -95,7 +129,7 @@ class Sequential(torch.nn.Module):
             x = self.f_in(x)
 
         # message passing on homo graph
-        x = self._forward(g_, x)
+        x = self._sequential(g_, x)
 
         # put attribute back in the graph
         g.nodes['n1'].data['h'] = x

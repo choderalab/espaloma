@@ -4,11 +4,12 @@
 import torch
 import dgl
 import espaloma as esp
+from espaloma.nn.readout.base_readout import BaseReadout
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class NodeTyping(torch.nn.Module):
+class NodeTyping(BaseReadout):
     """ Simple typing on homograph.
 
     """

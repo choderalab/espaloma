@@ -16,7 +16,7 @@ def data():
     typing = esp.graphs.legacy_force_field.LegacyForceField('gaff-1.81')
     esol.apply(typing, in_place=True) # this modify the original data
 
-    return esol
+    return esol.view('graph', batch_size=10)
 
 @pytest.fixture
 def net():

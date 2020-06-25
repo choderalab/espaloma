@@ -27,12 +27,14 @@ def run():
     # define a representation
     representation = esp.nn.Sequential(
             layer,
-            [32, 'tanh', 32, 'tanh', 32, 'tanh'])
+            [32, 'tanh', 32, 'tanh', 32, 'tanh']
+    )
 
     # define a readout
     readout = esp.nn.readout.node_typing.NodeTyping(
             in_features=32,
-            n_classes=100) # not too many elements here I think?
+            n_classes=100
+    ) # not too many elements here I think?
 
     net = torch.nn.Sequential(
         representation,
@@ -50,7 +52,6 @@ def run():
     results = exp.run()
 
     print(esp.app.report.markdown(results))
-
 
 
 if __name__ == '__main__':
