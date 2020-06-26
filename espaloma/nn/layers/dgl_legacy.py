@@ -15,9 +15,9 @@ from copy import deepcopy
 # CONSTANT
 # =============================================================================
 DEFAULT_MODEL_KWARGS = {
-    'SAGEConv': {'aggregator_type': 'mean'},
-    'GATConv': {'num_heads': 4},
-    'TAGConv': {'k': 2}
+    "SAGEConv": {"aggregator_type": "mean"},
+    "GATConv": {"num_heads": 4},
+    "TAGConv": {"k": 2},
 }
 
 
@@ -26,11 +26,7 @@ DEFAULT_MODEL_KWARGS = {
 # =============================================================================
 class GN(torch.nn.Module):
     def __init__(
-        self,
-        in_features,
-        out_features,
-        model_name="GraphConv",
-        kwargs={},
+        self, in_features, out_features, model_name="GraphConv", kwargs={},
     ):
         super(GN, self).__init__()
 
@@ -39,9 +35,8 @@ class GN(torch.nn.Module):
                 kwargs = DEFAULT_MODEL_KWARGS[model_name]
 
         self.gn = getattr(dgl_pytorch.conv, model_name)(
-                in_features,
-                out_features,
-                **kwargs)
+            in_features, out_features, **kwargs
+        )
 
         # register these properties here for downstream handling
         self.in_features = in_features
@@ -50,19 +45,22 @@ class GN(torch.nn.Module):
     def forward(self, g, x):
         return self.gn(g, x)
 
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 
+
 def gn(model_name="GraphConv", kwargs={}):
     if model_name == "GINConv":
         return lambda in_features, out_features: dgl_pytorch.conv.GINConv(
-                apply_func=torch.nn.Linear(in_features, out_features),
-                aggregator_type='sum')
+            apply_func=torch.nn.Linear(in_features, out_features), aggregator_type="sum"
+        )
 
     else:
         return lambda in_features, out_features: GN(
             in_features=in_features,
             out_features=out_features,
             model_name=model_name,
-            kwargs=kwargs)
+            kwargs=kwargs,
+        )

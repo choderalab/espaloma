@@ -19,7 +19,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     Note
     ----
     This also supports iterative-style dataset by deleting `__getitem__`
-    and `__len__` function. 
+    and `__len__` function.
 
     Attributes
     ----------
@@ -27,6 +27,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         the `__getiem__` method applies these transforms later.
 
     """
+
     def __init__(self, graphs=None):
         super(Dataset, self).__init__()
         self.graphs = graphs
@@ -36,16 +37,16 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         # 0 len if no graphs
         if self.graphs is None:
             return 0
-        
+
         else:
             return len(self.graphs)
 
     def __getitem__(self, idx):
         if self.graphs is None:
-            raise RuntimeError('Empty molecule dataset.')
+            raise RuntimeError("Empty molecule dataset.")
 
-        if isinstance(idx, int): # sinlge element
-            if self.transforms is None: # when no transform act like list
+        if isinstance(idx, int):  # sinlge element
+            if self.transforms is None:  # when no transform act like list
                 return self.graphs[idx]
 
             else:
@@ -57,10 +58,10 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
                 return graph
 
-        elif isinstance(idx, slice): # implement slicing
+        elif isinstance(idx, slice):  # implement slicing
             if self.transforms is None:
                 # return a Dataset object rather than list
-                return self.__class__(graphs=self.graphs[idx]) 
+                return self.__class__(graphs=self.graphs[idx])
             else:
                 graphs = []
                 for graph in self.graphs:
@@ -81,9 +82,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             # is this efficient?
             graphs = iter(self.graphs)
             for transform in self.transforms:
-                graphs = map(
-                        transform,
-                        graphs)
+                graphs = map(transform, graphs)
 
             return graphs
 
@@ -93,7 +92,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         Parameters
         ----------
         fn : callable
-        
+
         Note
         ----
         If in_place is False, `fn` is added to the `transforms` else it is applied
@@ -103,16 +102,16 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         assert callable(fn)
         assert isinstance(in_place, bool)
 
-        if in_place is False: # add to list of transforms
+        if in_place is False:  # add to list of transforms
             if self.transforms is None:
                 self.transforms = []
 
             self.transforms.append(fn)
 
-        else: # modify in-place
+        else:  # modify in-place
             self.graphs = list(map(fn, self.graphs))
 
-        return self # to allow grammar: ds = ds.apply(...)
+        return self  # to allow grammar: ds = ds.apply(...)
 
     def split(self, partition):
         """ Split the dataset according to some partition.
@@ -120,7 +119,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         Parameters
         ----------
         partition : sequence of integers or floats
-            
+
         """
         n_data = len(self)
         partition = [int(n_data * x / sum(partition)) for x in partition]
@@ -140,10 +139,9 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         path : path-like object
         """
         import pickle
-        with open(path, 'wb') as f_handle:
-            pickle.dump(
-                    self.graphs,
-                    f_handle)
+
+        with open(path, "wb") as f_handle:
+            pickle.dump(self.graphs, f_handle)
 
     def load(self, path):
         """ Load path to dataset.
@@ -152,16 +150,16 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         ----------
         """
         import pickle
-        with open(path, 'rb') as f_handle:
-            self.graphs = pickle.load(f_handle)
 
+        with open(path, "rb") as f_handle:
+            self.graphs = pickle.load(f_handle)
 
 
 class GraphDataset(Dataset):
     """ Dataset with additional support for only viewing
     certain attributes as `torch.utils.data.DataLoader`
 
-    
+
     """
 
     def __init__(self, graphs, first=None):
@@ -169,12 +167,8 @@ class GraphDataset(Dataset):
         from openforcefield.topology import Molecule
 
         if all(
-                isinstance(
-                    graph, 
-                    Molecule
-                ) or isinstance(
-                    graph,
-                    str) for graph in graphs):
+            isinstance(graph, Molecule) or isinstance(graph, str) for graph in graphs
+        ):
 
             if first is None:
                 graphs = [esp.Graph(graph) for graph in graphs]
@@ -186,20 +180,23 @@ class GraphDataset(Dataset):
     @staticmethod
     def batch(graphs):
         import dgl
+
         if all(isinstance(graph, esp.graphs.graph.Graph) for graph in graphs):
-            return dgl.batch([graph.homograph for graph in graphs])
+            return dgl.batch_hetero([graph.heterograph for graph in graphs])
 
         elif all(isinstance(graph, dgl.DGLGraph) for graph in graphs):
-            return dgl.batch(self.graphs)
-        
+            return dgl.batch(graphs)
+
         elif all(isinstance(graph, dgl.DGLHeteroGraph) for graph in graphs):
-            return dgl.batch_hetero(self.graphs)
+            return dgl.batch_hetero(graphs)
 
         else:
-            raise RuntimeError('Can only batch DGLGraph or DGLHeterograph,'
-                'now have %s' % type(graphs[0]))
+            raise RuntimeError(
+                "Can only batch DGLGraph or DGLHeterograph,"
+                "now have %s" % type(graphs[0])
+            )
 
-    def view(self, collate_fn='graph', *args, **kwargs):
+    def view(self, collate_fn="graph", *args, **kwargs):
         """ Provide a data loader.
 
         Parameters
@@ -209,29 +206,33 @@ class GraphDataset(Dataset):
 
 
         """
-        if collate_fn == 'graph':
+        if collate_fn == "graph":
             collate_fn = self.batch
-        
-        elif collate_fn == 'graph-typing':
+
+        if collate_fn == "homograph":
+
+            def collate_fn(graphs):
+                graph = self.batch([g.homograph for g in graphs])
+
+                return graph
+
+        elif collate_fn == "graph-typing":
+
             def collate_fn(graphs):
                 graph = self.batch(graphs)
-                y = graph.ndata['legacy_typing']
+                y = graph.ndata["legacy_typing"]
                 return graph, y
 
-        elif collate_fn == 'graph-typing-loss':
+        elif collate_fn == "graph-typing-loss":
             loss_fn = torch.nn.CrossEntropyLoss()
+
             def collate_fn(graphs):
                 graph = self.batch(graphs)
                 loss = lambda _graph: loss_fn(
-                        _graph.ndata['nn_typing'],
-                        graph.ndata['legacy_typing'])
+                    _graph.ndata["nn_typing"], graph.ndata["legacy_typing"]
+                )
                 return graph, loss
 
         return torch.utils.data.DataLoader(
-                dataset=self,
-                collate_fn=collate_fn,
-                *args, **kwargs)
-
-
-
-
+            dataset=self, collate_fn=collate_fn, *args, **kwargs
+        )

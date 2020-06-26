@@ -57,8 +57,18 @@ class LegacyForceField:
         if "gaff" in self.forcefield:
             self._prepare_gaff()
 
+        if "smirnoff" in self.forcefield:
+            # do nothing for now
+            self._prepare_smirnoff()
+
         else:
             raise NotImplementedError
+
+    def _prepare_smirnoff(self):
+
+        from openforcefield.typing.engines.smirnoff import ForceField
+
+        self.FF = ForceField("test_forcefields/%s.offxml" % self.forcefield)
 
     def _prepare_gaff(self):
         import os
@@ -142,11 +152,110 @@ class LegacyForceField:
         if g is None:
             g = esp.Graph(mol)
 
-        g.ndata["legacy_typing"] = torch.tensor(
+        g.nodes["n1"].data["legacy_typing"] = torch.tensor(
             [self._str_2_idx[atom] for atom in gaff_types]
         )
 
         return g
+
+    def _parametrize_gaff(self, mol, g=None):
+        raise NotImplementedError
+
+    def _parametrize_smirnoff(self, mol, g=None):
+        mol = self._convert_to_off(mol)
+
+        forces = self.FF.label_molecules(mol.to_topology())[0]
+
+        if g is None:
+            g = esp.Graph(mol)
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "k_ref": torch.Tensor(
+                    [
+                        forces["Bonds"][tuple(node.data["idxs"][idx].numpy())].k._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="n2",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "eq_ref": torch.Tensor(
+                    [
+                        forces["Bonds"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].length._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="n2",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "k_ref": torch.Tensor(
+                    [
+                        forces["Angles"][tuple(node.data["idxs"][idx].numpy())].k._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="n3",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "eq_ref": torch.Tensor(
+                    [
+                        forces["Angles"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].angle._value
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )
+            },
+            ntype="n3",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "k_ref": torch.Tensor(
+                    [
+                        forces["vdW"][(idx,)].epsilon._value
+                        for idx in range(g.heterograph.number_of_nodes("n1"))
+                    ]
+                )
+            },
+            ntype="n1",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "eq_ref": torch.Tensor(
+                    [
+                        forces["vdW"][(idx,)].rmin_half._value
+                        for idx in range(g.heterograph.number_of_nodes("n1"))
+                    ]
+                )
+            },
+            ntype="n1",
+        )
+
+        return g
+
+    def parametrize(self, mol, g=None):
+        """ Parametrize a molecular graph.
+
+        """
+        if 'smirnoff' in self.forcefield:
+            return self._parametrize_smirnoff(mol, g)
+
+        else:
+            raise NotImplementedError
 
     def typing(self, mol, g=None):
         """ Type a molecular graph.

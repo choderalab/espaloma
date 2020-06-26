@@ -14,8 +14,8 @@ def run():
     # I don't like torch-generic splitting function as it requires
     # specifically the volume of each partition and it is inconsistent
     # with the specification of __getitem__ method
-    ds_tr, ds_te = esol.split([4, 1]) 
-    
+    ds_tr, ds_te = esol.split([4, 1])
+
     # get a loader object that views this dataset in some way
     # using this specific flag the dataset turns into an iterator
     # that outputs loss function, per John's suggestion
@@ -27,32 +27,31 @@ def run():
     # define a representation
     representation = esp.nn.Sequential(
             layer,
-            [32, 'tanh', 32, 'tanh', 32, 'tanh'])
+            [32, 'tanh', 32, 'tanh', 32, 'tanh']
+    )
 
     # define a readout
     readout = esp.nn.readout.node_typing.NodeTyping(
             in_features=32,
-            n_classes=100) # not too many elements here I think?
+            n_classes=100
+    ) # not too many elements here I think?
 
-    # defien an optimizer
-    opt = torch.optim.Adam(
-            list(representation.parameters()) + list(readout.parameters()),
-            1e-3)
+    net = torch.nn.Sequential(
+        representation,
+        readout
+    )
 
-    loss_fn = esp.loss.GraphLoss(
-        base_loss=torch.nn.CrossEntropyLoss(),
-        between=['nn_typing', 'legacy_typing'])
+    exp = esp.TrainAndTest(
+        ds_tr=loader,
+        ds_te=loader,
+        net=net,
+        metrics_te=[esp.metrics.TypingAccuracy()],
+        n_epochs=500,
+    )
 
-    # train it !
-    for _ in range(10):
-        for g in loader:
-            opt.zero_grad()
-            g_hat = readout(representation(g))
-            loss = loss_fn(g, g_hat)
-            loss.backward()
-            opt.step()
-   
-    
+    results = exp.run()
+
+    print(esp.app.report.markdown(results))
 
 
 if __name__ == '__main__':

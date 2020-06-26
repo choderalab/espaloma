@@ -4,27 +4,20 @@ import torch
 import dgl
 
 
-class Sequential(torch.nn.Module):
+class _Sequential(torch.nn.Module):
+    """ Sequentially staggered neural networks.
+
+    """
+
     def __init__(
-        self,
-        layer,
-        config,
-        feature_units=117,
-        input_units=128,
-        model_kwargs={},
+        self, layer, config, in_features, model_kwargs={},
     ):
-        super(Sequential, self).__init__()
+        super(_Sequential, self).__init__()
 
-        # the initial dimensionality
-        dim = input_units
-
-        # record the name of the layers in a list
         self.exes = []
 
-        # initial featurization
-        self.f_in = torch.nn.Sequential(
-            torch.nn.Linear(feature_units, input_units), torch.nn.Tanh()
-        )
+        # init dim
+        dim = in_features
 
         # parse the config
         for idx, exe in enumerate(config):
@@ -59,18 +52,76 @@ class Sequential(torch.nn.Module):
 
                 self.exes.append("o" + str(idx))
 
-    def forward(self, g, x=None):
-    
-        if x is None:
-            x = g.ndata['h0']
-        
-        x = self.f_in(x)
-
+    def forward(self, g, x):
         for exe in self.exes:
-            if exe.startswith('d'):
+            if exe.startswith("d"):
+                if g is not None:
+                    x = getattr(self, exe)(g, x)
+                else:
+                    x = getattr(self, exe)(x)
+            else:
+                x = getattr(self, exe)(x)
+
+        return x
+
+
+class Sequential(torch.nn.Module):
+    """ Sequential neural network with input layers.
+
+    """
+
+    def __init__(
+        self, layer, config, feature_units=117, input_units=128, model_kwargs={},
+    ):
+        super(Sequential, self).__init__()
+
+        # initial featurization
+        self.f_in = torch.nn.Sequential(
+            torch.nn.Linear(feature_units, input_units), torch.nn.Tanh()
+        )
+
+        self._sequential = _Sequential(
+            layer, config, in_features=input_units, model_kwargs=model_kwargs
+        )
+
+    def _forward(self, g, x):
+        """ Forward pass with graph and features.
+
+        """
+        for exe in self.exes:
+            if exe.startswith("d"):
                 x = getattr(self, exe)(g, x)
             else:
                 x = getattr(self, exe)(x)
-        
-        g.ndata['h'] = x
-        return g 
+
+        return x
+
+    def forward(self, g, x=None):
+        """ Forward pass.
+
+        Parameters
+        ----------
+        g : `dgl.DGLHeteroGraph`,
+            input graph
+
+        Returns
+        -------
+        g : `dgl.DGLHeteroGraph`
+            output graph
+        """
+
+        # get homogeneous subgraph
+        g_ = dgl.to_homo(g.edge_type_subgraph(["n1_neighbors_n1"]))
+
+        if x is None:
+            # get node attributes
+            x = g.nodes["n1"].data["h0"]
+            x = self.f_in(x)
+
+        # message passing on homo graph
+        x = self._sequential(g_, x)
+
+        # put attribute back in the graph
+        g.nodes["n1"].data["h"] = x
+
+        return g
