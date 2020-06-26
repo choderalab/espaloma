@@ -127,7 +127,7 @@ def from_homogeneous(g):
     # we'll test later to see if this adds too much overhead
     for small_idx in range(1, 5):
         for big_idx in range(small_idx + 1, 5):
-            for pos_idx in range(big_idx - small_idx):
+            for pos_idx in range(big_idx - small_idx + 1):
                 hg[
                     (
                         "n%s" % small_idx,
@@ -173,5 +173,9 @@ def from_homogeneous(g):
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
+
+    # include indices in the nodes themselves
+    for term in ["n1", "n2", "n3", "n4"]:
+        hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
 
     return hg
