@@ -37,9 +37,9 @@ class JanossyPooling(torch.nn.Module):
                 self,
                 "sequential_%s" % level,
                 esp.nn.sequential._Sequential(
-                    in_features=in_features*level,
+                    in_features=in_features * level,
                     config=config,
-                    layer=torch.nn.Linear
+                    layer=torch.nn.Linear,
                 ),
             )
 
@@ -68,12 +68,13 @@ class JanossyPooling(torch.nn.Module):
                 % (relationship_idx, big_idx): (
                     dgl.function.copy_src("h", "m%s" % relationship_idx),
                     dgl.function.mean(
-                        "m%s" % relationship_idx,
-                        "h%s" % relationship_idx),
+                        "m%s" % relationship_idx, "h%s" % relationship_idx
+                    ),
                 )
-                for big_idx in self.levels for relationship_idx in range(big_idx)
+                for big_idx in self.levels
+                for relationship_idx in range(big_idx)
             },
-            cross_reducer='sum'
+            cross_reducer="sum",
         )
 
         # pool
@@ -82,7 +83,7 @@ class JanossyPooling(torch.nn.Module):
             g.apply_nodes(
                 func=lambda nodes: {
                     "theta": getattr(self, "f_out_%s" % big_idx)(
-                        getattr(self, 'sequential_%s' % big_idx)(
+                        getattr(self, "sequential_%s" % big_idx)(
                             g=None,
                             x=self.pool(
                                 torch.cat(
@@ -95,11 +96,13 @@ class JanossyPooling(torch.nn.Module):
                                 torch.cat(
                                     [
                                         nodes.data["h%s" % relationship_idx]
-                                        for relationship_idx in range(big_idx-1, -1, -1)
+                                        for relationship_idx in range(
+                                            big_idx - 1, -1, -1
+                                        )
                                     ],
                                     dim=1,
                                 ),
-                            )
+                            ),
                         )
                     )
                 },
@@ -107,11 +110,10 @@ class JanossyPooling(torch.nn.Module):
             )
 
             g.apply_nodes(
-                func=lambda nodes:
-                    {
-                        'k': nodes.data["theta"][:, 0],
-                        'eq': nodes.data["theta"][:, 1]
-                    },
+                func=lambda nodes: {
+                    "k": nodes.data["theta"][:, 0],
+                    "eq": nodes.data["theta"][:, 1],
+                },
                 ntype="n%s" % big_idx,
             )
 

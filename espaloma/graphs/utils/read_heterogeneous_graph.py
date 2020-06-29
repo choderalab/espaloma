@@ -61,7 +61,10 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
 
         # filter the enumeration to be output
         idxs_level = torch.cat(
-            [base_pairs[mask][:, : (level - 1)], base_pairs[mask][:, -1][:, None]],
+            [
+                base_pairs[mask][:, : (level - 1)],
+                base_pairs[mask][:, -1][:, None],
+            ],
             dim=-1,
         )
 

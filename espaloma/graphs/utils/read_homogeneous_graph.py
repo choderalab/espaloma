@@ -16,10 +16,18 @@ def fp_oe(atom):
     from openeye import oechem
 
     HYBRIDIZATION_OE = {
-        oechem.OEHybridization_sp: torch.tensor([1, 0, 0, 0, 0], dtype=torch.float32),
-        oechem.OEHybridization_sp2: torch.tensor([0, 1, 0, 0, 0], dtype=torch.float32),
-        oechem.OEHybridization_sp3: torch.tensor([0, 0, 1, 0, 0], dtype=torch.float32),
-        oechem.OEHybridization_sp3d: torch.tensor([0, 0, 0, 1, 0], dtype=torch.float32),
+        oechem.OEHybridization_sp: torch.tensor(
+            [1, 0, 0, 0, 0], dtype=torch.float32
+        ),
+        oechem.OEHybridization_sp2: torch.tensor(
+            [0, 1, 0, 0, 0], dtype=torch.float32
+        ),
+        oechem.OEHybridization_sp3: torch.tensor(
+            [0, 0, 1, 0, 0], dtype=torch.float32
+        ),
+        oechem.OEHybridization_sp3d: torch.tensor(
+            [0, 0, 0, 1, 0], dtype=torch.float32
+        ),
         oechem.OEHybridization_sp3d2: torch.tensor(
             [0, 0, 0, 0, 1], dtype=torch.float32
         ),
@@ -114,12 +122,15 @@ def from_oemol(mol, use_fp=True):
     # enter nodes
     n_atoms = mol.NumAtoms()
     g.add_nodes(n_atoms)
-    g.ndata["type"] = torch.Tensor([[atom.GetAtomicNum()] for atom in mol.GetAtoms()])
+    g.ndata["type"] = torch.Tensor(
+        [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
+    )
 
     h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
 
     h_v[
-        torch.arange(g.ndata["type"].shape[0]), torch.squeeze(g.ndata["type"]).long()
+        torch.arange(g.ndata["type"].shape[0]),
+        torch.squeeze(g.ndata["type"]).long(),
     ] = 1.0
 
     h_v_fp = torch.stack([fp_oe(atom) for atom in mol.GetAtoms()], axis=0)
@@ -153,12 +164,15 @@ def from_rdkit_mol(mol, use_fp=True):
     # enter nodes
     n_atoms = mol.GetNumAtoms()
     g.add_nodes(n_atoms)
-    g.ndata["type"] = torch.Tensor([[atom.GetAtomicNum()] for atom in mol.GetAtoms()])
+    g.ndata["type"] = torch.Tensor(
+        [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
+    )
 
     h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
 
     h_v[
-        torch.arange(g.ndata["type"].shape[0]), torch.squeeze(g.ndata["type"]).long()
+        torch.arange(g.ndata["type"].shape[0]),
+        torch.squeeze(g.ndata["type"]).long(),
     ] = 1.0
 
     h_v_fp = torch.stack([fp_rdkit(atom) for atom in mol.GetAtoms()], axis=0)

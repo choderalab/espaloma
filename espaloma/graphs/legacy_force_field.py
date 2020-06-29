@@ -50,7 +50,9 @@ class LegacyForceField:
             return mol
         elif isinstance(mol, rdkit.Chem.rdchem.Mol):
             return Molecule.from_rdkit(mol)
-        elif "openeye" in str(type(mol)):  # because we don't want to depend on OE
+        elif "openeye" in str(
+            type(mol)
+        ):  # because we don't want to depend on OE
             return Molecule.from_openeye(mol)
 
     def _prepare_forcefield(self):
@@ -121,7 +123,9 @@ class LegacyForceField:
         # import template generator
         from openmmforcefields.generators import GAFFTemplateGenerator
 
-        gaff = GAFFTemplateGenerator(molecules=mol, forcefield=self.forcefield)
+        gaff = GAFFTemplateGenerator(
+            molecules=mol, forcefield=self.forcefield
+        )
 
         # create temporary directory for running antechamber
         import tempfile
@@ -174,7 +178,9 @@ class LegacyForceField:
             lambda node: {
                 "k_ref": torch.Tensor(
                     [
-                        forces["Bonds"][tuple(node.data["idxs"][idx].numpy())].k._value
+                        forces["Bonds"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].k._value
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )
@@ -200,7 +206,9 @@ class LegacyForceField:
             lambda node: {
                 "k_ref": torch.Tensor(
                     [
-                        forces["Angles"][tuple(node.data["idxs"][idx].numpy())].k._value
+                        forces["Angles"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].k._value
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )
@@ -252,7 +260,7 @@ class LegacyForceField:
         """ Parametrize a molecular graph.
 
         """
-        if 'smirnoff' in self.forcefield:
+        if "smirnoff" in self.forcefield:
             return self._parametrize_smirnoff(mol, g)
 
         else:

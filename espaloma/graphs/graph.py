@@ -52,15 +52,21 @@ class Graph(BaseGraph):
 
         # TODO:
         # rewrite this using OFF-generic grammar
-        graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(mol.to_rdkit())
+        graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(
+            mol.to_rdkit()
+        )
 
         return graph
 
     @staticmethod
     def get_heterograph_from_graph(graph):
-        assert isinstance(graph, dgl.DGLGraph), "graph can only be dgl Graph object."
+        assert isinstance(
+            graph, dgl.DGLGraph
+        ), "graph can only be dgl Graph object."
 
-        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(graph)
+        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
+            graph
+        )
 
         return heterograph
 
@@ -92,10 +98,14 @@ class Graph(BaseGraph):
         import pickle
 
         with open(path, "wb") as f_handle:
-            pickle.dump([self._mol, self._homograph, self._heterograph], f_handle)
+            pickle.dump(
+                [self._mol, self._homograph, self._heterograph], f_handle
+            )
 
     def load(self, path):
         import pickle
 
         with open(path, "rb") as f_handle:
-            (self._mol, self._homograph, self._heterograph) = pickle.load(f_handle)
+            (self._mol, self._homograph, self._heterograph) = pickle.load(
+                f_handle
+            )

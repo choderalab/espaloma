@@ -20,6 +20,7 @@ class NodeTyping(BaseReadout):
 
     def forward(self, g):
         g.apply_nodes(
-            ntype="n1", func=lambda node: {"nn_typing": self.c(node.data["h"])}
+            ntype="n1",
+            func=lambda node: {"nn_typing": self.c(node.data["h"])},
         )
         return g

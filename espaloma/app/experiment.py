@@ -240,7 +240,10 @@ class TrainAndTest(Experiment):
         self.states = train.states
 
         test = Test(
-            net=self.net, data=self.ds_te, metrics=self.metrics_te, states=self.states,
+            net=self.net,
+            data=self.ds_te,
+            metrics=self.metrics_te,
+            states=self.states,
         )
 
         test.test()
@@ -248,7 +251,10 @@ class TrainAndTest(Experiment):
         self.results_te = test.results
 
         test = Test(
-            net=self.net, data=self.ds_tr, metrics=self.metrics_te, states=self.states,
+            net=self.net,
+            data=self.ds_tr,
+            metrics=self.metrics_te,
+            states=self.states,
         )
 
         test.test()

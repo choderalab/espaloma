@@ -43,7 +43,9 @@ def periodic(x, k, eq, order):
     if isinstance(order, list):
         order = torch.tensor(order)
 
-    return torch.sum(k * (1.0 + torch.cos(order * x - eq)), dim=-1, keepdim=True)
+    return torch.sum(
+        k * (1.0 + torch.cos(order * x - eq)), dim=-1, keepdim=True
+    )
 
 
 def lj(x, k, eq, order=torch.tensor([12, 6])):
