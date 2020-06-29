@@ -51,11 +51,10 @@ def periodic(x, k, eq, order):
 def lj(x, k, eq, order=torch.tensor([12, 6])):
     r""" Lennard-Jones term.
 
-    $$
-    
+    Notes
+    -----
+    ..math::
     E  = \epsilon  ((\sigma / r) ^ {12} - (\sigma / r) ^ 6)
-
-    $$
 
     Parameters
     ----------
@@ -69,7 +68,7 @@ def lj(x, k, eq, order=torch.tensor([12, 6])):
     Returns
     -------
     u: torch.tensor, shape=(batch_size, 1)
-  
+
     """
     if isinstance(order, list):
         order = torch.tensor(order)

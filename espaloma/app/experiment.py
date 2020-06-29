@@ -59,6 +59,7 @@ class Train(Experiment):
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
         record_interval=1,
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize
     ):
         super(Train, self).__init__()
 
@@ -68,6 +69,7 @@ class Train(Experiment):
         self.metrics = metrics
         self.n_epochs = n_epochs
         self.record_interval = record_interval
+        self.normalize = normalize()
         self.states = {}
 
         # make optimizer
@@ -80,7 +82,9 @@ class Train(Experiment):
         def loss(g):
             _loss = 0.0
             for metric in self.metrics:
-                _loss += metric(g)
+                _loss += metric(
+                    self.normalize.norm(g)
+                )
             return _loss
 
         self.loss = loss
@@ -141,6 +145,7 @@ class Test(Experiment):
         data,
         states,
         metrics=[esp.metrics.TypingCrossEntropy()],
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
         sampler=None,
     ):
         # bookkeeping
@@ -149,6 +154,7 @@ class Test(Experiment):
         self.states = states
         self.metrics = metrics
         self.sampler = sampler
+        self.normalize = normalize()
 
     def test(self):
         """ Run tests. """
@@ -170,7 +176,9 @@ class Test(Experiment):
 
                 # loop through the metrics
                 results[metric.__name__][state_name] = (
-                    metric(g_input=self.net(g),).detach().cpu().numpy()
+                    metric(
+                        g_input=self.normalize.unnorm(self.net(g)),
+                        ).detach().cpu().numpy()
                 )
 
         # point this to self
@@ -189,6 +197,7 @@ class TrainAndTest(Experiment):
         metrics_tr=[esp.metrics.TypingCrossEntropy()],
         metrics_te=[esp.metrics.TypingCrossEntropy()],
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
         n_epochs=100,
         record_interval=1,
     ):
@@ -233,6 +242,7 @@ class TrainAndTest(Experiment):
             optimizer=self.optimizer,
             n_epochs=self.n_epochs,
             metrics=self.metrics_tr,
+            normalize=self.normalize,
         )
 
         train.train()
@@ -244,6 +254,7 @@ class TrainAndTest(Experiment):
             data=self.ds_te,
             metrics=self.metrics_te,
             states=self.states,
+            normalize=self.normalize,
         )
 
         test.test()
