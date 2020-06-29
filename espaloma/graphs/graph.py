@@ -10,9 +10,7 @@ import dgl
 # MODULE CLASSES
 # =============================================================================
 class BaseGraph(abc.ABC):
-    """ Base class of various graph objects that we host data in.
-
-    """
+    """ Base class of graph. """
 
     def __init__(self):
         super(BaseGraph, self).__init__()
@@ -22,6 +20,10 @@ class Graph(BaseGraph):
     """ A unified graph object that support translation to and from
     message-passing graphs and MM factor graph.
 
+    Note
+    ----
+    This object provides access to popular attributes of homograph and
+    heterograph.
 
     """
 

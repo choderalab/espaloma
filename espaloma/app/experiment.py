@@ -11,16 +11,44 @@ import dgl
 # MODULE CLASSES
 # =============================================================================
 class Experiment(abc.ABC):
-    """ Base class for espaloma experiment.
-
-    """
+    """ Base class for espaloma experiment. """
 
     def __init__(self):
         super(Experiment, self).__init__()
 
 
 class Train(Experiment):
-    """ Train a model for a while.
+    """ Training experiment.
+
+    Parameters
+    ----------
+    net : `torch.nn.Module`
+        Neural networks that inputs graph representation and outputs
+        parameterized or typed graph for molecular mechanics.
+
+    data : `espaloma.data.dataset.Dataset`
+        or `torch.utils.data.DataLoader`
+        Dataset.
+
+    metrics : `List` of `callable`
+        List of loss functions to be used (summed) in training.
+
+    optimizer : `torch.optim.Optimizer`
+        Optimizer used for training.
+
+    n_epochs : `int`
+        Number of epochs.
+
+    record_interval : `int`
+        Interval at which states are recorded.
+
+    Methods
+    -------
+    train_once : Train the network for exactly once.
+
+    train : Execute `train_once` for `n_epochs` times and record states
+        every `record_interval`.
+
     """
 
     def __init__(
@@ -58,9 +86,7 @@ class Train(Experiment):
         self.loss = loss
 
     def train_once(self):
-        """ Train the model for one batch.
-
-        """
+        """ Train the model for one batch. """
         for g in self.data:  # TODO: does this have to be a single g?
 
             def closure(g=g):
@@ -91,7 +117,21 @@ class Train(Experiment):
 
 
 class Test(Experiment):
-    """ Run sequences of tests on a trained model.
+    """ Test experiment.
+
+    Parameters
+    ----------
+    net : `torch.nn.Module`
+        Neural networks that inputs graph representation and outputs
+        parameterized or typed graph for molecular mechanics.
+
+    data : `espaloma.data.dataset.Dataset`
+        or `torch.utils.data.DataLoader`
+        Dataset.
+
+    metrics : `List` of `callable`
+        List of loss functions to be used (summed) in training.
+
 
     """
 
@@ -111,9 +151,7 @@ class Test(Experiment):
         self.sampler = sampler
 
     def test(self):
-        """ Run test.
-
-        """
+        """ Run tests. """
         results = {}
 
         # loop through the metrics
@@ -141,9 +179,7 @@ class Test(Experiment):
 
 
 class TrainAndTest(Experiment):
-    """ Train a model and then test it.
-
-    """
+    """ Train a model and then test it. """
 
     def __init__(
         self,
