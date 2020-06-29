@@ -38,6 +38,7 @@ def from_csv(path, toolkit="rdkit", smiles_col=-1, y_cols=[-2], seed=2666):
             gs = [esp.HomogeneousGraph(mol) for mol in mols]
 
         ds = list(zip(gs, list(torch.tensor(df_y.values))))
+
         random.seed(seed)
         random.shuffle(ds)
 

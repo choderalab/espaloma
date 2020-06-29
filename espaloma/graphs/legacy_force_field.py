@@ -54,10 +54,11 @@ class LegacyForceField:
             return Molecule.from_openeye(mol)
 
     def _prepare_forcefield(self):
+
         if "gaff" in self.forcefield:
             self._prepare_gaff()
 
-        if "smirnoff" in self.forcefield:
+        elif "smirnoff" in self.forcefield:
             # do nothing for now
             self._prepare_smirnoff()
 

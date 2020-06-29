@@ -108,8 +108,7 @@ def from_homogeneous(g):
     # NOTE:
     # here we only define the neighboring relationship
     # on atom level
-    for idx in range(1, 5):
-        hg[("n%s" % idx, "n%s_neighbors_n%s" % (idx, idx), "n%s" % idx)] = idxs["n2"]
+    hg[("n1", "n1_neighbors_n1", "n1")] = idxs["n2"]
 
     # build a mapping between indices and the ordering
     idxs_to_ordering = {}
