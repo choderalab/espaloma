@@ -125,3 +125,23 @@ class TypingAccuracy(GraphMetric):
         )
 
         self.__name__ = "TypingAccuracy"
+
+class BondKMSE(GraphMetric):
+    def __init__(self):
+        super(BondKMSE, self).__init__(
+            between=['k_ref', 'k'],
+            level='n2',
+            base_metric=torch.nn.MSELoss()
+        )
+
+        self.__name__ = 'BondKMSE'
+
+class BondKRMSE(GraphMetric):
+    def __init__(self):
+        super(BondKRMSE, self).__init__(
+            between=['k_ref', 'k'],
+            level='n2',
+            base_metric=rmse
+        )
+
+        self.__name__ = 'BondKRMSE'

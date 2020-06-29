@@ -4,6 +4,7 @@
 import espaloma as esp
 import abc
 import torch
+from rdkit import Chem
 
 # =============================================================================
 # MODULE CLASSES
@@ -170,8 +171,10 @@ class GraphDataset(Dataset):
             isinstance(graph, Molecule) or isinstance(graph, str) for graph in graphs
         ):
 
-            if first is None:
+            if first is None or first == -1:
                 graphs = [esp.Graph(graph) for graph in graphs]
+
+
             else:
                 graphs = [esp.Graph(graph) for graph in graphs[:first]]
 
