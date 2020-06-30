@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import espaloma as esp
 
 # =============================================================================
@@ -14,7 +13,7 @@ K_E = 332.0636  # kcal angstrom / (mol e ** 2)
 # =============================================================================
 def lj_12_6(x, k, eq):
     """ Lenard-Jones 12-6.
-    
+
     Parameters
     ----------
     x : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
@@ -42,6 +41,6 @@ def columb(x, q_prod, k_e=K_E):
     -------
     u : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
 
-    
+
     """
     return k_e * x / q_prod

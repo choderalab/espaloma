@@ -3,7 +3,6 @@
 # =============================================================================
 import torch
 import espaloma as esp
-from espaloma.nn.readout.base_readout import BaseReadout
 import dgl
 
 # =============================================================================

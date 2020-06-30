@@ -2,8 +2,6 @@
 # IMPORTS
 # =============================================================================
 import torch
-import dgl
-import espaloma as esp
 from espaloma.nn.readout.base_readout import BaseReadout
 
 # =============================================================================

@@ -74,11 +74,11 @@ class GraphMetric(Metric):
 
         self.base_metric = base_metric
 
-        # get base name
-        if hasattr(base_metric, "__init__"):
-            base_name = base_metric.__class__.__name__
-        else:
+        # get name
+        if hasattr(base_metric, '__name__'):
             base_name = base_metric.__name__
+        else:
+            base_name = base_metric.__class__.__name__
 
         self.__name__ = "%s between %s and %s" % (
             base_name,

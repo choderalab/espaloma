@@ -82,9 +82,8 @@ class Train(Experiment):
         def loss(g):
             _loss = 0.0
             for metric in self.metrics:
-                _loss += metric(
-                    self.normalize.norm(g)
-                )
+                _loss += metric(g)
+
             return _loss
 
         self.loss = loss
@@ -107,6 +106,9 @@ class Train(Experiment):
         record the weights once every `record_interval`
 
         """
+        # normalize before training
+        [self.normalize.norm(g) for g in self.data]
+
         for epoch_idx in range(int(self.n_epochs)):
             self.train_once()
 
@@ -210,6 +212,7 @@ class TrainAndTest(Experiment):
         self.n_epochs = n_epochs
         self.metrics_tr = metrics_tr
         self.metrics_te = metrics_te
+        self.normalize=normalize
 
     def __str__(self):
         _str = ""
@@ -266,6 +269,7 @@ class TrainAndTest(Experiment):
             data=self.ds_tr,
             metrics=self.metrics_te,
             states=self.states,
+            normalize=self.normalize
         )
 
         test.test()

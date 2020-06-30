@@ -89,6 +89,9 @@ class DatasetNormalNormalize(BaseNormalize):
             for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
                 for key in g.nodes[term].data.keys(): # loop through parameters
 
+                    if key + '_mean' not in self.statistics[term]:
+                        continue
+
                     g.nodes[term].data[key]\
                         = g.nodes[term].data[key]\
                         * self.statistics[term][key + '_std']\
@@ -164,6 +167,9 @@ class DatasetLogNormalNormalize(BaseNormalize):
         def unnorm(g):
             for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
                 for key in g.nodes[term].data.keys(): # loop through parameters
+
+                    if key + '_mean' not in self.statistics[term]:
+                        continue
 
                     g.nodes[term].data[key]\
                         = torch.exp(
