@@ -5,6 +5,7 @@ import espaloma as esp
 import abc
 import openforcefield
 import dgl
+import torch
 
 # =============================================================================
 # MODULE CLASSES
@@ -27,7 +28,7 @@ class Graph(BaseGraph):
 
     """
 
-    def __init__(self, mol=None, homograph=None, heterograph=None):
+    def __init__(self, mol=None, homograph=None, heterograph=None, xyz=None):
         # input molecule
         if isinstance(mol, str):
             from openforcefield.topology import Molecule
@@ -43,6 +44,14 @@ class Graph(BaseGraph):
         self._mol = mol
         self._homograph = homograph
         self._heterograph = heterograph
+
+        # sanity check coordinates
+        self.xyz = xyz
+
+        if self.xyz is not None:
+            assert isinstance(xyz, torch.Tensor)
+            assert self.xyz.shape[0] == self._homograph.number_of_nodes()
+            assert self.xyz.shape[2] == 3
 
     @staticmethod
     def get_homograph_from_mol(mol):

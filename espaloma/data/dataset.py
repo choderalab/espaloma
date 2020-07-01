@@ -4,7 +4,6 @@
 import espaloma as esp
 import abc
 import torch
-from rdkit import Chem
 
 # =============================================================================
 # MODULE CLASSES
@@ -68,7 +67,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                 for graph in self.graphs:
 
                     # nested transforms
-                    for transform in transforms:
+                    for transform in self.transforms:
                         graph = transform(graph)
                     graphs.append(graph)
 
@@ -212,7 +211,14 @@ class GraphDataset(Dataset):
         if collate_fn == "graph":
             collate_fn = self.batch
 
-        if collate_fn == "homograph":
+        elif collate_fn == 'geometry_graph':
+            def collate_fn(graphs):
+                for g in graphs: # in-place modification
+                    g.heterograph.nodes['n1'].data['xyz'] = g.xyz
+
+                return self.batch(graphs)
+
+        elif collate_fn == "homograph":
 
             def collate_fn(graphs):
                 graph = self.batch([g.homograph for g in graphs])
