@@ -95,6 +95,7 @@ class Train(Experiment):
             def closure(g=g):
                 self.optimizer.zero_grad()
                 g = self.net(g)
+                g = self.normalize.unnorm(g)
                 loss = self.loss(g)
                 loss.backward()
                 return loss
@@ -106,8 +107,6 @@ class Train(Experiment):
         record the weights once every `record_interval`
 
         """
-        # normalize before training
-        [self.normalize.norm(g) for g in self.data]
 
         for epoch_idx in range(int(self.n_epochs)):
             self.train_once()
@@ -174,14 +173,17 @@ class Test(Experiment):
             # load the state dict
             self.net.load_state_dict(state)
 
-            for metric in self.metrics:
+            # local scope
+            with g.local_scope():
 
-                # loop through the metrics
-                results[metric.__name__][state_name] = (
-                    metric(
-                        g_input=self.normalize.unnorm(self.net(g)),
-                        ).detach().cpu().numpy()
-                )
+                for metric in self.metrics:
+
+                    # loop through the metrics
+                    results[metric.__name__][state_name] = metric(
+                            g_input=self.normalize.unnorm(
+                                    self.net(g)
+                                )
+                            ).detach().cpu().numpy()
 
         # point this to self
         self.results = results

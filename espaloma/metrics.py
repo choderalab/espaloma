@@ -80,10 +80,11 @@ class GraphMetric(Metric):
         else:
             base_name = base_metric.__class__.__name__
 
-        self.__name__ = "%s between %s and %s" % (
+        self.__name__ = "%s_between_%s_and_%s_on_%s" % (
             base_name,
             between[0],
             between[1],
+            level
         )
 
     @staticmethod

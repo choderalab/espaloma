@@ -89,13 +89,23 @@ class DatasetNormalNormalize(BaseNormalize):
             for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
                 for key in g.nodes[term].data.keys(): # loop through parameters
 
-                    if key + '_mean' not in self.statistics[term]:
-                        continue
+                    if key + '_mean' in self.statistics[term]:
 
-                    g.nodes[term].data[key]\
-                        = g.nodes[term].data[key]\
-                        * self.statistics[term][key + '_std']\
-                        + self.statistics[term][key + '_mean']
+                        g.nodes[term].data[key]\
+                            = g.nodes[term].data[key]\
+                                * self.statistics[term][key + '_std']\
+                                + self.statistics[term][key + '_mean']
+                    #
+                    # elif '_ref' in key \
+                    #     and key.replace('_ref', '_mean')\
+                    #     in self.statistics[term]:
+                    #
+                    #     g.nodes[term].data[key]\
+                    #         = g.nodes[term].data[key]\
+                    #             * self.statistics[term][
+                    #                 key.replace('_ref', '_std')]\
+                    #             + self.statistics[term][
+                    #                 key.replace('_ref', '_mean')]
 
             return g
 
@@ -168,14 +178,25 @@ class DatasetLogNormalNormalize(BaseNormalize):
             for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
                 for key in g.nodes[term].data.keys(): # loop through parameters
 
-                    if key + '_mean' not in self.statistics[term]:
-                        continue
+                    if key + '_mean' in self.statistics[term]:
 
-                    g.nodes[term].data[key]\
-                        = torch.exp(
-                            g.nodes[term].data[key]\
-                                * self.statistics[term][key + '_std']\
-                                + self.statistics[term][key + '_mean'])
+                        g.nodes[term].data[key]\
+                            = torch.exp(
+                                g.nodes[term].data[key]\
+                                    * self.statistics[term][key + '_std']\
+                                    + self.statistics[term][key + '_mean'])
+                    #
+                    # elif '_ref' in key \
+                    #     and key.replace('_ref', '_mean')\
+                    #     in self.statistics[term]:
+                    #
+                    #     g.nodes[term].data[key]\
+                    #         = torch.exp(
+                    #             g.nodes[term].data[key]\
+                    #                 * self.statistics[term][
+                    #                     key.replace('_ref', '_std')]\
+                    #                 + self.statistics[term][
+                    #                     key.replace('_ref', '_mean')])
 
             return g
 

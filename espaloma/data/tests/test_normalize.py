@@ -62,14 +62,23 @@ def test_normal_normalize_reproduce():
 
     npt.assert_almost_equal(
         g.nodes['n2'].data['k'].detach().numpy(),
+        g_.nodes['n2'].data['k_ref'].detach().numpy(),
+    )
+
+    npt.assert_almost_equal(
+        g.nodes['n2'].data['k'].detach().numpy(),
         g_.nodes['n2'].data['k_ref'].detach().numpy()
     )
 
     npt.assert_almost_equal(
-        g.nodes['n2'].data['eq'].detach().numpy(),
+        g.nodes['n2'].data['eq_ref'].detach().numpy(),
         g_.nodes['n2'].data['eq_ref'].detach().numpy()
     )
 
+    npt.assert_almost_equal(
+        g.nodes['n2'].data['eq_ref'].detach().numpy(),
+        g_.nodes['n2'].data['eq_ref'].detach().numpy()
+    )
 
 def test_log_normal_normalize_reproduce():
     import espaloma as esp
@@ -111,7 +120,19 @@ def test_log_normal_normalize_reproduce():
     )
 
     npt.assert_almost_equal(
-        g.nodes['n2'].data['eq'].detach().numpy(),
+        g.nodes['n2'].data['k'].detach().numpy(),
+        g_.nodes['n2'].data['k_ref'].detach().numpy(),
+        decimal=1
+    )
+
+    npt.assert_almost_equal(
+        g.nodes['n2'].data['eq_ref'].detach().numpy(),
+        g_.nodes['n2'].data['eq_ref'].detach().numpy(),
+        decimal=1
+    )
+
+    npt.assert_almost_equal(
+        g.nodes['n2'].data['eq_ref'].detach().numpy(),
         g_.nodes['n2'].data['eq_ref'].detach().numpy(),
         decimal=1
     )

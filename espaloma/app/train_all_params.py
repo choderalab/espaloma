@@ -65,8 +65,6 @@ def run(args):
         ]
     ]
 
-    print(metrics_te)
-
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,
         ds_te=ds_te,
