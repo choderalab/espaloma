@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import espaloma as esp
 
 # =============================================================================
@@ -12,19 +11,19 @@ def harmonic_angle(x, k, eq):
 
     Parameters
     ----------
-    x : torch.Tensor, shape = (batch_size, 1)
+    x : `torch.Tensor`, `shape = (batch_size, 1)`
         angle value
-    k : torch.Tensor, shape = (batch_size, 1)
+    k : `torch.Tensor`, `shape = (batch_size, 1)`
         force constant
-    eq : torch.Tensor, shape = (batch_size, 1)
+    eq : `torch.Tensor`, `shape = (batch_size, 1)`
         eqilibrium value
 
     Returns
     -------
-    u : torch.tensor, shape = (batch_size, 1)
+    u : `torch.Tensor`, `shape = (batch_size, 1)`
         energy
 
     """
     # NOTE:
     # the constant 0.5 is included here but not in the functional forms
-    return 0.5 * esp.mm.functional.harmonic(x, k, eq)
+    return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)

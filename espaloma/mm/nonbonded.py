@@ -16,13 +16,16 @@ def lj_12_6(x, k, eq):
 
     Parameters
     ----------
-    x : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
-    k : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
-    eq : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
+    x : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+    k : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+    eq : `torch.Tensor`,
+        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
     Returns
     -------
-    u : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
+    u : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
     """
 
@@ -34,12 +37,14 @@ def columb(x, q_prod, k_e=K_E):
 
     Parameters
     ----------
-    x : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
-    q_prod : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
+    x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`
+    q_prod : `torch.Tensor`,
+        `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`
 
     Returns
     -------
-    u : torch.tensor, shape=(batch_size, 1) or (batch_size, batch_size, 1)
+    u : `torch.Tensor`,
+        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
 
     """
