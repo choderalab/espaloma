@@ -49,27 +49,27 @@ class MoleculeVacuumSimulation(object):
 
     Methods
     -------
-    sim_from_mol : Create simluation from molecule.
+    simulation_from_graph : Create simluation from molecule.
+
+    run : Run the simluation.
 
     """
 
     def __init__(
         self,
-        g,
-        forcefield='openff_unconstrained-1.0.0.offxml',
-        n_samples=1000,
+        forcefield='test_forcefields/smirnoff99Frosst.offxml',
+        n_samples=100,
         n_steps_per_sample=1000,
         temperature=TEMPERATURE,
         collision_rate=COLLISION_RATE,
         step_size=STEP_SIZE,
     ):
 
-        self.g = g
         self.n_samples = n_samples
         self.n_steps_per_sample = n_steps_per_sample
         self.temperature = temperature
         self.collision_rate = collision_rate
-        self.timestep = step_size
+        self.step_size = step_size
 
         if isinstance(forcefield, str):
             self.forcefield = ForceField(forcefield)
@@ -77,53 +77,70 @@ class MoleculeVacuumSimulation(object):
             # TODO: type assertion
             self.forcefield = forcefield
 
-    def simulation_from_mol(self):
+    def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # parameterize topology
-        topology = self.g.mol.to_topology()
+        topology = g.mol.to_topology()
 
         # create openmm system
         system = self.forcefield.create_openmm_system(topology)
 
         # use langevin integrator
         integrator = openmm.LangevinIntegrator(
-            temperature=self.temperature,
-            frictionCoeff=self.collision_rate,
-            stepSize=self.step_size
+            self.temperature,
+            self.collision_rate,
+            self.step_size
         )
 
         # initialize simulation
-        self.simulation = Simulation(
+        simulation = Simulation(
             topology=topology,
             system=system,
             integrator=integrator
         )
 
         # get conformer
-        self.g.mol.generate_conformers()
+        g.mol.generate_conformers()
 
         # put conformer in simulation
-        self.simulation.context.setPositions(
-            self.g.mol.conformers[0]
+        simulation.context.setPositions(
+            g.mol.conformers[0]
         )
 
         # minimize energy
-        self.simulation.minimizeEnergy()
+        simulation.minimizeEnergy()
 
         # set velocities
-        self.simulation.context.setVelocitiesToTemperature(
+        simulation.context.setVelocitiesToTemperature(
             self.temperature
         )
 
-        return self.simulation
+        return simulation
 
-    def collect_samples(self):
+    def run(self, g, in_place=True):
         """ Collect samples from simulation.
+
+        Parameters
+        ----------
+        g : `esp.Graph`
+            Input graph.
+
+        in_place : `bool`
+            If ture,
 
         Returns
         -------
         samples : `torch.Tensor`, `shape=(n_samples, n_nodes, 3)`
+            `in_place=True`
+            Sample.
+
+        graph : `esp.Graph`
+            Modified graph.
+
         """
+        # build simulation
+        simulation = self.simulation_from_graph(g)
+
         # initialize empty list for samples.
         samples = []
 
@@ -131,12 +148,13 @@ class MoleculeVacuumSimulation(object):
         for _ in range(self.n_samples):
 
             # run MD for `self.n_steps_per_sample` steps
-            self.simulation.step(self.n_steps_per_sample)
+            simulation.step(self.n_steps_per_sample)
 
             # append samples to `samples`
             samples.append(
-                self.simulation.context.getState(getPositions=True)
+                simulation.context.getState(getPositions=True)
                 .getPositions(asNumpy=True)
+                .value_in_unit(DISTANCE_UNIT)
             )
 
         # put samples into an array
@@ -144,5 +162,11 @@ class MoleculeVacuumSimulation(object):
 
         # put samples into tensor
         samples = torch.tensor(samples)
+
+        if in_place is True:
+            g.heterograph.nodes['n1'].data['xyz'] = samples.permute(
+                1, 0, 2
+            )
+            return g
 
         return samples

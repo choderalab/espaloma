@@ -211,13 +211,6 @@ class GraphDataset(Dataset):
         if collate_fn == "graph":
             collate_fn = self.batch
 
-        elif collate_fn == 'geometry_graph':
-            def collate_fn(graphs):
-                for g in graphs: # in-place modification
-                    g.heterograph.nodes['n1'].data['xyz'] = g.xyz
-
-                return self.batch(graphs)
-
         elif collate_fn == "homograph":
 
             def collate_fn(graphs):
