@@ -83,7 +83,13 @@ class MoleculeVacuumSimulation(object):
         topology = g.mol.to_topology()
 
         # create openmm system
-        system = self.forcefield.create_openmm_system(topology)
+        system = self.forcefield.create_openmm_system(
+            topology,
+
+            # TODO:
+            # figure out whether `sqm` should be so slow
+            charge_from_molecules=[g.mol],
+        )
 
         # use langevin integrator
         integrator = openmm.LangevinIntegrator(

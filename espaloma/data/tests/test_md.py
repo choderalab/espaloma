@@ -50,4 +50,4 @@ def test_apply(ds):
     ds.apply(simulation, in_place=True)
 
     assert ds.graphs[0].nodes['n1'].data['xyz'].shape[-1] == 3
-    assert ds.graphs[0].nodes['n1'].data['xyz'].shape[-2] == 10
+    assert ds.graphs[0].nodes['n1'].data['xyz'].shape[-2] == 1
