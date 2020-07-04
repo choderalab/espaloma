@@ -7,8 +7,6 @@ from espaloma.units import *
 
 import numpy.testing as npt
 
-
-
 @pytest.mark.parametrize(
     "g",
     esp.data.esol(first=20),

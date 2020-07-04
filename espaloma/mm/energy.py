@@ -63,4 +63,8 @@ def energy_in_graph(g):
     g.apply_nodes(apply_angle, ntype='n3')
     # g.apply_nodes(apply_torsion, ntype='n4')
 
+    # sum up energy
+    
+
+
     return g
