@@ -12,7 +12,7 @@ class NodeTyping(BaseReadout):
 
     """
 
-    def __init__(self, in_features, n_classes):
+    def __init__(self, in_features, n_classes=100):
         super(NodeTyping, self).__init__()
         self.c = torch.nn.Linear(in_features, n_classes)
 

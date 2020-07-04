@@ -180,10 +180,10 @@ class LegacyForceField:
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].k._value
+                        ].k.value_in_unit(esp.units.FORCE_CONSTANT_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
-                )
+                )[:, None]
             },
             ntype="n2",
         )
@@ -194,10 +194,10 @@ class LegacyForceField:
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].length._value
+                        ].length.value_in_unit(esp.units.DISTANCE_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
-                )
+                )[:, None]
             },
             ntype="n2",
         )
@@ -208,10 +208,12 @@ class LegacyForceField:
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].k._value
+                        ].k.value_in_unit(
+                            esp.units.ANGLE_FORCE_CONSTANCE_UNIT
+                        )
                         for idx in range(node.data["idxs"].shape[0])
                     ]
-                )
+                )[:, None]
             },
             ntype="n3",
         )
@@ -222,10 +224,10 @@ class LegacyForceField:
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].angle._value
+                        ].angle.value_in_unit(esp.units.ANGLE_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
-                )
+                )[:, None]
             },
             ntype="n3",
         )
@@ -234,10 +236,11 @@ class LegacyForceField:
             lambda node: {
                 "k_ref": torch.Tensor(
                     [
-                        forces["vdW"][(idx,)].epsilon._value
+                        forces["vdW"][(idx,)].epsilon
+                            .value_in_unit(esp.units.ENERGY_UNIT)
                         for idx in range(g.heterograph.number_of_nodes("n1"))
                     ]
-                )
+                )[:, None]
             },
             ntype="n1",
         )
@@ -246,10 +249,11 @@ class LegacyForceField:
             lambda node: {
                 "eq_ref": torch.Tensor(
                     [
-                        forces["vdW"][(idx,)].rmin_half._value
+                        forces["vdW"][(idx,)].rmin_half
+                            .value_in_unit(esp.units.DISTANCE_UNIT)
                         for idx in range(g.heterograph.number_of_nodes("n1"))
                     ]
-                )
+                )[:, None]
             },
             ntype="n1",
         )

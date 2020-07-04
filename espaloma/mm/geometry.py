@@ -20,7 +20,6 @@ def distance(x0, x1):
     """ Distance. """
     return torch.norm(x0 - x1, p=2, dim=-1)
 
-
 def _angle(r0, r1):
     """ Angle between vectors. """
 
@@ -112,9 +111,10 @@ def geometry_in_graph(g):
         {
             'n1_as_%s_in_n%s' % (pos_idx, big_idx): (
                 dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
-                reduce_stack(msg='m_xyz%s' % pos_idx, out='xyz' % pos_idx)
+                dgl.function.sum(msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx)
             ) for big_idx in range(2, 5) for pos_idx in range(big_idx)
-        }
+        },
+        cross_reducer='sum',
     )
 
     # apply geometry functions

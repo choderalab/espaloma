@@ -6,7 +6,7 @@ import espaloma as esp
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def periodic_torsion(x, k, eq):
+def periodic_torsion(x, k, eq, order=1):
     """ Harmonic bond energy.
 
     Parameters
@@ -24,4 +24,4 @@ def periodic_torsion(x, k, eq):
         Energy.
 
     """
-    return esp.mm.functional.periodic(x, k, eq)
+    return esp.mm.functional.periodic(x=x, k=k, eq=eq, order=order)

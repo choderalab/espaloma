@@ -110,8 +110,8 @@ class JanossyPooling(torch.nn.Module):
 
             g.apply_nodes(
                 func=lambda nodes: {
-                    "k": nodes.data["theta"][:, 0],
-                    "eq": nodes.data["theta"][:, 1],
+                    "k": nodes.data["theta"][:, 0][:, None],
+                    "eq": nodes.data["theta"][:, 1][:, None],
                 },
                 ntype="n%s" % big_idx,
             )

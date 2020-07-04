@@ -25,7 +25,6 @@ def harmonic(x, k, eq, order=2):
 
     return torch.sum(k * (x - eq) ** order, dim=-1, keepdim=True)
 
-
 def periodic(x, k, eq, order):
     """ Periodic term.
 

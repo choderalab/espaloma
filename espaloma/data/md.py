@@ -7,15 +7,11 @@ from simtk import openmm
 from simtk import unit
 from simtk.openmm.app import Simulation
 from openforcefield.typing.engines.smirnoff import ForceField
+from espaloma.units import *
 
 # =============================================================================
 # CONSTANTS
 # =============================================================================
-# units
-DISTANCE_UNIT = unit.nanometer
-ENERGY_UNIT = unit.kilojoule_per_mole
-FORCE_UNIT = ENERGY_UNIT / DISTANCE_UNIT
-
 # simulation specs
 TEMPERATURE = 500 * unit.kelvin
 STEP_SIZE = 1 * unit.femtosecond
@@ -167,7 +163,7 @@ class MoleculeVacuumSimulation(object):
         samples = np.array(samples)
 
         # put samples into tensor
-        samples = torch.tensor(samples)
+        samples = torch.tensor(samples, dtype=torch.float32)
 
         if in_place is True:
             g.heterograph.nodes['n1'].data['xyz'] = samples.permute(

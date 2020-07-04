@@ -14,6 +14,7 @@ import espaloma.nn
 import espaloma.graphs
 import espaloma.mm
 import espaloma.app
+import espaloma.units
 
 
 from espaloma.mm.geometry import *
