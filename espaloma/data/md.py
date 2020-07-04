@@ -75,6 +75,9 @@ class MoleculeVacuumSimulation(object):
 
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
+        # assign partial charge
+        g.mol.assign_partial_charges('gasteiger') # faster
+
         # parameterize topology
         topology = g.mol.to_topology()
 
