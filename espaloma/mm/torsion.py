@@ -24,4 +24,6 @@ def periodic_torsion(x, k, eq, order=1):
         Energy.
 
     """
-    return esp.mm.functional.periodic(x=x, k=k, eq=eq, order=order)
+    # NOTE:
+    # 0.5 because all torsions are calculated twice
+    return 0.5 * esp.mm.functional.periodic(x=x, k=k, eq=eq, order=order)

@@ -108,6 +108,9 @@ def from_homogeneous(g):
     # also include n1
     idxs["n1"] = np.arange(g.number_of_nodes())[:, None]
 
+    # =========================
+    # neighboring relationships
+    # =========================
     # NOTE:
     # here we only define the neighboring relationship
     # on atom level
@@ -122,6 +125,9 @@ def from_homogeneous(g):
             for (ordering, subgraph_idxs) in enumerate(list(idxs[term]))
         }
 
+    # ===============================================
+    # relationships between nodes of different levels
+    # ===============================================
     # NOTE:
     # here we define all the possible
     # 'has' and 'in' relationships.
@@ -171,6 +177,38 @@ def from_homogeneous(g):
                     ],
                     axis=1,
                 )
+
+    # ======================================
+    # relationships between nodes and graphs
+    # ======================================
+
+    for term in ["n1", "n2", "n3", "n4"]:
+        hg[
+            (
+                term,
+                "%s_in_g" % term,
+                "g",
+            )] = np.stack(
+                [
+                    np.arange(len(idxs[term])),
+                    np.zeros(len(idxs[term]))
+                ],
+                axis=1,
+            )
+
+        hg[
+            (
+                "g",
+                "g_has_%s" % term,
+                term
+            )] = np.stack(
+                [
+                    np.zeros(len(idxs[term])),
+                    np.arange(len(idxs[term])),
+                ],
+                axis=1,
+            )
+
 
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 

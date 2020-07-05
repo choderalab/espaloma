@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import dgl
 import espaloma as esp
 
 # =============================================================================
@@ -64,7 +65,21 @@ def energy_in_graph(g):
     # g.apply_nodes(apply_torsion, ntype='n4')
 
     # sum up energy
-    
+    g.multi_update_all(
+        {
+            'n%s_in_g' % idx: (
+                dgl.function.copy_src(src='u', out='m%s' % idx),
+                dgl.function.sum(msg='m%s' % idx, out='u%s' % idx)
+            ) for idx in [2, 3]
+        },
+        'sum'
+    )
 
+    g.apply_nodes(
+        lambda node: {
+            'u': node.data['u2'] + node.data['u3']
+        },
+        ntype='g'
+    )
 
     return g

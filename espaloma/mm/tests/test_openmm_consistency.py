@@ -74,13 +74,13 @@ def test_energy_angle_and_bond(g):
     esp.mm.energy.energy_in_graph(g.heterograph)
 
     npt.assert_almost_equal(
-        g.nodes['n2'].data['u'].sum().mul(0.5).numpy(),
+        g.nodes['g'].data['u2'].numpy(),
         energies['HarmonicBondForce'],
         decimal=3,
     )
 
     npt.assert_almost_equal(
-        g.nodes['n3'].data['u'].sum().mul(0.5).numpy(),
+        g.nodes['g'].data['u3'].numpy(),
         energies['HarmonicAngleForce'],
         decimal=3,
     )
