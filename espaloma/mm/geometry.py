@@ -109,10 +109,21 @@ def geometry_in_graph(g):
     # Copy coordinates to higher-order nodes.
     g.multi_update_all(
         {
-            'n1_as_%s_in_n%s' % (pos_idx, big_idx): (
-                dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
-                dgl.function.sum(msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx)
-            ) for big_idx in range(2, 5) for pos_idx in range(big_idx)
+            **{
+                'n1_as_%s_in_n%s' % (pos_idx, big_idx): (
+                    dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
+                    dgl.function.sum(
+                        msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx),
+                ) for big_idx in range(2, 5) for pos_idx in range(big_idx)
+            },
+            **{
+                'n1_as_%s_in_%s' % (pos_idx, term): (
+                    dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
+                    dgl.function.sum(
+                        msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx),
+                ) for term in ['nonbonded', 'onefour']
+                for pos_idx in [0, 1]
+            },
         },
         cross_reducer='sum',
     )
@@ -121,5 +132,9 @@ def geometry_in_graph(g):
     g.apply_nodes(apply_bond, ntype='n2')
     g.apply_nodes(apply_angle, ntype='n3')
     g.apply_nodes(apply_torsion, ntype='n4')
+
+    # copy coordinates to nonbonded
+    g.apply_nodes(apply_bond, ntype='nonbonded')
+    g.apply_nodes(apply_bond, ntype='onefour')
 
     return g

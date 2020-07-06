@@ -5,7 +5,7 @@ import dgl
 import espaloma as esp
 
 # =============================================================================
-# ENERGY IN HYPERNODES
+# ENERGY IN HYPERNODES---BONDED
 # =============================================================================
 def apply_bond(nodes):
     """ Bond energy in nodes. """
@@ -38,6 +38,20 @@ def apply_torsion(nodes):
     }
 
 # =============================================================================
+# ENERGY IN HYPERNODES---NONBONDED
+# =============================================================================
+def apply_nonbonded(nodes):
+    """ Nonbonded in nodes. """
+    return {
+        'u': esp.mm.nonbonded.lj_12_6(
+            x=nodes.data['x'],
+            k=nodes.data['k'],
+            eq=nodes.data['eq'],
+        )
+    }
+
+
+# =============================================================================
 # ENERGY IN GRAPH
 # =============================================================================
 def energy_in_graph(g):
@@ -58,19 +72,35 @@ def energy_in_graph(g):
     This function modifies graphs in-place.
 
     """
+    # TODO: this is all very restricted for now
+    # we need to make this better
+
+    # apply combination rule
+    esp.mm.nonbonded.lorentz_berthelot(g)
 
     # apply energy function
     g.apply_nodes(apply_bond, ntype='n2')
     g.apply_nodes(apply_angle, ntype='n3')
     # g.apply_nodes(apply_torsion, ntype='n4')
 
+    g.apply_nodes(apply_nonbonded, ntype='nonbonded')
+
     # sum up energy
+    # bonded
     g.multi_update_all(
         {
-            'n%s_in_g' % idx: (
-                dgl.function.copy_src(src='u', out='m%s' % idx),
-                dgl.function.sum(msg='m%s' % idx, out='u%s' % idx)
-            ) for idx in [2, 3]
+            **{
+                'n%s_in_g' % idx: (
+                    dgl.function.copy_src(src='u', out='m_%s' % idx),
+                    dgl.function.sum(msg='m_%s' % idx, out='u%s' % idx)
+                ) for idx in [2, 3]
+            },
+            **{
+                '%s_in_g' % term: (
+                    dgl.function.copy_src(src='u', out='m_%s' % term),
+                    dgl.function.sum(msg='m_%s' % term, out='u_%s' % term)
+                ) for term in ['nonbonded']
+            },
         },
         'sum'
     )

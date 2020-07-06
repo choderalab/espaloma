@@ -99,8 +99,11 @@ def from_homogeneous(g):
     # initialize empty dictionary
     hg = {}
 
+    # get adjacency matrix
+    a = g.adjacency_matrix()
+
     # get all the indices
-    idxs = relationship_indices_from_adjacency_matrix(g.adjacency_matrix())
+    idxs = relationship_indices_from_adjacency_matrix(a)
 
     # make them all numpy
     idxs = {key: value.numpy() for key, value in idxs.items()}
@@ -179,10 +182,67 @@ def from_homogeneous(g):
                 )
 
     # ======================================
+    # nonbonded terms
+    # ======================================
+    # NOTE: everything is counted twice here
+    # nonbonded is where
+    # $A = AA = AAA = AAAA = 0$
+
+    # make dense
+    a_ = a.to_dense().detach().numpy()
+
+    idxs['nonbonded'] = np.stack(
+        np.where(
+            np.equal(
+                a_ + a_ @ a_ + a_ @ a_ @ a_ + a_ @ a_ @ a_ @ a_,
+                0.0
+            )
+        ),
+        axis=-1)
+
+    # onefour is the two ends of torsion
+    idxs['onefour'] = np.stack(
+        [
+            idxs['n4'][:, 0],
+            idxs['n4'][:, 3],
+        ],
+        axis=1)
+
+    # membership
+    for term in ['nonbonded', 'onefour']:
+        for pos_idx in [0, 1]:
+            hg[
+                (
+                    term,
+                    "%s_has_%s_n1" % (term, pos_idx),
+                    "n1"
+                )] = np.stack(
+                        [
+                            np.arange(idxs[term].shape[0]),
+                            idxs[term][:, pos_idx]
+                        ],
+                        axis=-1
+                    )
+
+
+            hg[
+                (
+                    "n1",
+                    "n1_as_%s_in_%s" % (pos_idx, term),
+                    term
+                )] = np.stack(
+                        [
+                            idxs[term][:, pos_idx],
+                            np.arange(idxs[term].shape[0]),
+                        ],
+                        axis=-1
+                    )
+
+
+    # ======================================
     # relationships between nodes and graphs
     # ======================================
-
-    for term in ["n1", "n2", "n3", "n4"]:
+    for term in ["n1", "n2", "n3", "n4", "nonbonded", "onefour"]:
         hg[
             (
                 term,

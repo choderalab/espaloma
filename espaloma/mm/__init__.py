@@ -6,3 +6,4 @@ import espaloma.mm.bond
 import espaloma.mm.angle
 import espaloma.mm.torsion
 import espaloma.mm.functional
+import espaloma.mm.nonbonded

@@ -11,16 +11,16 @@ def harmonic_bond(x, k, eq):
 
     Parameters
     ----------
-    x : torch.Tensor, shape = (batch_size, 1)
+    x : `torch.Tensor`, `shape = (batch_size, 1)`
         bond length
-    k : torch.Tensor, shape = (batch_size, 1)
+    k : `torch.Tensor`, `shape = (batch_size, 1)`
         force constant
-    eq : torch.Tensor, shape = (batch_size, 1)
+    eq : `torch.Tensor`, `shape = (batch_size, 1)`
         eqilibrium value
 
     Returns
     -------
-    u : torch.tensor, shape = (batch_size, 1)
+    u : `torch.Tensor`, `shape = (batch_size, 1)`
         energy
 
     """

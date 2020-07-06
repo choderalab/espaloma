@@ -6,7 +6,8 @@ def test_graph():
 
     g = esp.Graph("c1ccccc1")
 
-
+    print(g.heterograph)
+    
 @pytest.fixture
 def graph():
     import espaloma as esp
