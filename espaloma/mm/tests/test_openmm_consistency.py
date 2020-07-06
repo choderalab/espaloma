@@ -59,7 +59,7 @@ def test_energy_angle_and_bond(g):
     ff = esp.graphs.legacy_force_field.LegacyForceField("smirnoff99Frosst")
     g = ff.parametrize(g)
 
-    for term in ['n2', 'n3']:
+    for term in ['n2', 'n3', 'n1']:
         g.nodes[term].data['k'] = g.nodes[term].data['k_ref']
         g.nodes[term].data['eq'] = g.nodes[term].data['eq_ref']
 

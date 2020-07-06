@@ -40,12 +40,13 @@ def arithmetic_mean(msg='m', out='eq'):
 # =============================================================================
 
 def lorentz_berthelot(g):
+
     g.multi_update_all(
         {
             'n1_as_%s_in_%s' % (pos_idx, term): (
                 dgl.function.copy_src(src='k', out='m_k'),
                 geometric_mean(msg='m_k', out='k')
-            ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
+            ) for pos_idx in [0, 1] for term in ['nonbonded']
         },
         cross_reducer='sum'
     )
@@ -55,7 +56,7 @@ def lorentz_berthelot(g):
             'n1_as_%s_in_%s' % (pos_idx, term): (
                 dgl.function.copy_src(src='eq', out='m_eq'),
                 arithmetic_mean(msg='m_eq', out='eq')
-            ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
+            ) for pos_idx in [0, 1] for term in ['nonbonded']
         },
         cross_reducer='sum'
     )
