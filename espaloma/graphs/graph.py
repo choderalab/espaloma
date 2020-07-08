@@ -52,10 +52,13 @@ class Graph(BaseGraph):
 
         # TODO:
         # rewrite this using OFF-generic grammar
-        graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(
-            mol.to_rdkit()
-        )
+        # graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(
+        #     mol.to_rdkit()
+        # )
 
+        graph = esp.graphs.utils.read_homogeneous_graph.from_openforcefield_mol(
+            mol
+        )
         return graph
 
     @staticmethod

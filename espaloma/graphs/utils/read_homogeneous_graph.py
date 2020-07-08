@@ -111,7 +111,48 @@ def fp_rdkit(atom):
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
+def from_openforcefield_mol(mol, use_fp=True):
+    # initialize graph
+    from rdkit import Chem
 
+    # initialize graph
+    g = dgl.DGLGraph()
+
+    # enter nodes
+    n_atoms = mol.n_atoms
+    g.add_nodes(n_atoms)
+    g.ndata["type"] = torch.Tensor(
+        [[atom.atomic_number] for atom in mol.atoms]
+    )
+
+    h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
+
+    h_v[
+        torch.arange(g.ndata["type"].shape[0]),
+        torch.squeeze(g.ndata["type"]).long(),
+    ] = 1.0
+
+    h_v_fp = torch.stack([
+        fp_rdkit(atom) for atom in mol.to_rdkit().GetAtoms()], axis=0)
+
+    if use_fp == True:
+        h_v = torch.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
+
+    g.ndata["h0"] = h_v
+
+    # enter bonds
+    bonds = list(mol.bonds)
+    bonds_begin_idxs = [bond.atom1_index for bond in bonds]
+    bonds_end_idxs = [bond.atom2_index for bond in bonds]
+    bonds_types = [bond.bond_order for bond in bonds]
+
+    # NOTE: dgl edges are directional
+    g.add_edges(bonds_begin_idxs, bonds_end_idxs)
+    g.add_edges(bonds_end_idxs, bonds_begin_idxs)
+
+    # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
+
+    return g
 
 def from_oemol(mol, use_fp=True):
     from openeye import oechem

@@ -25,7 +25,6 @@ class JanossyPooling(torch.nn.Module):
             3: ['k', 'eq'],
             4: ['k', 'eq']
         },
-        atom_out_features=2,
         pool=torch.add,
     ):
         super(JanossyPooling, self).__init__()
@@ -70,7 +69,7 @@ class JanossyPooling(torch.nn.Module):
 
         self.f_out_1 = torch.nn.Linear(
             mid_features,
-            atom_out_features,
+            len(self.out_features[1]),
         )
 
     def forward(self, g):
@@ -148,7 +147,7 @@ class JanossyPooling(torch.nn.Module):
                 func=lambda nodes: {
                     term: nodes.data["theta"][:, idx][:, None]
                         for idx, term in enumerate(
-                            self.output_features[big_idx]
+                            self.out_features[big_idx]
                         )
                 },
                 ntype="n%s" % big_idx,
