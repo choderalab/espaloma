@@ -9,9 +9,10 @@ import numpy.testing as npt
 
 @pytest.mark.parametrize(
     "g",
-    esp.data.esol(first=20),
+    esp.data.esol(first=2),
 )
 def test_energy_angle_and_bond(g):
+
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
 
@@ -51,6 +52,28 @@ def test_energy_angle_and_bond(g):
 
         name = force.__class__.__name__
 
+
+        if 'Nonbonded' in name:
+            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
+            for _idx in range(force.getNumParticles()):
+                q, sigma, epsilon = force.getParticleParameters(_idx)
+                force.setParticleParameters(_idx, 0., sigma, 0.)
+
+            for _idx in range(force.getNumExceptions()):
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+                    _idx)
+                force.setExceptionParameters(
+                    _idx,
+                    idx0,
+                    idx1,
+                    0.0,
+                    sigma,
+                    0.0,
+                )
+
+            force.updateParametersInContext(_simulation.context)
+
+
         energy = state.getPotentialEnergy().value_in_unit(ENERGY_UNIT)
 
         energies[name] = energy
@@ -59,10 +82,18 @@ def test_energy_angle_and_bond(g):
     ff = esp.graphs.legacy_force_field.LegacyForceField("smirnoff99Frosst")
     g = ff.parametrize(g)
 
-    for term in ['n2', 'n3', 'n1']:
+    # n2 : bond, n3: angle, n1: nonbonded?
+    # n1 : sigma (k), epsilon (eq), and charge (not included yet)
+    for term in ['n2', 'n3']:
         g.nodes[term].data['k'] = g.nodes[term].data['k_ref']
         g.nodes[term].data['eq'] = g.nodes[term].data['eq_ref']
 
+    for term in ['n1']:
+        g.nodes[term].data['sigma'] = g.nodes[term].data['sigma_ref']
+        g.nodes[term].data['epsilon'] = g.nodes[term].data['epsilon_ref']
+        # g.nodes[term].data['q'] = g.nodes[term].data['q_ref']
+
+    # for each atom, store n_snapshots x 3
     g.nodes['n1'].data['xyz'] = torch.tensor(
         simulation.context.getState(getPositions=True)
             .getPositions(asNumpy=True)
@@ -72,15 +103,29 @@ def test_energy_angle_and_bond(g):
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
     esp.mm.energy.energy_in_graph(g.heterograph)
+    # writes into nodes
+    # .data['u_nonbonded'], .data['u_onefour'], .data['u2'], .data['u3'],
 
+
+    # test bonds
     npt.assert_almost_equal(
         g.nodes['g'].data['u2'].numpy(),
         energies['HarmonicBondForce'],
         decimal=3,
     )
 
+    # test angles
     npt.assert_almost_equal(
         g.nodes['g'].data['u3'].numpy(),
         energies['HarmonicAngleForce'],
+        decimal=3,
+    )
+
+    # test nonbonded
+    # TODO: must set all charges to zero in _simulation for this to pass currently, since g doesn't have any charges
+    npt.assert_almost_equal(
+        g.nodes['g'].data['u_nonbonded'].numpy()\
+        + g.nodes['g'].data['u_onefour'].numpy(),
+        energies['NonbondedForce'],
         decimal=3,
     )

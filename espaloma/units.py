@@ -11,6 +11,7 @@ DISTANCE_UNIT = unit.nanometer
 ENERGY_UNIT = unit.kilojoule_per_mole
 FORCE_UNIT = ENERGY_UNIT / DISTANCE_UNIT
 ANGLE_UNIT = unit.radian
+CHARGE_UNIT = unit.elementary_charge
 
 # compose units
 FORCE_CONSTANT_UNIT = ENERGY_UNIT / (DISTANCE_UNIT ** 2)

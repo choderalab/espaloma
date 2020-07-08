@@ -234,7 +234,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "k_ref": torch.Tensor(
+                "epsilon_ref": torch.Tensor(
                     [
                         forces["vdW"][(idx,)].epsilon
                             .value_in_unit(esp.units.ENERGY_UNIT)
@@ -247,7 +247,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "eq_ref": torch.Tensor(
+                "sigma_ref": torch.Tensor(
                     [
                         forces["vdW"][(idx,)].rmin_half
                             .value_in_unit(esp.units.DISTANCE_UNIT)

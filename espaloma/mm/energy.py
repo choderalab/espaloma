@@ -45,8 +45,8 @@ def apply_nonbonded(nodes):
     return {
         'u': esp.mm.nonbonded.lj_12_6(
             x=nodes.data['x'],
-            k=nodes.data['k'],
-            eq=nodes.data['eq'],
+            sigma=nodes.data['sigma'],
+            epsilon=nodes.data['epsilon'],
         )
     }
 
@@ -83,7 +83,11 @@ def energy_in_graph(g):
     g.apply_nodes(apply_angle, ntype='n3')
     # g.apply_nodes(apply_torsion, ntype='n4')
 
-    g.apply_nodes(apply_nonbonded, ntype='nonbonded')
+    if g.number_of_nodes('nonbonded') > 0:
+        g.apply_nodes(apply_nonbonded, ntype='nonbonded')
+
+    if g.number_of_nodes('onefour') > 0:
+        g.apply_nodes(apply_nonbonded, ntype='onefour')
 
     # sum up energy
     # bonded
@@ -99,7 +103,7 @@ def energy_in_graph(g):
                 '%s_in_g' % term: (
                     dgl.function.copy_src(src='u', out='m_%s' % term),
                     dgl.function.sum(msg='m_%s' % term, out='u_%s' % term)
-                ) for term in ['nonbonded']
+                ) for term in ['onefour', 'nonbonded']
             },
         },
         'sum'
@@ -107,7 +111,7 @@ def energy_in_graph(g):
 
     g.apply_nodes(
         lambda node: {
-            'u': node.data['u2'] + node.data['u3']
+            'u': node.data['u2'] + node.data['u3'] # + node.data['onefour'] + node.data['nonbonded']
         },
         ntype='g'
     )

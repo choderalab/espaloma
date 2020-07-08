@@ -134,7 +134,10 @@ def geometry_in_graph(g):
     g.apply_nodes(apply_torsion, ntype='n4')
 
     # copy coordinates to nonbonded
-    g.apply_nodes(apply_bond, ntype='nonbonded')
-    g.apply_nodes(apply_bond, ntype='onefour')
+    if g.number_of_nodes('nonbonded') > 0:
+        g.apply_nodes(apply_bond, ntype='nonbonded')
+
+    if g.number_of_nodes('onefour') > 0:
+        g.apply_nodes(apply_bond, ntype='onefour')
 
     return g

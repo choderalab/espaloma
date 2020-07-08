@@ -19,21 +19,27 @@ class JanossyPooling(torch.nn.Module):
         self,
         config,
         in_features,
-        out_features=[2, 2, 2],
-        levels=[2, 3, 4],
+        out_features={
+            1: ['sigma', 'epsilon', 'q'],
+            2: ['k', 'eq'],
+            3: ['k', 'eq'],
+            4: ['k', 'eq']
+        },
         atom_out_features=2,
         pool=torch.add,
     ):
         super(JanossyPooling, self).__init__()
+
         # bookkeeping
-        self.levels = levels
+        self.out_features = out_features
+        self.levels = [key for key in out_features.keys() if key != 1]
         self.pool = pool
 
         # get output features
         mid_features = [x for x in config if isinstance(x, int)][-1]
 
         # set up networks
-        for idx_level, level in enumerate(self.levels):
+        for level in self.levels:
 
             # set up individual sequential networks
             setattr(
@@ -49,7 +55,10 @@ class JanossyPooling(torch.nn.Module):
             setattr(
                 self,
                 "f_out_%s" % level,
-                torch.nn.Linear(mid_features, out_features[idx_level]),
+                torch.nn.Linear(
+                    mid_features,
+                    len(out_features[level]),
+                ),
             )
 
         # atom level
@@ -137,8 +146,10 @@ class JanossyPooling(torch.nn.Module):
         for big_idx in self.levels + [1]:
             g.apply_nodes(
                 func=lambda nodes: {
-                    "k": nodes.data["theta"][:, 0][:, None],
-                    "eq": nodes.data["theta"][:, 1][:, None],
+                    term: nodes.data["theta"][:, idx][:, None]
+                        for idx, term in enumerate(
+                            self.output_features[big_idx]
+                        )
                 },
                 ntype="n%s" % big_idx,
             )

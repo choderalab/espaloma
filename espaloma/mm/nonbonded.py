@@ -25,12 +25,12 @@ from simtk import unit
 # =============================================================================
 # UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED
 # =============================================================================
-def geometric_mean(msg='m', out='k'):
+def geometric_mean(msg='m', out='epsilon'):
     def _geometric_mean(nodes):
         return {out: torch.prod(nodes.mailbox[msg], dim=1).pow(0.5)}
     return _geometric_mean
 
-def arithmetic_mean(msg='m', out='eq'):
+def arithmetic_mean(msg='m', out='sigma'):
     def _arithmetic_mean(nodes):
         return {out: torch.sum(nodes.mailbox[msg], dim=1).mul(0.5)}
     return _arithmetic_mean
@@ -44,9 +44,9 @@ def lorentz_berthelot(g):
     g.multi_update_all(
         {
             'n1_as_%s_in_%s' % (pos_idx, term): (
-                dgl.function.copy_src(src='k', out='m_k'),
-                geometric_mean(msg='m_k', out='k')
-            ) for pos_idx in [0, 1] for term in ['nonbonded']
+                dgl.function.copy_src(src='epsilon', out='m_epsilon'),
+                geometric_mean(msg='m_epsilon', out='epsilon')
+            ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
         },
         cross_reducer='sum'
     )
@@ -54,9 +54,9 @@ def lorentz_berthelot(g):
     g.multi_update_all(
         {
             'n1_as_%s_in_%s' % (pos_idx, term): (
-                dgl.function.copy_src(src='eq', out='m_eq'),
-                arithmetic_mean(msg='m_eq', out='eq')
-            ) for pos_idx in [0, 1] for term in ['nonbonded']
+                dgl.function.copy_src(src='sigma', out='m_sigma'),
+                arithmetic_mean(msg='m_sigma', out='sigma')
+            ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
         },
         cross_reducer='sum'
     )
@@ -67,7 +67,7 @@ def lorentz_berthelot(g):
 # =============================================================================
 # ENERGY FUNCTIONS
 # =============================================================================
-def lj_12_6(x, k, eq):
+def lj_12_6(x, sigma, epsilon):
     """ Lenard-Jones 12-6.
 
     Parameters
@@ -85,7 +85,7 @@ def lj_12_6(x, k, eq):
 
     """
 
-    return esp.mm.functional.lj(x=x, k=k, eq=eq)
+    return esp.mm.functional.lj(x=x, sigma=sigma, epsilon=epsilon)
 
 #
 # def columb(x, q_prod, k_e=K_E):

@@ -47,7 +47,7 @@ def periodic(x, k, eq, order):
     )
 
 
-def lj(x, k, eq, order=torch.tensor([12, 6])):
+def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):
     r""" Lennard-Jones term.
 
     Notes
@@ -58,8 +58,8 @@ def lj(x, k, eq, order=torch.tensor([12, 6])):
     Parameters
     ----------
     x : `torch.Tensor`, `shape=(batch_size, 1)`
-    k : `torch.Tensor`, `shape=(batch_size, len(order))`
-    eq : `torch.Tensor`, `shape=(batch_size, len(order))`
+    epsilon : `torch.Tensor`, `shape=(batch_size, len(order))`
+    sigma : `torch.Tensor`, `shape=(batch_size, len(order))`
     order : `int` or `List` of `int`
 
     Returns
@@ -74,4 +74,4 @@ def lj(x, k, eq, order=torch.tensor([12, 6])):
     assert order.shape[0] == 2
     assert order.dim() == 1
 
-    return k * ((eq / x) ** order[0] - (eq / x) ** order[1])
+    return epsilon * ((sigma / x) ** order[0] - (sigma / x) ** order[1])
