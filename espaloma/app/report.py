@@ -57,7 +57,7 @@ def curve(results_dict):
 
 def markdown(results_dict):
     df = dataframe(results_dict)
-    return df.to_markdown()
+    return df.transpose().to_markdown()
 
 
 def visual(results_dict):

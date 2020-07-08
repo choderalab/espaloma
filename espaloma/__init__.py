@@ -7,6 +7,12 @@ Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-pas
 # import espaloma
 from . import units, metrics
 
+from openforcefield.utils.toolkits import ToolkitRegistry, OpenEyeToolkitWrapper, RDKitToolkitWrapper, AmberToolsToolkitWrapper
+toolkit_registry = ToolkitRegistry()
+toolkit_precedence = [ RDKitToolkitWrapper ] # , OpenEyeToolkitWrapper, AmberToolsToolkitWrapper]
+[ toolkit_registry.register_toolkit(toolkit) for toolkit in toolkit_precedence if toolkit.is_available() ]
+
+
 
 from espaloma.graphs.graph import Graph
 from espaloma.metrics import GraphMetric
