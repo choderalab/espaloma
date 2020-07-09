@@ -3,6 +3,7 @@ import espaloma as esp
 from simtk import openmm
 from simtk import unit
 import torch
+import numpy as np
 from espaloma.units import *
 
 import numpy.testing as npt
@@ -30,6 +31,45 @@ def test_energy_angle_and_bond(g):
     for idx, force in enumerate(forces):
         force.setForceGroup(idx)
 
+        name = force.__class__.__name__
+
+        if 'Nonbonded' in name:
+            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
+
+            # epsilons = {}
+            # sigmas = {}
+
+            # for _idx in range(force.getNumParticles()):
+            #     q, sigma, epsilon = force.getParticleParameters(_idx)
+
+            #     # record parameters
+            #     epsilons[_idx] = epsilon
+            #     sigmas[_idx] = sigma
+
+            #     force.setParticleParameters(_idx, 0., sigma, epsilon)
+
+
+            # def sigma_combining_rule(sig1, sig2):
+            #     return (sig1 + sig2) / 2
+
+
+            # def eps_combining_rule(eps1, eps2):
+            #     return np.sqrt(np.abs(eps1 * eps2))
+
+            # for _idx in range(force.getNumExceptions()):
+            #     idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+            #         _idx)
+            #     force.setExceptionParameters(
+            #         _idx,
+            #         idx0,
+            #         idx1,
+            #         0.0,
+            #         sigma_combining_rule(sigmas[idx0], sigmas[idx1]),
+            #         eps_combining_rule(epsilons[idx0], epsilons[idx1])
+            #     )
+
+            # force.updateParametersInContext(_simulation.context)
+
     # create new simulation
     _simulation = openmm.app.Simulation(
         simulation.topology,
@@ -44,35 +84,13 @@ def test_energy_angle_and_bond(g):
 
     for idx, force in enumerate(forces):
 
+        name = force.__class__.__name__
+
         state = _simulation.context.getState(
             getEnergy=True,
             getParameters=True,
             groups=2**idx,
         )
-
-        name = force.__class__.__name__
-
-
-        if 'Nonbonded' in name:
-            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
-            for _idx in range(force.getNumParticles()):
-                q, sigma, epsilon = force.getParticleParameters(_idx)
-                force.setParticleParameters(_idx, 0., sigma, 0.)
-
-            for _idx in range(force.getNumExceptions()):
-                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
-                    _idx)
-                force.setExceptionParameters(
-                    _idx,
-                    idx0,
-                    idx1,
-                    0.0,
-                    sigma,
-                    0.0,
-                )
-
-            force.updateParametersInContext(_simulation.context)
-
 
         energy = state.getPotentialEnergy().value_in_unit(ENERGY_UNIT)
 
