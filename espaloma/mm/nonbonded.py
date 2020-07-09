@@ -39,13 +39,13 @@ def arithmetic_mean(msg='m', out='sigma'):
 # COMBINATION RULES FOR NONBONDED
 # =============================================================================
 
-def lorentz_berthelot(g):
+def lorentz_berthelot(g, suffix=''):
 
     g.multi_update_all(
         {
             'n1_as_%s_in_%s' % (pos_idx, term): (
-                dgl.function.copy_src(src='epsilon', out='m_epsilon'),
-                geometric_mean(msg='m_epsilon', out='epsilon')
+                dgl.function.copy_src(src='epsilon%s' % suffix, out='m_epsilon'),
+                geometric_mean(msg='m_epsilon', out='epsilon%s' % suffix)
             ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
         },
         cross_reducer='sum'
@@ -54,8 +54,8 @@ def lorentz_berthelot(g):
     g.multi_update_all(
         {
             'n1_as_%s_in_%s' % (pos_idx, term): (
-                dgl.function.copy_src(src='sigma', out='m_sigma'),
-                arithmetic_mean(msg='m_sigma', out='sigma')
+                dgl.function.copy_src(src='sigma%s' % suffix, out='m_sigma'),
+                arithmetic_mean(msg='m_sigma', out='sigma%s' % suffix)
             ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
         },
         cross_reducer='sum'
