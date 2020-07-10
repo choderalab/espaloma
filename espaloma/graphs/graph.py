@@ -40,9 +40,9 @@ class Graph(BaseGraph):
         if homograph is not None and heterograph is None:
             heterograph = self.get_heterograph_from_graph(homograph)
 
-        self._mol = mol
-        self._homograph = homograph
-        self._heterograph = heterograph
+        self.mol = mol
+        self.homograph = homograph
+        self.heterograph = heterograph
 
     @staticmethod
     def get_homograph_from_mol(mol):
@@ -73,17 +73,18 @@ class Graph(BaseGraph):
 
         return heterograph
 
-    @property
-    def mol(self):
-        return self._mol
-
-    @property
-    def homograph(self):
-        return self._homograph
-
-    @property
-    def heterograph(self):
-        return self._heterograph
+    #
+    # @property
+    # def mol(self):
+    #     return self._mol
+    #
+    # @property
+    # def homograph(self):
+    #     return self._homograph
+    #
+    # @property
+    # def heterograph(self):
+    #     return self._heterograph
 
     @property
     def ndata(self):

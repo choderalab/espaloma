@@ -15,6 +15,13 @@ def test_energy():
     )
     g = simulation.run(g, in_place=True)
 
+    param = esp.graphs.legacy_force_field.LegacyForceField(
+        'smirnoff99Frosst').parametrize
+
+    g = param(g)
+
+    print(g.nodes['n1'].data)
+
     # parametrize
     layer = esp.nn.dgl_legacy.gn()
     net = torch.nn.Sequential(
@@ -29,3 +36,5 @@ def test_energy():
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g)
     esp.mm.energy.energy_in_graph(g)
+
+    esp.mm.energy.energy_in_graph(g, suffix='_ref')

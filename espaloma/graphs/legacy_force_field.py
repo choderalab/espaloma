@@ -110,7 +110,7 @@ class LegacyForceField:
         self._str_2_idx = str_2_idx
         self._idx_2_str = idx_2_str
 
-    def _type_gaff(self, mol, g=None):
+    def _type_gaff(self, g):
         """ Type a molecular graph using gaff force fields.
 
         """
@@ -118,7 +118,7 @@ class LegacyForceField:
         assert "gaff" in self.forcefield
 
         # make sure mol is in OpenForceField format `
-        mol = self._convert_to_off(mol)
+        mol = g.mol
 
         # import template generator
         from openmmforcefields.generators import GAFFTemplateGenerator
@@ -166,13 +166,10 @@ class LegacyForceField:
     def _parametrize_gaff(self, mol, g=None):
         raise NotImplementedError
 
-    def _parametrize_smirnoff(self, mol, g=None):
-        mol = self._convert_to_off(mol)
+    def _parametrize_smirnoff(self, g):
+        # mol = self._convert_to_off(mol)
 
-        forces = self.FF.label_molecules(mol.to_topology())[0]
-
-        if g is None:
-            g = esp.Graph(mol)
+        forces = self.FF.label_molecules(g.mol.to_topology())[0]
 
         g.heterograph.apply_nodes(
             lambda node: {
@@ -260,12 +257,12 @@ class LegacyForceField:
 
         return g
 
-    def parametrize(self, mol, g=None):
+    def parametrize(self, g):
         """ Parametrize a molecular graph.
 
         """
         if "smirnoff" in self.forcefield:
-            return self._parametrize_smirnoff(mol, g)
+            return self._parametrize_smirnoff(g)
 
         else:
             raise NotImplementedError
@@ -275,7 +272,7 @@ class LegacyForceField:
 
         """
         if "gaff" in self.forcefield:
-            return self._type_gaff(mol, g)
+            return self._type_gaff(g)
 
         else:
             raise NotImplementedError
