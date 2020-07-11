@@ -103,13 +103,13 @@ class Graph(BaseGraph):
 
         with open(path, "wb") as f_handle:
             pickle.dump(
-                [self._mol, self._homograph, self._heterograph], f_handle
+                [self.mol, self.homograph, self.heterograph], f_handle
             )
 
     def load(self, path):
         import pickle
 
         with open(path, "rb") as f_handle:
-            (self._mol, self._homograph, self._heterograph) = pickle.load(
+            (self.mol, self.homograph, self.heterograph) = pickle.load(
                 f_handle
             )

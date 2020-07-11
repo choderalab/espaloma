@@ -267,7 +267,7 @@ class LegacyForceField:
         else:
             raise NotImplementedError
 
-    def typing(self, mol, g=None):
+    def typing(self, g=None):
         """ Type a molecular graph.
 
         """
