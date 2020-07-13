@@ -67,3 +67,5 @@ def test_energy_consistent():
     esp.mm.energy.energy_in_graph(g.heterograph)
 
     esp.mm.energy.energy_in_graph(g.heterograph, suffix='_ref')
+
+    
