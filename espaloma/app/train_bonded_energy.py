@@ -62,15 +62,13 @@ def run(args):
         )
     ]
 
-    metrics_tr = [
+    metrics_te = [
         esp.metrics.GraphMetric(
             base_metric=torch.nn.MSELoss(),
             between=['u', 'u_ref'],
             level='g'
         )
     ]
-
-
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,

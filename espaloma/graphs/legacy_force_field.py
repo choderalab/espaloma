@@ -257,6 +257,56 @@ class LegacyForceField:
 
         return g
 
+
+    def _multi_typing_smirnoff(self, g):
+        # mol = self._convert_to_off(mol)
+
+        forces = self.FF.label_molecules(g.mol.to_topology())[0]
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "type": torch.Tensor(
+                    [
+                        int(forces["Bonds"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].id[1:])
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )[:, None]
+            },
+            ntype="n2",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "type": torch.Tensor(
+                    [
+                        int(forces["Angles"][
+                            tuple(node.data["idxs"][idx].numpy())
+                        ].id[1:])
+                        for idx in range(node.data["idxs"].shape[0])
+                    ]
+                )[:, None]
+            },
+            ntype="n3",
+        )
+
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "type": torch.Tensor(
+                    [
+                        int(forces["vdW"][(idx,)]
+                            .id[1:])
+                        for idx in range(g.heterograph.number_of_nodes("n1"))
+                    ]
+                )[:, None]
+            },
+            ntype="n1",
+        )
+
+        return g
+
+
     def parametrize(self, g):
         """ Parametrize a molecular graph.
 
@@ -267,12 +317,20 @@ class LegacyForceField:
         else:
             raise NotImplementedError
 
-    def typing(self, g=None):
+    def typing(self, g):
         """ Type a molecular graph.
 
         """
         if "gaff" in self.forcefield:
             return self._type_gaff(g)
+
+        else:
+            raise NotImplementedError
+
+    def multi_typing(self, g):
+        """ Type a molecular graph for hetero nodes. """
+        if "smirnoff" in self.forcefield:
+            return self._multi_typing_smirnoff(g)
 
         else:
             raise NotImplementedError
