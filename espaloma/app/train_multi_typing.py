@@ -17,7 +17,7 @@ def run(args):
     )
 
     # param / typing
-    operation = forcefield.parametrize
+    operation = forcefield.multi_typing
 
     # apply to dataset
     data = data.apply(operation, in_place=True)
@@ -43,9 +43,9 @@ def run(args):
         in_features=units,
         config=args.janossy_config,
         out_features={
-            1: ['nn_typing'],
-            2: ['nn_typing'],
-            3: ['nn_typing']
+            1: {'nn_typing': 100},
+            2: {'nn_typing': 100},
+            3: {'nn_typing': 100}
         }
     )
 
@@ -56,7 +56,7 @@ def run(args):
             base_metric=torch.nn.CrossEntropyLoss(),
             between=['nn_typing', 'legacy_typing'],
             level=term,
-        ) for term in ['n2', 'n3']
+        ) for term in ['n1', 'n2', 'n3']
     ]
 
     metrics_te = [
@@ -64,7 +64,7 @@ def run(args):
             base_metric=esp.metrics.accuracy,
             between=['nn_typing', 'legacy_typing'],
             level=term
-        )  for term in ['n2', 'n3']
+        )  for term in ['n1', 'n2', 'n3']
         ]
 
     exp = esp.TrainAndTest(

@@ -272,7 +272,7 @@ class LegacyForceField:
                         ].id[1:])
                         for idx in range(node.data["idxs"].shape[0])
                     ]
-                )[:, None]
+                ).long()
             },
             ntype="n2",
         )
@@ -286,7 +286,7 @@ class LegacyForceField:
                         ].id[1:])
                         for idx in range(node.data["idxs"].shape[0])
                     ]
-                )[:, None]
+                ).long()
             },
             ntype="n3",
         )
@@ -299,7 +299,7 @@ class LegacyForceField:
                             .id[1:])
                         for idx in range(g.heterograph.number_of_nodes("n1"))
                     ]
-                )[:, None]
+                ).long()
             },
             ntype="n1",
         )
