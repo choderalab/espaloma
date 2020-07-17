@@ -265,7 +265,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "type": torch.Tensor(
+                "legacy_typing": torch.Tensor(
                     [
                         int(forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -279,7 +279,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "type": torch.Tensor(
+                "legacy_typing": torch.Tensor(
                     [
                         int(forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -293,7 +293,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "type": torch.Tensor(
+                "legacy_typing": torch.Tensor(
                     [
                         int(forces["vdW"][(idx,)]
                             .id[1:])
