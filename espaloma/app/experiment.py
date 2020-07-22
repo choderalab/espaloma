@@ -185,6 +185,9 @@ class Test(Experiment):
                                 )
                             ).detach().cpu().numpy()
 
+
+        self.ref_g = self.normalize.unnorm(self.net(g))
+
         # point this to self
         self.results = results
         return dict(results)
@@ -262,7 +265,10 @@ class TrainAndTest(Experiment):
             normalize=self.normalize,
         )
 
+
         test.test()
+
+        self.ref_g_test = test.ref_g
 
         self.results_te = test.results
 
@@ -274,7 +280,9 @@ class TrainAndTest(Experiment):
             normalize=self.normalize
         )
 
+
         test.test()
+        self.ref_g_training = test.ref_g
 
         self.results_tr = test.results
 

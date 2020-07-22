@@ -6,6 +6,7 @@ import espaloma as esp
 import os
 import numpy as np
 import torch
+import dgl
 
 def run(args):
     # define data
@@ -47,7 +48,7 @@ def run(args):
 
     metrics_tr = [
         esp.metrics.GraphMetric(
-            base_metric=torch.nn.MSELoss(),
+            base_metric=torch.nn.L1Loss(),
             between=[param, param + '_ref'],
             level=term
         ) for param in ['k', 'eq'] for term in ['n2', 'n3']
@@ -78,12 +79,34 @@ def run(args):
 
     print(esp.app.report.markdown(results))
 
+    import os
+    os.mkdir(args.out)
+
+    with open(args.out + "/architecture.txt", "w") as f_handle:
+        f_handle.write(str(exp))
+
+    with open(args.out + "/result_table.md", "w") as f_handle:
+        f_handle.write(esp.app.report.markdown(results))
+
+    curves = esp.app.report.curve(results)
+
+    for spec, curve in curves.items():
+        np.save(args.out + "/" + "_".join(spec) + ".npy", curve)
+
+    import pickle
+    with open(args.out + "/ref_g_test.th", "wb") as f_handle:
+        pickle.dump(exp.ref_g_test, f_handle)
+
+    with open(args.out + "/ref_g_training.th", "wb") as f_handle:
+        pickle.dump(exp.ref_g_training, f_handle)
+
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="alkethoh", type=str)
+    parser.add_argument("--out", default="results", type=str)
     parser.add_argument("--first", default=-1, type=int)
     parser.add_argument("--partition", default="4:1", type=str)
     parser.add_argument("--batch_size", default=8, type=int)
