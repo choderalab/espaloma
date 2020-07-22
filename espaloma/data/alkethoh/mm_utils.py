@@ -150,22 +150,26 @@ def get_energy(sim):
     return sim.context.getState(getEnergy=True).getPotentialEnergy() / unit.kilojoule_per_mole
 
 
+def get_energy_by_group(sim, group=0):
+    return sim.context.getState(getEnergy=True, groups={group}).getPotentialEnergy() / unit.kilojoule_per_mole
+
+
 
 def get_bond_energy(sim):
     """assumes HarmonicBondForce is in group 0"""
-    return sim.context.getState(getEnergy=True, groups={0}).getPotentialEnergy() / unit.kilojoule_per_mole
+    return get_energy_by_group(sim, 0)
 
 
 def get_angle_energy(sim):
     """assumes HarmonicAngleForce is in group 1"""
-    return sim.context.getState(getEnergy=True, groups={1}).getPotentialEnergy() / unit.kilojoule_per_mole
+    return get_energy_by_group(sim, 1)
 
 
 def get_torsion_energy(sim):
     """assumes PeriodicTorsionForce is in group 2"""
-    return sim.context.getState(getEnergy=True, groups={2}).getPotentialEnergy() / unit.kilojoule_per_mole
+    return get_energy_by_group(sim, 2)
 
 
 def get_nb_energy(sim):
     """assumes NonbondedForce is in group 3"""
-    return sim.context.getState(getEnergy=True, groups={3}).getPotentialEnergy() / unit.kilojoule_per_mole
+    return get_energy_by_group(sim, 3)
