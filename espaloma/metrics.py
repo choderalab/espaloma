@@ -4,7 +4,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 import abc
 
@@ -74,13 +73,18 @@ class GraphMetric(Metric):
 
         self.base_metric = base_metric
 
-        # get base name
-        if hasattr(base_metric, "__init__"):
-            base_name = base_metric.__class__.__name__
-        else:
+        # get name
+        if hasattr(base_metric, '__name__'):
             base_name = base_metric.__name__
+        else:
+            base_name = base_metric.__class__.__name__
 
-        self.__name__ = "%s between %s and %s" % (base_name, between[0], between[1])
+        self.__name__ = "%s_between_%s_and_%s_on_%s" % (
+            base_name,
+            between[0],
+            between[1],
+            level
+        )
 
     @staticmethod
     def _translation(string, level):
@@ -100,7 +104,9 @@ class GraphMetric(Metric):
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
-        return self.base_metric(input=input_fn(g_input), target=target_fn(g_target))
+        return self.base_metric(
+            input=input_fn(g_input), target=target_fn(g_target)
+        )
 
 
 # =============================================================================
@@ -126,22 +132,20 @@ class TypingAccuracy(GraphMetric):
 
         self.__name__ = "TypingAccuracy"
 
+
 class BondKMSE(GraphMetric):
     def __init__(self):
         super(BondKMSE, self).__init__(
-            between=['k_ref', 'k'],
-            level='n2',
-            base_metric=torch.nn.MSELoss()
+            between=["k_ref", "k"], level="n2", base_metric=torch.nn.MSELoss()
         )
 
-        self.__name__ = 'BondKMSE'
+        self.__name__ = "BondKMSE"
+
 
 class BondKRMSE(GraphMetric):
     def __init__(self):
         super(BondKRMSE, self).__init__(
-            between=['k_ref', 'k'],
-            level='n2',
-            base_metric=rmse
+            between=["k_ref", "k"], level="n2", base_metric=rmse
         )
 
-        self.__name__ = 'BondKRMSE'
+        self.__name__ = "BondKRMSE"

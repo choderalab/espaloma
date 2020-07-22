@@ -4,7 +4,6 @@
 import espaloma as esp
 import abc
 import torch
-from rdkit import Chem
 
 # =============================================================================
 # MODULE CLASSES
@@ -68,7 +67,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                 for graph in self.graphs:
 
                     # nested transforms
-                    for transform in transforms:
+                    for transform in self.transforms:
                         graph = transform(graph)
                     graphs.append(graph)
 
@@ -168,12 +167,12 @@ class GraphDataset(Dataset):
         from openforcefield.topology import Molecule
 
         if all(
-            isinstance(graph, Molecule) or isinstance(graph, str) for graph in graphs
+            isinstance(graph, Molecule) or isinstance(graph, str)
+            for graph in graphs
         ):
 
             if first is None or first == -1:
                 graphs = [esp.Graph(graph) for graph in graphs]
-
 
             else:
                 graphs = [esp.Graph(graph) for graph in graphs[:first]]
@@ -212,7 +211,7 @@ class GraphDataset(Dataset):
         if collate_fn == "graph":
             collate_fn = self.batch
 
-        if collate_fn == "homograph":
+        elif collate_fn == "homograph":
 
             def collate_fn(graphs):
                 graph = self.batch([g.homograph for g in graphs])

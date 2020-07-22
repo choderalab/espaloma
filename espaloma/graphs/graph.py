@@ -10,9 +10,7 @@ import dgl
 # MODULE CLASSES
 # =============================================================================
 class BaseGraph(abc.ABC):
-    """ Base class of various graph objects that we host data in.
-
-    """
+    """ Base class of graph. """
 
     def __init__(self):
         super(BaseGraph, self).__init__()
@@ -22,6 +20,10 @@ class Graph(BaseGraph):
     """ A unified graph object that support translation to and from
     message-passing graphs and MM factor graph.
 
+    Note
+    ----
+    This object provides access to popular attributes of homograph and
+    heterograph.
 
     """
 
@@ -38,9 +40,9 @@ class Graph(BaseGraph):
         if homograph is not None and heterograph is None:
             heterograph = self.get_heterograph_from_graph(homograph)
 
-        self._mol = mol
-        self._homograph = homograph
-        self._heterograph = heterograph
+        self.mol = mol
+        self.homograph = homograph
+        self.heterograph = heterograph
 
     @staticmethod
     def get_homograph_from_mol(mol):
@@ -50,29 +52,39 @@ class Graph(BaseGraph):
 
         # TODO:
         # rewrite this using OFF-generic grammar
-        graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(mol.to_rdkit())
+        # graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(
+        #     mol.to_rdkit()
+        # )
 
+        graph = esp.graphs.utils.read_homogeneous_graph.from_openforcefield_mol(
+            mol
+        )
         return graph
 
     @staticmethod
     def get_heterograph_from_graph(graph):
-        assert isinstance(graph, dgl.DGLGraph), "graph can only be dgl Graph object."
+        assert isinstance(
+            graph, dgl.DGLGraph
+        ), "graph can only be dgl Graph object."
 
-        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(graph)
+        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
+            graph
+        )
 
         return heterograph
 
-    @property
-    def mol(self):
-        return self._mol
-
-    @property
-    def homograph(self):
-        return self._homograph
-
-    @property
-    def heterograph(self):
-        return self._heterograph
+    #
+    # @property
+    # def mol(self):
+    #     return self._mol
+    #
+    # @property
+    # def homograph(self):
+    #     return self._homograph
+    #
+    # @property
+    # def heterograph(self):
+    #     return self._heterograph
 
     @property
     def ndata(self):
@@ -90,10 +102,14 @@ class Graph(BaseGraph):
         import pickle
 
         with open(path, "wb") as f_handle:
-            pickle.dump([self._mol, self._homograph, self._heterograph], f_handle)
+            pickle.dump(
+                [self.mol, self.homograph, self.heterograph], f_handle
+            )
 
     def load(self, path):
         import pickle
 
         with open(path, "rb") as f_handle:
-            (self._mol, self._homograph, self._heterograph) = pickle.load(f_handle)
+            (self.mol, self.homograph, self.heterograph) = pickle.load(
+                f_handle
+            )

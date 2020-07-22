@@ -11,63 +11,62 @@ def harmonic(x, k, eq, order=2):
 
     Parameters
     ----------
-    x : torch.tensor, shape=(batch_size, 1)
-    k : torch.tensor, shape=(batch_size, len(order))
-    eq : torch.tensor, shape=(batch_size, len(order))
-    order : int or list of int
+    x : `torch.Tensor`, `shape=(batch_size, 1)`
+    k : `torch.Tensor`, `shape=(batch_size, len(order))`
+    eq : `torch.Tensor`, `shape=(batch_size, len(order))`
+    order : `int` or `List` of `int`
 
     Returns
     -------
-    u : torch.tensor, shape=(batch_size, 1)
+    u : `torch.Tensor`, `shape=(batch_size, 1)`
     """
     if isinstance(order, list):
         order = torch.tensor(order)
 
     return torch.sum(k * (x - eq) ** order, dim=-1, keepdim=True)
 
-
 def periodic(x, k, eq, order):
     """ Periodic term.
 
     Parameters
     ----------
-    x : torch.tensor, shape=(batch_size, 1)
-    k : torch.tensor, shape=(batch_size, 1)
-    eq : torch.tensor, shape=(batch_size, 1)
-    order : int or list of int
+    x : `torch.Tensor`, `shape=(batch_size, 1)`
+    k : `torch.Tensor`, `shape=(batch_size, len(order))`
+    eq : `torch.Tensor`, `shape=(batch_size, len(order))`
+    order : `int` or `List` of `int`
 
     Returns
     -------
-    u: torch.tensor, shape=(batch_size, 1)
+    u : `torch.Tensor`, `shape=(batch_size, 1)`
     """
     if isinstance(order, list):
         order = torch.tensor(order)
 
-    return torch.sum(k * (1.0 + torch.cos(order * x - eq)), dim=-1, keepdim=True)
+    return torch.sum(
+        k * (1.0 + torch.cos(order * x - eq)), dim=-1, keepdim=True
+    )
 
 
-def lj(x, k, eq, order=torch.tensor([12, 6])):
+def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):
     r""" Lennard-Jones term.
 
-    $$
-    
+    Notes
+    -----
+    ..math::
     E  = \epsilon  ((\sigma / r) ^ {12} - (\sigma / r) ^ 6)
-
-    $$
 
     Parameters
     ----------
-    x : torch.tensor, shape=(batch_size, 1)
-    k : torch.tensor, shape=(batch_size, 1)
-        correspond to epsilon
-    eq : torch.tensor, shape=(batch_size, 1)
-        correspond to sigma
-    order : list of int
+    x : `torch.Tensor`, `shape=(batch_size, 1)`
+    epsilon : `torch.Tensor`, `shape=(batch_size, len(order))`
+    sigma : `torch.Tensor`, `shape=(batch_size, len(order))`
+    order : `int` or `List` of `int`
 
     Returns
     -------
-    u: torch.tensor, shape=(batch_size, 1)
-  
+    u : `torch.Tensor`, `shape=(batch_size, 1)`
+
+
     """
     if isinstance(order, list):
         order = torch.tensor(order)
@@ -75,4 +74,4 @@ def lj(x, k, eq, order=torch.tensor([12, 6])):
     assert order.shape[0] == 2
     assert order.dim() == 1
 
-    return k * ((eq / x) ** order[0] - (eq / x) ** order[1])
+    return epsilon * ((sigma / x) ** order[0] - (sigma / x) ** order[1])

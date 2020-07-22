@@ -29,7 +29,9 @@ def net():
     layer = esp.nn.layers.dgl_legacy.gn("GraphConv")
 
     # define a representation
-    representation = esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"])
+    representation = esp.nn.Sequential(
+        layer, [32, "tanh", 32, "tanh", 32, "tanh"]
+    )
 
     # define a readout
     readout = esp.nn.readout.node_typing.NodeTyping(

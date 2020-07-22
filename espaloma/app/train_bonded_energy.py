@@ -7,7 +7,6 @@ import os
 import numpy as np
 import torch
 
-
 def run(args):
     # define data
     data = getattr(esp.data, args.data)(first=args.first)
@@ -18,10 +17,19 @@ def run(args):
     )
 
     # param / typing
-    operation = getattr(forcefield, args.operation)
+    operation = forcefield.parametrize
 
     # apply to dataset
     data = data.apply(operation, in_place=True)
+
+    # apply simulation
+    # make simulation
+    from espaloma.data.md import MoleculeVacuumSimulation
+    simulation = MoleculeVacuumSimulation(
+        n_samples=10, n_steps_per_sample=10
+    )
+
+    data = data.apply(simulation.run, in_place=True)
 
     # split
     partition = [int(x) for x in args.partition.split(":")]
@@ -40,37 +48,34 @@ def run(args):
     # get the last bit of units
     units = [x for x in args.config if isinstance(x, int)][-1]
 
-    # readout
-    if args.readout == "node_typing":
-        readout = esp.nn.readout.node_typing.NodeTyping(
-            in_features=units, n_classes=args.n_classes
-        )
-
-    if args.readout == "janossy":
-        readout = esp.nn.readout.janossy.JanossyPooling(
-            in_features=units, config=args.janossy_config
-        )
+    readout = esp.nn.readout.janossy.JanossyPooling(
+        in_features=units, config=args.janossy_config
+    )
 
     net = torch.nn.Sequential(representation, readout)
 
-    training_metrics = [
-        getattr(esp.metrics, metric)() for metric in args.training_metrics
+    metrics_tr = [
+        esp.metrics.GraphMetric(
+            base_metric=torch.nn.MSELoss(),
+            between=['u', 'u_ref'],
+            level='g'
+        )
     ]
 
-    test_metrics = [
-        getattr(esp.metrics, metric)() for metric in args.test_metrics
+    metrics_te = [
+        esp.metrics.GraphMetric(
+            base_metric=torch.nn.MSELoss(),
+            between=['u', 'u_ref'],
+            level='g'
+        )
     ]
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,
         ds_te=ds_te,
         net=net,
-        metrics_tr=[
-            getattr(esp.metrics, metric)() for metric in args.training_metrics
-        ],
-        metrics_te=[
-            getattr(esp.metrics, metric)() for metric in args.test_metrics
-        ],
+        metrics_tr=metrics_tr,
+        metrics_te=metrics_te,
         n_epochs=args.n_epochs,
     )
 
@@ -83,13 +88,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="esol", type=str)
+    parser.add_argument("--data", default="alkethoh", type=str)
     parser.add_argument("--first", default=-1, type=int)
-    parser.add_argument("--readout", default="node_typing", type=str)
     parser.add_argument("--partition", default="4:1", type=str)
     parser.add_argument("--batch_size", default=8, type=int)
-    parser.add_argument("--forcefield", default="gaff-1.81", type=str)
-    parser.add_argument("--operation", default="typing", type=str)
+    parser.add_argument("--forcefield", default="smirnoff99Frosst", type=str)
     parser.add_argument("--layer", default="GraphConv", type=str)
     parser.add_argument("--n_classes", default=100, type=int)
     parser.add_argument(

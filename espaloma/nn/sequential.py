@@ -71,7 +71,12 @@ class Sequential(torch.nn.Module):
     """
 
     def __init__(
-        self, layer, config, feature_units=117, input_units=128, model_kwargs={},
+        self,
+        layer,
+        config,
+        feature_units=117,
+        input_units=128,
+        model_kwargs={},
     ):
         super(Sequential, self).__init__()
 

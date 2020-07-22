@@ -11,16 +11,44 @@ import dgl
 # MODULE CLASSES
 # =============================================================================
 class Experiment(abc.ABC):
-    """ Base class for espaloma experiment.
-
-    """
+    """ Base class for espaloma experiment. """
 
     def __init__(self):
         super(Experiment, self).__init__()
 
 
 class Train(Experiment):
-    """ Train a model for a while.
+    """ Training experiment.
+
+    Parameters
+    ----------
+    net : `torch.nn.Module`
+        Neural networks that inputs graph representation and outputs
+        parameterized or typed graph for molecular mechanics.
+
+    data : `espaloma.data.dataset.Dataset`
+        or `torch.utils.data.DataLoader`
+        Dataset.
+
+    metrics : `List` of `callable`
+        List of loss functions to be used (summed) in training.
+
+    optimizer : `torch.optim.Optimizer`
+        Optimizer used for training.
+
+    n_epochs : `int`
+        Number of epochs.
+
+    record_interval : `int`
+        Interval at which states are recorded.
+
+    Methods
+    -------
+    train_once : Train the network for exactly once.
+
+    train : Execute `train_once` for `n_epochs` times and record states
+        every `record_interval`.
+
     """
 
     def __init__(
@@ -31,6 +59,7 @@ class Train(Experiment):
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
         record_interval=1,
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize
     ):
         super(Train, self).__init__()
 
@@ -40,6 +69,7 @@ class Train(Experiment):
         self.metrics = metrics
         self.n_epochs = n_epochs
         self.record_interval = record_interval
+        self.normalize = normalize()
         self.states = {}
 
         # make optimizer
@@ -53,19 +83,19 @@ class Train(Experiment):
             _loss = 0.0
             for metric in self.metrics:
                 _loss += metric(g)
+
             return _loss
 
         self.loss = loss
 
     def train_once(self):
-        """ Train the model for one batch.
-
-        """
+        """ Train the model for one batch. """
         for g in self.data:  # TODO: does this have to be a single g?
 
             def closure(g=g):
                 self.optimizer.zero_grad()
                 g = self.net(g)
+                g = self.normalize.unnorm(g)
                 loss = self.loss(g)
                 loss.backward()
                 return loss
@@ -77,6 +107,7 @@ class Train(Experiment):
         record the weights once every `record_interval`
 
         """
+
         for epoch_idx in range(int(self.n_epochs)):
             self.train_once()
 
@@ -91,7 +122,21 @@ class Train(Experiment):
 
 
 class Test(Experiment):
-    """ Run sequences of tests on a trained model.
+    """ Test experiment.
+
+    Parameters
+    ----------
+    net : `torch.nn.Module`
+        Neural networks that inputs graph representation and outputs
+        parameterized or typed graph for molecular mechanics.
+
+    data : `espaloma.data.dataset.Dataset`
+        or `torch.utils.data.DataLoader`
+        Dataset.
+
+    metrics : `List` of `callable`
+        List of loss functions to be used (summed) in training.
+
 
     """
 
@@ -101,6 +146,7 @@ class Test(Experiment):
         data,
         states,
         metrics=[esp.metrics.TypingCrossEntropy()],
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
         sampler=None,
     ):
         # bookkeeping
@@ -109,11 +155,10 @@ class Test(Experiment):
         self.states = states
         self.metrics = metrics
         self.sampler = sampler
+        self.normalize = normalize()
 
     def test(self):
-        """ Run test.
-
-        """
+        """ Run tests. """
         results = {}
 
         # loop through the metrics
@@ -128,12 +173,20 @@ class Test(Experiment):
             # load the state dict
             self.net.load_state_dict(state)
 
-            for metric in self.metrics:
+            # local scope
+            with g.local_scope():
 
-                # loop through the metrics
-                results[metric.__name__][state_name] = (
-                    metric(g_input=self.net(g),).detach().cpu().numpy()
-                )
+                for metric in self.metrics:
+
+                    # loop through the metrics
+                    results[metric.__name__][state_name] = metric(
+                            g_input=self.normalize.unnorm(
+                                    self.net(g)
+                                )
+                            ).detach().cpu().numpy()
+
+
+        self.ref_g = self.normalize.unnorm(self.net(g))
 
         # point this to self
         self.results = results
@@ -141,9 +194,7 @@ class Test(Experiment):
 
 
 class TrainAndTest(Experiment):
-    """ Train a model and then test it.
-
-    """
+    """ Train a model and then test it. """
 
     def __init__(
         self,
@@ -153,6 +204,7 @@ class TrainAndTest(Experiment):
         metrics_tr=[esp.metrics.TypingCrossEntropy()],
         metrics_te=[esp.metrics.TypingCrossEntropy()],
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
         n_epochs=100,
         record_interval=1,
     ):
@@ -165,6 +217,7 @@ class TrainAndTest(Experiment):
         self.n_epochs = n_epochs
         self.metrics_tr = metrics_tr
         self.metrics_te = metrics_te
+        self.normalize=normalize
 
     def __str__(self):
         _str = ""
@@ -197,6 +250,7 @@ class TrainAndTest(Experiment):
             optimizer=self.optimizer,
             n_epochs=self.n_epochs,
             metrics=self.metrics_tr,
+            normalize=self.normalize,
         )
 
         train.train()
@@ -204,18 +258,31 @@ class TrainAndTest(Experiment):
         self.states = train.states
 
         test = Test(
-            net=self.net, data=self.ds_te, metrics=self.metrics_te, states=self.states,
+            net=self.net,
+            data=self.ds_te,
+            metrics=self.metrics_te,
+            states=self.states,
+            normalize=self.normalize,
         )
 
+
         test.test()
+
+        self.ref_g_test = test.ref_g
 
         self.results_te = test.results
 
         test = Test(
-            net=self.net, data=self.ds_tr, metrics=self.metrics_te, states=self.states,
+            net=self.net,
+            data=self.ds_tr,
+            metrics=self.metrics_te,
+            states=self.states,
+            normalize=self.normalize
         )
 
+
         test.test()
+        self.ref_g_training = test.ref_g
 
         self.results_tr = test.results
 
