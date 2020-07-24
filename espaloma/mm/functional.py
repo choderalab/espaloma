@@ -6,7 +6,7 @@ import torch
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def harmonic(x, k, eq, order=2):
+def harmonic(x, k, eq, order=[2]):
     """ Harmonic term.
 
     Parameters
@@ -23,7 +23,7 @@ def harmonic(x, k, eq, order=2):
     if isinstance(order, list):
         order = torch.tensor(order)
 
-    return torch.sum(k * (x - eq) ** order, dim=-1, keepdim=True)
+    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
 
 def periodic(x, k, eq, order):
     """ Periodic term.

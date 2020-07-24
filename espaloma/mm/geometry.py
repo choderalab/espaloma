@@ -141,3 +141,12 @@ def geometry_in_graph(g):
         g.apply_nodes(apply_bond, ntype='onefour')
 
     return g
+
+class GeometryInGraph(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super(GeometryInGraph, self).__init__()
+        self.args = args
+        self.kwargs = kwargs
+
+    def forward(self, g):
+        return geometry_in_graph(g, *self.args, **self.kwargs)

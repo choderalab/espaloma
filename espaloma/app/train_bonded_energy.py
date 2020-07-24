@@ -49,14 +49,20 @@ def run(args):
     units = [x for x in args.config if isinstance(x, int)][-1]
 
     readout = esp.nn.readout.janossy.JanossyPooling(
-        in_features=units, config=args.janossy_config
+        in_features=units, config=args.janossy_config,
     )
 
-    net = torch.nn.Sequential(representation, readout)
+    net = torch.nn.Sequential(
+            representation, 
+            readout,
+            esp.mm.geometry.GeometryInGraph(),
+            esp.mm.energy.EnergyInGraph(),
+            esp.mm.energy.EnergyInGraph(suffix='_ref'),
+    )
 
     metrics_tr = [
         esp.metrics.GraphMetric(
-            base_metric=torch.nn.MSELoss(),
+            base_metric=torch.nn.L1Loss(),
             between=['u', 'u_ref'],
             level='g'
         )
@@ -64,11 +70,16 @@ def run(args):
 
     metrics_te = [
         esp.metrics.GraphMetric(
-            base_metric=torch.nn.MSELoss(),
-            between=['u', 'u_ref'],
-            level='g'
-        )
+            base_metric=base_metric,
+            between=[param, param + '_ref'],
+            level=term
+        ) for param in ['u'] for term in ['g']
+        for base_metric in [
+            esp.metrics.rmse,
+            esp.metrics.r2
+        ]
     ]
+
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,
@@ -77,11 +88,43 @@ def run(args):
         metrics_tr=metrics_tr,
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
+        normalize=esp.data.normalize.PositiveNotNormalize,
     )
 
     results = exp.run()
 
     print(esp.app.report.markdown(results))
+
+    import os
+    os.mkdir(args.out)
+
+    with open(args.out + "/architecture.txt", "w") as f_handle:
+        f_handle.write(str(exp))
+
+    with open(args.out + "/result_table.md", "w") as f_handle:
+        f_handle.write(esp.app.report.markdown(results))
+
+    curves = esp.app.report.curve(results)
+
+    for spec, curve in curves.items():
+        np.save(args.out + "/" + "_".join(spec) + ".npy", curve)
+
+    import pickle
+    with open(args.out + "/ref_g_test.th", "wb") as f_handle:
+        pickle.dump(exp.ref_g_test, f_handle)
+
+    with open(args.out + "/ref_g_training.th", "wb") as f_handle:
+        pickle.dump(exp.ref_g_training, f_handle)
+
+
+    print(esp.app.report.markdown(results))
+
+    import pickle
+    with open(args.out + "/ref_g_test.th", "wb") as f_handle:
+        pickle.dump(exp.ref_g_test, f_handle)
+
+    with open(args.out + "/ref_g_training.th", "wb") as f_handle:
+        pickle.dump(exp.ref_g_training, f_handle)
 
 
 if __name__ == "__main__":
@@ -105,7 +148,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test_metrics", nargs="*", default=["TypingAccuracy"]
     )
-
+    parser.add_argument(
+        "--out", default="results", type=str
+    )
     parser.add_argument("--janossy_config", nargs="*", default=[32, "tanh"])
 
     parser.add_argument("--n_epochs", default=10, type=int)

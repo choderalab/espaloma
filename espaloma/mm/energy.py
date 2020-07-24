@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import torch
 import dgl
 import espaloma as esp
 
@@ -54,7 +55,7 @@ def apply_nonbonded(nodes, suffix=''):
 # =============================================================================
 # ENERGY IN GRAPH
 # =============================================================================
-def energy_in_graph(g, suffix=''):
+def energy_in_graph(g, suffix='', terms=['n2', 'n3']):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
@@ -75,28 +76,30 @@ def energy_in_graph(g, suffix=''):
     # TODO: this is all very restricted for now
     # we need to make this better
 
-    # apply combination rule
-    esp.mm.nonbonded.lorentz_berthelot(g, suffix=suffix)
+    if 'nonbonded' in terms or 'onefour' in terms:
+        # apply combination rule
+        esp.mm.nonbonded.lorentz_berthelot(g, suffix=suffix)
 
-    # apply energy function
-    g.apply_nodes(
+    if 'n2' in terms:
+        # apply energy function
+        g.apply_nodes(
             lambda node: apply_bond(node, suffix=suffix), 
             ntype='n2'
-    )
+        )
 
-
-    g.apply_nodes(
+    if 'n3' in terms:
+        g.apply_nodes(
             lambda node: apply_angle(node, suffix=suffix),
             ntype='n3',
-    )
+        )
 
-    if g.number_of_nodes('nonbonded') > 0:
+    if g.number_of_nodes('nonbonded') > 0 and 'nonbonded' in terms:
         g.apply_nodes(
                 lambda node: apply_nonbonded(node, suffix=suffix), 
                 ntype='nonbonded'
         )
 
-    if g.number_of_nodes('onefour') > 0:
+    if g.number_of_nodes('onefour') > 0 and 'onefour' in terms:
         g.apply_nodes(
                 lambda node: apply_nonbonded(node, suffix=suffix), 
                 ntype='onefour'
@@ -105,29 +108,31 @@ def energy_in_graph(g, suffix=''):
     # sum up energy
     # bonded
     g.multi_update_all(
-        {
-            **{
-                'n%s_in_g' % idx: (
-                    dgl.function.copy_src(src='u%s' % suffix, out='m_%s' % idx),
-                    dgl.function.sum(msg='m_%s' % idx, out='u%s%s' % (idx, suffix))
-                ) for idx in [2, 3]
+            {
+                "%s_in_g" % term: (
+                    dgl.function.copy_src(src='u%s' % suffix, out="m_%s" % term),
+                    dgl.function.sum(msg="m_%s" % term, out="u_%s%s" % (term, suffix))
+                ) for term in terms
             },
-            **{
-                '%s_in_g' % term: (
-                    dgl.function.copy_src(src='u%s' % suffix, out='m_%s' % term),
-                    dgl.function.sum(msg='m_%s' % term, out='u_%s%s' % (term, suffix))
-                ) for term in ['onefour', 'nonbonded']
-            },
-        },
-        'sum'
+            cross_reducer='sum',
     )
 
     g.apply_nodes(
         lambda node: {
-            'u%s' % suffix: node.data['u2%s' % suffix] + node.data['u3%s' % suffix] 
-             # + node.data['onefour'] + node.data['nonbonded']
+            'u%s' % suffix: sum(node.data["u_%s%s" % (term, suffix)] for term in terms)
         },
         ntype='g'
     )
 
     return g
+
+class EnergyInGraph(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super(EnergyInGraph, self).__init__()
+        self.args = args
+        self.kwargs = kwargs
+
+    def forward(self, g):
+        return energy_in_graph(g, *self.args, **self.kwargs)
+
+

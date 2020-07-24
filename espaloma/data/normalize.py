@@ -227,3 +227,50 @@ class ESOL100LogNormalNormalize(DatasetLogNormalNormalize):
                 in_place=True
             )
         )
+
+class NotNormalize(BaseNormalize):
+    def __init__(self):
+        super(NotNormalize).__init__()
+        self._prepare()
+
+    def _prepare(self):
+        self.norm = lambda x: x
+        self.unnorm = lambda x: x
+
+
+
+class PositiveNotNormalize(BaseNormalize):
+    def __init__(self):
+        super(PositiveNotNormalize, self).__init__()
+        self._prepare()
+
+    def _prepare(self):
+
+        # get normalize and unnormalize functions
+        def norm(g):
+            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
+                for key in g.nodes[term].data.keys(): # loop through parameters
+                    if not key.endswith('ref'): # pass non-parameters
+                        continue
+
+                    g.nodes[term].data[key] = g.nodes[term].data[key].log()
+
+            return g
+
+        def unnorm(g):
+            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
+                for key in g.nodes[term].data.keys(): # loop through parameters
+                    if not key + '_ref' in g.nodes[term].data:
+                        continue
+
+                    g.nodes[term].data[key]\
+                        = torch.exp(
+                            g.nodes[term].data[key])
+
+            return g
+
+        # point normalize and unnormalize functions to `self`
+        self.norm = norm
+        self.unnorm = unnorm
+
+

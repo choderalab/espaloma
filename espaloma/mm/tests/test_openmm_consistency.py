@@ -125,16 +125,18 @@ def test_energy_angle_and_bond(g):
     # .data['u_nonbonded'], .data['u_onefour'], .data['u2'], .data['u3'],
 
 
+    print(energies)
+
     # test bonds
     npt.assert_almost_equal(
-        g.nodes['g'].data['u2'].numpy(),
+        g.nodes['g'].data['u_n2'].numpy(),
         energies['HarmonicBondForce'],
         decimal=3,
     )
 
     # test angles
     npt.assert_almost_equal(
-        g.nodes['g'].data['u3'].numpy(),
+        g.nodes['g'].data['u_n3'].numpy(),
         energies['HarmonicAngleForce'],
         decimal=3,
     )

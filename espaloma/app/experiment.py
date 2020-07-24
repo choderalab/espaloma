@@ -146,7 +146,7 @@ class Test(Experiment):
         data,
         states,
         metrics=[esp.metrics.TypingCrossEntropy()],
-        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
+        normalize=esp.data.normalize.NotNormalize,
         sampler=None,
     ):
         # bookkeeping
@@ -204,7 +204,7 @@ class TrainAndTest(Experiment):
         metrics_tr=[esp.metrics.TypingCrossEntropy()],
         metrics_te=[esp.metrics.TypingCrossEntropy()],
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
-        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
+        normalize=esp.data.normalize.NotNormalize,
         n_epochs=100,
         record_interval=1,
     ):

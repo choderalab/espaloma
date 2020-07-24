@@ -17,6 +17,9 @@ def mse(input, target):
 def rmse(input, target):
     return torch.sqrt(torch.nn.functional.mse_loss(target, input))
 
+def mae_of_log(input, target):
+    return torch.nn.L1Loss()(torch.log(input), torch.log(target))
+
 
 def cross_entropy(input, target, reduction="mean"):
     loss_fn = torch.nn.CrossEntropyLoss(reduction=reduction)
