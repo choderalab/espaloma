@@ -112,6 +112,84 @@ class GraphMetric(Metric):
         )
 
 
+class GraphDerivativeMetric(Metric):
+    """ Loss between nodes attributes of graph or graphs.
+
+    """
+
+    def __init__(
+            self, 
+            base_metric, 
+            between, 
+            level="n1", 
+            d="xyz",
+            d_level="n1",
+            *args, **kwargs):
+        super(GraphDerivativeMetric, self).__init__(*args, **kwargs)
+
+        # between could be tuple of two strings or two functions
+        assert len(between) == 2
+
+        self.between = (
+            self._translation(between[0], level),
+            self._translation(between[1], level),
+        )
+
+        self.d = self._translation(d, d_level)
+
+        self.base_metric = base_metric
+
+        # get name
+        if hasattr(base_metric, '__name__'):
+            base_name = base_metric.__name__
+        else:
+            base_name = base_metric.__class__.__name__
+
+        self.__name__ = "%s_between_d_%s_d_%s_and_d_%s_d_%s_on_%s" % (
+            base_name,
+            between[0],
+            d,
+            between[1],
+            d,
+            level
+        )
+
+    @staticmethod
+    def _translation(string, level):
+        return lambda g: g.nodes[level].data[string]
+
+    def forward(self, g_input, g_target=None):
+        """ Forward function of loss.
+
+        """
+        # allow loss within self
+        if g_target is None:
+            g_target = g_input
+
+        # get input and output transform function
+        input_fn, target_fn = self.between
+
+        print(self.d(g_input).requires_grad)
+
+        # get input and target
+        input = input_fn(g_input)
+        input.sum().backward(retain_graph=True)
+        input_prime = self.d(g_input).grad
+        print(input_prime)
+
+        target = target_fn(g_input)
+        target.sum().backward(retain_graph=True)
+        target_prime = self.d(g_input).grad 
+        print(target_prime)
+
+        # compute loss using base loss
+        # NOTE:
+        # use keyward argument here since torch is bad with the order with args
+        return self.base_metric(
+            input=input_prime, target=target_prime,
+        )
+
+
 # =============================================================================
 # PRESETS
 # =============================================================================

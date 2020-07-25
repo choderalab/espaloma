@@ -26,7 +26,7 @@ def run(args):
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
     simulation = MoleculeVacuumSimulation(
-        n_samples=10, n_steps_per_sample=10
+        n_samples=100, n_steps_per_sample=100
     )
 
     data = data.apply(simulation.run, in_place=True)

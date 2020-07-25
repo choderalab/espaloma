@@ -172,6 +172,10 @@ class MoleculeVacuumSimulation(object):
             g.heterograph.nodes['n1'].data['xyz'] = samples.permute(
                 1, 0, 2
             )
+
+            # require gradient for force matching
+            g.heterograph.nodes['n1'].data['xyz'].requires_grad = True
+
             return g
 
         return samples
