@@ -36,9 +36,9 @@ class FreeParameterBaseline(torch.nn.Module):
         for term in self.g_ref.ntypes:
             for param, param_value in self.g_ref.nodes[term].data.items():
                 if param.endswith("_ref"):
-                    g.nodes[term].data[param] = getattr(
+                    g.nodes[term].data[param.replace("_ref", "")] = getattr(
                         self,
-                        "%s_%s",
+                        "%s_%s" % (term, param),
                     )
 
         
