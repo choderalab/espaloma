@@ -13,18 +13,15 @@ import abc
 def mse(input, target):
     return torch.nn.functional.mse_loss(target, input)
 
-
 def rmse(input, target):
     return torch.sqrt(torch.nn.functional.mse_loss(target, input))
 
 def mae_of_log(input, target):
     return torch.nn.L1Loss()(torch.log(input), torch.log(target))
 
-
 def cross_entropy(input, target, reduction="mean"):
     loss_fn = torch.nn.CrossEntropyLoss(reduction=reduction)
     return loss_fn(input=input, target=target)  # prediction first, logit
-
 
 def r2(target, input):
     target = target.flatten()
@@ -32,7 +29,6 @@ def r2(target, input):
     ss_tot = (target - target.mean()).pow(2).sum()
     ss_res = (input - target).pow(2).sum()
     return 1 - torch.div(ss_res, ss_tot)
-
 
 def accuracy(input, target):
     # check if this is logit
@@ -169,18 +165,20 @@ class GraphDerivativeMetric(Metric):
         # get input and output transform function
         input_fn, target_fn = self.between
 
-        print(self.d(g_input).requires_grad)
+        # calculate the derivatives of input
+        input_prime = torch.autograd.grad(
+            input_fn(g_input).sum(),
+            self.d(g_input),
+            create_graph=True,
+            retain_graph=True,
+        )[0]
 
-        # get input and target
-        input = input_fn(g_input)
-        input.sum().backward(retain_graph=True)
-        input_prime = self.d(g_input).grad
-        print(input_prime)
-
-        target = target_fn(g_input)
-        target.sum().backward(retain_graph=True)
-        target_prime = self.d(g_input).grad 
-        print(target_prime)
+        target_prime = torch.autograd.grad(
+            target_fn(g_target).sum(),
+            self.d(g_target),
+            create_graph=True,
+            retain_graph=True,
+        )[0]
 
         # compute loss using base loss
         # NOTE:

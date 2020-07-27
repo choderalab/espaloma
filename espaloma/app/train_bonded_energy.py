@@ -26,7 +26,7 @@ def run(args):
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
     simulation = MoleculeVacuumSimulation(
-        n_samples=100, n_steps_per_sample=100
+        n_samples=1000, n_steps_per_sample=10
     )
 
     data = data.apply(simulation.run, in_place=True)
@@ -80,6 +80,11 @@ def run(args):
         ]
     ]
 
+    optimizer = getattr(
+        torch.optim,
+        args.optimizer)(
+            net.parameters(),
+            lr=args.lr)
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,
@@ -154,6 +159,9 @@ if __name__ == "__main__":
     parser.add_argument("--janossy_config", nargs="*", default=[32, "tanh"])
 
     parser.add_argument("--n_epochs", default=10, type=int)
+
+    parser.add_argument("--optimizer", default="Adam", type=str)
+    parser.add_argument("--lr", default=1e-3, type=float)
 
     args = parser.parse_args()
 

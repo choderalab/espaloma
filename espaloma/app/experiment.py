@@ -98,8 +98,9 @@ class Train(Experiment):
                 g = self.normalize.unnorm(g)
                 loss = self.loss(g)
                 loss.backward()
+                print(loss)
                 return loss
-
+            
             self.optimizer.step(closure)
 
     def train(self):
