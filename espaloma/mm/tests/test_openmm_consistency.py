@@ -125,8 +125,6 @@ def test_energy_angle_and_bond(g):
     # .data['u_nonbonded'], .data['u_onefour'], .data['u2'], .data['u3'],
 
 
-    print(energies)
-
     # test bonds
     npt.assert_almost_equal(
         g.nodes['g'].data['u_n2'].numpy(),

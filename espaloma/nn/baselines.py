@@ -21,29 +21,35 @@ class FreeParameterBaseline(torch.nn.Module):
         # assign a `torch.nn.Parameter`
         for term in self.g_ref.ntypes:
             for param, param_value in self.g_ref.nodes[term].data.items():
-                if param.endswith("_ref"):
+                if param.endswith("_ref") and 'u' not in param:
                     setattr(
                         self,
-                        "%s_%s" % (term, param),
+                        "%s_%s" % (term, param.replace("_ref", "")),
                         torch.nn.Parameter(
                             torch.zeros_like(
-                                param_value
+                                param_value.clone().detach(),
                             )
                         )
                     )
 
     def forward(self, g):
+        update_dicts = {node: {} for node in self.g_ref.ntypes}
+
         for term in self.g_ref.ntypes:
             for param, param_value in self.g_ref.nodes[term].data.items():
                 if param.endswith("_ref"):
-                    g.nodes[term].data[param.replace("_ref", "")] = getattr(
+                    if hasattr(
                         self,
-                        "%s_%s" % (term, param),
-                    )
+                        "%s_%s" % (term, param.replace("_ref", ""))
+                    ):
 
-        
+                        update_dicts[term][param.replace("_ref", "")] = getattr(
+                            self,
+                            "%s_%s" % (term, param.replace("_ref", "")),
+                        )
+
+        for node, update_dict in update_dicts.items():
+            for param, param_value in update_dict.items():
+                g.nodes[node].data[param] = param_value.exp()
+
         return g
-
-
-
-

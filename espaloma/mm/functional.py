@@ -6,24 +6,29 @@ import torch
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def harmonic(x, k, eq, order=[2]):
-    """ Harmonic term.
+# def harmonic(x, k, eq, order=[2]):
+#     """ Harmonic term.
+#
+#     Parameters
+#     ----------
+#     x : `torch.Tensor`, `shape=(batch_size, 1)`
+#     k : `torch.Tensor`, `shape=(batch_size, len(order))`
+#     eq : `torch.Tensor`, `shape=(batch_size, len(order))`
+#     order : `int` or `List` of `int`
+#
+#     Returns
+#     -------
+#     u : `torch.Tensor`, `shape=(batch_size, 1)`
+#     """
+#     if isinstance(order, list):
+#         order = torch.tensor(order)
+#
+#     return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
 
-    Parameters
-    ----------
-    x : `torch.Tensor`, `shape=(batch_size, 1)`
-    k : `torch.Tensor`, `shape=(batch_size, len(order))`
-    eq : `torch.Tensor`, `shape=(batch_size, len(order))`
-    order : `int` or `List` of `int`
 
-    Returns
-    -------
-    u : `torch.Tensor`, `shape=(batch_size, 1)`
-    """
-    if isinstance(order, list):
-        order = torch.tensor(order)
-
-    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
+# simple implementation
+def harmonic(x, k, eq):
+    return k * (x - eq) ** 2
 
 def periodic(x, k, eq, order):
     """ Periodic term.

@@ -13,6 +13,13 @@ def reduce_stack(msg, out):
         return {out: nodes.mailbox[msg]}
     return _reduce_stack
 
+
+def copy_src(src, out):
+    """ Copy source of an edge. """
+    def _copy_src(edges, src=src, out=out):
+        return {out: edges.src[src].clone()}
+    return _copy_src
+
 # =============================================================================
 # SINGLE GEOMETRY ENTITY
 # =============================================================================
@@ -111,14 +118,14 @@ def geometry_in_graph(g):
         {
             **{
                 'n1_as_%s_in_n%s' % (pos_idx, big_idx): (
-                    dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
+                    copy_src(src='xyz', out='m_xyz%s' % pos_idx),
                     dgl.function.sum(
                         msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx),
                 ) for big_idx in range(2, 5) for pos_idx in range(big_idx)
             },
             **{
                 'n1_as_%s_in_%s' % (pos_idx, term): (
-                    dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
+                    copy_src(src='xyz', out='m_xyz%s' % pos_idx),
                     dgl.function.sum(
                         msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx),
                 ) for term in ['nonbonded', 'onefour']
@@ -131,7 +138,9 @@ def geometry_in_graph(g):
     # apply geometry functions
     g.apply_nodes(apply_bond, ntype='n2')
     g.apply_nodes(apply_angle, ntype='n3')
-    g.apply_nodes(apply_torsion, ntype='n4')
+
+    if g.number_of_nodes('n4') > 0:
+        g.apply_nodes(apply_torsion, ntype='n4')
 
     # copy coordinates to nonbonded
     if g.number_of_nodes('nonbonded') > 0:
