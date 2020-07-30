@@ -10,6 +10,7 @@ import espaloma as esp
 # =============================================================================
 def apply_bond(nodes, suffix=''):
     """ Bond energy in nodes. """
+    # if suffix == '_ref':
     return {
         'u%s' % suffix: esp.mm.bond.harmonic_bond(
             x=nodes.data['x'],
@@ -17,6 +18,15 @@ def apply_bond(nodes, suffix=''):
             eq=nodes.data['eq%s' % suffix],
         )
     }
+
+    # else:
+    #     return {
+    #         'u%s' % suffix: esp.mm.bond.harmonic_bond_re(
+    #             x=nodes.data['x'],
+    #             k=nodes.data['k%s' % suffix],
+    #             eq=nodes.data['eq%s' % suffix],
+    #         )
+    #     }
 
 def apply_angle(nodes, suffix=''):
     """ Angle energy in nodes. """
@@ -83,7 +93,7 @@ def energy_in_graph(g, suffix='', terms=['n2', 'n3']):
     if 'n2' in terms:
         # apply energy function
         g.apply_nodes(
-            lambda node: apply_bond(node, suffix=suffix), 
+            lambda node: apply_bond(node, suffix=suffix),
             ntype='n2'
         )
 
@@ -95,13 +105,13 @@ def energy_in_graph(g, suffix='', terms=['n2', 'n3']):
 
     if g.number_of_nodes('nonbonded') > 0 and 'nonbonded' in terms:
         g.apply_nodes(
-                lambda node: apply_nonbonded(node, suffix=suffix), 
+                lambda node: apply_nonbonded(node, suffix=suffix),
                 ntype='nonbonded'
         )
 
     if g.number_of_nodes('onefour') > 0 and 'onefour' in terms:
         g.apply_nodes(
-                lambda node: apply_nonbonded(node, suffix=suffix), 
+                lambda node: apply_nonbonded(node, suffix=suffix),
                 ntype='onefour'
         )
 
@@ -134,5 +144,3 @@ class EnergyInGraph(torch.nn.Module):
 
     def forward(self, g):
         return energy_in_graph(g, *self.args, **self.kwargs)
-
-

@@ -50,6 +50,6 @@ class FreeParameterBaseline(torch.nn.Module):
 
         for node, update_dict in update_dicts.items():
             for param, param_value in update_dict.items():
-                g.nodes[node].data[param] = param_value.exp()
+                g.nodes[node].data[param] = param_value
 
         return g
