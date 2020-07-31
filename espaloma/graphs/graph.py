@@ -105,9 +105,7 @@ class Graph(BaseGraph):
         import pickle
 
         with open(path, "wb") as f_handle:
-            pickle.dump(
-                [self.mol, self.homograph, self.heterograph], f_handle
-            )
+            pickle.dump([self.mol, self.homograph, self.heterograph], f_handle)
 
     def load(self, path):
         import pickle

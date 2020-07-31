@@ -4,12 +4,12 @@ import pytest
 @pytest.fixture
 def baseline():
     import espaloma as esp
-    g = esp.Graph('c1ccccc1')
 
+    g = esp.Graph("c1ccccc1")
 
     # get force field
     forcefield = esp.graphs.legacy_force_field.LegacyForceField(
-        'smirnoff99Frosst'
+        "smirnoff99Frosst"
     )
 
     # param / typing
@@ -20,6 +20,7 @@ def baseline():
     baseline = esp.nn.baselines.FreeParameterBaseline(g_ref=g.heterograph)
 
     return baseline
+
 
 def test_init(baseline):
     baseline

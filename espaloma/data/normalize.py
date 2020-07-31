@@ -15,6 +15,7 @@ class BaseNormalize(abc.ABC):
     """ Base class for normalizing operation.
 
     """
+
     def __init__(self):
         super(BaseNormalize, self).__init__()
 
@@ -23,6 +24,7 @@ class BaseNormalize(abc.ABC):
         # NOTE:
         # `_norm` and `_unnorm` are assigned here
         raise NotImplementedError
+
 
 # =============================================================================
 # MODULE CLASSES
@@ -44,6 +46,7 @@ class DatasetNormalNormalize(BaseNormalize):
     unnorm : unnormalize function
 
     """
+
     def __init__(self, dataset):
         super(DatasetNormalNormalize, self).__init__()
         self.dataset = dataset
@@ -52,52 +55,53 @@ class DatasetNormalNormalize(BaseNormalize):
     def _prepare(self):
         """ Calculate the statistics from dataset """
         # grab the collection of graphs in the dataset, batched
-        g = self.dataset.batch(
-            self.dataset.graphs
-        )
+        g = self.dataset.batch(self.dataset.graphs)
 
-        self.statistics = {term: {} for term in ['n1', 'n2', 'n3', 'n4']}
+        self.statistics = {term: {} for term in ["n1", "n2", "n3", "n4"]}
 
         # calculate statistics
-        for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-            for key in g.nodes[term].data.keys(): # loop through parameters
-                if not key.endswith('ref'): # pass non-parameters
+        for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+            for key in g.nodes[term].data.keys():  # loop through parameters
+                if not key.endswith("ref"):  # pass non-parameters
                     continue
 
-                self.statistics[term][key.replace('_ref', '_mean')] = torch.mean(
-                    g.nodes[term].data[key],
-                    axis=0
-                )
+                self.statistics[term][
+                    key.replace("_ref", "_mean")
+                ] = torch.mean(g.nodes[term].data[key], axis=0)
 
-                self.statistics[term][key.replace('_ref', '_std')] = torch.std(
-                    g.nodes[term].data[key],
-                    axis=0
+                self.statistics[term][key.replace("_ref", "_std")] = torch.std(
+                    g.nodes[term].data[key], axis=0
                 )
 
         # get normalize and unnormalize functions
         def norm(g):
-            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-                for key in g.nodes[term].data.keys(): # loop through parameters
-                    if not key.endswith('ref'): # pass non-parameters
+            for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+                for key in g.nodes[
+                    term
+                ].data.keys():  # loop through parameters
+                    if not key.endswith("ref"):  # pass non-parameters
                         continue
 
                     g.nodes[term].data[key] = (
-                        g.nodes[term].data[key]\
-                        - self.statistics[term][key.replace('_ref', '_mean')]
-                        ) / self.statistics[term][key.replace('_ref', '_std')]
+                        g.nodes[term].data[key]
+                        - self.statistics[term][key.replace("_ref", "_mean")]
+                    ) / self.statistics[term][key.replace("_ref", "_std")]
 
             return g
 
         def unnorm(g):
-            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-                for key in g.nodes[term].data.keys(): # loop through parameters
+            for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+                for key in g.nodes[
+                    term
+                ].data.keys():  # loop through parameters
 
-                    if key + '_mean' in self.statistics[term]:
+                    if key + "_mean" in self.statistics[term]:
 
-                        g.nodes[term].data[key]\
-                            = g.nodes[term].data[key]\
-                                * self.statistics[term][key + '_std']\
-                                + self.statistics[term][key + '_mean']
+                        g.nodes[term].data[key] = (
+                            g.nodes[term].data[key]
+                            * self.statistics[term][key + "_std"]
+                            + self.statistics[term][key + "_mean"]
+                        )
                     #
                     # elif '_ref' in key \
                     #     and key.replace('_ref', '_mean')\
@@ -116,6 +120,7 @@ class DatasetNormalNormalize(BaseNormalize):
         self.norm = norm
         self.unnorm = unnorm
 
+
 class DatasetLogNormalNormalize(BaseNormalize):
     """ Normalizing operation based on a dataset of molecules,
     assuming parameters having log normal distribution.
@@ -133,6 +138,7 @@ class DatasetLogNormalNormalize(BaseNormalize):
     unnorm : unnormalize function
 
     """
+
     def __init__(self, dataset):
         super(DatasetLogNormalNormalize, self).__init__()
         self.dataset = dataset
@@ -141,53 +147,53 @@ class DatasetLogNormalNormalize(BaseNormalize):
     def _prepare(self):
         """ Calculate the statistics from dataset """
         # grab the collection of graphs in the dataset, batched
-        g = self.dataset.batch(
-            self.dataset.graphs
-        )
+        g = self.dataset.batch(self.dataset.graphs)
 
-        self.statistics = {term: {} for term in ['n1', 'n2', 'n3', 'n4']}
+        self.statistics = {term: {} for term in ["n1", "n2", "n3", "n4"]}
 
         # calculate statistics
-        for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-            for key in g.nodes[term].data.keys(): # loop through parameters
-                if not key.endswith('ref'): # pass non-parameters
+        for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+            for key in g.nodes[term].data.keys():  # loop through parameters
+                if not key.endswith("ref"):  # pass non-parameters
                     continue
 
-                self.statistics[term][key.replace('_ref', '_mean')] = torch.mean(
-                    g.nodes[term].data[key].log(),
-                    axis=0
-                )
+                self.statistics[term][
+                    key.replace("_ref", "_mean")
+                ] = torch.mean(g.nodes[term].data[key].log(), axis=0)
 
-                self.statistics[term][key.replace('_ref', '_std')] = torch.std(
-                    g.nodes[term].data[key].log(),
-                    axis=0
+                self.statistics[term][key.replace("_ref", "_std")] = torch.std(
+                    g.nodes[term].data[key].log(), axis=0
                 )
 
         # get normalize and unnormalize functions
         def norm(g):
-            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-                for key in g.nodes[term].data.keys(): # loop through parameters
-                    if not key.endswith('ref'): # pass non-parameters
+            for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+                for key in g.nodes[
+                    term
+                ].data.keys():  # loop through parameters
+                    if not key.endswith("ref"):  # pass non-parameters
                         continue
 
                     g.nodes[term].data[key] = (
-                        g.nodes[term].data[key].log()\
-                        - self.statistics[term][key.replace('_ref', '_mean')]
-                        ) / self.statistics[term][key.replace('_ref', '_std')]
+                        g.nodes[term].data[key].log()
+                        - self.statistics[term][key.replace("_ref", "_mean")]
+                    ) / self.statistics[term][key.replace("_ref", "_std")]
 
             return g
 
         def unnorm(g):
-            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-                for key in g.nodes[term].data.keys(): # loop through parameters
+            for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+                for key in g.nodes[
+                    term
+                ].data.keys():  # loop through parameters
 
-                    if key + '_mean' in self.statistics[term]:
+                    if key + "_mean" in self.statistics[term]:
 
-                        g.nodes[term].data[key]\
-                            = torch.exp(
-                                g.nodes[term].data[key]\
-                                    * self.statistics[term][key + '_std']\
-                                    + self.statistics[term][key + '_mean'])
+                        g.nodes[term].data[key] = torch.exp(
+                            g.nodes[term].data[key]
+                            * self.statistics[term][key + "_std"]
+                            + self.statistics[term][key + "_mean"]
+                        )
                     #
                     # elif '_ref' in key \
                     #     and key.replace('_ref', '_mean')\
@@ -215,21 +221,25 @@ class ESOL100NormalNormalize(DatasetNormalNormalize):
     def __init__(self):
         super(ESOL100NormalNormalize, self).__init__(
             dataset=esp.data.esol(first=100).apply(
-                esp.graphs.legacy_force_field.LegacyForceField('smirnoff99Frosst'
-                        ).parametrize,
-                in_place=True
+                esp.graphs.legacy_force_field.LegacyForceField(
+                    "smirnoff99Frosst"
+                ).parametrize,
+                in_place=True,
             )
         )
+
 
 class ESOL100LogNormalNormalize(DatasetLogNormalNormalize):
     def __init__(self):
         super(ESOL100LogNormalNormalize, self).__init__(
             dataset=esp.data.esol(first=100).apply(
-                esp.graphs.legacy_force_field.LegacyForceField('smirnoff99Frosst'
-                        ).parametrize,
-                in_place=True
+                esp.graphs.legacy_force_field.LegacyForceField(
+                    "smirnoff99Frosst"
+                ).parametrize,
+                in_place=True,
             )
         )
+
 
 class NotNormalize(BaseNormalize):
     def __init__(self):
@@ -241,7 +251,6 @@ class NotNormalize(BaseNormalize):
         self.unnorm = lambda x: x
 
 
-
 class PositiveNotNormalize(BaseNormalize):
     def __init__(self):
         super(PositiveNotNormalize, self).__init__()
@@ -251,9 +260,11 @@ class PositiveNotNormalize(BaseNormalize):
 
         # get normalize and unnormalize functions
         def norm(g):
-            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-                for key in g.nodes[term].data.keys(): # loop through parameters
-                    if not key.endswith('ref'): # pass non-parameters
+            for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+                for key in g.nodes[
+                    term
+                ].data.keys():  # loop through parameters
+                    if not key.endswith("ref"):  # pass non-parameters
                         continue
 
                     g.nodes[term].data[key] = g.nodes[term].data[key].log()
@@ -261,19 +272,19 @@ class PositiveNotNormalize(BaseNormalize):
             return g
 
         def unnorm(g):
-            for term in ['n1', 'n2', 'n3', 'n4']: # loop through terms
-                for key in g.nodes[term].data.keys(): # loop through parameters
-                    if not key + '_ref' in g.nodes[term].data:
+            for term in ["n1", "n2", "n3", "n4"]:  # loop through terms
+                for key in g.nodes[
+                    term
+                ].data.keys():  # loop through parameters
+                    if not key + "_ref" in g.nodes[term].data:
                         continue
 
-                    g.nodes[term].data[key]\
-                        = torch.exp(
-                            g.nodes[term].data[key])
+                    g.nodes[term].data[key] = torch.exp(
+                        g.nodes[term].data[key]
+                    )
 
             return g
 
         # point normalize and unnormalize functions to `self`
         self.norm = norm
         self.unnorm = unnorm
-
-

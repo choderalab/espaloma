@@ -22,10 +22,10 @@ class JanossyPooling(torch.nn.Module):
         config,
         in_features,
         out_features={
-            1: ['sigma', 'epsilon', 'q'],
-            2: ['k', 'eq'],
-            3: ['k', 'eq'],
-            4: ['k', 'eq']
+            1: ["sigma", "epsilon", "q"],
+            2: ["k", "eq"],
+            3: ["k", "eq"],
+            4: ["k", "eq"],
         },
         out_features_dimensions=-1,
         pool=torch.add,
@@ -37,10 +37,8 @@ class JanossyPooling(torch.nn.Module):
         for level in out_features.keys():
             if isinstance(out_features[level], list):
                 out_features[level] = dict(
-                    zip(
-                        out_features[level],
-                        [1 for _ in out_features[level]]
-                    ))
+                    zip(out_features[level], [1 for _ in out_features[level]])
+                )
 
         # bookkeeping
         self.out_features = out_features
@@ -68,27 +66,19 @@ class JanossyPooling(torch.nn.Module):
                 setattr(
                     self,
                     "f_out_%s_to_%s" % (level, feature),
-                    torch.nn.Linear(
-                        mid_features,
-                        dimension,
-                    ),
+                    torch.nn.Linear(mid_features, dimension,),
                 )
 
         # atom level
         self.sequential_1 = esp.nn.sequential._Sequential(
-            in_features=in_features,
-            config=config,
-            layer=torch.nn.Linear
+            in_features=in_features, config=config, layer=torch.nn.Linear
         )
 
         for feature, dimension in self.out_features[1].items():
             setattr(
                 self,
                 "f_out_1_to_%s" % feature,
-                torch.nn.Linear(
-                    mid_features,
-                    dimension,
-                )
+                torch.nn.Linear(mid_features, dimension,),
             )
 
     def forward(self, g):
@@ -121,7 +111,9 @@ class JanossyPooling(torch.nn.Module):
 
             g.apply_nodes(
                 func=lambda nodes: {
-                    feature: getattr(self, "f_out_%s_to_%s" % (big_idx, feature))(
+                    feature: getattr(
+                        self, "f_out_%s_to_%s" % (big_idx, feature)
+                    )(
                         getattr(self, "sequential_%s" % big_idx)(
                             g=None,
                             x=self.pool(
@@ -143,7 +135,8 @@ class JanossyPooling(torch.nn.Module):
                                 ),
                             ),
                         )
-                    ) for feature in self.out_features[big_idx].keys()
+                    )
+                    for feature in self.out_features[big_idx].keys()
                 },
                 ntype="n%s" % big_idx,
             )
@@ -151,15 +144,12 @@ class JanossyPooling(torch.nn.Module):
         # atom level
         g.apply_nodes(
             func=lambda nodes: {
-                feature: getattr(self, 'f_out_1_to_%s' % feature)(
-                    self.sequential_1(
-                        g=None,
-                        x=nodes.data['h']
-                    )
-                ) for feature in self.out_features[1].keys()
+                feature: getattr(self, "f_out_1_to_%s" % feature)(
+                    self.sequential_1(g=None, x=nodes.data["h"])
+                )
+                for feature in self.out_features[1].keys()
             },
-            ntype="n1"
+            ntype="n1",
         )
-
 
         return g

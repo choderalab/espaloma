@@ -42,11 +42,7 @@ def curve(results_dict):
 
             # get all the recorded indices
             idxs = list(
-                [
-                    key
-                    for key in results[metric].keys()
-                    if isinstance(key, int)
-                ]
+                [key for key in results[metric].keys() if isinstance(key, int)]
             )
 
             curve_dict[(metric, ds_name)] = np.array(
@@ -84,11 +80,7 @@ def visual(results_dict):
 
             # get all the recorded indices
             idxs = list(
-                [
-                    key
-                    for key in results[metric].keys()
-                    if isinstance(key, int)
-                ]
+                [key for key in results[metric].keys() if isinstance(key, int)]
             )
 
             # sort it ascending

@@ -46,10 +46,10 @@ def run(args):
         in_features=units,
         config=args.janossy_config,
         out_features={
-            1: {'nn_typing': 100},
-            2: {'nn_typing': 100},
-            3: {'nn_typing': 100}
-        }
+            1: {"nn_typing": 100},
+            2: {"nn_typing": 100},
+            3: {"nn_typing": 100},
+        },
     )
 
     net = torch.nn.Sequential(representation, readout)
@@ -57,18 +57,20 @@ def run(args):
     metrics_tr = [
         esp.metrics.GraphMetric(
             base_metric=torch.nn.CrossEntropyLoss(),
-            between=['nn_typing', 'legacy_typing'],
+            between=["nn_typing", "legacy_typing"],
             level=term,
-        ) for term in ['n1', 'n2', 'n3']
+        )
+        for term in ["n1", "n2", "n3"]
     ]
 
     metrics_te = [
         esp.metrics.GraphMetric(
             base_metric=esp.metrics.accuracy,
-            between=['nn_typing', 'legacy_typing'],
-            level=term
-        )  for term in ['n1', 'n2', 'n3']
-        ]
+            between=["nn_typing", "legacy_typing"],
+            level=term,
+        )
+        for term in ["n1", "n2", "n3"]
+    ]
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,

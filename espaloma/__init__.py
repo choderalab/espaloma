@@ -16,6 +16,7 @@ from espaloma.mm.geometry import *
 # Add imports here
 # import espaloma
 from . import metrics, units
+
 # Handle versioneer
 from ._version import get_versions
 
@@ -25,13 +26,6 @@ from ._version import get_versions
 # toolkit_precedence = [ RDKitToolkitWrapper ] # , OpenEyeToolkitWrapper, AmberToolsToolkitWrapper]
 # [ toolkit_registry.register_toolkit(toolkit) for toolkit in toolkit_precedence if toolkit.is_available() ]
 #
-
-
-
-
-
-
-
 
 
 versions = get_versions()

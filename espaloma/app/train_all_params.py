@@ -44,11 +44,9 @@ def run(args):
     units = [x for x in args.config if isinstance(x, int)][-1]
 
     readout = esp.nn.readout.janossy.JanossyPooling(
-        in_features=units, config=args.janossy_config,
-        out_features={
-            2: ['k', 'eq'],
-            3: ['k', 'eq'],
-        }
+        in_features=units,
+        config=args.janossy_config,
+        out_features={2: ["k", "eq"], 3: ["k", "eq"],},
     )
 
     net = torch.nn.Sequential(representation, readout)
@@ -56,21 +54,22 @@ def run(args):
     metrics_tr = [
         esp.metrics.GraphMetric(
             base_metric=torch.nn.L1Loss(),
-            between=[param, param + '_ref'],
-            level=term
-        ) for param in ['k', 'eq'] for term in ['n2', 'n3']
+            between=[param, param + "_ref"],
+            level=term,
+        )
+        for param in ["k", "eq"]
+        for term in ["n2", "n3"]
     ]
 
     metrics_te = [
         esp.metrics.GraphMetric(
             base_metric=base_metric,
-            between=[param, param + '_ref'],
-            level=term
-        ) for param in ['k', 'eq'] for term in ['n2', 'n3']
-        for base_metric in [
-            esp.metrics.rmse,
-            esp.metrics.r2
-        ]
+            between=[param, param + "_ref"],
+            level=term,
+        )
+        for param in ["k", "eq"]
+        for term in ["n2", "n3"]
+        for base_metric in [esp.metrics.rmse, esp.metrics.r2]
     ]
 
     exp = esp.TrainAndTest(
@@ -87,6 +86,7 @@ def run(args):
     print(esp.app.report.markdown(results))
 
     import os
+
     os.mkdir(args.out)
 
     with open(args.out + "/architecture.txt", "w") as f_handle:
@@ -101,6 +101,7 @@ def run(args):
         np.save(args.out + "/" + "_".join(spec) + ".npy", curve)
 
     import pickle
+
     with open(args.out + "/ref_g_test.th", "wb") as f_handle:
         pickle.dump(exp.ref_g_test, f_handle)
 

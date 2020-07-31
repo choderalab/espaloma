@@ -3,6 +3,7 @@
 # =============================================================================
 import dgl
 import torch
+
 # =============================================================================
 # CONSTANTS
 # =============================================================================
@@ -24,40 +25,53 @@ import espaloma as esp
 # =============================================================================
 # UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED
 # =============================================================================
-def geometric_mean(msg='m', out='epsilon'):
+def geometric_mean(msg="m", out="epsilon"):
     def _geometric_mean(nodes):
         return {out: torch.prod(nodes.mailbox[msg], dim=1).pow(0.5)}
+
     return _geometric_mean
 
-def arithmetic_mean(msg='m', out='sigma'):
+
+def arithmetic_mean(msg="m", out="sigma"):
     def _arithmetic_mean(nodes):
         return {out: torch.sum(nodes.mailbox[msg], dim=1).mul(0.5)}
+
     return _arithmetic_mean
+
 
 # =============================================================================
 # COMBINATION RULES FOR NONBONDED
 # =============================================================================
 
-def lorentz_berthelot(g, suffix=''):
+
+def lorentz_berthelot(g, suffix=""):
 
     g.multi_update_all(
         {
-            'n1_as_%s_in_%s' % (pos_idx, term): (
-                dgl.function.copy_src(src='epsilon%s' % suffix, out='m_epsilon'),
-                geometric_mean(msg='m_epsilon', out='epsilon%s' % suffix)
-            ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
+            "n1_as_%s_in_%s"
+            % (pos_idx, term): (
+                dgl.function.copy_src(
+                    src="epsilon%s" % suffix, out="m_epsilon"
+                ),
+                geometric_mean(msg="m_epsilon", out="epsilon%s" % suffix),
+            )
+            for pos_idx in [0, 1]
+            for term in ["nonbonded", "onefour"]
         },
-        cross_reducer='sum'
+        cross_reducer="sum",
     )
 
     g.multi_update_all(
         {
-            'n1_as_%s_in_%s' % (pos_idx, term): (
-                dgl.function.copy_src(src='sigma%s' % suffix, out='m_sigma'),
-                arithmetic_mean(msg='m_sigma', out='sigma%s' % suffix)
-            ) for pos_idx in [0, 1] for term in ['nonbonded', 'onefour']
+            "n1_as_%s_in_%s"
+            % (pos_idx, term): (
+                dgl.function.copy_src(src="sigma%s" % suffix, out="m_sigma"),
+                arithmetic_mean(msg="m_sigma", out="sigma%s" % suffix),
+            )
+            for pos_idx in [0, 1]
+            for term in ["nonbonded", "onefour"]
         },
-        cross_reducer='sum'
+        cross_reducer="sum",
     )
 
     return g
@@ -85,6 +99,7 @@ def lj_12_6(x, sigma, epsilon):
     """
 
     return esp.mm.functional.lj(x=x, sigma=sigma, epsilon=epsilon)
+
 
 #
 # def columb(x, q_prod, k_e=K_E):

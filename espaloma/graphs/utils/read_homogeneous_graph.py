@@ -132,8 +132,9 @@ def from_openforcefield_mol(mol, use_fp=True):
         torch.squeeze(g.ndata["type"]).long(),
     ] = 1.0
 
-    h_v_fp = torch.stack([
-        fp_rdkit(atom) for atom in mol.to_rdkit().GetAtoms()], axis=0)
+    h_v_fp = torch.stack(
+        [fp_rdkit(atom) for atom in mol.to_rdkit().GetAtoms()], axis=0
+    )
 
     if use_fp == True:
         h_v = torch.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
@@ -153,6 +154,7 @@ def from_openforcefield_mol(mol, use_fp=True):
     # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
 
     return g
+
 
 def from_oemol(mol, use_fp=True):
     from openeye import oechem
