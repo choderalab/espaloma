@@ -2,8 +2,9 @@ import pytest
 
 
 def test_small_net():
-    import espaloma as esp
     import torch
+
+    import espaloma as esp
 
     # define a layer
     layer = esp.nn.layers.dgl_legacy.gn('GraphConv')

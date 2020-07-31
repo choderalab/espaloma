@@ -1,15 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import dgl
-import espaloma as esp
-
-
+import torch
 # =============================================================================
 # CONSTANTS
 # =============================================================================
 from simtk import unit
+
+import espaloma as esp
 
 # CODATA 2018
 # ref https://en.wikipedia.org/wiki/Coulomb_constant

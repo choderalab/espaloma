@@ -1,6 +1,7 @@
 import pytest
 import torch
 
+
 def test_init():
     import espaloma.data.md
 

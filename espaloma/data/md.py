@@ -1,12 +1,12 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import numpy as np
-from simtk import openmm
-from simtk import unit
-from simtk.openmm.app import Simulation
+import torch
 from openforcefield.typing.engines.smirnoff import ForceField
+from simtk import openmm, unit
+from simtk.openmm.app import Simulation
+
 from espaloma.units import *
 
 # =============================================================================

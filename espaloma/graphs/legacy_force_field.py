@@ -1,13 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma as esp
-import torch
 import abc
-from openforcefield.topology import Molecule
-from openforcefield.topology import Topology
-from openforcefield.typing.engines.smirnoff import ForceField
+
 import rdkit
+import torch
+from openforcefield.topology import Molecule, Topology
+from openforcefield.typing.engines.smirnoff import ForceField
+
+import espaloma as esp
 
 # =============================================================================
 # CONSTANTS
@@ -75,8 +76,9 @@ class LegacyForceField:
 
     def _prepare_gaff(self):
         import os
-        import openmmforcefields
         import xml.etree.ElementTree as ET
+
+        import openmmforcefields
 
         # get the openforcefields path
         openmmforcefields_path = os.path.dirname(openmmforcefields.__file__)
@@ -128,9 +130,9 @@ class LegacyForceField:
         )
 
         # create temporary directory for running antechamber
-        import tempfile
         import os
         import shutil
+        import tempfile
 
         tempdir = tempfile.mkdtemp()
         prefix = "molecule"

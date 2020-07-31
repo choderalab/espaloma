@@ -1,11 +1,12 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
-import numpy as np
 import matplotlib
-from matplotlib import pyplot as plt
+import numpy as np
 import pandas as pd
+import torch
+from matplotlib import pyplot as plt
+
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -107,8 +108,8 @@ def visual(results_dict):
 
 
 def visual_multiple(results_dicts):
-    from matplotlib import pyplot as plt
     from matplotlib import cm as cm
+    from matplotlib import pyplot as plt
 
     plt.rc("font", size=14)
     plt.rc("lines", linewidth=4)
@@ -172,8 +173,8 @@ def visual_multiple(results_dicts):
 
 def visual_base64(results_dict):
     fig = visual(results_dict)
-    import io
     import base64
+    import io
 
     img = io.BytesIO()
     fig.savefig(img, format="png", dpi=50)

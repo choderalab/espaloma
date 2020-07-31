@@ -3,9 +3,21 @@ espaloma
 Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm
 """
 
+import espaloma.app
+import espaloma.data
+import espaloma.graphs
+import espaloma.mm
+import espaloma.nn
+from espaloma.app.experiment import *
+from espaloma.graphs.graph import Graph
+from espaloma.metrics import GraphMetric
+from espaloma.mm.geometry import *
+
 # Add imports here
 # import espaloma
-from . import units, metrics
+from . import metrics, units
+# Handle versioneer
+from ._version import get_versions
 
 #
 # from openforcefield.utils.toolkits import ToolkitRegistry, OpenEyeToolkitWrapper, RDKitToolkitWrapper, AmberToolsToolkitWrapper
@@ -15,23 +27,12 @@ from . import units, metrics
 #
 
 
-from espaloma.graphs.graph import Graph
-from espaloma.metrics import GraphMetric
-
-import espaloma.data
-import espaloma.nn
-import espaloma.graphs
-import espaloma.mm
-import espaloma.app
 
 
 
-from espaloma.mm.geometry import *
 
-from espaloma.app.experiment import *
 
-# Handle versioneer
-from ._version import get_versions
+
 
 versions = get_versions()
 __version__ = versions["version"]

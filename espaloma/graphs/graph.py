@@ -1,10 +1,13 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma as esp
 import abc
-import openforcefield
+
 import dgl
+import openforcefield
+
+import espaloma as esp
+
 
 # =============================================================================
 # MODULE CLASSES

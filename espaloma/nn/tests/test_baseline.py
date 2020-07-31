@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.fixture
 def baseline():
     import espaloma as esp

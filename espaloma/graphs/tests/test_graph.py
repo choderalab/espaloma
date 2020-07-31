@@ -23,6 +23,7 @@ def test_ndata_consistency(graph):
 
 def test_save_and_load(graph):
     import tempfile
+
     import espaloma as esp
 
     with tempfile.TemporaryDirectory() as tempdir:

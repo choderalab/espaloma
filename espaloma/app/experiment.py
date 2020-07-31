@@ -1,11 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma as esp
 import abc
-import torch
 import copy
+
 import dgl
+import torch
+
+import espaloma as esp
+
 
 # =============================================================================
 # MODULE CLASSES
@@ -99,7 +102,7 @@ class Train(Experiment):
                 loss = self.loss(g)
                 loss.backward()
                 return loss
-            
+
             self.optimizer.step(closure)
 
     def train(self):

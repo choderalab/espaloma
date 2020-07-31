@@ -1,5 +1,5 @@
-import pytest
 import numpy.testing as npt
+import pytest
 
 
 def test_import():

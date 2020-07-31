@@ -1,12 +1,12 @@
-import pytest
-import espaloma as esp
-from simtk import openmm
-from simtk import unit
-import torch
 import numpy as np
+import numpy.testing as npt
+import pytest
+import torch
+from simtk import openmm, unit
+
+import espaloma as esp
 from espaloma.units import *
 
-import numpy.testing as npt
 
 @pytest.mark.parametrize(
     "g",

@@ -2,8 +2,8 @@
 import dgl
 import numpy as np
 import torch
-import espaloma as esp
 
+import espaloma as esp
 
 # In[74]:
 
@@ -25,6 +25,7 @@ forcefield.parametrize(g)
 
 
 from espaloma.data.md import MoleculeVacuumSimulation
+
 simulation = MoleculeVacuumSimulation(
     n_samples=100,
     n_steps_per_sample=10,
@@ -147,6 +148,7 @@ plt.plot(eqs, label='eq')
 
 
 from matplotlib import pyplot as plt
+
 plt.scatter(
     g.nodes['n2'].data['u_ref'].detach(),
     g.nodes['n2'].data['u'].detach()
