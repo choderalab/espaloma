@@ -1,11 +1,8 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import matplotlib
 import numpy as np
 import pandas as pd
-import torch
-from matplotlib import pyplot as plt
 
 
 # =============================================================================
@@ -15,7 +12,6 @@ def dataframe(results_dict):
     # get all the results
     metrics = list(list(results_dict.values())[0].keys())
     ds_names = list(results_dict.keys())
-    n_metrics = len(metrics)
     df = pd.DataFrame(
         [
             [value["final"].round(4) for metric, value in results.items()]
@@ -32,7 +28,6 @@ def curve(results_dict):
 
     # get all the results
     metrics = list(list(results_dict.values())[0].keys())
-    n_metrics = len(metrics)
 
     # loop through metrics
     for idx_metric, metric in enumerate(metrics):

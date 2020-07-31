@@ -1,13 +1,9 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import abc
-
 import rdkit
 import torch
-from openforcefield.topology import Molecule, Topology
-from openforcefield.typing.engines.smirnoff import ForceField
-
+from openforcefield.topology import Molecule
 import espaloma as esp
 
 # =============================================================================

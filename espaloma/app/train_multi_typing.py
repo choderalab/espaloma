@@ -2,9 +2,6 @@
 # IMPORTS
 # =============================================================================
 import argparse
-import os
-
-import numpy as np
 import torch
 
 import espaloma as esp
