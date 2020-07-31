@@ -1,9 +1,9 @@
 import espaloma
 import espaloma.mm
-import espaloma.mm.geometry
-import espaloma.mm.energy
-import espaloma.mm.bond
 import espaloma.mm.angle
-import espaloma.mm.torsion
+import espaloma.mm.bond
+import espaloma.mm.energy
 import espaloma.mm.functional
+import espaloma.mm.geometry
 import espaloma.mm.nonbonded
+import espaloma.mm.torsion

@@ -1,11 +1,13 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import pandas as pd
-import numpy as np
-import torch
-import dgl
 import random
+
+import dgl
+import numpy as np
+import pandas as pd
+import torch
+
 import espaloma as esp
 
 # =============================================================================

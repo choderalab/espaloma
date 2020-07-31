@@ -1,7 +1,7 @@
-import pytest
-import torch
 import numpy as np
 import numpy.testing as npt
+import pytest
+import torch
 
 
 def test_distance():

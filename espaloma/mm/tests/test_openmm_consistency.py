@@ -1,16 +1,15 @@
-import pytest
-import espaloma as esp
-from simtk import openmm
-from simtk import unit
-import torch
 import numpy as np
+import numpy.testing as npt
+import pytest
+import torch
+from simtk import openmm, unit
+
+import espaloma as esp
 from espaloma.units import *
 
-import numpy.testing as npt
 
 @pytest.mark.parametrize(
-    "g",
-    esp.data.esol(first=2),
+    "g", esp.data.esol(first=2),
 )
 def test_energy_angle_and_bond(g):
 
@@ -33,7 +32,7 @@ def test_energy_angle_and_bond(g):
 
         name = force.__class__.__name__
 
-        if 'Nonbonded' in name:
+        if "Nonbonded" in name:
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
 
             # epsilons = {}
@@ -48,10 +47,8 @@ def test_energy_angle_and_bond(g):
 
             #     force.setParticleParameters(_idx, 0., sigma, epsilon)
 
-
             # def sigma_combining_rule(sig1, sig2):
             #     return (sig1 + sig2) / 2
-
 
             # def eps_combining_rule(eps1, eps2):
             #     return np.sqrt(np.abs(eps1 * eps2))
@@ -72,14 +69,11 @@ def test_energy_angle_and_bond(g):
 
     # create new simulation
     _simulation = openmm.app.Simulation(
-        simulation.topology,
-        system,
-        openmm.VerletIntegrator(0.0),
+        simulation.topology, system, openmm.VerletIntegrator(0.0),
     )
 
     _simulation.context.setPositions(
-        simulation.context.getState(getPositions=True)
-            .getPositions()
+        simulation.context.getState(getPositions=True).getPositions()
     )
 
     for idx, force in enumerate(forces):
@@ -87,9 +81,7 @@ def test_energy_angle_and_bond(g):
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
-            getEnergy=True,
-            getParameters=True,
-            groups=2**idx,
+            getEnergy=True, getParameters=True, groups=2 ** idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(ENERGY_UNIT)
@@ -102,21 +94,22 @@ def test_energy_angle_and_bond(g):
 
     # n2 : bond, n3: angle, n1: nonbonded?
     # n1 : sigma (k), epsilon (eq), and charge (not included yet)
-    for term in ['n2', 'n3']:
-        g.nodes[term].data['k'] = g.nodes[term].data['k_ref']
-        g.nodes[term].data['eq'] = g.nodes[term].data['eq_ref']
+    for term in ["n2", "n3"]:
+        g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
+        g.nodes[term].data["eq"] = g.nodes[term].data["eq_ref"]
 
-    for term in ['n1']:
-        g.nodes[term].data['sigma'] = g.nodes[term].data['sigma_ref']
-        g.nodes[term].data['epsilon'] = g.nodes[term].data['epsilon_ref']
+    for term in ["n1"]:
+        g.nodes[term].data["sigma"] = g.nodes[term].data["sigma_ref"]
+        g.nodes[term].data["epsilon"] = g.nodes[term].data["epsilon_ref"]
         # g.nodes[term].data['q'] = g.nodes[term].data['q_ref']
 
     # for each atom, store n_snapshots x 3
-    g.nodes['n1'].data['xyz'] = torch.tensor(
+    g.nodes["n1"].data["xyz"] = torch.tensor(
         simulation.context.getState(getPositions=True)
-            .getPositions(asNumpy=True)
-            .value_in_unit(DISTANCE_UNIT),
-            dtype=torch.float32)[None, :, :].permute(1, 0, 2)
+        .getPositions(asNumpy=True)
+        .value_in_unit(DISTANCE_UNIT),
+        dtype=torch.float32,
+    )[None, :, :].permute(1, 0, 2)
 
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
@@ -124,21 +117,19 @@ def test_energy_angle_and_bond(g):
     # writes into nodes
     # .data['u_nonbonded'], .data['u_onefour'], .data['u2'], .data['u3'],
 
-
     # test bonds
     npt.assert_almost_equal(
-        g.nodes['g'].data['u_n2'].numpy(),
-        energies['HarmonicBondForce'],
+        g.nodes["g"].data["u_n2"].numpy(),
+        energies["HarmonicBondForce"],
         decimal=3,
     )
 
     # test angles
     npt.assert_almost_equal(
-        g.nodes['g'].data['u_n3'].numpy(),
-        energies['HarmonicAngleForce'],
+        g.nodes["g"].data["u_n3"].numpy(),
+        energies["HarmonicAngleForce"],
         decimal=3,
     )
-
 
     # TODO:
     # This is not working now, matching OpenMM nonbonded.

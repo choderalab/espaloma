@@ -1,5 +1,7 @@
-import espaloma as esp
 import torch
+
+import espaloma as esp
+
 
 def run():
     # grab dataset

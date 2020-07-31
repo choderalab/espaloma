@@ -1,11 +1,13 @@
 """ Metrics to evaluate and train models.
 
 """
+import abc
+
 # =============================================================================
 # IMPORTS
 # =============================================================================
 import torch
-import abc
+
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -13,15 +15,19 @@ import abc
 def mse(input, target):
     return torch.nn.functional.mse_loss(target, input)
 
+
 def rmse(input, target):
     return torch.sqrt(torch.nn.functional.mse_loss(target, input))
+
 
 def mae_of_log(input, target):
     return torch.nn.L1Loss()(torch.log(input), torch.log(target))
 
+
 def cross_entropy(input, target, reduction="mean"):
     loss_fn = torch.nn.CrossEntropyLoss(reduction=reduction)
     return loss_fn(input=input, target=target)  # prediction first, logit
+
 
 def r2(target, input):
     target = target.flatten()
@@ -29,6 +35,7 @@ def r2(target, input):
     ss_tot = (target - target.mean()).pow(2).sum()
     ss_res = (input - target).pow(2).sum()
     return 1 - torch.div(ss_res, ss_tot)
+
 
 def accuracy(input, target):
     # check if this is logit
@@ -73,7 +80,7 @@ class GraphMetric(Metric):
         self.base_metric = base_metric
 
         # get name
-        if hasattr(base_metric, '__name__'):
+        if hasattr(base_metric, "__name__"):
             base_name = base_metric.__name__
         else:
             base_name = base_metric.__class__.__name__
@@ -82,7 +89,7 @@ class GraphMetric(Metric):
             base_name,
             between[0],
             between[1],
-            level
+            level,
         )
 
     @staticmethod
@@ -114,13 +121,15 @@ class GraphDerivativeMetric(Metric):
     """
 
     def __init__(
-            self, 
-            base_metric, 
-            between, 
-            level="n1", 
-            d="xyz",
-            d_level="n1",
-            *args, **kwargs):
+        self,
+        base_metric,
+        between,
+        level="n1",
+        d="xyz",
+        d_level="n1",
+        *args,
+        **kwargs
+    ):
         super(GraphDerivativeMetric, self).__init__(*args, **kwargs)
 
         # between could be tuple of two strings or two functions
@@ -136,7 +145,7 @@ class GraphDerivativeMetric(Metric):
         self.base_metric = base_metric
 
         # get name
-        if hasattr(base_metric, '__name__'):
+        if hasattr(base_metric, "__name__"):
             base_name = base_metric.__name__
         else:
             base_name = base_metric.__class__.__name__
@@ -147,7 +156,7 @@ class GraphDerivativeMetric(Metric):
             d,
             between[1],
             d,
-            level
+            level,
         )
 
     @staticmethod
@@ -183,9 +192,7 @@ class GraphDerivativeMetric(Metric):
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
-        return self.base_metric(
-            input=input_prime, target=target_prime,
-        )
+        return self.base_metric(input=input_prime, target=target_prime,)
 
 
 # =============================================================================

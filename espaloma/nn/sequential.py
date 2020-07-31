@@ -1,7 +1,7 @@
 """ Chain mutiple layers of GN together.
 """
-import torch
 import dgl
+import torch
 
 
 class _Sequential(torch.nn.Module):

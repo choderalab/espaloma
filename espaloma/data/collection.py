@@ -2,17 +2,15 @@
 # IMPORTS
 # =============================================================================
 import espaloma as esp
-import abc
-import torch
-from espaloma.data.dataset import GraphDataset
+
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 def esol(*args, **kwargs):
-    import pandas as pd
     import os
-    from openforcefield.topology import Molecule
+
+    import pandas as pd
 
     path = os.path.dirname(esp.__file__) + "/data/esol.csv"
     df = pd.read_csv(path)
@@ -21,10 +19,9 @@ def esol(*args, **kwargs):
 
 
 def alkethoh(*args, **kwargs):
-    import pandas as pd
     import os
 
-    from openforcefield.topology import Molecule
+    import pandas as pd
 
     path = os.path.dirname(esp.__file__) + "/data/alkethoh.smi"
     df = pd.read_csv(path)

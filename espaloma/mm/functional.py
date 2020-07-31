@@ -3,6 +3,7 @@
 # =============================================================================
 import torch
 
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
@@ -23,7 +24,9 @@ def harmonic(x, k, eq, order=[2]):
     if isinstance(order, list):
         order = torch.tensor(order)
 
-    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
+    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
+        dim=-1
+    )
 
 
 # simple implementation
@@ -38,6 +41,7 @@ def harmonic(x, k, eq, order=[2]):
 #     c = ((ka * a + kb * b) / (ka + kb)) ** 2 - a ** 2 - b ** 2
 #
 #     return ka * (x - a) ** 2 + kb * (x - b) ** 2
+
 
 def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):
     r""" Lennard-Jones term.

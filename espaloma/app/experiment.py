@@ -1,11 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma as esp
 import abc
-import torch
 import copy
+
 import dgl
+import torch
+
+import espaloma as esp
+
 
 # =============================================================================
 # MODULE CLASSES
@@ -59,7 +62,7 @@ class Train(Experiment):
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
         record_interval=1,
-        normalize=esp.data.normalize.ESOL100LogNormalNormalize
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
     ):
         super(Train, self).__init__()
 
@@ -99,7 +102,7 @@ class Train(Experiment):
                 loss = self.loss(g)
                 loss.backward()
                 return loss
-            
+
             self.optimizer.step(closure)
 
     def train(self):
@@ -179,12 +182,12 @@ class Test(Experiment):
                 for metric in self.metrics:
 
                     # loop through the metrics
-                    results[metric.__name__][state_name] = metric(
-                            g_input=self.normalize.unnorm(
-                                    self.net(g)
-                                )
-                            ).detach().cpu().numpy()
-
+                    results[metric.__name__][state_name] = (
+                        metric(g_input=self.normalize.unnorm(self.net(g)))
+                        .detach()
+                        .cpu()
+                        .numpy()
+                    )
 
         self.ref_g = self.normalize.unnorm(self.net(g))
 
@@ -217,7 +220,7 @@ class TrainAndTest(Experiment):
         self.n_epochs = n_epochs
         self.metrics_tr = metrics_tr
         self.metrics_te = metrics_te
-        self.normalize=normalize
+        self.normalize = normalize
 
     def __str__(self):
         _str = ""
@@ -265,7 +268,6 @@ class TrainAndTest(Experiment):
             normalize=self.normalize,
         )
 
-
         test.test()
 
         self.ref_g_test = test.ref_g
@@ -277,9 +279,8 @@ class TrainAndTest(Experiment):
             data=self.ds_tr,
             metrics=self.metrics_te,
             states=self.states,
-            normalize=self.normalize
+            normalize=self.normalize,
         )
-
 
         test.test()
         self.ref_g_training = test.ref_g
