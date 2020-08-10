@@ -2,7 +2,9 @@
 # IMPORTS
 # =============================================================================
 import torch
+
 from espaloma.nn.readout.base_readout import BaseReadout
+
 
 # =============================================================================
 # MODULE CLASSES

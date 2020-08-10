@@ -1,12 +1,12 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import numpy as np
-from simtk import openmm
-from simtk import unit
-from simtk.openmm.app import Simulation
+import torch
 from openforcefield.typing.engines.smirnoff import ForceField
+from simtk import openmm, unit
+from simtk.openmm.app import Simulation
+
 from espaloma.units import *
 
 # =============================================================================
@@ -53,7 +53,7 @@ class MoleculeVacuumSimulation(object):
 
     def __init__(
         self,
-        forcefield='test_forcefields/smirnoff99Frosst.offxml',
+        forcefield="test_forcefields/smirnoff99Frosst.offxml",
         n_samples=100,
         n_steps_per_sample=1000,
         temperature=TEMPERATURE,
@@ -76,7 +76,7 @@ class MoleculeVacuumSimulation(object):
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # assign partial charge
-        g.mol.assign_partial_charges('gasteiger') # faster
+        g.mol.assign_partial_charges("gasteiger")  # faster
 
         # parameterize topology
         topology = g.mol.to_topology()
@@ -84,7 +84,6 @@ class MoleculeVacuumSimulation(object):
         # create openmm system
         system = self.forcefield.create_openmm_system(
             topology,
-
             # TODO:
             # figure out whether `sqm` should be so slow
             charge_from_molecules=[g.mol],
@@ -92,33 +91,25 @@ class MoleculeVacuumSimulation(object):
 
         # use langevin integrator
         integrator = openmm.LangevinIntegrator(
-            self.temperature,
-            self.collision_rate,
-            self.step_size
+            self.temperature, self.collision_rate, self.step_size
         )
 
         # initialize simulation
         simulation = Simulation(
-            topology=topology,
-            system=system,
-            integrator=integrator
+            topology=topology, system=system, integrator=integrator
         )
 
         # get conformer
         g.mol.generate_conformers()
 
         # put conformer in simulation
-        simulation.context.setPositions(
-            g.mol.conformers[0]
-        )
+        simulation.context.setPositions(g.mol.conformers[0])
 
         # minimize energy
         simulation.minimizeEnergy()
 
         # set velocities
-        simulation.context.setVelocitiesToTemperature(
-            self.temperature
-        )
+        simulation.context.setVelocitiesToTemperature(self.temperature)
 
         return simulation
 
@@ -169,12 +160,10 @@ class MoleculeVacuumSimulation(object):
         samples = torch.tensor(samples, dtype=torch.float32)
 
         if in_place is True:
-            g.heterograph.nodes['n1'].data['xyz'] = samples.permute(
-                1, 0, 2
-            )
+            g.heterograph.nodes["n1"].data["xyz"] = samples.permute(1, 0, 2)
 
             # require gradient for force matching
-            g.heterograph.nodes['n1'].data['xyz'].requires_grad = True
+            g.heterograph.nodes["n1"].data["xyz"].requires_grad = True
 
             return g
 

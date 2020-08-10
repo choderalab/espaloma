@@ -5,8 +5,9 @@
 # IMPORTS
 # =============================================================================
 import dgl
-import torch
 import numpy as np
+import torch
+
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -191,84 +192,40 @@ def from_homogeneous(g):
     # make dense
     a_ = a.to_dense().detach().numpy()
 
-    idxs['nonbonded'] = np.stack(
+    idxs["nonbonded"] = np.stack(
         np.where(
-            np.equal(
-                a_ + a_ @ a_ + a_ @ a_ @ a_ + a_ @ a_ @ a_ @ a_,
-                0.0
-            )
+            np.equal(a_ + a_ @ a_ + a_ @ a_ @ a_ + a_ @ a_ @ a_ @ a_, 0.0)
         ),
-        axis=-1)
+        axis=-1,
+    )
 
     # onefour is the two ends of torsion
-    idxs['onefour'] = np.stack(
-        [
-            idxs['n4'][:, 0],
-            idxs['n4'][:, 3],
-        ],
-        axis=1)
+    idxs["onefour"] = np.stack([idxs["n4"][:, 0], idxs["n4"][:, 3],], axis=1)
 
     # membership
-    for term in ['nonbonded', 'onefour']:
+    for term in ["nonbonded", "onefour"]:
         for pos_idx in [0, 1]:
-            hg[
-                (
-                    term,
-                    "%s_has_%s_n1" % (term, pos_idx),
-                    "n1"
-                )] = np.stack(
-                        [
-                            np.arange(idxs[term].shape[0]),
-                            idxs[term][:, pos_idx]
-                        ],
-                        axis=-1
-                    )
+            hg[(term, "%s_has_%s_n1" % (term, pos_idx), "n1")] = np.stack(
+                [np.arange(idxs[term].shape[0]), idxs[term][:, pos_idx]],
+                axis=-1,
+            )
 
-
-            hg[
-                (
-                    "n1",
-                    "n1_as_%s_in_%s" % (pos_idx, term),
-                    term
-                )] = np.stack(
-                        [
-                            idxs[term][:, pos_idx],
-                            np.arange(idxs[term].shape[0]),
-                        ],
-                        axis=-1
-                    )
-
+            hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
+                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                axis=-1,
+            )
 
     # ======================================
     # relationships between nodes and graphs
     # ======================================
     for term in ["n1", "n2", "n3", "n4", "nonbonded", "onefour"]:
-        hg[
-            (
-                term,
-                "%s_in_g" % term,
-                "g",
-            )] = np.stack(
-                [
-                    np.arange(len(idxs[term])),
-                    np.zeros(len(idxs[term]))
-                ],
-                axis=1,
-            )
+        hg[(term, "%s_in_g" % term, "g",)] = np.stack(
+            [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
+        )
 
-        hg[
-            (
-                "g",
-                "g_has_%s" % term,
-                term
-            )] = np.stack(
-                [
-                    np.zeros(len(idxs[term])),
-                    np.arange(len(idxs[term])),
-                ],
-                axis=1,
-            )
-
+        hg[("g", "g_has_%s" % term, term)] = np.stack(
+            [np.zeros(len(idxs[term])), np.arange(len(idxs[term])),], axis=1,
+        )
 
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 

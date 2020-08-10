@@ -1,13 +1,10 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import espaloma as esp
-import torch
-import abc
-from openforcefield.topology import Molecule
-from openforcefield.topology import Topology
-from openforcefield.typing.engines.smirnoff import ForceField
 import rdkit
+import torch
+from openforcefield.topology import Molecule
+import espaloma as esp
 
 # =============================================================================
 # CONSTANTS
@@ -75,8 +72,9 @@ class LegacyForceField:
 
     def _prepare_gaff(self):
         import os
-        import openmmforcefields
         import xml.etree.ElementTree as ET
+
+        import openmmforcefields
 
         # get the openforcefields path
         openmmforcefields_path = os.path.dirname(openmmforcefields.__file__)
@@ -123,14 +121,12 @@ class LegacyForceField:
         # import template generator
         from openmmforcefields.generators import GAFFTemplateGenerator
 
-        gaff = GAFFTemplateGenerator(
-            molecules=mol, forcefield=self.forcefield
-        )
+        gaff = GAFFTemplateGenerator(molecules=mol, forcefield=self.forcefield)
 
         # create temporary directory for running antechamber
-        import tempfile
         import os
         import shutil
+        import tempfile
 
         tempdir = tempfile.mkdtemp()
         prefix = "molecule"
@@ -205,9 +201,7 @@ class LegacyForceField:
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].k.value_in_unit(
-                            esp.units.ANGLE_FORCE_CONSTANCE_UNIT
-                        )
+                        ].k.value_in_unit(esp.units.ANGLE_FORCE_CONSTANCE_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )[:, None]
@@ -233,8 +227,9 @@ class LegacyForceField:
             lambda node: {
                 "epsilon_ref": torch.Tensor(
                     [
-                        forces["vdW"][(idx,)].epsilon
-                            .value_in_unit(esp.units.ENERGY_UNIT)
+                        forces["vdW"][(idx,)].epsilon.value_in_unit(
+                            esp.units.ENERGY_UNIT
+                        )
                         for idx in range(g.heterograph.number_of_nodes("n1"))
                     ]
                 )[:, None]
@@ -246,8 +241,9 @@ class LegacyForceField:
             lambda node: {
                 "sigma_ref": torch.Tensor(
                     [
-                        forces["vdW"][(idx,)].rmin_half
-                            .value_in_unit(esp.units.DISTANCE_UNIT)
+                        forces["vdW"][(idx,)].rmin_half.value_in_unit(
+                            esp.units.DISTANCE_UNIT
+                        )
                         for idx in range(g.heterograph.number_of_nodes("n1"))
                     ]
                 )[:, None]
@@ -256,7 +252,6 @@ class LegacyForceField:
         )
 
         return g
-
 
     def _multi_typing_smirnoff(self, g):
         # mol = self._convert_to_off(mol)
@@ -267,9 +262,11 @@ class LegacyForceField:
             lambda node: {
                 "legacy_typing": torch.Tensor(
                     [
-                        int(forces["Bonds"][
-                            tuple(node.data["idxs"][idx].numpy())
-                        ].id[1:])
+                        int(
+                            forces["Bonds"][
+                                tuple(node.data["idxs"][idx].numpy())
+                            ].id[1:]
+                        )
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 ).long()
@@ -281,9 +278,11 @@ class LegacyForceField:
             lambda node: {
                 "legacy_typing": torch.Tensor(
                     [
-                        int(forces["Angles"][
-                            tuple(node.data["idxs"][idx].numpy())
-                        ].id[1:])
+                        int(
+                            forces["Angles"][
+                                tuple(node.data["idxs"][idx].numpy())
+                            ].id[1:]
+                        )
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 ).long()
@@ -295,8 +294,7 @@ class LegacyForceField:
             lambda node: {
                 "legacy_typing": torch.Tensor(
                     [
-                        int(forces["vdW"][(idx,)]
-                            .id[1:])
+                        int(forces["vdW"][(idx,)].id[1:])
                         for idx in range(g.heterograph.number_of_nodes("n1"))
                     ]
                 ).long()
@@ -305,7 +303,6 @@ class LegacyForceField:
         )
 
         return g
-
 
     def parametrize(self, g):
         """ Parametrize a molecular graph.

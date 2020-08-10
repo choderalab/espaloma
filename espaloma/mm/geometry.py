@@ -1,17 +1,30 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import dgl
+import torch
+
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
 def reduce_stack(msg, out):
     """ Copy massage and stack. """
+
     def _reduce_stack(nodes, msg=msg, out=out):
         return {out: nodes.mailbox[msg]}
+
     return _reduce_stack
+
+
+def copy_src(src, out):
+    """ Copy source of an edge. """
+
+    def _copy_src(edges, src=src, out=out):
+        return {out: edges.src[src].clone()}
+
+    return _copy_src
+
 
 # =============================================================================
 # SINGLE GEOMETRY ENTITY
@@ -19,6 +32,7 @@ def reduce_stack(msg, out):
 def distance(x0, x1):
     """ Distance. """
     return torch.norm(x0 - x1, p=2, dim=-1)
+
 
 def _angle(r0, r1):
     """ Angle between vectors. """
@@ -47,36 +61,32 @@ def dihedral(x0, x1, x2, x3):
     right = torch.cross(x2 - x1, x2 - x3)
     return _dihedral(left, right)
 
+
 # =============================================================================
 # GEOMETRY IN HYPERNODES
 # =============================================================================
 def apply_bond(nodes):
     """ Bond length in nodes. """
-    return {
-        'x': distance(
-            x0=nodes.data['xyz0'],
-            x1=nodes.data['xyz1']
-        )
-    }
+    return {"x": distance(x0=nodes.data["xyz0"], x1=nodes.data["xyz1"])}
+
 
 def apply_angle(nodes):
     """ Angle values in nodes. """
     return {
-        'x': angle(
-            x0=nodes.data['xyz0'],
-            x1=nodes.data['xyz1'],
-            x2=nodes.data['xyz2']
+        "x": angle(
+            x0=nodes.data["xyz0"], x1=nodes.data["xyz1"], x2=nodes.data["xyz2"]
         )
     }
+
 
 def apply_torsion(nodes):
     """ Torsion dihedrals in nodes. """
     return {
-        'x': dihedral(
-            x0=nodes.data['xyz0'],
-            x1=nodes.data['xyz1'],
-            x2=nodes.data['xyz2'],
-            x3=nodes.data['xyz3']
+        "x": dihedral(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"],
+            x2=nodes.data["xyz2"],
+            x3=nodes.data["xyz3"],
         )
     }
 
@@ -86,6 +96,7 @@ def apply_torsion(nodes):
 # =============================================================================
 # NOTE:
 # The following functions modify graphs in-place.
+
 
 def geometry_in_graph(g):
     """ Assign values to geometric entities in graphs.
@@ -110,37 +121,47 @@ def geometry_in_graph(g):
     g.multi_update_all(
         {
             **{
-                'n1_as_%s_in_n%s' % (pos_idx, big_idx): (
-                    dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
+                "n1_as_%s_in_n%s"
+                % (pos_idx, big_idx): (
+                    copy_src(src="xyz", out="m_xyz%s" % pos_idx),
                     dgl.function.sum(
-                        msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx),
-                ) for big_idx in range(2, 5) for pos_idx in range(big_idx)
+                        msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
+                    ),
+                )
+                for big_idx in range(2, 5)
+                for pos_idx in range(big_idx)
             },
             **{
-                'n1_as_%s_in_%s' % (pos_idx, term): (
-                    dgl.function.copy_src(src='xyz', out='m_xyz%s' % pos_idx),
+                "n1_as_%s_in_%s"
+                % (pos_idx, term): (
+                    copy_src(src="xyz", out="m_xyz%s" % pos_idx),
                     dgl.function.sum(
-                        msg='m_xyz%s' % pos_idx, out='xyz%s' % pos_idx),
-                ) for term in ['nonbonded', 'onefour']
+                        msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
+                    ),
+                )
+                for term in ["nonbonded", "onefour"]
                 for pos_idx in [0, 1]
             },
         },
-        cross_reducer='sum',
+        cross_reducer="sum",
     )
 
     # apply geometry functions
-    g.apply_nodes(apply_bond, ntype='n2')
-    g.apply_nodes(apply_angle, ntype='n3')
-    g.apply_nodes(apply_torsion, ntype='n4')
+    g.apply_nodes(apply_bond, ntype="n2")
+    g.apply_nodes(apply_angle, ntype="n3")
+
+    if g.number_of_nodes("n4") > 0:
+        g.apply_nodes(apply_torsion, ntype="n4")
 
     # copy coordinates to nonbonded
-    if g.number_of_nodes('nonbonded') > 0:
-        g.apply_nodes(apply_bond, ntype='nonbonded')
+    if g.number_of_nodes("nonbonded") > 0:
+        g.apply_nodes(apply_bond, ntype="nonbonded")
 
-    if g.number_of_nodes('onefour') > 0:
-        g.apply_nodes(apply_bond, ntype='onefour')
+    if g.number_of_nodes("onefour") > 0:
+        g.apply_nodes(apply_bond, ntype="onefour")
 
     return g
+
 
 class GeometryInGraph(torch.nn.Module):
     def __init__(self, *args, **kwargs):

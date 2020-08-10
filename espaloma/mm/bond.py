@@ -3,6 +3,7 @@
 # =============================================================================
 import espaloma as esp
 
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
@@ -30,3 +31,8 @@ def harmonic_bond(x, k, eq):
     # NOTE:
     # 0.25 because all bonds are calculated twice
     return 0.25 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
+
+
+#
+# def harmonic_bond_re(x, k, eq):
+#     return 0.25 * esp.mm.functional.harmonic_re(x=x, k=k, eq=eq)

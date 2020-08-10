@@ -1,11 +1,9 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import numpy as np
-import matplotlib
-from matplotlib import pyplot as plt
 import pandas as pd
+
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -14,7 +12,6 @@ def dataframe(results_dict):
     # get all the results
     metrics = list(list(results_dict.values())[0].keys())
     ds_names = list(results_dict.keys())
-    n_metrics = len(metrics)
     df = pd.DataFrame(
         [
             [value["final"].round(4) for metric, value in results.items()]
@@ -31,7 +28,6 @@ def curve(results_dict):
 
     # get all the results
     metrics = list(list(results_dict.values())[0].keys())
-    n_metrics = len(metrics)
 
     # loop through metrics
     for idx_metric, metric in enumerate(metrics):
@@ -41,11 +37,7 @@ def curve(results_dict):
 
             # get all the recorded indices
             idxs = list(
-                [
-                    key
-                    for key in results[metric].keys()
-                    if isinstance(key, int)
-                ]
+                [key for key in results[metric].keys() if isinstance(key, int)]
             )
 
             curve_dict[(metric, ds_name)] = np.array(
@@ -83,11 +75,7 @@ def visual(results_dict):
 
             # get all the recorded indices
             idxs = list(
-                [
-                    key
-                    for key in results[metric].keys()
-                    if isinstance(key, int)
-                ]
+                [key for key in results[metric].keys() if isinstance(key, int)]
             )
 
             # sort it ascending
@@ -107,8 +95,8 @@ def visual(results_dict):
 
 
 def visual_multiple(results_dicts):
-    from matplotlib import pyplot as plt
     from matplotlib import cm as cm
+    from matplotlib import pyplot as plt
 
     plt.rc("font", size=14)
     plt.rc("lines", linewidth=4)
@@ -172,8 +160,8 @@ def visual_multiple(results_dicts):
 
 def visual_base64(results_dict):
     fig = visual(results_dict)
-    import io
     import base64
+    import io
 
     img = io.BytesIO()
     fig.savefig(img, format="png", dpi=50)

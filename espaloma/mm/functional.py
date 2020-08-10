@@ -3,6 +3,7 @@
 # =============================================================================
 import torch
 
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
@@ -23,28 +24,23 @@ def harmonic(x, k, eq, order=[2]):
     if isinstance(order, list):
         order = torch.tensor(order)
 
-    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
-
-def periodic(x, k, eq, order):
-    """ Periodic term.
-
-    Parameters
-    ----------
-    x : `torch.Tensor`, `shape=(batch_size, 1)`
-    k : `torch.Tensor`, `shape=(batch_size, len(order))`
-    eq : `torch.Tensor`, `shape=(batch_size, len(order))`
-    order : `int` or `List` of `int`
-
-    Returns
-    -------
-    u : `torch.Tensor`, `shape=(batch_size, 1)`
-    """
-    if isinstance(order, list):
-        order = torch.tensor(order)
-
-    return torch.sum(
-        k * (1.0 + torch.cos(order * x - eq)), dim=-1, keepdim=True
+    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
+        dim=-1
     )
+
+
+# simple implementation
+# def harmonic(x, k, eq):
+#     return k * (x - eq) ** 2
+#
+# def harmonic_re(x, k, eq, a=0.0, b=0.3):
+#     # temporary
+#     ka = k
+#     kb = eq
+#
+#     c = ((ka * a + kb * b) / (ka + kb)) ** 2 - a ** 2 - b ** 2
+#
+#     return ka * (x - a) ** 2 + kb * (x - b) ** 2
 
 
 def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):

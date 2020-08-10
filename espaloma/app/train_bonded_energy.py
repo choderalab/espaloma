@@ -2,10 +2,13 @@
 # IMPORTS
 # =============================================================================
 import argparse
-import espaloma as esp
 import os
+
 import numpy as np
 import torch
+
+import espaloma as esp
+
 
 def run(args):
     # define data
@@ -25,6 +28,7 @@ def run(args):
     # apply simulation
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
+
     simulation = MoleculeVacuumSimulation(
         n_samples=1000, n_steps_per_sample=10
     )
@@ -53,38 +57,33 @@ def run(args):
     )
 
     net = torch.nn.Sequential(
-            representation, 
-            readout,
-            esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(),
-            esp.mm.energy.EnergyInGraph(suffix='_ref'),
+        representation,
+        readout,
+        esp.mm.geometry.GeometryInGraph(),
+        esp.mm.energy.EnergyInGraph(),
+        esp.mm.energy.EnergyInGraph(suffix="_ref"),
     )
 
     metrics_tr = [
         esp.metrics.GraphMetric(
-            base_metric=torch.nn.L1Loss(),
-            between=['u', 'u_ref'],
-            level='g'
+            base_metric=torch.nn.L1Loss(), between=["u", "u_ref"], level="g"
         )
     ]
 
     metrics_te = [
         esp.metrics.GraphMetric(
             base_metric=base_metric,
-            between=[param, param + '_ref'],
-            level=term
-        ) for param in ['u'] for term in ['g']
-        for base_metric in [
-            esp.metrics.rmse,
-            esp.metrics.r2
-        ]
+            between=[param, param + "_ref"],
+            level=term,
+        )
+        for param in ["u"]
+        for term in ["g"]
+        for base_metric in [esp.metrics.rmse, esp.metrics.r2]
     ]
 
-    optimizer = getattr(
-        torch.optim,
-        args.optimizer)(
-            net.parameters(),
-            lr=args.lr)
+    optimizer = getattr(torch.optim, args.optimizer)(
+        net.parameters(), lr=args.lr
+    )
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,
@@ -101,6 +100,7 @@ def run(args):
     print(esp.app.report.markdown(results))
 
     import os
+
     os.mkdir(args.out)
 
     with open(args.out + "/architecture.txt", "w") as f_handle:
@@ -115,16 +115,17 @@ def run(args):
         np.save(args.out + "/" + "_".join(spec) + ".npy", curve)
 
     import pickle
+
     with open(args.out + "/ref_g_test.th", "wb") as f_handle:
         pickle.dump(exp.ref_g_test, f_handle)
 
     with open(args.out + "/ref_g_training.th", "wb") as f_handle:
         pickle.dump(exp.ref_g_training, f_handle)
 
-
     print(esp.app.report.markdown(results))
 
     import pickle
+
     with open(args.out + "/ref_g_test.th", "wb") as f_handle:
         pickle.dump(exp.ref_g_test, f_handle)
 
@@ -153,9 +154,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test_metrics", nargs="*", default=["TypingAccuracy"]
     )
-    parser.add_argument(
-        "--out", default="results", type=str
-    )
+    parser.add_argument("--out", default="results", type=str)
     parser.add_argument("--janossy_config", nargs="*", default=[32, "tanh"])
 
     parser.add_argument("--n_epochs", default=10, type=int)
