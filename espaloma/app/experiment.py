@@ -59,12 +59,14 @@ class Train(Experiment):
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         n_epochs=100,
         record_interval=1,
-        normalize=esp.data.normalize.ESOL100LogNormalNormalize
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
+        device=torch.device('cpu'),
     ):
         super(Train, self).__init__()
 
         # bookkeeping
-        self.net = net
+        self.device = device
+        self.net = net.to(self.device)
         self.data = data
         self.metrics = metrics
         self.n_epochs = n_epochs
@@ -88,10 +90,12 @@ class Train(Experiment):
 
         self.loss = loss
 
+
+
     def train_once(self):
         """ Train the model for one batch. """
         for g in self.data:  # TODO: does this have to be a single g?
-
+            g = g.to(self.device)
             def closure(g=g):
                 self.optimizer.zero_grad()
                 g = self.net(g)
@@ -148,9 +152,11 @@ class Test(Experiment):
         metrics=[esp.metrics.TypingCrossEntropy()],
         normalize=esp.data.normalize.NotNormalize,
         sampler=None,
+        device=torch.device('cpu'), # it should cpu
     ):
         # bookkeeping
-        self.net = net
+        self.device = device
+        self.net = net.to(self.device)
         self.data = data
         self.states = states
         self.metrics = metrics
@@ -168,6 +174,7 @@ class Test(Experiment):
         # make it just one giant graph
         g = list(self.data)
         g = dgl.batch_hetero(g)
+        g = g.to(self.device)
 
         for state_name, state in self.states.items():  # loop through states
             # load the state dict
@@ -207,9 +214,11 @@ class TrainAndTest(Experiment):
         normalize=esp.data.normalize.NotNormalize,
         n_epochs=100,
         record_interval=1,
+        device=torch.device('cpu'),
     ):
 
         # bookkeeping
+        self.device = device
         self.net = net
         self.ds_tr = ds_tr
         self.ds_te = ds_te
@@ -251,6 +260,7 @@ class TrainAndTest(Experiment):
             n_epochs=self.n_epochs,
             metrics=self.metrics_tr,
             normalize=self.normalize,
+            device=self.device,
         )
 
         train.train()
