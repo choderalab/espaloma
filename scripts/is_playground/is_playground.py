@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[14]:
+# In[128]:
 
 
 import torch
 import espaloma as esp
 
 
-# In[116]:
+# In[145]:
 
 
 class EulerIntegrator(torch.optim.Optimizer):
@@ -19,7 +19,7 @@ class EulerIntegrator(torch.optim.Optimizer):
         )
         super(EulerIntegrator, self).__init__(params, defaults)
     
-    @torch.no_grad()
+    # @torch.no_grad()
     def step(self, closure=None):
         loss = None
         if closure is not None:
@@ -35,20 +35,73 @@ class EulerIntegrator(torch.optim.Optimizer):
                 if len(state) == 0:
                     state['p'] = torch.zeros_like(q)
 
-                state['p'].add_(q.grad, alpha=-group['lr']*group['m'])
-                q.add_(state['p'], alpha=group['lr'])
+                state['p'].add(q.grad, alpha=-group['lr']*group['m'])
+                q.add(state['p'], alpha=group['lr'])
 
         return loss
 
 
-# In[117]:
+# In[146]:
+
+
+class NodeRNN(torch.nn.Module):
+    def __init__(self, input_size=32, units=128):
+        super(NodeRNN, self).__init__()
+        self.rnn = torch.nn.RNN(
+            input_size=input_size,
+            hidden_size=units,
+            batch_first=True,
+            bidirectional=True,
+        )
+        self.d = torch.nn.Linear(
+            2 * units,
+            1
+        )
+    
+    def forward(self, g, windows=48):
+        g.apply_nodes(
+            lambda node: {'lambs_': self.d(self.rnn(node.data['h'][:, None, :].repeat(1, windows, 1))[0]).squeeze(-1)},
+            ntype='n2'
+        )
+        
+        g.apply_nodes(
+            lambda node: {'lambs_': self.d(self.rnn(node.data['h'][:, None, :].repeat(1, windows, 1))[0]).squeeze(-1)},
+            ntype='n3'
+        )
+        
+        return g
+        
+
+
+# In[167]:
+
+
+class LambdaConstraint(torch.nn.Module):
+    def __init__(self):
+        super(LambdaConstraint, self).__init__()
+        
+    def forward(self, g):
+        g.apply_nodes(
+            lambda node: {'lambs': node.data['lambs_'].softmax(dim=-1).cumsum(dim=-1)},
+            ntype='n2'
+        )
+        
+        g.apply_nodes(
+            lambda node: {'lambs': node.data['lambs_'].softmax(dim=-1).cumsum(dim=-1)},
+            ntype='n3'
+        )
+        
+        return g
+
+
+# In[168]:
 
 
 g = esp.Graph('CN1C=NC2=C1C(=O)N(C(=O)N2C)C')
 esp.graphs.LegacyForceField('smirnoff99Frosst').parametrize(g)
 
 
-# In[118]:
+# In[169]:
 
 
 layer = esp.nn.dgl_legacy.gn()
@@ -62,32 +115,37 @@ readout = esp.nn.readout.janossy.JanossyPooling(
     in_features=32,
     config=[32, 'tanh', 32],
     out_features={
-        1: {'lambs': 98},
-        2: {'lambs': 98},
-        3: {'lambs': 98},
+        1: {'h': 32},
+        2: {'h': 32},
+        3: {'h': 32},
     }
 )
+
+node_rnn = NodeRNN()
+
+lambda_constraint = LambdaConstraint()
 
 net = torch.nn.Sequential(
     representation,
     readout,
+    node_rnn,
+    lambda_constraint,
 )
 
 
-# In[139]:
+# In[170]:
 
 
 def f(x, idx):
-    print(idx)
     if idx == 0:
         return (x ** 2).sum(dim=(0, 2))
     
-    if idx == 99:
+    if idx == 49:
         g.nodes['n1'].data['xyz'] = x
         esp.mm.geometry.geometry_in_graph(g.heterograph)
         esp.mm.energy.energy_in_graph(g.heterograph, suffix='_ref')
         # print(g.nodes['n2'].data['u'].sum(dim=0) + g.nodes['n3'].data['u'].sum(dim=0))
-        return g.nodes['n2'].data['u_ref'].sum(dim=0) + g.nodes['n3'].data['u_ref'].sum(dim=0)
+        return 1e-10 * (g.nodes['n2'].data['u_ref'].sum(dim=0) + g.nodes['n3'].data['u_ref'].sum(dim=0))
 
     g.nodes['n1'].data['xyz'] = x
     esp.mm.geometry.geometry_in_graph(g.heterograph)
@@ -103,14 +161,14 @@ def f(x, idx):
         ntype='n3'
     )
 
-    return g.nodes['n2'].data['u'].sum(dim=0) + g.nodes['n3'].data['u'].sum(dim=0)
+    return 1e-10 * (g.nodes['n2'].data['u'].sum(dim=0) + g.nodes['n3'].data['u'].sum(dim=0))
 
 
-# In[140]:
+# In[171]:
 
 
 def loss():
-    x = torch.autograd.Variable(
+    x = torch.nn.Parameter(
         torch.randn(
             g.heterograph.number_of_nodes('n1'),
             128,
@@ -124,7 +182,7 @@ def loss():
     
     net(g.heterograph)
     
-    for idx in range(1, 100):
+    for idx in range(1, 50):
         sampler.zero_grad()
         energy_old = f(x, idx-1)
         energy_new = f(x, idx)
@@ -135,16 +193,24 @@ def loss():
     return works.sum()
 
 
-# In[141]:
+# In[171]:
 
 
-optimizer = torch.optim.Adam(net.parameters(), 1e-5)
+optimizer = torch.optim.SGD(net.parameters(), 1e-2, 1e-2)
 for _ in range(1000):
     optimizer.zero_grad()
     _loss = loss()
     _loss.backward()
     print(_loss)
+    print(g.nodes['n2'].data['lambs_'][0].detach())
     optimizer.step()
+
+
+# In[140]:
+
+
+from matplotlib import pyplot as plt
+plt.plot(g.nodes['n2'].data['lambs_'][0].detach())
 
 
 # In[ ]:
