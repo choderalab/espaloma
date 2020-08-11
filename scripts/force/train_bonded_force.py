@@ -110,6 +110,7 @@ def run(args):
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
         normalize=esp.data.normalize.PositiveNotNormalize,
+        device=torch.device('cuda:0'),
     )
 
     results = exp.run()
