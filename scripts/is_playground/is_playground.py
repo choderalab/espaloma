@@ -19,7 +19,7 @@ class EulerIntegrator(torch.optim.Optimizer):
         )
         super(EulerIntegrator, self).__init__(params, defaults)
     
-    @torch.no_grad()
+    # @torch.no_grad()
     def step(self, closure=None):
         loss = None
         if closure is not None:
@@ -35,8 +35,8 @@ class EulerIntegrator(torch.optim.Optimizer):
                 if len(state) == 0:
                     state['p'] = torch.zeros_like(q)
 
-                state['p'].add_(q.grad, alpha=-group['lr']*group['m'])
-                q.add_(state['p'], alpha=group['lr'])
+                state['p'].add(q.grad, alpha=-group['lr']*group['m'])
+                q.add(state['p'], alpha=group['lr'])
 
         return loss
 
@@ -78,7 +78,6 @@ net = torch.nn.Sequential(
 
 
 def f(x, idx):
-    print(idx)
     if idx == 0:
         return (x ** 2).sum(dim=(0, 2))
     
@@ -110,7 +109,7 @@ def f(x, idx):
 
 
 def loss():
-    x = torch.autograd.Variable(
+    x = torch.nn.Parameter(
         torch.randn(
             g.heterograph.number_of_nodes('n1'),
             128,

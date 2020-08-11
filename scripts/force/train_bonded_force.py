@@ -68,7 +68,14 @@ def run(args):
             base_metric=torch.nn.L1Loss(),
             between=['u', 'u_ref'],
             level='g'
-        )
+        ),
+
+        esp.metrics.GraphMetric(
+            base_metric=torch.nn.L1Loss(),
+            between=['u', 'u_ref'],
+            level='g'
+        ),
+ 
     ]
 
     metrics_te = [
