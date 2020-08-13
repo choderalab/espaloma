@@ -7,38 +7,23 @@
 import torch
 import espaloma as esp
 
-
+torch.autograd.set_detect_anomaly(True)
 # In[145]:
 
+def euler_method(qs, ps, lr=1e-3):
+    q = qs[-1]
+    p = ps[-1]
 
-class EulerIntegrator(torch.optim.Optimizer):
-    def __init__(self, params, lr=1e-3, m=0.1):
-        defaults = dict(
-            lr=lr,
-            m=m,
-        )
-        super(EulerIntegrator, self).__init__(params, defaults)
+    if q.grad is None:
+        q.grad = torch.zeros_like(q)
+
+    p = p.clone().add(lr * q.grad)
+    q = q.clone().add(lr * p)
+   
+    ps.append(p)
+    qs.append(q)
     
-    # @torch.no_grad()
-    def step(self, closure=None):
-        loss = None
-        if closure is not None:
-            with torch.enable_grad():
-                loss = closure()
-
-        for group in self.param_groups:
-            for q in group['params']:
-                if q.grad is None:
-                    continue
-
-                state = self.state[q]
-                if len(state) == 0:
-                    state['p'] = torch.zeros_like(q)
-
-                state['p'].add(q.grad, alpha=-group['lr']*group['m'])
-                q.add(state['p'], alpha=group['lr'])
-
-        return loss
+    return qs, ps
 
 
 # In[146]:
@@ -53,19 +38,42 @@ class NodeRNN(torch.nn.Module):
             batch_first=True,
             bidirectional=True,
         )
+        self.windows=48
         self.d = torch.nn.Linear(
-            2 * units,
+            2 * units + self.windows,
             1
         )
-    
-    def forward(self, g, windows=48):
+
+    def apply_nodes_fn(self, x):
+        h_rnn = self.rnn(x[:, None, :].repeat(1, self.windows, 1))[0]
+       
+        h_one_hot = torch.zeros(
+            self.windows,
+            self.windows
+        ).scatter(
+            1,
+            torch.range(0, self.windows-1)[:, None].long(),
+            1.0,
+        )[None, :, :].repeat(x.shape[0], 1, 1)
+        
+        h = torch.cat(
+            [
+                h_rnn,
+                h_one_hot,
+            ],
+            dim=-1
+        )
+
+        return self.d(h).squeeze(-1)
+
+    def forward(self, g):
         g.apply_nodes(
-            lambda node: {'lambs_': self.d(self.rnn(node.data['h'][:, None, :].repeat(1, windows, 1))[0]).squeeze(-1)},
+            lambda node: {'lambs_': self.apply_nodes_fn(node.data['h'])},
             ntype='n2'
         )
         
         g.apply_nodes(
-            lambda node: {'lambs_': self.d(self.rnn(node.data['h'][:, None, :].repeat(1, windows, 1))[0]).squeeze(-1)},
+            lambda node: {'lambs_': self.apply_nodes_fn(node.data['h'])},
             ntype='n3'
         )
         
@@ -168,26 +176,35 @@ def f(x, idx):
 
 
 def loss():
-    x = torch.nn.Parameter(
-        torch.randn(
+    x = torch.randn(
             g.heterograph.number_of_nodes('n1'),
             128,
             3
-        )
     )
-    
-    sampler = EulerIntegrator([x], 1e-1)
+
+    x.requires_grad = True
+
+    q = torch.zeros_like(x)
+
+    xs = [x]
+    qs = [q]
     
     works = 0.0
     
     net(g.heterograph)
     
     for idx in range(1, 50):
-        sampler.zero_grad()
+        x = xs[-1]
+        q = qs[-1]
+    
+        print(x.shape)
+
         energy_old = f(x, idx-1)
         energy_new = f(x, idx)
-        energy_new.sum().backward(create_graph=True)
-        sampler.step()
+        energy_new.sum().backward(create_graph=True, retain_graph=True)
+
+        xs, qs = euler_method(xs, qs)
+        
         works += energy_new - energy_old
         
     return works.sum()
@@ -200,9 +217,7 @@ optimizer = torch.optim.SGD(net.parameters(), 1e-2, 1e-2)
 for _ in range(1000):
     optimizer.zero_grad()
     _loss = loss()
-    _loss.backward()
-    print(_loss)
-    print(g.nodes['n2'].data['lambs_'][0].detach())
+    _loss.backward(create_graph=True, retain_graph=True)
     optimizer.step()
 
 
