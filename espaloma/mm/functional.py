@@ -71,3 +71,16 @@ def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):
     assert order.dim() == 1
 
     return epsilon * ((sigma / x) ** order[0] - (sigma / x) ** order[1])
+
+def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
+    r""" Gaussian basis function.
+
+    """
+    if isinstance(phases, list):
+        # (number_of_phases, )
+        phases = torch.tensor(phases)[:, None]
+
+    assert x.shape == coefficients.shape
+    assert x.shape[0] == phases.shape[0]
+
+    return coefficients * torch.exp(-0.5 * (x - phases) ** 2).sum(-1)
