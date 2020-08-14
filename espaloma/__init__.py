@@ -3,6 +3,9 @@ espaloma
 Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm
 """
 
+import dgl
+import torch
+
 import espaloma.data
 from . import metrics, units
 import espaloma.app
