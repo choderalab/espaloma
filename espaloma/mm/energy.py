@@ -59,7 +59,7 @@ def apply_bond_gaussian(nodes, suffix=""):
     # if suffix == '_ref':
     return {
         "u%s"
-        % suffix: esp.mm.bond.gaussian(
+        % suffix: esp.mm.bond.gaussian_bond(
             x=nodes.data["x"],
             coefficients=nodes.data["coefficients%s" % suffix],
         )
