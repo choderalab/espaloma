@@ -70,8 +70,25 @@ def run(args):
             level='g'
         ),
 
+
+        esp.metrics.GraphMetric(
+            base_metric=torch.nn.L1Loss(),
+            between=['u', 'u_ref'],
+            level='g'
+        )
+
     ]
 
+
+    metrics_te = [
+        esp.metrics.GraphDerivativeMetric(
+            base_metric=esp.metrics.r2,
+            between=['u', 'u_ref'],
+            level='g'
+        )
+
+
+    '''
     metrics_te = [
         esp.metrics.GraphDerivativeMetric(
             base_metric=base_metric,
@@ -83,7 +100,7 @@ def run(args):
             esp.metrics.r2
         ]
     ]
-
+    '''
 
     exp = esp.TrainAndTest(
         ds_tr=ds_tr,
