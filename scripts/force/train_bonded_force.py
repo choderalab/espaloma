@@ -29,7 +29,7 @@ def run(args):
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
     simulation = MoleculeVacuumSimulation(
-        n_samples=10, n_steps_per_sample=10
+        n_samples=100, n_steps_per_sample=10
     )
 
     data = data.apply(simulation.run, in_place=True)
@@ -70,16 +70,10 @@ def run(args):
             level='g'
         ),
 
-        esp.metrics.GraphMetric(
-            base_metric=torch.nn.L1Loss(),
-            between=['u', 'u_ref'],
-            level='g'
-        ),
- 
     ]
 
     metrics_te = [
-        esp.metrics.GraphMetric(
+        esp.metrics.GraphDerivativeMetric(
             base_metric=base_metric,
             between=[param, param + '_ref'],
             level=term
@@ -98,7 +92,8 @@ def run(args):
         metrics_tr=metrics_tr,
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
-        normalize=esp.data.normalize.PositiveNotNormalize,
+        normalize=esp.data.normalize.ESOL100LogNormalNormalize,
+        optimizer=torch.optim.Adam(net.parameters(), 1e-2),
     )
 
     results = exp.run()

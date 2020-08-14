@@ -10,14 +10,14 @@ import espaloma as esp
 torch.autograd.set_detect_anomaly(True)
 # In[145]:
 
-def euler_method(qs, ps, lr=1e-3):
+def euler_method(qs, ps, q_grad, lr=1e-3):
     q = qs[-1]
     p = ps[-1]
 
-    if q.grad is None:
-        q.grad = torch.zeros_like(q)
+    if q_grad is None:
+        q_grad = torch.zeros_like(q)
 
-    p = p.clone().add(lr * q.grad)
+    p = p.clone().add(lr * q_grad)
     q = q.clone().add(lr * p)
    
     ps.append(p)
@@ -144,18 +144,18 @@ net = torch.nn.Sequential(
 # In[170]:
 
 
-def f(x, idx):
+def f(x, idx, g):
     if idx == 0:
         return (x ** 2).sum(dim=(0, 2))
     
     if idx == 49:
-        g.nodes['n1'].data['xyz'] = x
+        g.heterograph.nodes['n1'].data['xyz'] = x
         esp.mm.geometry.geometry_in_graph(g.heterograph)
         esp.mm.energy.energy_in_graph(g.heterograph, suffix='_ref')
         # print(g.nodes['n2'].data['u'].sum(dim=0) + g.nodes['n3'].data['u'].sum(dim=0))
         return 1e-10 * (g.nodes['n2'].data['u_ref'].sum(dim=0) + g.nodes['n3'].data['u_ref'].sum(dim=0))
 
-    g.nodes['n1'].data['xyz'] = x
+    g.heterograph.nodes['n1'].data['xyz'] = x
     esp.mm.geometry.geometry_in_graph(g.heterograph)
     esp.mm.energy.energy_in_graph(g.heterograph, suffix='_ref')
 
@@ -175,7 +175,7 @@ def f(x, idx):
 # In[171]:
 
 
-def loss():
+def loss(g):
     x = torch.randn(
             g.heterograph.number_of_nodes('n1'),
             128,
@@ -191,19 +191,19 @@ def loss():
     
     works = 0.0
     
-    net(g.heterograph)
-    
     for idx in range(1, 50):
         x = xs[-1]
         q = qs[-1]
     
-        print(x.shape)
+        energy_old = f(x, idx-1, g)
+        energy_new = f(x, idx, g)
+        x_grad = torch.autograd.grad(
+            energy_new.sum(),
+            [x],
+            create_graph=True
+        )[0]
 
-        energy_old = f(x, idx-1)
-        energy_new = f(x, idx)
-        energy_new.sum().backward(create_graph=True, retain_graph=True)
-
-        xs, qs = euler_method(xs, qs)
+        xs, qs = euler_method(xs, qs, x_grad)
         
         works += energy_new - energy_old
         
@@ -216,8 +216,10 @@ def loss():
 optimizer = torch.optim.SGD(net.parameters(), 1e-2, 1e-2)
 for _ in range(1000):
     optimizer.zero_grad()
-    _loss = loss()
-    _loss.backward(create_graph=True, retain_graph=True)
+    net(g.heterograph)
+    _loss = loss(g)
+    _loss.backward(retain_graph=True)
+    print(_loss)
     optimizer.step()
 
 
