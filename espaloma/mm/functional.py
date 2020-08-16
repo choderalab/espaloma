@@ -22,7 +22,7 @@ def harmonic(x, k, eq, order=[2]):
     u : `torch.Tensor`, `shape=(batch_size, 1)`
     """
     if isinstance(order, list):
-        order = torch.tensor(order)
+        order = torch.tensor(order, device=x.device)
 
     return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
         dim=-1
@@ -76,9 +76,10 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     r""" Gaussian basis function.
 
     """
+
     if isinstance(phases, list):
         # (number_of_phases, )
-        phases = torch.tensor(phases)
+        phases = torch.tensor(phases, device=x.device)
 
     # broadcasting
     # (number_of_hypernodes, number_of_snapshots, number_of_phases)
