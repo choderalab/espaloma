@@ -29,7 +29,7 @@ def run(args):
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
     simulation = MoleculeVacuumSimulation(
-        n_samples=100, n_steps_per_sample=10
+        n_samples=1000, n_steps_per_sample=10
     )
 
     data = data.apply(simulation.run, in_place=True)
@@ -62,14 +62,9 @@ def run(args):
             esp.mm.energy.EnergyInGraph(),
             esp.mm.energy.EnergyInGraph(suffix='_ref'),
     )
-
+    
+    '''
     metrics_tr = [
-        esp.metrics.GraphDerivativeMetric(
-            base_metric=torch.nn.L1Loss(),
-            between=['u', 'u_ref'],
-            level='g'
-        ),
-
         esp.metrics.GraphMetric(
             base_metric=torch.nn.L1Loss(),
             between=['u', 'u_ref'],
@@ -77,10 +72,21 @@ def run(args):
         )
 
     ]
+    '''
+
+    metrics_tr = [
+        esp.metrics.GraphMetric(
+            base_metric=torch.nn.L1Loss(),
+            between=[param, param + "_ref"],
+            level=term,
+        )
+        for param in ["k", "eq"]
+        for term in ["n2", "n3"]
+    ]
 
 
     metrics_te = [
-        esp.metrics.GraphDerivativeMetric(
+        esp.metrics.GraphMetric(
             base_metric=esp.metrics.r2,
             between=['u', 'u_ref'],
             level='g'
@@ -109,7 +115,7 @@ def run(args):
         metrics_tr=metrics_tr,
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
-        normalize=esp.data.normalize.PositiveNotNormalize,
+        normalize=esp.data.normalize.NotNormalize,
         device=torch.device('cuda:0'),
     )
 

@@ -22,7 +22,7 @@ def harmonic(x, k, eq, order=[2]):
     u : `torch.Tensor`, `shape=(batch_size, 1)`
     """
     if isinstance(order, list):
-        order = torch.tensor(order)
+        order = torch.tensor(order, device=x.device)
 
     return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
         dim=-1

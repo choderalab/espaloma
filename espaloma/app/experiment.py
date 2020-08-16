@@ -213,7 +213,7 @@ class TrainAndTest(Experiment):
         ds_te,
         metrics_tr=[esp.metrics.TypingCrossEntropy()],
         metrics_te=[esp.metrics.TypingCrossEntropy()],
-        optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
+        optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-2),
         normalize=esp.data.normalize.NotNormalize,
         n_epochs=100,
         record_interval=1,
