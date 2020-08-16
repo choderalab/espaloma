@@ -32,12 +32,11 @@ def harmonic_bond(x, k, eq):
     # 0.25 because all bonds are calculated twice
     return 0.25 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
-def gaussian_bond(x, coefficients, phases):
+def gaussian_bond(x, coefficients):
     """ Bond energy with Gaussian basis function.
 
     """
-    return esp.mm.function.gaussian(
+    return esp.mm.functional.gaussian(
         x=x,
         coefficients=coefficients,
-        phases=phases
     )

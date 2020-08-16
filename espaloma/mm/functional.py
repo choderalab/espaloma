@@ -78,9 +78,13 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     """
     if isinstance(phases, list):
         # (number_of_phases, )
-        phases = torch.tensor(phases)[:, None]
+        phases = torch.tensor(phases)
 
-    assert x.shape == coefficients.shape
-    assert x.shape[0] == phases.shape[0]
+    # broadcasting
+    # (number_of_hypernodes, number_of_snapshots, number_of_phases)
+    phases = phases[None, None, :].repeat(x.shape[0], x.shape[1], 1)
+    x = x[:, :, None].repeat(1, 1, phases.shape[-1])
+    coefficients = coefficients[:, None, :].repeat(1, x.shape[1], 1)
 
-    return coefficients * torch.exp(-0.5 * (x - phases) ** 2).sum(-1)
+
+    return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
