@@ -39,7 +39,3 @@ def test_energy():
     esp.mm.energy.energy_in_graph(g)
 
     esp.mm.energy.energy_in_graph(g, suffix="_ref")
-
-
-
-

@@ -40,3 +40,12 @@ def gaussian_bond(x, coefficients):
         x=x,
         coefficients=coefficients,
     )
+
+def linear_mixture_bond(x, coefficients):
+    """ Bond energy with Linear basis function.
+
+    """
+    return esp.mm.functional.linear_mixture(
+        x=x,
+        coefficients=coefficients,
+    )
