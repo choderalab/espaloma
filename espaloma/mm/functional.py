@@ -3,6 +3,21 @@
 # =============================================================================
 import torch
 
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+def linear_mixture_to_original(k1, k2, b1, b2):
+    """ Translating linear mixture coefficients back to original
+    parameterization.
+    """
+    # (batch_size, )
+    k = k1 + k2
+
+    # (batch_size, )
+    b = (k1 * b1 + k2 * b2) / (k + 1e-3)
+
+    return k, b
+
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -89,3 +104,32 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
 
 
     return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
+
+def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
+    r""" Linear mixture basis function.
+
+    """
+
+    assert len(phases) == 2, 'Only two phases now.'
+    assert coefficients.shape[-1] == 2
+
+    # partition the dimensions
+    # (, )
+    b1 = phases[0]
+    b2 = phases[1]
+
+    # (batch_size, 1)
+    k1 = coefficients[:, 0][:, None]
+    k2 = coefficients[:, 1][:, None]
+
+    # get the original parameters
+    # (batch_size, )
+    k, b = linear_mixture_to_original(k1, k2, b1, b2)
+
+    # (batch_size, 1)
+    u1 = k1 * (x - b1) ** 2
+    u2 = k2 * (x - b1) ** 2
+
+    u = u1 + u2 - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
+
+    return u

@@ -65,6 +65,17 @@ def apply_bond_gaussian(nodes, suffix=""):
         )
     }
 
+def apply_bond_linear_mixture(nodes, suffix=""):
+    """ Bond energy in nodes. """
+    # if suffix == '_ref':
+    return {
+        "u%s"
+        % suffix: esp.mm.bond.linear_mixture_bond(
+            x=nodes.data["x"],
+            coefficients=nodes.data["coefficients%s" % suffix],
+        )
+    }
+
 # =============================================================================
 # ENERGY IN HYPERNODES---NONBONDED
 # =============================================================================
@@ -118,7 +129,7 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3"]):
 
         else:
             g.apply_nodes(
-                lambda node: apply_bond_gaussian(node, suffix=suffix),
+                lambda node: apply_bond_linear_mixture(node, suffix=suffix),
                 ntype="n2"
             )
 
