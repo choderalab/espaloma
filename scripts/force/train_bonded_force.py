@@ -49,7 +49,7 @@ def run(args):
     representation = esp.nn.Sequential(layer, config=args.config)
 
     # get the last bit of units
-    units = [x for x in args.config if isinstance(x, int)][-1]
+    units = [int(x) for x in args.config if x.isdigit()][-1]
 
     readout = esp.nn.readout.janossy.JanossyPooling(
         in_features=units, config=args.janossy_config,
