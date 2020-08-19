@@ -191,8 +191,12 @@ class DatasetLogNormalNormalize(BaseNormalize):
 
                         g.nodes[term].data[key] = torch.exp(
                             g.nodes[term].data[key]
-                            * self.statistics[term][key + "_std"]
-                            + self.statistics[term][key + "_mean"]
+                            * self.statistics[term][key + "_std"].to(
+                                g.nodes[term].data[key].device
+                            )
+                            + self.statistics[term][key + "_mean"].to(
+                                g.nodes[term].data[key].device
+                            )
                         )
                     #
                     # elif '_ref' in key \

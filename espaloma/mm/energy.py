@@ -121,17 +121,11 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3"]):
 
     if "n2" in terms:
         # apply energy function
-        if suffix=="_ref":
-            g.apply_nodes(
-                lambda node: apply_bond(node, suffix=suffix),
-                ntype="n2",
-            )
+        g.apply_nodes(
+            lambda node: apply_bond(node, suffix=suffix),
+            ntype="n2",
+        )
 
-        else:
-            g.apply_nodes(
-                lambda node: apply_bond_linear_mixture(node, suffix=suffix),
-                ntype="n2"
-            )
 
     if "n3" in terms:
         g.apply_nodes(
