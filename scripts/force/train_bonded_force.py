@@ -29,7 +29,7 @@ def run(args):
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
     simulation = MoleculeVacuumSimulation(
-        n_samples=1000, n_steps_per_sample=10
+        n_samples=100, n_steps_per_sample=10,
     )
 
     data = data.apply(simulation.run, in_place=True)
@@ -76,12 +76,17 @@ def run(args):
 
     metrics_tr = [
         esp.metrics.GraphMetric(
-            base_metric=torch.nn.L1Loss(),
-            between=[param, param + "_ref"],
-            level=term,
-        )
-        for param in ["k", "eq"]
-        for term in ["n2", "n3"]
+            base_metric=torch.nn.MSELoss(),
+            between=['u', "u_ref"],
+            level="g",
+        ),
+
+        
+        esp.metrics.GraphDerivativeMetric(
+              base_metric=torch.nn.MSELoss(),
+              between=["u", "u_ref"],
+              level="g",
+        ),
     ]
 
 
@@ -89,8 +94,14 @@ def run(args):
         esp.metrics.GraphMetric(
             base_metric=esp.metrics.r2,
             between=['u', 'u_ref'],
-            level='g'
-        )
+            level="g",
+        ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.rmse,
+            between=['u', 'u_ref'],
+            level="g",
+        ),
+
     ]
 
 
@@ -116,6 +127,7 @@ def run(args):
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
         normalize=esp.data.normalize.NotNormalize,
+        optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
         device=torch.device('cuda:0'),
     )
 
@@ -179,7 +191,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--out", default="results", type=str
     )
-    parser.add_argument("--janossy_config", nargs="*", default=[32, "tanh"])
+    parser.add_argument("--janossy_config", nargs="*", default=[32, "leaky_relu"])
 
     parser.add_argument("--n_epochs", default=10, type=int)
 

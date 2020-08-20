@@ -31,7 +31,6 @@ def apply_bond(nodes, suffix=""):
     #         )
     #     }
 
-
 def apply_angle(nodes, suffix=""):
     """ Angle energy in nodes. """
     return {
@@ -55,6 +54,27 @@ def apply_torsion(nodes, suffix=""):
         )
     }
 
+def apply_bond_gaussian(nodes, suffix=""):
+    """ Bond energy in nodes. """
+    # if suffix == '_ref':
+    return {
+        "u%s"
+        % suffix: esp.mm.bond.gaussian_bond(
+            x=nodes.data["x"],
+            coefficients=nodes.data["coefficients%s" % suffix],
+        )
+    }
+
+def apply_bond_linear_mixture(nodes, suffix=""):
+    """ Bond energy in nodes. """
+    # if suffix == '_ref':
+    return {
+        "u%s"
+        % suffix: esp.mm.bond.linear_mixture_bond(
+            x=nodes.data["x"],
+            coefficients=nodes.data["coefficients%s" % suffix],
+        )
+    }
 
 # =============================================================================
 # ENERGY IN HYPERNODES---NONBONDED
@@ -101,7 +121,11 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3"]):
 
     if "n2" in terms:
         # apply energy function
-        g.apply_nodes(lambda node: apply_bond(node, suffix=suffix), ntype="n2")
+        g.apply_nodes(
+            lambda node: apply_bond(node, suffix=suffix),
+            ntype="n2",
+        )
+
 
     if "n3" in terms:
         g.apply_nodes(
