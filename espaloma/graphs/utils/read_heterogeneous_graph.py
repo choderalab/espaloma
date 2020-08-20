@@ -5,8 +5,9 @@
 # IMPORTS
 # =============================================================================
 import dgl
-import torch
 import numpy as np
+import torch
+
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -61,7 +62,10 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
 
         # filter the enumeration to be output
         idxs_level = torch.cat(
-            [base_pairs[mask][:, : (level - 1)], base_pairs[mask][:, -1][:, None]],
+            [
+                base_pairs[mask][:, : (level - 1)],
+                base_pairs[mask][:, -1][:, None],
+            ],
             dim=-1,
         )
 
@@ -73,7 +77,7 @@ def relationship_indices_from_adjacency_matrix(a, max_size=4):
 def from_homogeneous(g):
     r""" Build heterogeneous graph from homogeneous ones.
 
-    
+
     Note
     ----
     For now we name single node, two-, three, and four-,
@@ -96,8 +100,11 @@ def from_homogeneous(g):
     # initialize empty dictionary
     hg = {}
 
+    # get adjacency matrix
+    a = g.adjacency_matrix()
+
     # get all the indices
-    idxs = relationship_indices_from_adjacency_matrix(g.adjacency_matrix())
+    idxs = relationship_indices_from_adjacency_matrix(a)
 
     # make them all numpy
     idxs = {key: value.numpy() for key, value in idxs.items()}
@@ -105,11 +112,13 @@ def from_homogeneous(g):
     # also include n1
     idxs["n1"] = np.arange(g.number_of_nodes())[:, None]
 
+    # =========================
+    # neighboring relationships
+    # =========================
     # NOTE:
     # here we only define the neighboring relationship
     # on atom level
-    for idx in range(1, 5):
-        hg[("n%s" % idx, "n%s_neighbors_n%s" % (idx, idx), "n%s" % idx)] = idxs["n2"]
+    hg[("n1", "n1_neighbors_n1", "n1")] = idxs["n2"]
 
     # build a mapping between indices and the ordering
     idxs_to_ordering = {}
@@ -120,6 +129,9 @@ def from_homogeneous(g):
             for (ordering, subgraph_idxs) in enumerate(list(idxs[term]))
         }
 
+    # ===============================================
+    # relationships between nodes of different levels
+    # ===============================================
     # NOTE:
     # here we define all the possible
     # 'has' and 'in' relationships.
@@ -127,7 +139,7 @@ def from_homogeneous(g):
     # we'll test later to see if this adds too much overhead
     for small_idx in range(1, 5):
         for big_idx in range(small_idx + 1, 5):
-            for pos_idx in range(big_idx - small_idx):
+            for pos_idx in range(big_idx - small_idx + 1):
                 hg[
                     (
                         "n%s" % small_idx,
@@ -170,8 +182,57 @@ def from_homogeneous(g):
                     axis=1,
                 )
 
+    # ======================================
+    # nonbonded terms
+    # ======================================
+    # NOTE: everything is counted twice here
+    # nonbonded is where
+    # $A = AA = AAA = AAAA = 0$
+
+    # make dense
+    a_ = a.to_dense().detach().numpy()
+
+    idxs["nonbonded"] = np.stack(
+        np.where(
+            np.equal(a_ + a_ @ a_ + a_ @ a_ @ a_ + a_ @ a_ @ a_ @ a_, 0.0)
+        ),
+        axis=-1,
+    )
+
+    # onefour is the two ends of torsion
+    idxs["onefour"] = np.stack([idxs["n4"][:, 0], idxs["n4"][:, 3],], axis=1)
+
+    # membership
+    for term in ["nonbonded", "onefour"]:
+        for pos_idx in [0, 1]:
+            hg[(term, "%s_has_%s_n1" % (term, pos_idx), "n1")] = np.stack(
+                [np.arange(idxs[term].shape[0]), idxs[term][:, pos_idx]],
+                axis=-1,
+            )
+
+            hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
+                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                axis=-1,
+            )
+
+    # ======================================
+    # relationships between nodes and graphs
+    # ======================================
+    for term in ["n1", "n2", "n3", "n4", "nonbonded", "onefour"]:
+        hg[(term, "%s_in_g" % term, "g",)] = np.stack(
+            [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
+        )
+
+        hg[("g", "g_has_%s" % term, term)] = np.stack(
+            [np.zeros(len(idxs[term])), np.arange(len(idxs[term])),], axis=1,
+        )
+
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
+
+    # include indices in the nodes themselves
+    for term in ["n1", "n2", "n3", "n4"]:
+        hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
 
     return hg

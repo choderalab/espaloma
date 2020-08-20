@@ -1,7 +1,7 @@
-import pytest
-import torch
 import numpy as np
 import numpy.testing as npt
+import pytest
+import torch
 
 
 def test_angle_random_vectors():
@@ -14,7 +14,9 @@ def test_angle_random_vectors():
     left = distribution.sample()
     right = distribution.sample()
 
-    cos_ref = (left * right).sum(dim=-1) / (torch.norm(left) * torch.norm(right))
+    cos_ref = (left * right).sum(dim=-1) / (
+        torch.norm(left) * torch.norm(right)
+    )
 
     cos_hat = torch.cos(esp.mm.geometry._angle(left, right))
 

@@ -1,11 +1,13 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import pandas as pd
-import numpy as np
-import torch
-import dgl
 import random
+
+import dgl
+import numpy as np
+import pandas as pd
+import torch
+
 import espaloma as esp
 
 # =============================================================================
@@ -38,6 +40,7 @@ def from_csv(path, toolkit="rdkit", smiles_col=-1, y_cols=[-2], seed=2666):
             gs = [esp.HomogeneousGraph(mol) for mol in mols]
 
         ds = list(zip(gs, list(torch.tensor(df_y.values))))
+
         random.seed(seed)
         random.shuffle(ds)
 
