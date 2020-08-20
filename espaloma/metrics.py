@@ -124,6 +124,7 @@ class GraphDerivativeMetric(Metric):
         self,
         base_metric,
         between,
+        weight=1.0,
         level="n1",
         d="xyz",
         d_level="n1",
@@ -143,7 +144,7 @@ class GraphDerivativeMetric(Metric):
         self.d = self._translation(d, d_level)
 
         self.base_metric = base_metric
-
+        self.weight = weight
         # get name
         if hasattr(base_metric, "__name__"):
             base_name = base_metric.__name__
@@ -192,7 +193,7 @@ class GraphDerivativeMetric(Metric):
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
-        return self.base_metric(input=input_prime, target=target_prime,)
+        return self.weight * self.base_metric(input=input_prime, target=target_prime,)
 
 
 # =============================================================================
