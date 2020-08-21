@@ -6,7 +6,7 @@ from simtk import unit
 # =============================================================================
 # CONSTANTS
 # =============================================================================
- 
+
 # scaled units
 PARTICLE = unit.mole.create_unit(
     6.02214076e23 ** -1,
@@ -18,7 +18,7 @@ PARTICLE = unit.mole.create_unit(
 HARTREE_PER_PARTICLE = unit.hartree / PARTICLE
 
 # basic units
-DISTANCE_UNIT = unit.angstrom
+DISTANCE_UNIT = unit.bohr
 ENERGY_UNIT = HARTREE_PER_PARTICLE
 FORCE_UNIT = ENERGY_UNIT / DISTANCE_UNIT
 ANGLE_UNIT = unit.radian

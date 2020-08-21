@@ -109,3 +109,74 @@ def batch(ds, batch_size, seed=2666):
 
 def collate_fn(graphs):
     return esp.HomogeneousGraph(dgl.batch(graphs))
+
+def infer_mol_from_coordinates(
+        coordinates,
+        species,
+        smiles_ref=None,
+        coordinates_unit='angstrom',
+    ):
+
+    # local import
+    from openeye import oechem
+    from simtk import unit
+    from simtk.unit.quantity import Quantity
+
+    if isinstance(coordinates_unit, str):
+        coordinates_unit = getattr(
+            unit,
+            coordinates_unit
+        )
+
+    # make sure we have the coordinates
+    # in the unit system
+    coordinates = Quantity(
+        coordinates,
+        coordinates_unit
+    ).value_in_unit(
+        esp.units.DISTANCE_UNIT
+    )
+
+    # initialize molecule
+    mol = oechem.OEGraphMol()
+
+    if all(isinstance(symbol, str) for symbol in species):
+        [
+            mol.NewAtom(getattr(oechem, 'OEElemNo_' + symbol))
+            for symbol in species
+        ]
+
+    elif all(isinstance(symbol, int) for symbol in species):
+        [
+            mol.NewAtom(getattr(
+                oechem, 'OEElemNo_' + oechem.OEGetAtomicSymbol(symbol)
+            ))
+            for symbol in species
+        ]
+
+    else:
+        raise RuntimeError(
+            'The species can only be all strings or all integers.'
+        )
+
+
+    mol.SetCoords(coordinates.reshape([-1]))
+    mol.SetDimension(3)
+    oechem.OEDetermineConnectivity(mol)
+    oechem.OEFindRingAtomsAndBonds(mol)
+    oechem.OEPerceiveBondOrders(mol)
+
+    if smiles_ref is not None:
+        smiles_can = oechem.OECreateCanSmiString(mol)
+        ims = oechem.oemolistream()
+        ims.SetFormat(oechem.OEFormat_SMI)
+        ims.openstring(smiles_ref)
+        mol_ref = next(ims.GetOEMols())
+        smiles_ref = oechem.OECreateCanSmiString(mol_ref)
+        assert smiles_ref == smiles_can, "SMILES different."
+
+    from openforcefield.topology import Molecule
+    _mol = Molecule.from_openeye(mol)
+    g = esp.Graph(_mol)
+
+    return g
