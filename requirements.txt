@@ -3,3 +3,4 @@ torch
 matplotlib
 pandas
 numpy
+qcportal
