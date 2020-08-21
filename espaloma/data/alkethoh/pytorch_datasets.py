@@ -8,13 +8,16 @@ from openforcefield.topology import Molecule
 from torch import tensor, Tensor
 from torch.utils.data.dataset import Dataset
 
+from pkg_resources import resource_filename
+path_to_offmols = resource_filename('espaloma.data.alkethoh', 'AlkEthOH_rings_offmols.pkl')
+path_to_npz = resource_filename('espaloma.data.alkethoh', 'AlkEthOH_rings.npz')
 
 class AlkEthOHDataset(Dataset):
     def __init__(self):
-        with open('AlkEthOH_rings_offmols.pkl', 'rb') as f:
+        with open(path_to_offmols, 'rb') as f:
             self._mols = load(f)
 
-        self._label_dict = np.load('AlkEthOH_rings.npz')
+        self._label_dict = np.load(path_to_npz)
         self._mol_names = sorted(list(self._mols.keys()))
 
     def _get_inds(self, mol_name: str, type_name: str) -> Tensor:
