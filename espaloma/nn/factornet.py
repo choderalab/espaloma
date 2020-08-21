@@ -348,6 +348,42 @@ class FactorToAtom(nn.Module):
         g.nodes['atom'].data[self.updated_repr_name] = self.combine_g(x_combined)
 
 
+class FactorNet(nn.Module):
+    def __init__(self, initial_atom_dim, atom_dim=32, initial_factor_dims=dict(bond=1, angle=1, torsion=1), factor_dims=dict(bond=32, angle=32, torsion=32), message_dim=32, n_rounds=5):
+        super(FactorNet, self).__init__()
+
+        self.initial_atom_dim = initial_atom_dim
+        self.atom_dim = atom_dim
+        self.initial_factor_dims = initial_factor_dims
+        self.factor_dims = factor_dims
+        self.message_dim = message_dim
+        self.n_rounds = n_rounds
+
+        # initial round
+        atom_to_factor_models = []
+        atom_to_factor_models.append(AtomToFactor(msg_src_name='element', msg_dest_name='incoming_element', current_repr_name='initial_repr', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, initial_factor_dims=initial_factor_dims, updated_factor_dims=factor_dims))
+
+        factor_to_atom_models = []
+        factor_to_atom_models.append(FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round1', current_repr_name='element', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=factor_dims))
+        
+        # subsequent rounds
+        for r in range(1, n_rounds):
+            # factor -> atom
+            factor_to_atom_models.append(FactorToAtom(msg_src_name=f'round{r}_repr', msg_dest_name=f'incoming_round{r+1}', current_repr_name=f'round{r}_repr', updated_repr_name=f'round{r+1}_repr', atom_dim=atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=factor_dims))
+
+            # atom -> factor
+            atom_to_factor_models.append(AtomToFactor(msg_src_name=f'round{r}_repr', msg_dest_name=f'incoming_round{r}_repr', current_repr_name=f'round{r}_repr', updated_repr_name=f'round{r+1}_repr', atom_dim=atom_dim,  initial_factor_dims=factor_dims, updated_factor_dims=factor_dims))
+
+        self.atom_to_factor_models = atom_to_factor_models
+        self.factor_to_atom_models = factor_to_atom_models
+
+    def forward(self, g):
+        for r in range(self.n_rounds):
+            self.atom_to_factor_models[r].forward(g)
+
+            self.factor_to_atom_models[r].forward(g)
+
+
 def print_fields(factor_graph):
     print('atom representations')
     for name in list(factor_graph.nodes['atom'].data):
@@ -363,39 +399,4 @@ if __name__ == '__main__':
     offmol = Molecule.from_smiles('C1CCCCC1')
     factor_graph = offmol_to_heterograph(offmol)
 
-    # to simplify, we can hold some message and representation dimensions constant
-    initial_atom_dim = ATOM_DIM
-    atom_dim = 32
-    factor_dim = 32
-    factor_dims = dict(bond=factor_dim, angle=factor_dim, torsion=factor_dim)
-    message_dim = 32
-
-    print('passing atom-to-factor messages')
-    # atom-to-factor messages
-    atom_to_factor = AtomToFactor(msg_src_name='element', msg_dest_name='incoming_element', current_repr_name='initial_repr', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, updated_factor_dims=factor_dims)
-
-    atom_to_factor(factor_graph)
-    print_fields(factor_graph)
-
-    # factor-to-atom messages
-    print('passing factor-to-atom messages')
-    factor_to_atom = FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round1', current_repr_name='element', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=atom_to_factor.updated_factor_dims)
-    
-    factor_to_atom(factor_graph)
-    print_fields(factor_graph)
-
-    # TODO: chain a few steps of this together
-    print('passing atom-to-factor messages')
-    atom_to_factor_2 = AtomToFactor(msg_src_name='round1_repr', msg_dest_name='incoming_round1_repr', current_repr_name='round1_repr', updated_repr_name='round2_repr', atom_dim=atom_dim,  initial_factor_dims=factor_dims, updated_factor_dims=factor_dims)
-
-    atom_to_factor_2(factor_graph)
-    print_fields(factor_graph)
-
-    print('passing factor-to-atom messages')
-    factor_to_atom_2 = FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round2', current_repr_name='round1_repr', updated_repr_name='round2_repr', atom_dim=atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=factor_dims)
-    
-
-    factor_to_atom_2(factor_graph)
-    print_fields(factor_graph)
-
-    factor_graph.nodes['torsion'].data['round2_repr']
+    factor_net = FactorNet(ATOM_DIM)
