@@ -192,7 +192,6 @@ class AtomToFactor(nn.Module):
             destination = f'{self.msg_dest_name}[{i}]'
             g[edge_type].pull(v, fn.copy_u(self.msg_src_name, destination), fn.sum(destination, destination))
 
-
     def _pass_labeled_messages_from_atom_to_angle(self, g):
         """angle nodes will have attributes "{dest}[0]", "{dest}[1]", and "{dest}[2]"
         containing whatever was on atom "src" attribute for
@@ -219,7 +218,6 @@ class AtomToFactor(nn.Module):
             destination = f'{self.msg_dest_name}[{i}]'
             g[edge_type].pull(v, fn.copy_u(self.msg_src_name, destination), fn.sum(destination, destination))
 
-
     def _compute_updated_bond_representation(self, g):
         """if a bond with current representation r is connected to atoms (a,b,),
         
@@ -234,7 +232,6 @@ class AtomToFactor(nn.Module):
         X_r = torch.cat(incoming_messages[::-1] + [current_repr], dim=1)
         
         g.nodes['bond'].data[self.updated_repr_name] = self.bond_f(X_f) + self.bond_f(X_r)
-
 
     def _compute_updated_angle_representation(self, g):
         """if an angle with current representation r is connected to atoms (a,b,c),
@@ -251,7 +248,6 @@ class AtomToFactor(nn.Module):
         
         g.nodes['angle'].data[self.updated_repr_name] = self.angle_f(X_f) + self.angle_f(X_r)
         
-
     def _compute_updated_torsion_representation(self, g):
         """if a torsion with current representation r is connected to atoms (a,b,c,d),
         
@@ -266,7 +262,6 @@ class AtomToFactor(nn.Module):
         X_r = torch.cat(incoming_messages[::-1] + [current_repr], dim=1)
         
         g.nodes['torsion'].data[self.updated_repr_name] = self.torsion_f(X_f) + self.torsion_f(X_r)
-
 
     def forward(self, g):
         self._pass_labeled_messages_from_atom_to_bond(g)
@@ -353,16 +348,54 @@ class FactorToAtom(nn.Module):
         g.nodes['atom'].data[self.updated_repr_name] = self.combine_g(x_combined)
 
 
-if __name__ == '__main__':
-    offmol = Molecule.from_smiles('C1CCCCC1')
+def print_fields(factor_graph):
+    print('atom representations')
+    for name in list(factor_graph.nodes['atom'].data):
+        print(f'\t{name}')
+    print('factor representations')
+    for factor in ['bond', 'angle', 'torsion']:
+        print(factor)
+        for name in list(factor_graph.nodes[factor].data):
+            print(f'\t{name}')
 
+if __name__ == '__main__':
+    # construct factor graph from molecule
+    offmol = Molecule.from_smiles('C1CCCCC1')
     factor_graph = offmol_to_heterograph(offmol)
 
-    factor_net = AtomToFactor('element', 'element', 'initial_repr', 'round1_repr', atom_dim=ATOM_DIM)
+    # to simplify, we can hold some message and representation dimensions constant
+    initial_atom_dim = ATOM_DIM
+    atom_dim = 32
+    factor_dim = 32
+    factor_dims = dict(bond=factor_dim, angle=factor_dim, torsion=factor_dim)
+    message_dim = 32
 
-    factor_net(factor_graph)
+    print('passing atom-to-factor messages')
+    # atom-to-factor messages
+    atom_to_factor = AtomToFactor(msg_src_name='element', msg_dest_name='incoming_element', current_repr_name='initial_repr', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, updated_factor_dims=factor_dims)
 
-    factor_to_atom = FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round1', current_repr_name='element', updated_repr_name='round1_repr', atom_dim=ATOM_DIM, message_dim=10, updated_atom_dim=10, factor_dims=factor_net.updated_factor_dims)
+    atom_to_factor(factor_graph)
+    print_fields(factor_graph)
+
+    # factor-to-atom messages
+    print('passing factor-to-atom messages')
+    factor_to_atom = FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round1', current_repr_name='element', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=atom_to_factor.updated_factor_dims)
+    
+    factor_to_atom(factor_graph)
+    print_fields(factor_graph)
 
     # TODO: chain a few steps of this together
+    print('passing atom-to-factor messages')
+    atom_to_factor_2 = AtomToFactor(msg_src_name='round1_repr', msg_dest_name='incoming_round1_repr', current_repr_name='round1_repr', updated_repr_name='round2_repr', atom_dim=atom_dim,  initial_factor_dims=factor_dims, updated_factor_dims=factor_dims)
 
+    atom_to_factor_2(factor_graph)
+    print_fields(factor_graph)
+
+    print('passing factor-to-atom messages')
+    factor_to_atom_2 = FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round2', current_repr_name='round1_repr', updated_repr_name='round2_repr', atom_dim=atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=factor_dims)
+    
+
+    factor_to_atom_2(factor_graph)
+    print_fields(factor_graph)
+
+    factor_graph.nodes['torsion'].data['round2_repr']
