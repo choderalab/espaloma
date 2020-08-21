@@ -113,7 +113,7 @@ def offmol_to_heterograph(offmol):
     # TODO: initialize with other information
     for factor in ['bond', 'angle', 'torsion']:
         N = factor_graph.number_of_nodes(factor)
-        factor_graph.nodes[factor].data['initial_representation'] = torch.zeros((N, 1))
+        factor_graph.nodes[factor].data['initial_repr'] = torch.zeros((N, 1))
 
     return factor_graph
 
@@ -284,15 +284,85 @@ class AtomToFactor(nn.Module):
 # TODO: FactorToAtom class
 #   an atom can talk to an unpredictable number of factors, so aggregation will have to be simpler
 
+"""
+something like, updated_atom_repr = g(\sum_{neighboring_bond_factors} f(factor_repr, atom_repr);  \sum_{neighboring_angle_factors} f(factor_repr, atom_repr); \sum_{neighboring_torsion_factors} f(factor_repr, atom_repr) )
+"""
+
+class FactorToAtom(nn.Module):
+    def __init__(self, msg_src_name, msg_dest_name, current_repr_name, updated_repr_name, atom_dim, message_dim, updated_atom_dim, factor_dims=dict(bond=1, angle=1, torsion=1)):
+        """
+        for each factor in ['bond', 'angle', 'torsion']
+            {msg_dest_name}_{factor} = \sum_factor factor_f(msg_src_name, current_repr_name)
+        
+        msg_dest_name = combine_g({msg_dest_name}_bond; {msg_dest_name}_angle; {msg_dest_name}_torsion)
+        
+        """
+        super(FactorToAtom, self).__init__()
+        self.msg_src_name = msg_src_name
+        self.msg_dest_name = msg_dest_name
+        self.current_repr_name = current_repr_name
+        self.updated_repr_name = updated_repr_name
+
+        self.atom_dim = atom_dim
+        self.message_dim = message_dim
+        self.updated_atom_dim = updated_atom_dim
+        self.factor_dims = factor_dims
+
+        # bonds
+        bond_dim = atom_dim + factor_dims['bond']
+        self.bond_f = MLP(bond_dim, message_dim)
+
+        # angles
+        angle_dim = atom_dim + factor_dims['angle']
+        self.angle_f = MLP(angle_dim, message_dim)
+
+        # torsions
+        torsion_dim = atom_dim + factor_dims['torsion']
+        self.torsion_f = MLP(torsion_dim, message_dim)
+
+        self.fs = dict(bond=self.bond_f, angle=self.angle_f, torsion=self.torsion_f)
+
+        self.combine_g = MLP(3 * message_dim, updated_atom_dim)
+    
+    def pass_messages_from_factor_to_atom(self, g, f, factor_repr, atom_repr, atom_dest, edge_type):
+        """Compute atom_dest = \sum_factors f(factor_repr; atom_repr)
+
+        edge_type is something like (factor, contains, atom)
+        """
+        
+        N = g.number_of_nodes('atom')
+        v = np.arange(N)
+
+        def message_func(edges):
+            x = torch.cat((edges.src[factor_repr], edges.dst[atom_repr]), dim=1)
+            return {atom_dest: f(x)}
+
+        # TODO: is there an important difference between push and pull for this step?
+        g[edge_type].pull(v, message_func, reduce_func=fn.sum(atom_dest, atom_dest))
+    
+    def forward(self, g):
+        messages = []
+        for factor in ['bond', 'angle', 'torsion']:
+            msg_dest = f'{self.msg_dest_name}_{factor}'
+            edge_type = (factor, 'contains', 'atom')
+
+            self.pass_messages_from_factor_to_atom(g, self.fs[factor], self.msg_src_name, self.current_repr_name, msg_dest, edge_type)
+            messages.append(g.nodes['atom'].data[msg_dest])
+
+        x_combined = torch.cat(messages, dim=1)
+        g.nodes['atom'].data[self.updated_repr_name] = self.combine_g(x_combined)
+
 
 if __name__ == '__main__':
     offmol = Molecule.from_smiles('C1CCCCC1')
 
     factor_graph = offmol_to_heterograph(offmol)
 
-    factor_net = AtomToFactor('element', 'element', 'initial_representation', 'round1_representation', atom_dim=ATOM_DIM, )
+    factor_net = AtomToFactor('element', 'element', 'initial_repr', 'round1_repr', atom_dim=ATOM_DIM)
 
     factor_net(factor_graph)
 
-    
+    factor_to_atom = FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round1', current_repr_name='element', updated_repr_name='round1_repr', atom_dim=ATOM_DIM, message_dim=10, updated_atom_dim=10, factor_dims=factor_net.updated_factor_dims)
+
+    # TODO: chain a few steps of this together
 
