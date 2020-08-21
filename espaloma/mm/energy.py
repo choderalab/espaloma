@@ -79,11 +79,11 @@ def apply_bond_linear_mixture(nodes, suffix=""):
 # =============================================================================
 # ENERGY IN HYPERNODES---NONBONDED
 # =============================================================================
-def apply_nonbonded(nodes, suffix=""):
+def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     """ Nonbonded in nodes. """
     return {
         "u%s"
-        % suffix: esp.mm.nonbonded.lj_12_6(
+        % suffix: scaling * esp.mm.nonbonded.lj_12_6(
             x=nodes.data["x"],
             sigma=nodes.data["sigma%s" % suffix],
             epsilon=nodes.data["epsilon%s" % suffix],
@@ -94,7 +94,7 @@ def apply_nonbonded(nodes, suffix=""):
 # =============================================================================
 # ENERGY IN GRAPH
 # =============================================================================
-def energy_in_graph(g, suffix="", terms=["n2", "n3"]):
+def energy_in_graph(g, suffix="", terms=["n2", "n3",]):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
@@ -140,7 +140,9 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3"]):
 
     if g.number_of_nodes("onefour") > 0 and "onefour" in terms:
         g.apply_nodes(
-            lambda node: apply_nonbonded(node, suffix=suffix), ntype="onefour"
+            lambda node: apply_nonbonded(
+                node, suffix=suffix, scaling=0.5,
+            ), ntype="onefour"
         )
 
     # sum up energy

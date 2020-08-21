@@ -58,7 +58,7 @@ def harmonic(x, k, eq, order=[2]):
 #     return ka * (x - a) ** 2 + kb * (x - b) ** 2
 
 
-def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):
+def lj(x, epsilon, sigma, order=[12, 6]):
     r""" Lennard-Jones term.
 
     Notes
@@ -80,7 +80,7 @@ def lj(x, epsilon, sigma, order=torch.tensor([12, 6])):
 
     """
     if isinstance(order, list):
-        order = torch.tensor(order)
+        order = torch.tensor(order, device=x.device)
 
     assert order.shape[0] == 2
     assert order.dim() == 1
