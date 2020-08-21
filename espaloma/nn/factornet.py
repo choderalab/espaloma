@@ -403,27 +403,22 @@ def print_fields(factor_graph):
             print(f'\t{name}')
 
 if __name__ == '__main__':
-    # construct factor graph from molecule
-    offmol = Molecule.from_smiles('C1CCCCC1')
-    factor_graph = offmol_to_heterograph(offmol)
 
-    factor_net = FactorNet(ATOM_DIM, n_rounds=1)
-    factor_net.forward(factor_graph)
+    factor_net = FactorNet(ATOM_DIM, n_rounds=2)
 
-    from espaloma.data.alkethoh.pytorch_datasets import AlkEthOHTorsionTypesDataset
-
-    torsions_dataset = AlkEthOHTorsionTypesDataset()
+    from espaloma.data.alkethoh.pytorch_datasets import AlkEthOHAngleTypesDataset
+    angles_dataset = AlkEthOHAngleTypesDataset()
 
 
     # one-hot-ify
-    all_torsion_labels = set()
-    for (_, _, labels) in torsions_dataset:
-        all_torsion_labels.update(set(labels.detach().numpy()))
-    all_torsion_labels = sorted(list(all_torsion_labels))
-    n_types = len(all_torsion_labels)
-    print(all_torsion_labels)
+    all_angle_labels = set()
+    for (_, _, labels) in angles_dataset:
+        all_angle_labels.update(set(labels.detach().numpy()))
+    all_angle_labels = sorted(list(all_angle_labels))
+    n_types = len(all_angle_labels)
+    print(all_angle_labels)
     print(n_types)
-    to_index = dict(zip(all_torsion_labels, range(n_types)))
+    to_index = dict(zip(all_angle_labels, range(n_types)))
 
     def labels_to_tensor(labels):
         labels = labels.detach().numpy()
@@ -434,24 +429,24 @@ if __name__ == '__main__':
     from tqdm import tqdm
 
     graphs = []
-    for (mol, inds, labels) in torsions_dataset:
+    for (mol, inds, labels) in angles_dataset:
         g = offmol_to_heterograph(mol)
-        n_torsions = g.number_of_nodes('torsion')
-        #g.nodes['torsion'].data['label'] = torch.randint(0, n_types, (n_torsions,))
-        g.nodes['torsion'].data['label'] = labels_to_tensor(labels)
+        n_angles = g.number_of_nodes('angle')
+        #g.nodes['angle'].data['label'] = torch.randint(0, n_types, (n_angles,))
+        g.nodes['angle'].data['label'] = labels_to_tensor(labels)
         graphs.append(g)
 
     print('batching')
     g = dgl.batch_hetero(graphs[:10])
-    readout = MLP(factor_net.factor_dims['torsion'], n_types)
+    readout = MLP(factor_net.factor_dims['angle'], n_types)
 
     from torch.nn import CrossEntropyLoss
 
     def loss(g):
         factor_net.forward(g)
         # TODO: could measure cross entropy loss from multiple rounds
-        preds = readout(g.nodes['torsion'].data['round1_repr'])
-        target = g.nodes['torsion'].data['label']
+        preds = readout(g.nodes['angle'].data['round2_repr'])
+        target = g.nodes['angle'].data['label']
         return CrossEntropyLoss()(preds, target)
 
     print('computing loss once')
@@ -472,8 +467,8 @@ if __name__ == '__main__':
 
         loss_traj.append(L)
 
-        preds = readout(batch.nodes['torsion'].data['round1_repr']).argmax(1)
-        targets = batch.nodes['torsion'].data['label']
+        preds = readout(batch.nodes['angle'].data['round2_repr']).argmax(1)
+        targets = batch.nodes['angle'].data['label']
         accuracy = np.mean((preds == targets).detach().numpy())
         print('\tloss = {:.3f}'.format(L.detach().numpy()))
         print('\taccuracy = {:.3f}'.format(accuracy))
