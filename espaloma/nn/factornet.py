@@ -25,57 +25,70 @@ def one_hot_elements(atomic_numbers):
 
 
 def form_bond_dict_ordered(offmol):
-    """
-    {('atom', 'in[0]', 'bond') : [(atom_index, bond_index), ...],
-    ('atom', 'in[1]', 'bond') : [(atom_index, bond_index), ...],
-    }
+    """Adds edge types ('atom', 'in[{i}]', 'bond') for i=0,1 and ('bond', 'contains', 'atom')
+
+    to allow bonds to receive indexed messages from neighboring atoms, and atoms to recieve unindexed messages from neighboring bonds
     """
     bonds = [(bond.atom1.molecule_atom_index, bond.atom2.molecule_atom_index) for bond in offmol.bonds]
-    bond_dict = {('atom', 'in[0]', 'bond'): [],
-                 ('atom', 'in[1]', 'bond'): [],
-                }
-    for i, (a,b) in enumerate(bonds):
-        bond_dict[('atom', 'in[0]', 'bond')].append((a, i))
-        bond_dict[('atom', 'in[1]', 'bond')].append((b, i))
+
+    bond_dict = dict()
+    for atom in range(2):
+        bond_dict[('atom', f'in[{atom}]', 'bond')] = []
+    
+    reverse_etype = ('bond', 'contains', 'atom')
+    bond_dict[reverse_etype] = []
+    
+    for atom in range(2):
+        forward_etype = ('atom', f'in[{atom}]', 'bond')
+        for i in range(len(bonds)):
+            bond_dict[forward_etype].append((bonds[i][atom], i))
+            bond_dict[reverse_etype].append((i, bonds[i][atom]))
 
     return bond_dict
 
 
 def form_angle_dict_ordered(offmol):
+    """Adds edge types ('atom', 'in[{i}]', 'angle') for i=0,1,2 and ('angle', 'contains', 'atom')
+
+    to allow angles to receive indexed messages from neighboring atoms, and atoms to recieve unindexed messages from neighboring angles
     """
-    keys=[('atom', 'in[0]', 'angle'), ('atom', 'in[1]', 'angle') , ('atom', 'in[2]', 'angle') ]
-    """
-    
     angles = [(a.molecule_atom_index, b.molecule_atom_index, c.molecule_atom_index) for (a,b,c) in offmol.angles]
 
-
-    angle_dict = {('atom', 'in[0]', 'angle'): [],
-                 ('atom', 'in[1]', 'angle'): [],
-                  ('atom', 'in[2]', 'angle'): [],
-                }
-    for i, (a,b,c) in enumerate(angles):
-        angle_dict[('atom', 'in[0]', 'angle')].append((a, i))
-        angle_dict[('atom', 'in[1]', 'angle')].append((b, i))
-        angle_dict[('atom', 'in[2]', 'angle')].append((c, i))
+    angle_dict = dict()
+    for atom in range(3):
+        angle_dict[('atom', f'in[{atom}]', 'angle')] = []
+    
+    reverse_etype = ('angle', 'contains', 'atom')
+    angle_dict[reverse_etype] = []
+    
+    for atom in range(3):
+        forward_etype = ('atom', f'in[{atom}]', 'angle')
+        for i in range(len(angles)):
+            angle_dict[forward_etype].append((angles[i][atom], i))
+            angle_dict[reverse_etype].append((i, angles[i][atom]))
 
     return angle_dict
 
 
 def form_torsion_dict_ordered(offmol):
+    """Adds edge types ('atom', 'in[{i}]', 'torsion') for i=0,1,2,3 and ('torsion', 'contains', 'atom')
 
-    
+    to allow torsions to receive indexed messages from neighboring atoms, and atoms to recieve unindexed messages from neighboring torsions
+    """
     torsions = [(a.molecule_atom_index, b.molecule_atom_index, c.molecule_atom_index, d.molecule_atom_index) for (a,b,c,d) in offmol.propers]
 
-    torsion_dict = {('atom', 'in[0]', 'torsion'): [],
-                 ('atom', 'in[1]', 'torsion'): [],
-                  ('atom', 'in[2]', 'torsion'): [],
-                    ('atom', 'in[3]', 'torsion'): [],
-                }
-    for i, (a,b,c,d) in enumerate(torsions):
-        torsion_dict[('atom', 'in[0]', 'torsion')].append((a, i))
-        torsion_dict[('atom', 'in[1]', 'torsion')].append((b, i))
-        torsion_dict[('atom', 'in[2]', 'torsion')].append((c, i))
-        torsion_dict[('atom', 'in[3]', 'torsion')].append((d, i))
+    torsion_dict = dict()
+    for atom in range(4):
+        torsion_dict[('atom', f'in[{atom}]', 'torsion')] = []
+    
+    reverse_etype = ('torsion', 'contains', 'atom')
+    torsion_dict[reverse_etype] = []
+    
+    for atom in range(4):
+        forward_etype = ('atom', f'in[{atom}]', 'torsion')
+        for i in range(len(torsions)):
+            torsion_dict[forward_etype].append((torsions[i][atom], i))
+            torsion_dict[reverse_etype].append((i, torsions[i][atom]))
 
     return torsion_dict
 
