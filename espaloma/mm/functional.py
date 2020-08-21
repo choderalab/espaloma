@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import math
 import torch
 
 # =============================================================================
@@ -43,6 +44,28 @@ def harmonic(x, k, eq, order=[2]):
         dim=-1
     )
 
+def periodic(x, k, periodicity=list(range(6)), phases=[0.0 for _ in range(6)]):
+    """ Periodic term.
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, `shape=(batch_size, 1)`
+    k : `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    eq: `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    """
+
+    if isinstance(phases, list):
+        phases = torch.tensor(phases, device=x.device)
+
+    if isinstance(periodicity, list):
+        periodicity = torch.tensor(
+            periodicity, device=x.device, dtype=torch.float32
+        )
+
+    return k * (1.0 + torch.cos(
+        periodicity[None, :].repeat(x.shape[0], 1) * x
+        - phases
+    ))
 
 # simple implementation
 # def harmonic(x, k, eq):
