@@ -82,6 +82,34 @@ def periodic_torsion_potential(theta, ks, phases, periodicities):
                   axis=0)
 
 
+n_periodicities = 6
+periodicities = np.arange(n_periodicities) + 1
+
+
+def compute_periodic_torsion_potential(xyz, params, quad_inds, torsion_inds):
+    """
+
+    :param xyz:
+    :param params:
+        length ( 2 * n_unique * n_periodicities )
+    :param quad_inds:
+    :param torsion_inds:
+    :return:
+    """
+    theta = compute_torsions(xyz, quad_inds)
+
+    n_unique = int(len(params) / (2 * n_periodicities))
+    params = np.reshape(params, (n_unique, (2 * n_periodicities)))
+
+    ks, phases = params[torsion_inds][:, :n_periodicities], params[torsion_inds][:, n_periodicities:]
+
+    # TODO; clean this up a bit
+    periodicities_ = np.array([periodicities for _ in ks])
+
+    return np.sum(periodic_torsion_potential(theta, ks, phases, periodicities_), axis=1)
+
+
+
 
 # Can represent springs a couple different ways
 # 1. In terms of spring constant and equilibrium length
