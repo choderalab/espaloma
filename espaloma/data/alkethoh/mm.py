@@ -122,14 +122,13 @@ if __name__ == '__main__':
 
     from pickle import load
 
-    with open('AlkEthOH_rings_offmols.pkl', 'rb') as f:
-        mols = load(f)
+    from espaloma.data.alkethoh.data import offmols
 
-    names = list(mols.keys())
+    names = list(offmols.keys())
     successes, failures = [], []
     for name in tqdm(names):
         try:
-            create_entry(name, mols[name], n_samples, n_steps_per_sample)
+            create_entry(name, offmols[name], n_samples, n_steps_per_sample)
             successes.append(name)
         except Exception as e:
             print('something failed for some reason!')
