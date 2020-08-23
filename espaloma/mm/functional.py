@@ -151,7 +151,7 @@ def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
 
     # (batch_size, 1)
     u1 = k1 * (x - b1) ** 2
-    u2 = k2 * (x - b1) ** 2
+    u2 = k2 * (x - b2) ** 2
 
     u = u1 + u2 - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
 
