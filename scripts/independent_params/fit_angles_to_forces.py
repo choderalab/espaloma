@@ -13,13 +13,13 @@ config.update("jax_enable_x64", True)
 from espaloma.utils.jax import jax_play_nice_with_scipy
 from jax import grad, jit, numpy as np
 from scipy.optimize import basinhopping
-from simtk import unit
 
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
-from espaloma.mm.mm_utils import get_force_targets, MMComponents
-from espaloma.mm.mm_utils import get_sim, compute_harmonic_angle_potential
-from espaloma.utils.symmetry import get_unique_angles, canonicalize_order
+from espaloma.mm.mm_utils import get_force_targets, MMComponents, initialize_angles
+from espaloma.mm.mm_utils import compute_harmonic_angle_potential
+from espaloma.utils.symmetry import get_unique_angles
+
 onp.random.seed(1234)
 
 # TODO: add coupling terms
@@ -27,37 +27,6 @@ onp.random.seed(1234)
 
 # TODO: initializer classes
 #   initialize at mean values vs. at openff values
-
-def initialize_angles(offmol, noise_magnitude=1.0):
-    triple_inds, angle_inds = get_unique_angles(offmol)
-    n_unique_angles = len(set(angle_inds))
-    n_angle_params = 2 * n_unique_angles
-    angle_params = onp.zeros(n_angle_params)
-
-    sim = get_sim(name)
-
-    harmonic_angle_force = [f for f in sim.system.getForces() if ("HarmonicAngle" in f.__class__.__name__)][0]
-    omm_angle_params = dict()
-
-    for i in range(harmonic_angle_force.getNumAngles()):
-        a, b, c, theta, k = harmonic_angle_force.getAngleParameters(i)
-        tup = canonicalize_order((a, b, c))
-        omm_angle_params[tup] = (theta, k)
-
-    for i in range(len(triple_inds)):
-        theta, k = omm_angle_params[tuple(triple_inds[i])]
-        theta_, k_ = theta / unit.radian, k / (unit.kilojoule_per_mole / (unit.radian ** 2))
-
-        multiplicative_noise = 2 * noise_magnitude * (
-                onp.random.rand(2) - 0.5) + 1.0  # uniform between [1-noise_magnitude, 1+noise_magnitude]
-
-        angle_params[angle_inds[i]] = k_ * multiplicative_noise[0]
-        angle_params[angle_inds[i] + n_unique_angles] = theta_ * multiplicative_noise[1]
-
-    def unpack(params):
-        return ([], params, [])
-
-    return angle_params, unpack
 
 
 if __name__ == '__main__':

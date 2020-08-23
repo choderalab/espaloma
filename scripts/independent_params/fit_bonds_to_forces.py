@@ -13,13 +13,13 @@ config.update("jax_enable_x64", True)
 from espaloma.utils.jax import jax_play_nice_with_scipy
 from jax import grad, jit, numpy as np
 from scipy.optimize import basinhopping
-from simtk import unit
 
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
-from espaloma.mm.mm_utils import get_force_targets, MMComponents
-from espaloma.mm.mm_utils import get_sim, compute_harmonic_bond_potential
-from espaloma.utils.symmetry import get_unique_bonds, canonicalize_order
+from espaloma.mm.mm_utils import get_force_targets, MMComponents, initialize_bonds
+from espaloma.mm.mm_utils import compute_harmonic_bond_potential
+from espaloma.utils.symmetry import get_unique_bonds
+
 onp.random.seed(1234)
 
 # TODO: add coupling terms
@@ -27,43 +27,6 @@ onp.random.seed(1234)
 
 # TODO: initializer classes
 #   initialize at mean values vs. at openff values
-
-def initialize_bonds(offmol, noise_magnitude=1.0):
-    # bonds
-    pair_inds, bond_inds = get_unique_bonds(offmol)
-    n_unique_bonds = len(set(bond_inds))
-    n_bond_params = 2 * n_unique_bonds
-    bond_params = onp.zeros(n_bond_params)
-
-    sim = get_sim(name)
-
-    # compare pair inds from harmonic_bond_force and autodiff'd one
-    harmonic_bond_force = [f for f in sim.system.getForces() if ("HarmonicBond" in f.__class__.__name__)][0]
-    omm_pair_inds = []
-    omm_bond_params = dict()
-
-    for i in range(harmonic_bond_force.getNumBonds()):
-        a, b, length, k = harmonic_bond_force.getBondParameters(i)
-        tup = canonicalize_order((a, b))
-        omm_bond_params[tup] = (length, k)
-        omm_pair_inds.append(tup)
-
-    # assert that I'm defining bonds on the same pairs of atoms
-    assert ((set(omm_pair_inds) == set([tuple(p) for p in pair_inds])))
-
-    # What if I initialize with MM parameters
-    for i in range(len(pair_inds)):
-        length, k = omm_bond_params[tuple(pair_inds[i])]
-        length_, k_ = length / unit.nanometer, k / (unit.kilojoule_per_mole / (unit.nanometer ** 2))
-        multiplicative_noise = 2 * noise_magnitude * (
-                    onp.random.rand(2) - 0.5) + 1.0  # uniform between [1-noise_magnitude, 1+noise_magnitude]
-        bond_params[bond_inds[i]] = k_ * multiplicative_noise[0]
-        bond_params[bond_inds[i] + n_unique_bonds] = length_ * multiplicative_noise[1]
-
-    def unpack(params):
-        return (params, [], [])
-
-    return bond_params, unpack
 
 
 if __name__ == '__main__':

@@ -13,43 +13,16 @@ config.update("jax_enable_x64", True)
 from espaloma.utils.jax import jax_play_nice_with_scipy
 from jax import grad, jit, numpy as np
 from scipy.optimize import basinhopping
-from simtk import unit
 
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
-from espaloma.mm.mm_utils import get_force_targets, MMComponents
-from espaloma.mm.mm_utils import get_sim, compute_periodic_torsion_potential, n_periodicities
-from espaloma.utils.symmetry import get_unique_torsions, canonicalize_order
+from espaloma.mm.mm_utils import get_force_targets, MMComponents, initialize_torsions
+from espaloma.mm.mm_utils import compute_periodic_torsion_potential
+from espaloma.utils.symmetry import get_unique_torsions
+
 onp.random.seed(1234)
 
 # TODO: add coupling terms
-
-# TODO: initializer classes
-#   initialize at mean values vs. at openff values
-
-def initialize_torsions(offmol, noise_magnitude=1.0):
-    
-    quad_inds, torsion_inds = get_unique_torsions(offmol)
-    n_unique_torsions = len(set(torsion_inds))
-    n_torsion_params = 2 * n_unique_torsions
-    sim = get_sim(name)
-    
-    periodic_torsion_force = [f for f in sim.system.getForces() if ("PeriodicTorsion" in f.__class__.__name__)][0]
-    omm_torsion_params = dict()
-    for i in range(periodic_torsion_force.getNumTorsions()):
-        a, b, c, d, periodicity, phase, k = periodic_torsion_force.getTorsionParameters(i)
-        k_ = k / (unit.kilojoule_per_mole / (unit.radian**2))
-    
-    _, torsion_inds = get_unique_torsions(offmol)
-    n_unique_torsions = len(set(torsion_inds))
-    n_torsion_params = 2 * n_unique_torsions * n_periodicities
-    torsion_params = onp.zeros(n_torsion_params)
-
-    def unpack(params):
-        return ([], [], params)
-
-    return torsion_params, unpack
-
 
 if __name__ == '__main__':
     # look at a single molecule first

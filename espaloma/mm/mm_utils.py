@@ -3,6 +3,8 @@ from jax import jit
 from jax import numpy as np
 from simtk import unit
 
+from espaloma.utils.symmetry import get_unique_torsions, get_unique_bonds, canonicalize_order, get_unique_angles
+
 energy_unit = unit.kilojoule_per_mole
 force_unit = unit.kilojoule_per_mole / unit.nanometer
 
@@ -449,3 +451,94 @@ def get_force_targets(name, components=default_components):
     # return named tuple
     mm_components = MMComponents(**forces)
     return mm_components, ani1ccx_forces
+
+
+
+def initialize_bonds(sim, offmol, noise_magnitude=1.0):
+    # bonds
+    pair_inds, bond_inds = get_unique_bonds(offmol)
+    n_unique_bonds = len(set(bond_inds))
+    n_bond_params = 2 * n_unique_bonds
+    bond_params = onp.zeros(n_bond_params)
+
+    # compare pair inds from harmonic_bond_force and autodiff'd one
+    harmonic_bond_force = [f for f in sim.system.getForces() if ("HarmonicBond" in f.__class__.__name__)][0]
+    omm_pair_inds = []
+    omm_bond_params = dict()
+
+    for i in range(harmonic_bond_force.getNumBonds()):
+        a, b, length, k = harmonic_bond_force.getBondParameters(i)
+        tup = canonicalize_order((a, b))
+        omm_bond_params[tup] = (length, k)
+        omm_pair_inds.append(tup)
+
+    # assert that I'm defining bonds on the same pairs of atoms
+    assert ((set(omm_pair_inds) == set([tuple(p) for p in pair_inds])))
+
+    # What if I initialize with MM parameters
+    for i in range(len(pair_inds)):
+        length, k = omm_bond_params[tuple(pair_inds[i])]
+        length_, k_ = length / unit.nanometer, k / (unit.kilojoule_per_mole / (unit.nanometer ** 2))
+        multiplicative_noise = 2 * noise_magnitude * (
+                    onp.random.rand(2) - 0.5) + 1.0  # uniform between [1-noise_magnitude, 1+noise_magnitude]
+        bond_params[bond_inds[i]] = k_ * multiplicative_noise[0]
+        bond_params[bond_inds[i] + n_unique_bonds] = length_ * multiplicative_noise[1]
+
+    def unpack(params):
+        return (params, [], [])
+
+    return bond_params, unpack
+
+
+def initialize_angles(sim, offmol, noise_magnitude=1.0):
+    triple_inds, angle_inds = get_unique_angles(offmol)
+    n_unique_angles = len(set(angle_inds))
+    n_angle_params = 2 * n_unique_angles
+    angle_params = onp.zeros(n_angle_params)
+
+    harmonic_angle_force = [f for f in sim.system.getForces() if ("HarmonicAngle" in f.__class__.__name__)][0]
+    omm_angle_params = dict()
+
+    for i in range(harmonic_angle_force.getNumAngles()):
+        a, b, c, theta, k = harmonic_angle_force.getAngleParameters(i)
+        tup = canonicalize_order((a, b, c))
+        omm_angle_params[tup] = (theta, k)
+
+    for i in range(len(triple_inds)):
+        theta, k = omm_angle_params[tuple(triple_inds[i])]
+        theta_, k_ = theta / unit.radian, k / (unit.kilojoule_per_mole / (unit.radian ** 2))
+
+        multiplicative_noise = 2 * noise_magnitude * (
+                onp.random.rand(2) - 0.5) + 1.0  # uniform between [1-noise_magnitude, 1+noise_magnitude]
+
+        angle_params[angle_inds[i]] = k_ * multiplicative_noise[0]
+        angle_params[angle_inds[i] + n_unique_angles] = theta_ * multiplicative_noise[1]
+
+    def unpack(params):
+        return ([], params, [])
+
+    return angle_params, unpack
+
+
+def initialize_torsions(sim, offmol, noise_magnitude=1.0):
+
+    quad_inds, torsion_inds = get_unique_torsions(offmol)
+    n_unique_torsions = len(set(torsion_inds))
+    n_torsion_params = 2 * n_unique_torsions
+
+    periodic_torsion_force = [f for f in sim.system.getForces() if ("PeriodicTorsion" in f.__class__.__name__)][0]
+    omm_torsion_params = dict()
+    for i in range(periodic_torsion_force.getNumTorsions()):
+        # TODO: actually initialize at or near underlying values, rather than initializing at 0
+        a, b, c, d, periodicity, phase, k = periodic_torsion_force.getTorsionParameters(i)
+        k_ = k / (unit.kilojoule_per_mole / (unit.radian**2))
+
+    _, torsion_inds = get_unique_torsions(offmol)
+    n_unique_torsions = len(set(torsion_inds))
+    n_torsion_params = 2 * n_unique_torsions * n_periodicities
+    torsion_params = onp.zeros(n_torsion_params)
+
+    def unpack(params):
+        return ([], [], params)
+
+    return torsion_params, unpack
