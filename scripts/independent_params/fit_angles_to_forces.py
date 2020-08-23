@@ -1,4 +1,4 @@
-# separate parameters for every atom, bond, angle, torsion, up to symmetry
+# separate parameters for every atom, angle, angle, torsion, up to symmetry
 
 from time import time
 
@@ -18,65 +18,59 @@ from simtk import unit
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
 from espaloma.mm.mm_utils import get_force_targets, MMComponents
-from espaloma.mm.mm_utils import get_sim, compute_harmonic_bond_potential
-from espaloma.utils.symmetry import get_unique_bonds, canonicalize_order
+from espaloma.mm.mm_utils import get_sim, compute_harmonic_angle_potential
+from espaloma.utils.symmetry import get_unique_angles, canonicalize_order
 onp.random.seed(1234)
 
 # TODO: add coupling terms
-# TODO: toggle between `compute_harmonic_bond_potential` and alternate parameterization
+# TODO: toggle between `compute_harmonic_angle_potential` and alternate parameterization
 
 # TODO: initializer classes
 #   initialize at mean values vs. at openff values
 
-def initialize_bonds(offmol, noise_magnitude=1.0):
-    # bonds
-    pair_inds, bond_inds = get_unique_bonds(offmol)
-    n_unique_bonds = len(set(bond_inds))
-    n_bond_params = 2 * n_unique_bonds
-    bond_params = onp.zeros(n_bond_params)
+def initialize_angles(offmol, noise_magnitude=1.0):
+    triple_inds, angle_inds = get_unique_angles(offmol)
+    n_unique_angles = len(set(angle_inds))
+    n_angle_params = 2 * n_unique_angles
+    angle_params = onp.zeros(n_angle_params)
 
     sim = get_sim(name)
 
-    # compare pair inds from harmonic_bond_force and autodiff'd one
-    harmonic_bond_force = [f for f in sim.system.getForces() if ("HarmonicBond" in f.__class__.__name__)][0]
-    omm_pair_inds = []
-    omm_bond_params = dict()
+    harmonic_angle_force = [f for f in sim.system.getForces() if ("HarmonicAngle" in f.__class__.__name__)][0]
+    omm_angle_params = dict()
 
-    for i in range(harmonic_bond_force.getNumBonds()):
-        a, b, length, k = harmonic_bond_force.getBondParameters(i)
-        tup = canonicalize_order((a, b))
-        omm_bond_params[tup] = (length, k)
-        omm_pair_inds.append(tup)
+    for i in range(harmonic_angle_force.getNumAngles()):
+        a, b, c, theta, k = harmonic_angle_force.getAngleParameters(i)
+        tup = canonicalize_order((a, b, c))
+        omm_angle_params[tup] = (theta, k)
 
-    # assert that I'm defining bonds on the same pairs of atoms
-    assert ((set(omm_pair_inds) == set([tuple(p) for p in pair_inds])))
+    for i in range(len(triple_inds)):
+        theta, k = omm_angle_params[tuple(triple_inds[i])]
+        theta_, k_ = theta / unit.radian, k / (unit.kilojoule_per_mole / (unit.radian ** 2))
 
-    # What if I initialize with MM parameters
-    for i in range(len(pair_inds)):
-        length, k = omm_bond_params[tuple(pair_inds[i])]
-        length_, k_ = length / unit.nanometer, k / (unit.kilojoule_per_mole / (unit.nanometer ** 2))
         multiplicative_noise = 2 * noise_magnitude * (
-                    onp.random.rand(2) - 0.5) + 1.0  # uniform between [1-noise_magnitude, 1+noise_magnitude]
-        bond_params[bond_inds[i]] = k_ * multiplicative_noise[0]
-        bond_params[bond_inds[i] + n_unique_bonds] = length_ * multiplicative_noise[1]
+                onp.random.rand(2) - 0.5) + 1.0  # uniform between [1-noise_magnitude, 1+noise_magnitude]
+
+        angle_params[angle_inds[i]] = k_ * multiplicative_noise[0]
+        angle_params[angle_inds[i] + n_unique_angles] = theta_ * multiplicative_noise[1]
 
     def unpack(params):
-        return (params, [], [])
+        return ([], params, [])
 
-    return bond_params, unpack
+    return angle_params, unpack
 
 
 if __name__ == '__main__':
     # look at a single molecule first
     name = 'AlkEthOH_r4'
     offmol = offmols[name]
-    # params, unpack = initialize_off_params(offmol)
-    params, unpack = initialize_bonds(offmol, noise_magnitude=1.0)
-    pair_inds, bond_inds = get_unique_bonds(offmol)
+
+    params, unpack = initialize_angles(offmol)
+    triple_inds, angle_inds = get_unique_angles(offmol)
 
     # targets
-    mm_components, ani1ccx_forces = get_force_targets(name, MMComponents(bonds=True))
-    target = mm_components.bonds
+    mm_components, ani1ccx_forces = get_force_targets(name, MMComponents(angles=True))
+    target = mm_components.angles
 
     # trajectory
     traj, _, _ = get_snapshots_energies_and_forces(name)
@@ -84,16 +78,16 @@ if __name__ == '__main__':
 
 
     @jit
-    def compute_harmonic_bond_force(xyz, bond_params, pair_inds, bond_inds):
-        total_U = lambda xyz: np.sum(compute_harmonic_bond_potential(xyz, bond_params, pair_inds, bond_inds))
+    def compute_harmonic_angle_force(xyz, angle_params, triple_inds, angle_inds):
+        total_U = lambda xyz: np.sum(compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds))
         return - grad(total_U)(xyz)
 
 
     @jit
     def predict(all_params):
-        bond_params, angle_params, torsion_params = unpack(all_params)
-        F_bond = compute_harmonic_bond_force(xyz, bond_params, pair_inds, bond_inds)
-        return F_bond
+        angle_params, angle_params, torsion_params = unpack(all_params)
+        F_angle = compute_harmonic_angle_force(xyz, angle_params, triple_inds, angle_inds)
+        return F_angle
 
 
     def stddev_loss(predicted, actual):
@@ -161,7 +155,7 @@ if __name__ == '__main__':
                               minimizer_kwargs=dict(method=method, jac=jac, callback=callback, options=min_options),
                               callback=bh_callback)
 
-    plot_residuals(predict(opt_result.x), target, name, 'bond')
+    plot_residuals(predict(opt_result.x), target, name, 'angle')
 
     loss_traj = [fun(theta) for theta in traj]
     running_min_loss_traj = onp.minimum.accumulate(loss_traj)
@@ -169,7 +163,7 @@ if __name__ == '__main__':
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel(f'{method} iteration (within basin-hopping)')
-    plt.ylabel('running minimum of RMSE loss\n(predicted MM bond force vs. OFF1.0 bond force, in kJ/mol / nm)')
-    plt.title(f'{name}: bond force regression')
-    plt.savefig(f'plots/{name}_bond_loss_traj.png', bbox_inches='tight', dpi=300)
+    plt.ylabel('running minimum of RMSE loss\n(predicted MM angle force vs. OFF1.0 angle force, in kJ/mol / nm)')
+    plt.title(f'{name}: angle force regression')
+    plt.savefig(f'plots/{name}_angle_loss_traj.png', bbox_inches='tight', dpi=300)
     plt.close()

@@ -172,7 +172,7 @@ def compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds):
     ks, theta0s = params[:n_unique], params[n_unique:]
     # Jax: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     #angle_inds = tuple(angle_inds)
-    angle_inds = onp.array(angle_inds)
+    angle_inds = np.array(angle_inds)
     #print(ks)
     #print(angle_inds)
 
@@ -343,3 +343,81 @@ def get_valence_energy(sim):
 
 def get_valence_force(sim):
     return get_force(sim) - get_nb_force(sim)
+
+
+
+from collections import namedtuple
+
+MMComponents = namedtuple('MMComponents',
+                          field_names=['bonds', 'angles', 'torsions', 'valence', 'nonbonded', 'total'],
+                          defaults=[False, False, False, False, False, False])
+default_components = MMComponents()
+
+get_mm_energies = dict(bonds=get_bond_energy, angles=get_angle_energy, torsions=get_torsion_energy,
+                       valence=get_valence_energy, nonbonded=get_nb_energy, total=get_energy)
+get_mm_forces = dict(bonds=get_bond_force, angles=get_angle_force, torsions=get_torsion_force,
+                     valence=get_valence_force, nonbonded=get_nb_force, total=get_force)
+
+
+from espaloma.data.alkethoh.ani import  get_snapshots_energies_and_forces
+
+def get_energy_targets(name, components=default_components):
+    """
+
+    :param name:
+    :param components:
+    :return:
+    """
+    traj, ani1ccx_energies, _ = get_snapshots_energies_and_forces(name)
+    xyz = traj.xyz
+    sim = get_sim(name)
+
+    # Define energy targets
+    component_names = [component for component in components._fields if components.__getattribute__(component)]
+
+    # initialize energies_dict
+    energies = dict(zip(component_names, [list() for _ in component_names]))
+    for component in components._fields:
+        if not components.__getattribute__(component):
+            energies[component] = None
+
+    # fill in energies
+    for conf in xyz:
+        set_positions(sim, conf * unit.nanometer)
+        for component in component_names:
+            energies[component].append(get_mm_energies[component](sim))
+    # convert from list of floats to np array
+    for component in component_names:
+        energies[component] = np.array(energies[component])
+
+    # return named tuple
+    mm_components = MMComponents(**energies)
+    return mm_components, ani1ccx_energies
+
+
+def get_force_targets(name, components=default_components):
+    traj, _, ani1ccx_forces = get_snapshots_energies_and_forces(name)
+    xyz = traj.xyz
+    sim = get_sim(name)
+
+    # Define force targets
+    component_names = [component for component in components._fields if components.__getattribute__(component)]
+
+    # initialize forces_dict
+    forces = dict(zip(component_names, [list() for _ in component_names]))
+    for component in components._fields:
+        if not components.__getattribute__(component):
+            forces[component] = None
+
+    # fill in forces
+    for conf in xyz:
+        set_positions(sim, conf * unit.nanometer)
+        for component in component_names:
+            forces[component].append(get_mm_forces[component](sim))
+    # convert from list of arrays to single array
+    for component in component_names:
+        forces[component] = np.array(forces[component])
+
+    # return named tuple
+    mm_components = MMComponents(**forces)
+    return mm_components, ani1ccx_forces
