@@ -1,4 +1,4 @@
-# separate parameters for every atom, angle, angle, torsion, up to symmetry
+# separate parameters for every atom, bond, angle, torsion, up to symmetry
 
 from time import time
 
@@ -16,14 +16,14 @@ from scipy.optimize import basinhopping
 
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
-from espaloma.mm.mm_utils import get_force_targets, MMComponents, initialize_angles
-from espaloma.mm.mm_utils import compute_harmonic_angle_potential, get_sim
-from espaloma.utils.symmetry import get_unique_angles
+from espaloma.mm.mm_utils import get_force_targets, MMComponents
+from espaloma.mm.mm_utils import  get_sim, compute_harmonic_bond_potential_alt_param
+from espaloma.utils.symmetry import get_unique_bonds
 
 onp.random.seed(1234)
 
 # TODO: add coupling terms
-# TODO: toggle between `compute_harmonic_angle_potential` and alternate parameterization
+# TODO: toggle between `compute_harmonic_bond_potential` and alternate parameterization
 
 # TODO: initializer classes
 #   initialize at mean values vs. at openff values
@@ -33,14 +33,15 @@ if __name__ == '__main__':
     # look at a single molecule first
     name = 'AlkEthOH_r4'
     offmol = offmols[name]
+    # params, unpack = initialize_off_params(offmol)
     sim = get_sim(name)
-
-    params = initialize_angles(sim, offmol)
-    triple_inds, angle_inds = get_unique_angles(offmol)
+    pair_inds, bond_inds = get_unique_bonds(offmol)
+    n_unique_bonds = len(set(bond_inds))
+    params = np.ones(n_unique_bonds * 2) * 100000 / 2 # eyeballed, bonds are something like k=10000 kJ/mol / nm^2, r0=1 Å
 
     # targets
-    mm_components, ani1ccx_forces = get_force_targets(name, MMComponents(angles=True))
-    target = mm_components.angles
+    mm_components, ani1ccx_forces = get_force_targets(name, MMComponents(bonds=True))
+    target = mm_components.bonds
 
     # trajectory
     traj, _, _ = get_snapshots_energies_and_forces(name)
@@ -48,16 +49,16 @@ if __name__ == '__main__':
 
 
     @jit
-    def compute_harmonic_angle_force(xyz, angle_params, triple_inds, angle_inds):
-        total_U = lambda xyz: np.sum(compute_harmonic_angle_potential(xyz, angle_params, triple_inds, angle_inds))
+    def compute_harmonic_bond_force(xyz, bond_params, pair_inds, bond_inds):
+        total_U = lambda xyz: np.sum(compute_harmonic_bond_potential_alt_param(xyz, bond_params, pair_inds, bond_inds))
         return - grad(total_U)(xyz)
 
 
     @jit
     def predict(all_params):
-        angle_params = all_params
-        F_angle = compute_harmonic_angle_force(xyz, angle_params, triple_inds, angle_inds)
-        return F_angle
+        bond_params = all_params
+        F_bond = compute_harmonic_bond_force(xyz, bond_params, pair_inds, bond_inds)
+        return F_bond
 
 
     def stddev_loss(predicted, actual):
@@ -67,6 +68,12 @@ if __name__ == '__main__':
     def rmse_loss(predicted, actual):
         return np.sqrt(np.mean((predicted - actual) ** 2))
 
+    def sum_squared_error_loss(predicted, actual):
+        return np.sum((predicted - actual) ** 2)
+
+    @jit
+    def rmse(all_params):
+        return rmse_loss(predict(all_params), target)
 
     @jit
     def loss(all_params):
@@ -75,7 +82,7 @@ if __name__ == '__main__':
             * regularization vs. no regularization
             * different normalizations and scalings
         """
-        return rmse_loss(predict(all_params), target)
+        return sum_squared_error_loss(predict(all_params), target)
 
 
     print('loss at initialization: {:.3f}'.format(loss(params)))
@@ -125,9 +132,40 @@ if __name__ == '__main__':
                               minimizer_kwargs=dict(method=method, jac=jac, callback=callback, options=min_options),
                               callback=bh_callback)
 
-    target_name = 'angle'
+    target_name = 'bond'
     plot_residuals(predict(opt_result.x), target, name, target_name)
 
-
     loss_traj = [fun(theta) for theta in traj]
-    plot_loss_traj(loss_traj, method=method, mol_name=name, target_name=target_name)
+    # TODO: update plot name so RMSE isn't hardwired
+    #plot_loss_traj(loss_traj, method=method, mol_name=name, target_name=target_name)
+
+    # now try with Langevin
+    from espaloma.utils.samplers import langevin
+
+    logprobfun = lambda x: - fun(x)
+    gradlogprobfun = lambda x: - jac(x)
+    x0 = opt_result.x
+    v0 = onp.random.randn(*x0.shape)
+    langevin_traj, langevin_log_prob_traj = langevin(x0, v0, logprobfun, gradlogprobfun, stepsize=1e-4, collision_rate=np.inf, n_steps=10000)
+
+
+    plt.plot(-langevin_log_prob_traj)
+    plt.xlabel('langevin iteration')
+    plt.ylabel('loss')
+    plt.title(f'initialized from {method} result')
+    plt.savefig(f'plots/{name}_{target_name}_langevin_loss_traj_alt_param.png', dpi=300)
+    plt.close()
+
+    # initialize from random
+    x0 = params
+    v0 = onp.random.randn(*x0.shape)
+    langevin_traj, langevin_log_prob_traj = langevin(x0, v0, logprobfun, gradlogprobfun, stepsize=1e-4,
+                                                     collision_rate=1e3, n_steps=10000)
+
+    plt.plot(-langevin_log_prob_traj)
+    plt.xlabel('langevin iteration')
+    plt.ylabel('loss')
+    plt.yscale('log')
+    plt.title(f'initialized from random')
+    plt.savefig(f'plots/{name}_{target_name}_langevin_loss_traj_random_init_alt_param.png', dpi=300)
+    plt.close()

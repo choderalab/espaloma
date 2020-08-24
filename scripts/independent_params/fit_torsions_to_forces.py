@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as onp
 from jax.config import config  # TODO: is there a way to enable this globally?
 
-from scripts.independent_params.plots import plot_residuals
+from scripts.independent_params.plots import plot_residuals, plot_loss_traj
 
 config.update("jax_enable_x64", True)
 
@@ -17,7 +17,7 @@ from scipy.optimize import basinhopping
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
 from espaloma.mm.mm_utils import get_force_targets, MMComponents, initialize_torsions
-from espaloma.mm.mm_utils import compute_periodic_torsion_potential
+from espaloma.mm.mm_utils import compute_periodic_torsion_potential, get_sim
 from espaloma.utils.symmetry import get_unique_torsions
 
 onp.random.seed(1234)
@@ -28,8 +28,9 @@ if __name__ == '__main__':
     # look at a single molecule first
     name = 'AlkEthOH_r4'
     offmol = offmols[name]
+    sim = get_sim(name)
 
-    params, unpack = initialize_torsions(offmol)
+    params = initialize_torsions(sim, offmol)
     quad_inds, torsion_inds = get_unique_torsions(offmol)
 
     # targets
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 
     @jit
     def predict(all_params):
-        torsion_params, torsion_params, torsion_params = unpack(all_params)
+        torsion_params = all_params
         F_torsion = compute_torsion_force(xyz, torsion_params, quad_inds, torsion_inds)
         return F_torsion
 
@@ -119,15 +120,9 @@ if __name__ == '__main__':
                               minimizer_kwargs=dict(method=method, jac=jac, callback=callback, options=min_options),
                               callback=bh_callback)
 
-    plot_residuals(predict(opt_result.x), target, name, 'torsion')
+    target_name = 'torsion'
+    plot_residuals(predict(opt_result.x), target, name, target_name)
 
     loss_traj = [fun(theta) for theta in traj]
-    running_min_loss_traj = onp.minimum.accumulate(loss_traj)
-    plt.plot(running_min_loss_traj)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel(f'{method} iteration (within basin-hopping)')
-    plt.ylabel('running minimum of RMSE loss\n(predicted MM torsion force vs. OFF1.0 torsion force, in kJ/mol / nm)')
-    plt.title(f'{name}: torsion force regression')
-    plt.savefig(f'plots/{name}_torsion_loss_traj.png', bbox_inches='tight', dpi=300)
-    plt.close()
+
+    plot_loss_traj(loss_traj, method=method, mol_name=name, target_name=target_name)

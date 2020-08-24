@@ -128,8 +128,7 @@ def harmonic_bond_potential_alt_param(r, k1, k2, r1, r2):
     return k1 * (r - r1) ** 2 + k2 * (r - r2) ** 2
 
 
-# TODO: is this an okay range, or should this extend further?
-r1, r2 = 0.0, 0.2
+
 
 
 @jit
@@ -158,7 +157,7 @@ def compute_harmonic_bond_potential(xyz, params, pair_inds, bond_inds):
     return np.sum(harmonic_bond_potential(r, k, r0), axis=1)
 
 
-def compute_harmonic_bond_potential_alt_param(xyz, params, pair_inds, bond_inds):
+def compute_harmonic_bond_potential_alt_param(xyz, params, pair_inds, bond_inds, r1=0.0, r2=0.3):
     """
     :param xyz:
     :param params:
@@ -168,6 +167,10 @@ def compute_harmonic_bond_potential_alt_param(xyz, params, pair_inds, bond_inds)
     :param bond_inds:
         numpy array of length len(offmol.bonds),
         taking integer values in range 0 through n_unique
+    :param r1, float
+        min representable bond length
+    :param r2, float
+        max representable bond length
     :return:
     """
 
@@ -216,10 +219,10 @@ def compute_harmonic_angle_potential(xyz, params, triple_inds, angle_inds):
     return np.sum(harmonic_angle_potential(theta, k, theta0), axis=1)
 
 
-theta1, theta2 = 0, 2 * np.pi
 
 
-def compute_harmonic_angle_potential_alt_param(xyz, params, triple_inds, angle_inds):
+
+def compute_harmonic_angle_potential_alt_param(xyz, params, triple_inds, angle_inds, theta1=0, theta2=np.pi):
     """
     :param xyz:
     :param params:
@@ -229,6 +232,10 @@ def compute_harmonic_angle_potential_alt_param(xyz, params, triple_inds, angle_i
     :param angle_inds:
         numpy array of length len(offmol.bonds),
         taking integer values in range 0 through n_unique
+    :param theta1
+        min representable angle
+    :param theta2
+        max representable angle
     :return:
     """
 
@@ -484,10 +491,7 @@ def initialize_bonds(sim, offmol, noise_magnitude=1.0):
         bond_params[bond_inds[i]] = k_ * multiplicative_noise[0]
         bond_params[bond_inds[i] + n_unique_bonds] = length_ * multiplicative_noise[1]
 
-    def unpack(params):
-        return (params, [], [])
-
-    return bond_params, unpack
+    return bond_params
 
 
 def initialize_angles(sim, offmol, noise_magnitude=1.0):
@@ -514,10 +518,7 @@ def initialize_angles(sim, offmol, noise_magnitude=1.0):
         angle_params[angle_inds[i]] = k_ * multiplicative_noise[0]
         angle_params[angle_inds[i] + n_unique_angles] = theta_ * multiplicative_noise[1]
 
-    def unpack(params):
-        return ([], params, [])
-
-    return angle_params, unpack
+    return angle_params
 
 
 def initialize_torsions(sim, offmol, noise_magnitude=1.0):
@@ -538,7 +539,4 @@ def initialize_torsions(sim, offmol, noise_magnitude=1.0):
     n_torsion_params = 2 * n_unique_torsions * n_periodicities
     torsion_params = onp.zeros(n_torsion_params)
 
-    def unpack(params):
-        return ([], [], params)
-
-    return torsion_params, unpack
+    return torsion_params

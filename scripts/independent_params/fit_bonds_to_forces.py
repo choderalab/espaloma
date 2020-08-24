@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as onp
 from jax.config import config  # TODO: is there a way to enable this globally?
 
-from scripts.independent_params.plots import plot_residuals
+from scripts.independent_params.plots import plot_residuals, plot_loss_traj
 
 config.update("jax_enable_x64", True)
 
@@ -17,7 +17,7 @@ from scipy.optimize import basinhopping
 from espaloma.data.alkethoh.ani import get_snapshots_energies_and_forces
 from espaloma.data.alkethoh.data import offmols
 from espaloma.mm.mm_utils import get_force_targets, MMComponents, initialize_bonds
-from espaloma.mm.mm_utils import compute_harmonic_bond_potential
+from espaloma.mm.mm_utils import compute_harmonic_bond_potential, get_sim
 from espaloma.utils.symmetry import get_unique_bonds
 
 onp.random.seed(1234)
@@ -34,7 +34,8 @@ if __name__ == '__main__':
     name = 'AlkEthOH_r4'
     offmol = offmols[name]
     # params, unpack = initialize_off_params(offmol)
-    params, unpack = initialize_bonds(offmol, noise_magnitude=1.0)
+    sim = get_sim(name)
+    params = initialize_bonds(sim, offmol, noise_magnitude=1.0)
     pair_inds, bond_inds = get_unique_bonds(offmol)
 
     # targets
@@ -54,7 +55,7 @@ if __name__ == '__main__':
 
     @jit
     def predict(all_params):
-        bond_params, angle_params, torsion_params = unpack(all_params)
+        bond_params = all_params
         F_bond = compute_harmonic_bond_force(xyz, bond_params, pair_inds, bond_inds)
         return F_bond
 
@@ -124,15 +125,39 @@ if __name__ == '__main__':
                               minimizer_kwargs=dict(method=method, jac=jac, callback=callback, options=min_options),
                               callback=bh_callback)
 
-    plot_residuals(predict(opt_result.x), target, name, 'bond')
+    target_name = 'bond'
+    plot_residuals(predict(opt_result.x), target, name, target_name)
 
     loss_traj = [fun(theta) for theta in traj]
-    running_min_loss_traj = onp.minimum.accumulate(loss_traj)
-    plt.plot(running_min_loss_traj)
-    plt.xscale('log')
+    plot_loss_traj(loss_traj, method=method, mol_name=name, target_name=target_name)
+
+    # now try with Langevin
+    from espaloma.utils.samplers import langevin
+
+    logprobfun = lambda x: - fun(x)
+    gradlogprobfun = lambda x: - jac(x)
+    x0 = opt_result.x
+    v0 = onp.random.randn(*x0.shape)
+    langevin_traj, langevin_log_prob_traj = langevin(x0, v0, logprobfun, gradlogprobfun, stepsize=1e-4, collision_rate=np.inf, n_steps=10000)
+
+
+    plt.plot(-langevin_log_prob_traj)
+    plt.xlabel('langevin iteration')
+    plt.ylabel('loss')
+    plt.title(f'initialized from {method} result')
+    plt.savefig(f'plots/{name}_langevin_loss_traj.png', dpi=300)
+    plt.close()
+
+    # initialize from random
+    x0 = params
+    v0 = onp.random.randn(*x0.shape)
+    langevin_traj, langevin_log_prob_traj = langevin(x0, v0, logprobfun, gradlogprobfun, stepsize=1e-4,
+                                                     collision_rate=np.inf, n_steps=10000)
+
+    plt.plot(-langevin_log_prob_traj)
+    plt.xlabel('langevin iteration')
+    plt.ylabel('loss')
     plt.yscale('log')
-    plt.xlabel(f'{method} iteration (within basin-hopping)')
-    plt.ylabel('running minimum of RMSE loss\n(predicted MM bond force vs. OFF1.0 bond force, in kJ/mol / nm)')
-    plt.title(f'{name}: bond force regression')
-    plt.savefig(f'plots/{name}_bond_loss_traj.png', bbox_inches='tight', dpi=300)
+    plt.title(f'initialized from random')
+    plt.savefig(f'plots/{name}_langevin_loss_traj_random_init.png', dpi=300)
     plt.close()
