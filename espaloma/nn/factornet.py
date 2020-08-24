@@ -34,10 +34,10 @@ def form_bond_dict_ordered(offmol):
     bond_dict = dict()
     for atom in range(2):
         bond_dict[('atom', f'in[{atom}]', 'bond')] = []
-    
+
     reverse_etype = ('bond', 'contains', 'atom')
     bond_dict[reverse_etype] = []
-    
+
     for atom in range(2):
         forward_etype = ('atom', f'in[{atom}]', 'bond')
         for i in range(len(bonds)):
@@ -57,10 +57,10 @@ def form_angle_dict_ordered(offmol):
     angle_dict = dict()
     for atom in range(3):
         angle_dict[('atom', f'in[{atom}]', 'angle')] = []
-    
+
     reverse_etype = ('angle', 'contains', 'atom')
     angle_dict[reverse_etype] = []
-    
+
     for atom in range(3):
         forward_etype = ('atom', f'in[{atom}]', 'angle')
         for i in range(len(angles)):
@@ -80,10 +80,10 @@ def form_torsion_dict_ordered(offmol):
     torsion_dict = dict()
     for atom in range(4):
         torsion_dict[('atom', f'in[{atom}]', 'torsion')] = []
-    
+
     reverse_etype = ('torsion', 'contains', 'atom')
     torsion_dict[reverse_etype] = []
-    
+
     for atom in range(4):
         forward_etype = ('atom', f'in[{atom}]', 'torsion')
         for i in range(len(torsions)):
@@ -108,7 +108,7 @@ def offmol_to_heterograph(offmol):
     atomic_numbers = np.array([atom.atomic_number for atom in offmol.atoms])
     atom_data = one_hot_elements(atomic_numbers)
     factor_graph.nodes['atom'].data['element'] = atom_data
-    
+
     # initialize factor representation
     # TODO: initialize with other information
     for factor in ['bond', 'angle', 'torsion']:
@@ -193,7 +193,7 @@ class AtomToFactor(nn.Module):
         """
         N = g.number_of_nodes('bond')
         v = np.arange(N)
-        
+
         for i in range(2):
             edge_type = ('atom', f'in[{i}]', 'bond')
             destination = f'{self.msg_dest_name}[{i}]'
@@ -206,7 +206,7 @@ class AtomToFactor(nn.Module):
         """
         N = g.number_of_nodes('angle')
         v = np.arange(N)
-        
+
         for i in range(3):
             edge_type = ('atom', f'in[{i}]', 'angle')
             destination = f'{self.msg_dest_name}[{i}]'
@@ -219,7 +219,7 @@ class AtomToFactor(nn.Module):
         """
         N = g.number_of_nodes('torsion')
         v = np.arange(N)
-        
+
         for i in range(4):
             edge_type = ('atom', f'in[{i}]', 'torsion')
             destination = f'{self.msg_dest_name}[{i}]'
@@ -227,44 +227,44 @@ class AtomToFactor(nn.Module):
 
     def _compute_updated_bond_representation(self, g):
         """if a bond with current representation r is connected to atoms (a,b,),
-        
+
         update representation to f(a, b; r) + f(b, a; r)
         """
-        
+
         current_repr = g.nodes['bond'].data[self.current_repr_name]
-        
+
         incoming_messages = [g.nodes['bond'].data[f'{self.msg_dest_name}[{i}]'] for i in range(2)]
-        
+
         X_f = torch.cat(incoming_messages + [current_repr], dim=1)
         X_r = torch.cat(incoming_messages[::-1] + [current_repr], dim=1)
-        
+
         g.nodes['bond'].data[self.updated_repr_name] = self.bond_f(X_f) + self.bond_f(X_r)
 
     def _compute_updated_angle_representation(self, g):
         """if an angle with current representation r is connected to atoms (a,b,c),
-        
+
         update representation to f(a, b, c; r) + f(c, b, a; r)
         """
-        
+
         current_repr = g.nodes['angle'].data[self.current_repr_name]
-        
+
         incoming_messages = [g.nodes['angle'].data[f'{self.msg_dest_name}[{i}]'] for i in range(3)]
-        
+
         X_f = torch.cat(incoming_messages + [current_repr], dim=1)
         X_r = torch.cat(incoming_messages[::-1] + [current_repr], dim=1)
-        
+
         g.nodes['angle'].data[self.updated_repr_name] = self.angle_f(X_f) + self.angle_f(X_r)
-        
+
     def _compute_updated_torsion_representation(self, g, symmetrize=False):
         """if a torsion with current representation r is connected to atoms (a,b,c,d),
-        
+
         symmetrize -> update representation to f(a, b, c, d; r) + f(d, c, b, a; r)
         not symmetrize -> update representation to f(a, b, c, d; r)
 
         """
-        
+
         current_repr = g.nodes['torsion'].data[self.current_repr_name]
-        
+
         incoming_messages = [g.nodes['torsion'].data[f'{self.msg_dest_name}[{i}]'] for i in range(4)]
         X_f = torch.cat(incoming_messages + [current_repr], dim=1)
 
@@ -296,9 +296,9 @@ class FactorToAtom(nn.Module):
         """
         for each factor in ['bond', 'angle', 'torsion']
             {msg_dest_name}_{factor} = \sum_factor factor_f(msg_src_name, current_repr_name)
-        
+
         msg_dest_name = combine_g({msg_dest_name}_bond; {msg_dest_name}_angle; {msg_dest_name}_torsion)
-        
+
         """
         super(FactorToAtom, self).__init__()
         self.msg_src_name = msg_src_name
@@ -326,13 +326,13 @@ class FactorToAtom(nn.Module):
         self.fs = dict(bond=self.bond_f, angle=self.angle_f, torsion=self.torsion_f)
 
         self.combine_g = MLP(3 * message_dim, updated_atom_dim)
-    
+
     def pass_messages_from_factor_to_atom(self, g, f, factor_repr, atom_repr, atom_dest, edge_type):
         """Compute atom_dest = \sum_factors f(factor_repr; atom_repr)
 
         edge_type is something like (factor, contains, atom)
         """
-        
+
         N = g.number_of_nodes('atom')
         v = np.arange(N)
 
@@ -342,7 +342,7 @@ class FactorToAtom(nn.Module):
 
         # TODO: is there an important difference between push and pull for this step?
         g[edge_type].pull(v, message_func, reduce_func=fn.sum(atom_dest, atom_dest))
-    
+
     def forward(self, g):
         messages = []
         for factor in ['bond', 'angle', 'torsion']:
@@ -373,7 +373,7 @@ class FactorNet(nn.Module):
 
         factor_to_atom_models = []
         factor_to_atom_models.append(FactorToAtom(msg_src_name='round1_repr', msg_dest_name='incoming_round1', current_repr_name='element', updated_repr_name='round1_repr', atom_dim=initial_atom_dim, message_dim=message_dim, updated_atom_dim=atom_dim, factor_dims=factor_dims))
-        
+
         # subsequent rounds
         for r in range(1, n_rounds):
             # factor -> atom
@@ -472,4 +472,3 @@ if __name__ == '__main__':
         accuracy = np.mean((preds == targets).detach().numpy())
         print('\tloss = {:.3f}'.format(L.detach().numpy()))
         print('\taccuracy = {:.3f}'.format(accuracy))
-
