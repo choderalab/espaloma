@@ -17,22 +17,22 @@ def fp_oe(atom):
 
     HYBRIDIZATION_OE = {
         oechem.OEHybridization_sp: torch.tensor(
-            [1, 0, 0, 0, 0], dtype=torch.float32
+            [1, 0, 0, 0, 0], dtype=torch.get_default_dtype()
         ),
         oechem.OEHybridization_sp2: torch.tensor(
-            [0, 1, 0, 0, 0], dtype=torch.float32
+            [0, 1, 0, 0, 0], dtype=torch.get_default_dtype()
         ),
         oechem.OEHybridization_sp3: torch.tensor(
-            [0, 0, 1, 0, 0], dtype=torch.float32
+            [0, 0, 1, 0, 0], dtype=torch.get_default_dtype()
         ),
         oechem.OEHybridization_sp3d: torch.tensor(
-            [0, 0, 0, 1, 0], dtype=torch.float32
+            [0, 0, 0, 1, 0], dtype=torch.get_default_dtype()
         ),
         oechem.OEHybridization_sp3d2: torch.tensor(
-            [0, 0, 0, 0, 1], dtype=torch.float32
+            [0, 0, 0, 0, 1], dtype=torch.get_default_dtype()
         ),
         oechem.OEHybridization_Unknown: torch.tensor(
-            [0, 0, 0, 0, 0], dtype=torch.float32
+            [0, 0, 0, 0, 0], dtype=torch.get_default_dtype()
         ),
     }
     return torch.cat(
@@ -65,22 +65,22 @@ def fp_rdkit(atom):
 
     HYBRIDIZATION_RDKIT = {
         Chem.rdchem.HybridizationType.SP: torch.tensor(
-            [1, 0, 0, 0, 0], dtype=torch.float32
+            [1, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP2: torch.tensor(
-            [0, 1, 0, 0, 0], dtype=torch.float32
+            [0, 1, 0, 0, 0], dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3: torch.tensor(
-            [0, 0, 1, 0, 0], dtype=torch.float32
+            [0, 0, 1, 0, 0], dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3D: torch.tensor(
-            [0, 0, 0, 1, 0], dtype=torch.float32
+            [0, 0, 0, 1, 0], dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3D2: torch.tensor(
-            [0, 0, 0, 0, 1], dtype=torch.float32
+            [0, 0, 0, 0, 1], dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.S: torch.tensor(
-            [0, 0, 0, 0, 0], dtype=torch.float32
+            [0, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
         ),
     }
     return torch.cat(
@@ -100,7 +100,7 @@ def fp_rdkit(atom):
                     atom.IsInRingSize(7) * 1.0,
                     atom.IsInRingSize(8) * 1.0,
                 ],
-                dtype=torch.float32,
+                dtype=torch.get_default_dtype(),
             ),
             HYBRIDIZATION_RDKIT[atom.GetHybridization()],
         ],
@@ -125,7 +125,7 @@ def from_openforcefield_mol(mol, use_fp=True):
         [[atom.atomic_number] for atom in mol.atoms]
     )
 
-    h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
+    h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.get_default_dtype())
 
     h_v[
         torch.arange(g.ndata["type"].shape[0]),

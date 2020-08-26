@@ -100,6 +100,28 @@ def lj_12_6(x, sigma, epsilon):
 
     return esp.mm.functional.lj(x=x, sigma=sigma, epsilon=epsilon)
 
+def lj_9_6(x, sigma, epsilon):
+    """ Lenard-Jones 12-6.
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+    k : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+    eq : `torch.Tensor`,
+        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+    Returns
+    -------
+    u : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+    """
+
+    return esp.mm.functional.lj(
+            x=x, sigma=sigma, epsilon=epsilon, order=[9, 6], coefficients=[2, 3]
+        )
+
 
 #
 # def columb(x, q_prod, k_e=K_E):

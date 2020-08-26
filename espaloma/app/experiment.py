@@ -105,6 +105,11 @@ class Train(Experiment):
                 g = self.normalize.unnorm(g)
                 loss = self.loss(g)
                 loss.backward()
+
+                if torch.isnan(loss).cpu().numpy().item() is True:
+                    raise RuntimeError('Loss is Nan.')
+
+
                 return loss
 
             self.optimizer.step(closure)
@@ -197,6 +202,10 @@ class Test(Experiment):
                     )
 
         self.ref_g = self.normalize.unnorm(self.net(g))
+
+        for term in self.ref_g.ntypes:
+            for param in self.ref_g.nodes[term].data.keys():
+                g.nodes[term].data[param] = g.nodes[term].data[param].detach().cpu()
 
         # point this to self
         self.results = results

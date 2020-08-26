@@ -112,7 +112,12 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             self.transforms.append(fn)
 
         else:  # modify in-place
-            self.graphs = list(map(fn, self.graphs))
+            # self.graphs = list(map(fn, self.graphs))
+            _graphs = []
+            for graph in self.graphs:
+                    _graphs.append(fn(graph))
+            
+            self.graphs = _graphs
 
         return self  # to allow grammar: ds = ds.apply(...)
 

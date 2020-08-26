@@ -6,8 +6,10 @@ import torch
 from openforcefield.typing.engines.smirnoff import ForceField
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
+from simtk.unit.quantity import Quantity
 
 from espaloma.units import *
+import espaloma as esp
 
 # =============================================================================
 # CONSTANTS
@@ -16,6 +18,122 @@ from espaloma.units import *
 TEMPERATURE = 500 * unit.kelvin
 STEP_SIZE = 1 * unit.femtosecond
 COLLISION_RATE = 1 / unit.picosecond
+
+# =============================================================================
+# MODULE FUNCTIONS
+# =============================================================================
+def subtract_nonbonded_force(
+        g,
+        forcefield="test_forcefields/smirnoff99Frosst.offxml",
+    ):
+
+    # get the forcefield from str
+    if isinstance(forcefield, str):
+        forcefield = ForceField(forcefield)
+
+    # partial charge
+    g.mol.assign_partial_charges("gasteiger") # faster
+
+    # parametrize topology
+    topology = g.mol.to_topology()
+
+    # create openmm system
+    system = forcefield.create_openmm_system(
+        topology,
+        charge_from_molecules=[g.mol],
+    )
+
+    # use langevin integrator, although it's not super useful here
+    integrator = openmm.LangevinIntegrator(
+        TEMPERATURE, COLLISION_RATE, STEP_SIZE
+    )
+
+    # create simulation
+    simulation = Simulation(
+        topology=topology, system=system, integrator=integrator
+    )
+
+    # get forces
+    forces = list(system.getForces())
+
+    # loop through forces
+    for force in forces:
+        name = force.__class__.__name__
+        
+        # turn off angle
+        if 'Angle' in name:
+            for idx in range(force.getNumAngles()):
+                id1, id2, id3, angle, k = force.getAngleParameters(idx)
+                force.setAngleParameters(
+                    idx, id1, id2, id3, angle, 0.0
+                )
+        
+        elif 'Bond' in name:
+            for idx in range(force.getNumBonds()):
+                id1, id2, length, k = force.getBondParameters(idx)
+                force.setBondParameters(
+                    idx, id1, id2, length, 0.0,
+                )
+
+        elif 'Torsion' in name:
+            for idx in range(force.getNumTorsions()):
+                id1, id2, id3, id4, periodicity, phase, k\
+                    = force.getTorsionParameters(idx)
+                force.setTorsionParameters(
+                    idx, id1, id2, id3, id4, periodicity, phase, 0.0,
+                )
+        
+        force.updateParametersInContext(simulation.context)
+
+    # the snapshots
+    xs = Quantity(
+        g.nodes['n1'].data['xyz'].detach().numpy(),
+        esp.units.DISTANCE_UNIT,
+    ).value_in_unit(unit.nanometer).transpose((1, 0, 2))
+
+    # loop through the snapshots
+    energies = []
+    derivatives = []
+
+    for x in xs:
+        simulation.context.setPositions(x)
+
+        state = simulation.context.getState(
+            getEnergy=True, getParameters=True, getForces=True,
+        )
+
+
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT,
+        )
+
+        derivative = state.getForces(asNumpy=True).value_in_unit(
+            esp.units.FORCE_UNIT,
+        )
+
+        energies.append(energy)
+        derivatives.append(derivative)
+
+    # put energies to a tensor
+    energies = torch.tensor(energies).flatten()[None, :]
+    derivatives = torch.tensor(
+        np.stack(derivatives, axis=1),        
+    )
+
+    # subtract the energies
+    g.heterograph.apply_nodes(
+        lambda node: {'u_ref': node.data['u_ref']-energies},
+        ntype='g',
+    )
+
+    g.heterograph.apply_nodes(
+        lambda node: {'u_ref_prime': node.data['u_ref_prime']-derivatives},
+        ntype='n1',
+    )
+
+    return g
+
+    
 
 # =============================================================================
 # MODULE CLASSES
@@ -99,8 +217,12 @@ class MoleculeVacuumSimulation(object):
             topology=topology, system=system, integrator=integrator
         )
 
+
+        import openforcefield
         # get conformer
-        g.mol.generate_conformers()
+        g.mol.generate_conformers(
+            toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),        
+        )
 
         # put conformer in simulation
         simulation.context.setPositions(g.mol.conformers[0])
@@ -168,3 +290,5 @@ class MoleculeVacuumSimulation(object):
             return g
 
         return samples
+
+

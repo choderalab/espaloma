@@ -3,6 +3,18 @@
 # =============================================================================
 import math
 import torch
+import espaloma as esp
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+from simtk import unit
+from simtk.unit.quantity import Quantity
+LJ_SWITCH = Quantity(
+    1.0,
+    unit.angstrom).value_in_unit(
+        esp.units.DISTANCE_UNIT
+    )
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -81,7 +93,7 @@ def periodic(x, k, periodicity=list(range(6)), phases=[0.0 for _ in range(6)]):
 #     return ka * (x - a) ** 2 + kb * (x - b) ** 2
 
 
-def lj(x, epsilon, sigma, order=[12, 6]):
+def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWITCH):
     r""" Lennard-Jones term.
 
     Notes
@@ -105,10 +117,26 @@ def lj(x, epsilon, sigma, order=[12, 6]):
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 
+    if isinstance(coefficients, list):
+        coefficients = torch.tensor(coefficients, device=x.device)
+
     assert order.shape[0] == 2
     assert order.dim() == 1
 
-    return epsilon * ((sigma / x) ** order[0] - (sigma / x) ** order[1])
+    # compute sigma over x
+    sigma_over_x = sigma / x
+
+    # erase values under switch
+    sigma_over_x = torch.where(
+        torch.lt(x, switch),
+        torch.zeros_like(sigma_over_x),
+        sigma_over_x,
+    )
+
+    return epsilon * (
+            coefficients[0] * sigma_over_x ** order[0] 
+            - coefficients[1] * sigma_over_x ** order[1]
+        )
 
 def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     r""" Gaussian basis function.

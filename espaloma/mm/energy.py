@@ -83,7 +83,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     """ Nonbonded in nodes. """
     return {
         "u%s"
-        % suffix: scaling * esp.mm.nonbonded.lj_12_6(
+        % suffix: scaling * esp.mm.nonbonded.lj_9_6(
             x=nodes.data["x"],
             sigma=nodes.data["sigma%s" % suffix],
             epsilon=nodes.data["epsilon%s" % suffix],
@@ -94,7 +94,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
 # =============================================================================
 # ENERGY IN GRAPH
 # =============================================================================
-def energy_in_graph(g, suffix="", terms=["n2", "n3",]):
+def energy_in_graph(g, suffix="", terms=["n2", "n3",]): # "onefour", "nonbonded"]):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
@@ -170,6 +170,12 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3",]):
         },
         ntype="g",
     )
+
+    if 'u0' in g.nodes['g'].data:
+        g.apply_nodes(
+            lambda node: {'u': node.data['u'] + node.data['u0']},
+            ntype="g",
+        )
 
     return g
 

@@ -196,6 +196,79 @@ class GraphDerivativeMetric(Metric):
         return self.weight * self.base_metric(input=input_prime, target=target_prime,)
 
 
+class GraphHalfDerivativeMetric(Metric):
+    """ Loss between nodes attributes of graph or graphs.
+
+    """
+
+    def __init__(
+        self,
+        base_metric,
+        input_level="g",
+        input_name="u",
+        target_prime_level="n1",
+        target_prime_name="u_ref_prime",
+        d="xyz",
+        d_level="n1",
+        weight=1.0,
+        *args,
+        **kwargs
+    ):
+        super(GraphHalfDerivativeMetric, self).__init__(*args, **kwargs)
+
+        # define query functions
+        self.d = self._translation(d, d_level)
+        self.input_fn = self._translation(input_name, input_level)
+        self.target_prime_fn = self._translation(
+                target_prime_name, 
+                target_prime_level
+        )
+
+        self.base_metric = base_metric
+        self.weight = weight
+        # get name
+        if hasattr(base_metric, "__name__"):
+            base_name = base_metric.__name__
+        else:
+            base_name = base_metric.__class__.__name__
+
+        self.__name__ = "%s_between_%s_d_%s_on_%s_and_%s_on_%s" % (
+            base_name,
+            input_name,
+            d,
+            input_level,
+            target_prime_name,
+            target_prime_level,
+        )
+
+    @staticmethod
+    def _translation(string, level):
+        return lambda g: g.nodes[level].data[string]
+
+    def forward(self, g_input, g_target=None):
+        """ Forward function of loss.
+
+        """
+        # allow loss within self
+        if g_target is None:
+            g_target = g_input
+
+        # calculate the derivatives of input
+        input_prime = torch.autograd.grad(
+            self.input_fn(g_input).sum(),
+            self.d(g_input),
+            create_graph=True,
+            retain_graph=True,
+        )[0]
+
+        target_prime = self.target_prime_fn(g_target)
+
+        # compute loss using base loss
+        # NOTE:
+        # use keyward argument here since torch is bad with the order with args
+        return self.weight * self.base_metric(input=input_prime, target=target_prime,)
+
+
 # =============================================================================
 # PRESETS
 # =============================================================================

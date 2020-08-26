@@ -28,6 +28,45 @@ def alkethoh(*args, **kwargs):
     smiles = df.iloc[:, 0]
     return esp.data.dataset.GraphDataset(smiles, *args, **kwargs)
 
+
+def zinc(first=-1, *args, **kwargs):
+    import tarfile
+    from os.path import exists
+    from openforcefield.topology import Molecule
+    from rdkit import Chem
+
+    fname = 'parm_at_Frosst.tgz'
+    url = 'http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz'
+
+    if not exists(fname):
+        import urllib.request
+        urllib.request.urlretrieve(url, fname)
+
+    archive = tarfile.open(fname)
+    zinc_file = archive.extractfile('parm_at_Frosst/zinc.sdf')
+    _mols = Chem.ForwardSDMolSupplier(zinc_file, removeHs=False)
+
+    count = 0
+    gs = []
+
+    for mol in _mols:
+        try:
+            gs.append(
+                esp.Graph(
+                    Molecule.from_rdkit(mol, allow_undefined_stereo=True)
+                )
+            )
+
+            count += 1
+
+        except:
+            pass
+
+        if first != -1 and count >= first:
+            break
+
+    return esp.data.dataset.GraphDataset(gs, *args, **kwargs)
+
 def qcarchive(
         collection_type="OptimizationDataset",
         name="OpenFF Full Optimization Benchmark 1",

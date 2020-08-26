@@ -8,7 +8,7 @@ import espaloma as esp
 
 
 # =============================================================================
-# MODULE FUNCTIONS
+# MODULE CLASSES
 # =============================================================================
 class JanossyPooling(torch.nn.Module):
     """ Janossy pooling (arXiv:1811.01900) to average node representation

@@ -51,8 +51,23 @@ def run(args):
     # get the last bit of units
     units = [int(x) for x in args.config if x.isdigit()][-1]
 
+    print(args.janossy_config)
+
+    janossy_config = []
+    for x in args.janossy_config:
+        if isinstance(x, int):
+            janossy_config.append(int(x))
+
+        elif x.isdigit():
+            janossy_config.append(int(x))
+
+        else:
+            janossy_config.append(x)
+
+    print(janossy_config)
+
     readout = esp.nn.readout.janossy.JanossyPooling(
-        in_features=units, config=args.janossy_config,
+        in_features=units, config=janossy_config,
     )
 
     net = torch.nn.Sequential(
@@ -86,6 +101,7 @@ def run(args):
               base_metric=torch.nn.MSELoss(),
               between=["u", "u_ref"],
               level="g",
+              weight=10.0,
         ),
     ]
 

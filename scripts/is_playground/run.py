@@ -13,14 +13,13 @@ import espaloma as esp
 # In[15]:
 
 
-WINDOWS = 20
+WINDOWS = 10
 
 
 # # integrator
 # We use a vanilla Euler method as our integrator.
 
 # In[16]:
-
 
 def velocity_verlot_integrator(xs, vs, closure, dt=1.0):
     x = xs[-1]
@@ -57,9 +56,13 @@ def velocity_verlot_integrator(xs, vs, closure, dt=1.0):
 # In[22]:
 
 
+# g = esp.Graph('CN1C=NC2=C1C(=O)N(C(=O)N2C)C')
 g = esp.Graph('C')
 g = esp.graphs.LegacyForceField('smirnoff99Frosst').parametrize(g)
 
+
+
+g.heterograph = g.heterograph.to(torch.device('cuda:0'))
 
 # In[23]:
 
@@ -88,6 +91,7 @@ net = torch.nn.Sequential(
     esp.mm.energy.EnergyInGraph(suffix='_ref'),
 )
 
+net = net.to(torch.device('cuda:0'))
 
 # In[24]:
 
@@ -117,7 +121,7 @@ def energy(g, idx):
 
 
 def simulation(net):
-    x = torch.nn.Parameter(particle_distribution.sample())
+    x = torch.nn.Parameter(particle_distribution.sample().cuda())
     v = torch.zeros_like(x)
     
     xs = [x]
@@ -134,7 +138,7 @@ def simulation(net):
     
     g.nodes['n1'].data['xyz'] = xs[-1]
 
-    return g.nodes['g'].data['u_ref']
+    return g, g.nodes['g'].data['u_ref']
 
 
 # In[ ]:
@@ -144,34 +148,37 @@ optimizer = torch.optim.Adam(net.parameters(), 1e-3)
 
 for _ in range(100):
     optimizer.zero_grad()
-    loss = simulation(net).sum()
+    g, u_ref = simulation(net)
+    loss = u_ref.sum()
     loss.backward(retain_graph=True)
-    print(loss)
+    print(loss, flush=True)
     optimizer.step()
+
+
+for term in g.heterograph.ntypes:
+    for param in self.ref_g.nodes[term].data.keys():
+        g.nodes[term].data[param] = g.nodes[term].data[param].detach().cpu()
 
 
 # In[33]:
 
 
-for _ in range(100):
-    optimizer.zero_grad()
-    loss = simulation(net).sum()
-    loss.backward(retain_graph=True)
-    print(loss)
-    optimizer.step()
-    
-    
-
 
 # In[32]:
-
-
-g.nodes['n2'].data['x']
 
 
 # In[28]:
 
 
+
+import pickle
+pickle.dump(
+    g,
+    open(
+        'g.th',
+        'wb'
+    ),
+)
 
 
 
