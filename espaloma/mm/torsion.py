@@ -7,7 +7,10 @@ import espaloma as esp
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def periodic_torsion(x, k, eq, order=1):
+def periodic_torsion(x, k, 
+        periodicity=list(range(1, 7)), 
+        phases=[0.0 for _ in range(6)]
+    ):
     """ Harmonic bond energy.
 
     Parameters
@@ -27,4 +30,9 @@ def periodic_torsion(x, k, eq, order=1):
     """
     # NOTE:
     # 0.5 because all torsions are calculated twice
-    return 0.5 * esp.mm.functional.periodic(x=x, k=k, eq=eq, order=order)
+    return 0.5 * esp.mm.functional.periodic(
+            x=x,
+            k=k,
+            periodicity=periodicity,
+            phases=phases,
+    )

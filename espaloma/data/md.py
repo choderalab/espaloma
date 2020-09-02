@@ -115,9 +115,13 @@ def subtract_nonbonded_force(
         derivatives.append(derivative)
 
     # put energies to a tensor
-    energies = torch.tensor(energies).flatten()[None, :]
+    energies = torch.tensor(
+            energies,
+            dtype=torch.get_default_dtype(),
+            ).flatten()[None, :]
     derivatives = torch.tensor(
-        np.stack(derivatives, axis=1),        
+        np.stack(derivatives, axis=1),      
+        dtype=torch.get_default_dtype(),
     )
 
     # subtract the energies

@@ -114,3 +114,5 @@ class Graph(BaseGraph):
             (self.mol, self.homograph, self.heterograph) = pickle.load(
                 f_handle
             )
+
+        return self

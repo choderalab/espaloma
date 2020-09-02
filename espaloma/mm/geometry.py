@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import math
 import dgl
 import torch
 
@@ -37,11 +38,12 @@ def distance(x0, x1):
 def _angle(r0, r1):
     """ Angle between vectors. """
 
-    return torch.atan2(
+    angle = torch.atan2(
         torch.norm(torch.cross(r0, r1), p=2, dim=-1),
         torch.sum(torch.mul(r0, r1), dim=-1),
     )
 
+    return angle
 
 def angle(x0, x1, x2):
     """ Angle between three points. """
@@ -55,10 +57,17 @@ def _dihedral(r0, r1):
     return _angle(r0, r1)
 
 
-def dihedral(x0, x1, x2, x3):
+def dihedral(x0, x1, x2, x3, jitter=1e-5):
     """ Dihedral between four points. """
+    x0 = x0 + torch.randn_like(x0) * jitter
+    x1 = x1 + torch.randn_like(x1) * jitter
+    x2 = x2 + torch.randn_like(x2) * jitter
+    x3 = x3 + torch.randn_like(x3) * jitter
+
     left = torch.cross(x1 - x0, x1 - x2)
     right = torch.cross(x2 - x1, x2 - x3)
+
+ 
     return _dihedral(left, right)
 
 

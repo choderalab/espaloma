@@ -6,7 +6,7 @@ import espaloma as esp
 def run(layer_name):
     # grab dataset
     # esol = esp.data.esol(first=20)
-    ds = esp.data.zinc(first=100)
+    ds = esp.data.zinc(first=1000).shuffle()
 
     # do some typing
     typing = esp.graphs.legacy_force_field.LegacyForceField('gaff-1.81')
@@ -19,10 +19,14 @@ def run(layer_name):
     # with the specification of __getitem__ method
     ds_tr, ds_te = ds.split([4, 1])
 
+    ds_tr.save('ds_tr.th')
+    ds_te.save('ds_te.th')
+
     # get a loader object that views this dataset in some way
     # using this specific flag the dataset turns into an iterator
     # that outputs loss function, per John's suggestion
-    loader = ds_tr.view('graph', batch_size=20)
+    ds_tr = ds_tr.view('graph', batch_size=20)
+    ds_te = ds_te.view('graph', batch_size=len(ds_te))
 
     # define a layer
     layer = esp.nn.layers.dgl_legacy.gn(layer_name)
@@ -45,8 +49,8 @@ def run(layer_name):
     )
 
     exp = esp.TrainAndTest(
-        ds_tr=loader,
-        ds_te=loader,
+        ds_tr=ds_tr,
+        ds_te=ds_te,
         net=net,
         metrics_te=[esp.metrics.TypingAccuracy()],
         n_epochs=500,

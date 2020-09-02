@@ -56,7 +56,7 @@ def harmonic(x, k, eq, order=[2]):
         dim=-1
     )
 
-def periodic(x, k, periodicity=list(range(6)), phases=[0.0 for _ in range(6)]):
+def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]):
     """ Periodic term.
 
     Parameters
@@ -71,13 +71,26 @@ def periodic(x, k, periodicity=list(range(6)), phases=[0.0 for _ in range(6)]):
 
     if isinstance(periodicity, list):
         periodicity = torch.tensor(
-            periodicity, device=x.device, dtype=torch.float32
+            periodicity, device=x.device, dtype=torch.get_default_dtype(),
         )
 
-    return k * (1.0 + torch.cos(
-        periodicity[None, :].repeat(x.shape[0], 1) * x
-        - phases
-    ))
+    n_theta = periodicity[None, None, :].repeat(
+        x.shape[0],
+        x.shape[1],
+        1
+    ) * x[:, :, None]
+
+    n_theta_minus_phases = n_theta - phases[None, None, :]
+
+    cos_n_theta_minus_phases = n_theta_minus_phases.cos()
+
+    k = k[:, None, :].repeat(
+        1, x.shape[1], 1
+    )
+
+    energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
+
+    return energy
 
 # simple implementation
 # def harmonic(x, k, eq):
@@ -152,7 +165,6 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     phases = phases[None, None, :].repeat(x.shape[0], x.shape[1], 1)
     x = x[:, :, None].repeat(1, 1, phases.shape[-1])
     coefficients = coefficients[:, None, :].repeat(1, x.shape[1], 1)
-
 
     return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
 

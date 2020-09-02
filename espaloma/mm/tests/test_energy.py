@@ -28,7 +28,13 @@ def test_energy():
     net = torch.nn.Sequential(
         esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
         esp.nn.readout.janossy.JanossyPooling(
-            in_features=32, config=[32, "tanh"]
+            in_features=32, config=[32, "tanh"],
+            out_features={
+                1: ['epsilon', 'sigma'],
+                2: ['k', 'eq'],
+                3: ['k', 'eq'],
+                4: ['k'],
+            },
         ),
     )
 

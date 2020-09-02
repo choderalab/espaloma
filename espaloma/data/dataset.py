@@ -89,6 +89,11 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
             return graphs
 
+    def shuffle(self):
+        from random import shuffle
+        shuffle(self.graphs)
+        return self        
+
     def apply(self, fn, in_place=False):
         r""" Apply functions to the elements of the dataset.
 
@@ -115,8 +120,10 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             # self.graphs = list(map(fn, self.graphs))
             _graphs = []
             for graph in self.graphs:
+                try:
                     _graphs.append(fn(graph))
-            
+                except:
+                    continue
             self.graphs = _graphs
 
         return self  # to allow grammar: ds = ds.apply(...)
@@ -162,6 +169,8 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         with open(path, "rb") as f_handle:
             self.graphs = pickle.load(f_handle)
 
+        return self
+
 
 class GraphDataset(Dataset):
     """ Dataset with additional support for only viewing
@@ -170,7 +179,7 @@ class GraphDataset(Dataset):
 
     """
 
-    def __init__(self, graphs, first=None):
+    def __init__(self, graphs=[], first=None):
         super(GraphDataset, self).__init__()
         from openforcefield.topology import Molecule
 

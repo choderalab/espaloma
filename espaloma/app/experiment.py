@@ -4,6 +4,7 @@
 import abc
 import copy
 
+import numpy as np
 import dgl
 import torch
 
@@ -99,12 +100,16 @@ class Train(Experiment):
         """ Train the model for one batch. """
         for g in self.data:  # TODO: does this have to be a single g?
             g = g.to(self.device)
+            
+
             def closure(g=g):
                 self.optimizer.zero_grad()
                 g = self.net(g)
                 g = self.normalize.unnorm(g)
+
                 loss = self.loss(g)
                 loss.backward()
+                print(loss, flush=True)
 
                 if torch.isnan(loss).cpu().numpy().item() is True:
                     raise RuntimeError('Loss is Nan.')
@@ -131,7 +136,6 @@ class Train(Experiment):
         self.states["final"] = copy.deepcopy(self.net.state_dict())
 
         return self.net
-
 
 class Test(Experiment):
     """ Test experiment.
@@ -171,8 +175,12 @@ class Test(Experiment):
         self.sampler = sampler
         self.normalize = normalize()
 
-    def test(self):
+    def test(self, averaged=True):
         """ Run tests. """
+
+        if averaged is True:
+            return self.test_averaged()
+
         results = {}
 
         # loop through the metrics
@@ -209,6 +217,45 @@ class Test(Experiment):
 
         # point this to self
         self.results = results
+        return dict(results)
+
+
+    def test_averaged(self):
+        """ Run tests. """
+        results = {}
+
+        # loop through the metrics
+        for metric in self.metrics:
+            results[metric.__name__] = {}
+
+        # make it just one giant graph
+        gs = list(self.data)
+        gs = [g.to(self.device) for g in gs]
+
+        for state_name, state in self.states.items():  # loop through states
+            # load the state dict
+            self.net.load_state_dict(state)
+
+            for metric in self.metrics:
+                results[metric.__name__][state_name] = []
+
+                # loop through the metrics
+                for g in gs:
+                    with g.local_scope():
+                        results[metric.__name__][state_name].append(
+                            metric(g_input=self.normalize.unnorm(self.net(g)))
+                            .detach()
+                            .cpu()
+                            .numpy()
+                        )
+                
+                results[metric.__name__][state_name] = np.average(
+                    results[metric.__name__][state_name]
+                )
+
+        # point this to self
+        self.results = results
+        self.ref_g = None
         return dict(results)
 
 

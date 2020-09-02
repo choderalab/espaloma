@@ -10,10 +10,18 @@ import torch
 
 import espaloma as esp
 
-# =============================================================================
-# MODULE FUNCTIONS
-# =============================================================================
+OFFSETS = {
+    1: -0.500607632585,
+    6: -37.8302333826,
+    7: -54.5680045287,
+    8: -75.0362229210,
+}
 
+# ==============================================================================
+# UTILITY FUNCTIONS
+# ==============================================================================
+def sum_offsets(elements):
+    return sum([OFFSETS[element] for element in elements])
 
 def from_csv(path, toolkit="rdkit", smiles_col=-1, y_cols=[-2], seed=2666):
     """ Read csv from file.
@@ -181,7 +189,7 @@ def infer_mol_from_coordinates(
         )
 
     from openforcefield.topology import Molecule
-    _mol = Molecule.from_openeye(mol)
+    _mol = Molecule.from_openeye(mol, allow_undefined_stereo=True)
     g = esp.Graph(_mol)
 
     return g

@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import numpy as np
 import torch
 import qcportal as ptl
 import espaloma as esp
@@ -60,23 +61,27 @@ def get_graph(collection, record_name):
                 esp.units.ENERGY_UNIT
             )
             for snapshot in trajectory
-        ]
+        ],
+        dtype=torch.get_default_dtype(),
     )[None, :]
 
-    g.nodes['n1'].data['xyz'] = torch.stack(
-        [
-            torch.tensor(
+    g.nodes['n1'].data['xyz'] = torch.tensor(
+        np.stack(
+                [
                 Quantity(
                     snapshot.get_molecule().geometry,
                     unit.bohr,
                 ).value_in_unit(
                     esp.units.DISTANCE_UNIT
                 )
-            )
-            for snapshot in trajectory
-        ],
-        dim=1
+                for snapshot in trajectory
+            ],
+            axis=1
+        ),
+        requires_grad=True,
+        dtype=torch.get_default_dtype(),
     )
+
 
     g.nodes['n1'].data['u_ref_prime'] = torch.stack(
         [
@@ -86,7 +91,8 @@ def get_graph(collection, record_name):
                     esp.units.HARTREE_PER_PARTICLE / unit.bohr,
                 ).value_in_unit(
                     esp.units.FORCE_UNIT
-                )
+                ),
+                dtype=torch.get_default_dtype(),
             )
             for snapshot in trajectory
         ],

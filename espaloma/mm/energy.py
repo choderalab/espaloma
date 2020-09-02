@@ -50,7 +50,6 @@ def apply_torsion(nodes, suffix=""):
         % suffix: esp.mm.torsion.periodic_torsion(
             x=nodes.data["x"],
             k=nodes.data["k%s" % suffix],
-            eq=nodes.data["eq%s" % suffix],
         )
     }
 
@@ -94,7 +93,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
 # =============================================================================
 # ENERGY IN GRAPH
 # =============================================================================
-def energy_in_graph(g, suffix="", terms=["n2", "n3",]): # "onefour", "nonbonded"]):
+def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbonded"]):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
@@ -130,6 +129,12 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3",]): # "onefour", "nonbonded"
     if "n3" in terms:
         g.apply_nodes(
             lambda node: apply_angle(node, suffix=suffix), ntype="n3",
+        )
+
+    if g.number_of_nodes("n4") > 0 and "n4" in terms:
+        g.apply_nodes(
+            lambda node: apply_torsion(node, suffix=suffix),
+            ntype="n4",
         )
 
     if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:

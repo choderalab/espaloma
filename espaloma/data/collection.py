@@ -86,3 +86,32 @@ def qcarchive(
     graphs = [graph for graph in graphs if graph is not None]
 
     return esp.data.dataset.GraphDataset(graphs, *args, **kwargs)
+
+
+def md17_old(*args, **kwargs):
+    return [
+        esp.data.md17_utils.get_molecule(
+            name, *args, **kwargs
+        ).heterograph for name in [
+            # 'benzene', 
+            'uracil', 
+            'naphthalene',
+            'aspirin', 'salicylic',
+            'malonaldehyde', 
+            # 'ethanol', 
+            'toluene',
+   'paracetamol', 'azobenzene'
+        ]]
+
+def md17_new(*args, **kwargs):
+    return [
+        esp.data.md17_utils.get_molecule(
+            name, *args, **kwargs
+        ).heterograph for name in [
+            # 'paracetamol', 'azobenzene',
+            'benzene', 'ethanol',
+        ]]
+
+
+
+
