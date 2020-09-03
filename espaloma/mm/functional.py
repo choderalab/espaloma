@@ -147,7 +147,7 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     )
 
     return epsilon * (
-            coefficients[0] * sigma_over_x ** order[0] 
+            coefficients[0] * sigma_over_x ** order[0]
             - coefficients[1] * sigma_over_x ** order[1]
         )
 
@@ -196,3 +196,59 @@ def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
     u = u1 + u2 - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
 
     return u
+
+def harmonic_periodic_coupled(
+        x_harmonic,
+        x_periodic,
+        k,
+        eq,
+        periodicity=list(range(1, 3)),
+    ):
+
+    if isinstance(periodicity, list):
+        periodicity = torch.tensor(
+            periodicity,
+            device=x_harmonic.device,
+            dtype=torch.get_default_dtype(),
+        )
+
+    n_theta = periodicity[None, None, :].repeat(
+        x_periodic.shape[0],
+        x_periodic.shape[1],
+        1
+    ) * x_periodic[:, :, None]
+
+    cos_n_theta = n_theta.cos()
+
+    k = k[:, None, :].repeat(
+        1, x_periodic.shape[1], 1
+    )
+
+    sum_k_cos_n_theta = (k * cos_n_theta).sum(dim=-1)
+
+    x_minus_eq = x_harmonic - eq
+
+    energy = x_minus_eq * sum_k_cos_n_theta
+
+    return energy
+
+def harmonic_harmonic_coupled(
+        x0,
+        x1,
+        eq0,
+        eq1,
+        k,
+    ):
+    energy = k * (x0 - eq0) * (x1 - eq1)
+    return energy
+
+def harmonic_harmonic_periodic_coupled(
+        theta0,
+        theta1,
+        eq0,
+        eq1,
+        phi,
+        k,
+    ):
+    energy = k * (theta0 - eq0) * (theta1 - eq1) * phi.cos()
+    return energy

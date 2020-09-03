@@ -67,7 +67,7 @@ def dihedral(x0, x1, x2, x3, jitter=1e-5):
     left = torch.cross(x1 - x0, x1 - x2)
     right = torch.cross(x2 - x1, x2 - x3)
 
- 
+
     return _dihedral(left, right)
 
 
@@ -76,17 +76,32 @@ def dihedral(x0, x1, x2, x3, jitter=1e-5):
 # =============================================================================
 def apply_bond(nodes):
     """ Bond length in nodes. """
-    return {"x": distance(x0=nodes.data["xyz0"], x1=nodes.data["xyz1"])}
-
+    return {
+        "x": distance(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"]
+        ),
+    }
 
 def apply_angle(nodes):
     """ Angle values in nodes. """
     return {
         "x": angle(
             x0=nodes.data["xyz0"], x1=nodes.data["xyz1"], x2=nodes.data["xyz2"]
+        ),
+        "x_left": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz0"],
+        ),
+        "x_right": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"],
+        ),
+        "x_between": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"],
         )
     }
-
 
 def apply_torsion(nodes):
     """ Torsion dihedrals in nodes. """
@@ -96,9 +111,30 @@ def apply_torsion(nodes):
             x1=nodes.data["xyz1"],
             x2=nodes.data["xyz2"],
             x3=nodes.data["xyz3"],
+        ),
+        "x_left": distance(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"]
+        ),
+        "x_center": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"]
+        ),
+        "x_right": distance(
+            x0=nodes.data["xyz2"],
+            x1=nodes.data["xyz3"]
+        ),
+        "x_angle_left": angle(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"],
+            x2=nodes.data["xyz2"]
+        ),
+        "x_angle_right": angle(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"],
+            x2=nodes.data["xyz3"],
         )
     }
-
 
 # =============================================================================
 # GEOMETRY IN GRAPH
