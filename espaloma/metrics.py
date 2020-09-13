@@ -10,6 +10,27 @@ import torch
 
 
 # =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+def center(metric, weight=1.0, dim=1):
+    def _centered(input, target, metric=metric, weight=weight, dim=dim):
+        # center input
+        input = input - input.mean(dim=dim, keepdim=True)
+
+        # center target
+        target = target - target.mean(dim=dim, keepdim=True)
+
+        return weight * metric(input, target)
+
+    return _centered
+
+def std(metric, weight=1.0, dim=1):
+    def _std(input, target, metric=metric, weight=weight, dim=dim):
+        return weight * metric(input, target).std(dim=dim).sum()
+
+    return _std
+
+# =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 def mse(input, target):
@@ -29,7 +50,7 @@ def cross_entropy(input, target, reduction="mean"):
     return loss_fn(input=input, target=target)  # prediction first, logit
 
 
-def r2(target, input):
+def r2(input, target):
     target = target.flatten()
     input = input.flatten()
     ss_tot = (target - target.mean()).pow(2).sum()
