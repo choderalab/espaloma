@@ -98,9 +98,8 @@ class Train(Experiment):
 
     def train_once(self):
         """ Train the model for one batch. """
-        for g in self.data:  # TODO: does this have to be a single g?
+        for idx, g in enumerate(self.data):  # TODO: does this have to be a single g?
             g = g.to(self.device)
-            
 
             def closure(g=g):
                 self.optimizer.zero_grad()
@@ -109,11 +108,10 @@ class Train(Experiment):
 
                 loss = self.loss(g)
                 loss.backward()
-                print(loss, flush=True)
 
-                if torch.isnan(loss).cpu().numpy().item() is True:
-                    raise RuntimeError('Loss is Nan.')
-
+                if idx == 0:
+                    if torch.isnan(loss).cpu().numpy().item() is True:
+                        raise RuntimeError('Loss is Nan.')
 
                 return loss
 
@@ -175,11 +173,8 @@ class Test(Experiment):
         self.sampler = sampler
         self.normalize = normalize()
 
-    def test(self, averaged=True):
+    def test(self):
         """ Run tests. """
-
-        if averaged is True:
-            return self.test_averaged()
 
         results = {}
 
@@ -195,7 +190,7 @@ class Test(Experiment):
         for state_name, state in self.states.items():  # loop through states
             # load the state dict
             self.net.load_state_dict(state)
-
+            
             # local scope
             with g.local_scope():
 
@@ -217,46 +212,6 @@ class Test(Experiment):
 
         # point this to self
         self.results = results
-        return dict(results)
-
-
-    def test_averaged(self):
-        """ Run tests. """
-        results = {}
-
-        # loop through the metrics
-        for metric in self.metrics:
-            results[metric.__name__] = {}
-
-        # make it just one giant graph
-        gs = list(self.data)
-        gs = [g.to(self.device) for g in gs]
-
-        for state_name, state in self.states.items():  # loop through states
-            # load the state dict
-            self.net.load_state_dict(state)
-
-            for metric in self.metrics:
-                results[metric.__name__][state_name] = []
-
-                # loop through the metrics
-                for g in gs:
-                    with g.local_scope():
-                        results[metric.__name__][state_name].append(
-                            metric(g_input=self.normalize.unnorm(self.net(g)))
-                            .detach()
-                            .cpu()
-                            .numpy()
-                        )
-                
-                results[metric.__name__][state_name] = np.average(
-                    results[metric.__name__][state_name]
-                )
-
-        # point this to self
-        self.results = results
-        self.ref_g = None
-        return dict(results)
 
 
 class TrainAndTest(Experiment):
@@ -286,6 +241,7 @@ class TrainAndTest(Experiment):
         self.metrics_tr = metrics_tr
         self.metrics_te = metrics_te
         self.normalize = normalize
+        self.record_interval = record_interval
 
     def __str__(self):
         _str = ""
@@ -320,6 +276,7 @@ class TrainAndTest(Experiment):
             metrics=self.metrics_tr,
             normalize=self.normalize,
             device=self.device,
+            record_interval=self.record_interval,
         )
 
         train.train()

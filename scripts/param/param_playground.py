@@ -5,19 +5,19 @@ import espaloma as esp
 
 def run():
     # grab dataset
-    esol = esp.data.esol(first=20)
+    ds = esp.data.zinc(first=1000)
 
     # do some typing
     param = esp.graphs.legacy_force_field.LegacyForceField('smirnoff99Frosst'
         ).parametrize
-    esol.apply(param, in_place=True) # this modify the original data
+    ds.apply(param, in_place=True) # this modify the original data
 
     # split
     # NOTE:
     # I don't like torch-generic splitting function as it requires
     # specifically the volume of each partition and it is inconsistent
     # with the specification of __getitem__ method
-    ds_tr, ds_te = esol.split([4, 1])
+    ds_tr, ds_te = ds.split([4, 1])
 
     # get a loader object that views this dataset in some way
     # using this specific flag the dataset turns into an iterator
@@ -54,10 +54,10 @@ def run():
         )],
         metrics_te=[esp.metrics.GraphMetric(
             between=['k_ref', 'k'],
-            level='n2',
+            level='n3',
             base_metric=esp.metrics.rmse
         )],
-        n_epochs=100,
+        n_epochs=10000,
     )
 
     results = exp.run()

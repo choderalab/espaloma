@@ -49,6 +49,7 @@ def harmonic(x, k, eq, order=[2]):
     -------
     u : `torch.Tensor`, `shape=(batch_size, 1)`
     """
+
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 

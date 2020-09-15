@@ -1,185 +1,230 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # imports
-
-# In[14]:
+# In[44]:
 
 
-import torch
+get_ipython().run_line_magic('load_ext', 'autoreload')
+get_ipython().run_line_magic('autoreload', '2')
 import espaloma as esp
+import torch
+import numpy as np
 
 
-# In[15]:
+# In[45]:
 
 
-WINDOWS = 10
+from simtk import unit
+GAS_CONSTANT = 8.31446261815324 * unit.joule / (unit.kelvin * unit.mole)
+GAS_CONSTANT = GAS_CONSTANT.value_in_unit(
+    esp.units.ENERGY_UNIT / (unit.kelvin)
+)
+kT = GAS_CONSTANT * 300
 
 
-# # integrator
-# We use a vanilla Euler method as our integrator.
+# In[46]:
 
-# In[16]:
 
-def velocity_verlot_integrator(xs, vs, closure, dt=1.0):
+WINDOWS = 50
+
+
+# In[47]:
+
+
+def leapfrog(xs, vs, closure, dt=1.0):
     x = xs[-1]
     v = vs[-1]
 
+    x = x + v * dt
+
     energy_old = closure(x)
 
-    a_old = -torch.autograd.grad(
+    a = -torch.autograd.grad(
         energy_old.sum(),
         [x],
         create_graph=True,
         retain_graph=True,
     )[0]
 
-    x = x + v * dt + 0.5 * a_old * dt * dt
+    v = v + a * dt
 
-    energy_new = closure(x)
-
-    a_new = -torch.autograd.grad(
-        energy_new.sum(),
-        [x],
-        create_graph=True,
-        retain_graph=True,
-    )[0]
-
-    v = v + 0.5 * a_old * dt + 0.5 * a_new * dt
+    x = x + v * dt
 
     vs.append(v)
     xs.append(x)
 
-    return xs, vs, energy_old, energy_new
+    return xs, vs
 
 
-# In[22]:
+# In[48]:
 
 
-# g = esp.Graph('CN1C=NC2=C1C(=O)N(C(=O)N2C)C')
-g = esp.Graph('C')
-g = esp.graphs.LegacyForceField('smirnoff99Frosst').parametrize(g)
+gs = esp.data.dataset.GraphDataset([esp.Graph('C' * idx) for idx in range(1, 3)])
+gs.apply(
+    esp.graphs.LegacyForceField('smirnoff99Frosst').parametrize,
+    in_place=True,
+)
+ds = gs.view(batch_size=len(gs))
 
 
-
-g.heterograph = g.heterograph.to(torch.device('cuda:0'))
-
-# In[23]:
+# In[49]:
 
 
 layer = esp.nn.dgl_legacy.gn()
 
 representation = esp.nn.Sequential(
     layer,
-    [32, 'tanh', 32, 'tanh', 32, 'tanh'],
+    [32, 'leaky_relu', 128, 'leaky_relu', 128, 'leaky_relu'],
 )
 
 readout = esp.nn.readout.janossy.JanossyPooling(
-    in_features=32,
-    config=[32, 'tanh', 32],
+    in_features=128,
+    config=[128, 'leaky_relu', 128, 'leaky_relu'],
     out_features={
-        1: {'epsilons': WINDOWS, 'sigmas': WINDOWS},
+        1: {'epsilons': WINDOWS, 'sigma': 1},
         2: {'ks': WINDOWS, 'eqs': WINDOWS},
         3: {'ks': WINDOWS, 'eqs': WINDOWS},
     }
 )
 
+
 net = torch.nn.Sequential(
     representation,
     readout,
+)
+
+realize = torch.nn.Sequential(
     esp.mm.geometry.GeometryInGraph(),
-    esp.mm.energy.EnergyInGraph(suffix='_ref'),
-)
-
-net = net.to(torch.device('cuda:0'))
-
-# In[24]:
-
-
-particle_distribution = torch.distributions.normal.Normal(
-    loc=torch.zeros(g.heterograph.number_of_nodes('n1'), 128, 3),
-    scale=torch.ones(g.heterograph.number_of_nodes('n1'), 128, 3),
+    esp.mm.energy.EnergyInGraph(suffix='_ref', terms=['n2', 'n3']),
 )
 
 
-# In[25]:
+# In[50]:
 
 
-def energy(g, idx):
-    u2 = g.nodes['n2'].data['ks'][:, idx][:, None] * (
-        g.nodes['n2'].data['x'] - g.nodes['n2'].data['eqs'][:, idx][:, None]
-    ) ** 2
-    
-    u3 = g.nodes['n3'].data['ks'][:, idx][:, None] * (
-        g.nodes['n3'].data['x'] - g.nodes['n3'].data['eqs'][:, idx][:, None]
-    ) ** 2
-    
-    return u2.sum(dim=0) + u3.sum(dim=0)
-
-
-# In[26]:
-
-
-def simulation(net):
-    x = torch.nn.Parameter(particle_distribution.sample().cuda())
-    v = torch.zeros_like(x)
-    
-    xs = [x]
-    vs = [v]
-    
-    for idx in range(1, WINDOWS):
-        def closure(x):
-            g.nodes['n1'].data['xyz'] = x
-            net(g.heterograph)
-            return energy(g, idx)
-            
-        xs, vs, _, __ = velocity_verlot_integrator(xs, vs, closure, 0.01)
+def closure(x, idx, g):
+    with g.local_scope():
+        g.nodes['n1'].data['xyz'] = x
         
-    
-    g.nodes['n1'].data['xyz'] = xs[-1]
+        if idx != -1:
 
-    return g, g.nodes['g'].data['u_ref']
+            g.nodes['n2'].data['eq_ref'] = g.nodes['n2'].data['eqs'][:, idx][:, None]
+            g.nodes['n2'].data['k_ref'] = g.nodes['n2'].data['ks'][:, idx][:, None]
+
+            g.nodes['n3'].data['eq_ref'] = g.nodes['n3'].data['eqs'][:, idx][:, None]
+            g.nodes['n3'].data['k_ref'] = g.nodes['n3'].data['ks'][:, idx][:, None]
+            
+        realize(g)
+        return g.nodes['g'].data['u_ref']
+
+
+# In[51]:
+
+
+def simulation(net, g):
+    with g.local_scope():
+        net(g)
+        
+        particle_distribution = torch.distributions.normal.Normal(
+            loc=torch.zeros(g.number_of_nodes('n1'), 128, 3),
+            scale=g.nodes['n1'].data['sigma'][:, :, None].repeat(1, 128, 3).exp()
+        )
+
+        #normal_distribution = torch.distributions.normal.Normal(0, 1.0)
+        
+        x = torch.nn.Parameter(
+            particle_distribution.rsample()
+        )
+        
+        v = torch.zeros_like(x)
+
+        xs = [x]
+        vs = [v]
+        
+
+        for idx in range(1, WINDOWS):
+
+            xs, vs = leapfrog(xs, vs, lambda x: closure(x, idx, g=g), 1e-2)
+        
+        return xs, vs, particle_distribution
+
+
+# In[53]:
+
+
+optimizer = torch.optim.Adam(net.parameters(), 1e-3)
+normal_distribution = torch.distributions.normal.Normal(0, 1.0)
+
+for _ in range(10000):
+    for g in ds:
+        optimizer.zero_grad()
+
+        xs, vs, particle_distribution = simulation(net, g)
+
+        energy = closure(xs[-1], idx=-1, g=g).sum()
+
+        log_p = -energy/kT + normal_distribution.log_prob(vs[-1]).sum()
+
+        log_q = normal_distribution.log_prob(vs[0]).sum() + particle_distribution.log_prob(xs[0]).sum()
+
+        loss = -log_p + log_q
+
+        loss.backward()
+
+        print(loss, energy)
+
+        optimizer.step()
 
 
 # In[ ]:
 
 
-optimizer = torch.optim.Adam(net.parameters(), 1e-3)
-
-for _ in range(100):
-    optimizer.zero_grad()
-    g, u_ref = simulation(net)
-    loss = u_ref.sum()
-    loss.backward(retain_graph=True)
-    print(loss, flush=True)
-    optimizer.step()
-
-
-for term in g.heterograph.ntypes:
-    for param in self.ref_g.nodes[term].data.keys():
-        g.nodes[term].data[param] = g.nodes[term].data[param].detach().cpu()
-
-
-# In[33]:
-
-
-
-# In[32]:
-
-
-# In[28]:
-
-
-
-import pickle
-pickle.dump(
-    g,
-    open(
-        'g.th',
-        'wb'
-    ),
+torch.save(
+    net.state_dict(),
+    'net.th'
 )
 
+
+# In[41]:
+
+
+g = esp.Graph('CC')
+
+
+# In[42]:
+
+
+xs, vs, particle_distribution = simulation(net, g=g.heterograph)
+
+
+# In[43]:
+
+
+import nglview as nv
+from rdkit.Geometry import Point3D
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+conf_idx = 1
+
+mol = g.mol.to_rdkit()
+AllChem.EmbedMolecule(mol)
+conf = mol.GetConformer()
+
+xs, vs, particle_distribution = simulation(net, g=g.heterograph)
+x = xs[-1]
+
+
+for idx_atom in range(mol.GetNumAtoms()):
+    conf.SetAtomPosition(
+        idx_atom,
+        Point3D(
+            float(x[idx_atom, conf_idx, 0]),
+            float(x[idx_atom, conf_idx, 1]),
+            float(x[idx_atom, conf_idx, 2]),
+        ))
+    
+nv.show_rdkit(mol)
 
 
 # In[ ]:
