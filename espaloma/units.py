@@ -14,7 +14,6 @@ PARTICLE = unit.mole.create_unit(
     'particle',
 )
 
-
 HARTREE_PER_PARTICLE = unit.hartree / PARTICLE
 
 # basic units

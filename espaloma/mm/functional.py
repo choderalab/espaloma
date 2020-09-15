@@ -49,6 +49,7 @@ def harmonic(x, k, eq, order=[2]):
     -------
     u : `torch.Tensor`, `shape=(batch_size, 1)`
     """
+
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 
@@ -147,7 +148,7 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     )
 
     return epsilon * (
-            coefficients[0] * sigma_over_x ** order[0] 
+            coefficients[0] * sigma_over_x ** order[0]
             - coefficients[1] * sigma_over_x ** order[1]
         )
 
