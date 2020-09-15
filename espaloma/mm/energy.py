@@ -51,7 +51,8 @@ def apply_angle(nodes, suffix=""):
             x_left=nodes.data["x_left"],
             x_right=nodes.data["x_right"],
             eq_left=nodes.data["eq_left"],
-            eq_right=nodes.data["eq_right"]
+            eq_right=nodes.data["eq_right"],
+            k_bond_bond=nodes.data["k_bond_bond"],
         ),
         "u_bond_angle%s"
         % suffix: esp.mm.angle.bond_angle(
@@ -77,12 +78,10 @@ def apply_torsion(nodes, suffix=""):
         "u_angle_angle%s"
         % suffix: esp.mm.torsion.angle_angle(
             x_angle_left=nodes.data["x_angle_left"],
-            x_angle_right=nodes.data["x_ange_right"],
+            x_angle_right=nodes.data["x_angle_right"],
             eq_angle_left=nodes.data["eq_angle_left"],
             eq_angle_right=nodes.data["eq_angle_right"],
-            x=nodes.data["x"],
-            k_angle_torsion_left=nodes.data["k_angle_torsion_left"],
-            k_angle_torsion_right=nodes.data["k_angle_torsion_right"],
+            k_angle_angle=nodes.data["k_angle_angle"],
         ),
         "u_angle_angle_torsion%s"
         % suffix: esp.mm.torsion.angle_angle_torsion(
@@ -91,7 +90,7 @@ def apply_torsion(nodes, suffix=""):
             eq_angle_left=nodes.data["eq_angle_left"],
             eq_angle_right=nodes.data["eq_angle_right"],
             x=nodes.data["x"],
-            k_angle_angle_torsion=nodes.data["angle_angle_torsion"],
+            k_angle_angle_torsion=nodes.data["k_angle_angle_torsion"],
         ),
         "u_bond_torsion%s"
         % suffix: esp.mm.torsion.bond_torsion(
@@ -103,8 +102,9 @@ def apply_torsion(nodes, suffix=""):
             k_right_torsion=nodes.data["k_right_torsion"],
             eq_left_torsion=nodes.data["eq_left_torsion"],
             eq_right_torsion=nodes.data["eq_right_torsion"],
+            k_center_torsion=nodes.data["k_center_torsion"],
+            eq_center_torsion=nodes.data["eq_center_torsion"],
         )
-
     }
 
 def apply_bond_gaussian(nodes, suffix=""):
@@ -148,7 +148,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
 # ENERGY IN GRAPH
 # =============================================================================
 def energy_in_graph(
-        g, suffix="", terms=["n2", "n3", "n4"], class_ii=False
+        g, suffix="", terms=["n2", "n3", "n4"], class_ii=True,
     ):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
@@ -208,20 +208,20 @@ def energy_in_graph(
     if class_ii is True:
         g.apply_nodes(
             lambda node: {
-                'u%s' % suffix,
-                node['u_urey_bradley%s' % suffix]\
-                + node['u_bond_bond%s' % suffix]\
-                + node['u_bond_angle%s' % suffix]
+                'u%s' % suffix:
+                node.data['u_urey_bradley%s' % suffix]\
+                + node.data['u_bond_bond%s' % suffix]\
+                + node.data['u_bond_angle%s' % suffix]
             },
             ntype='n3'
         )
 
         g.apply_nodes(
             lambda node: {
-                'u%s' % suffix,
-                node['u_angle_angle' % suffix]\
-                + node['u_angle_angle_torsion' % suffix]\
-                + node['u_bond_torsion' % suffix]
+                'u%s' % suffix:
+                node.data['u_angle_angle%s' % suffix]\
+                + node.data['u_angle_angle_torsion%s' % suffix]\
+                + node.data['u_bond_torsion%s' % suffix]
             },
             ntype='n4'
         )

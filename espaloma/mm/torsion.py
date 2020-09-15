@@ -101,23 +101,23 @@ def bond_torsion(
         k_left_torsion,
         k_center_torsion,
         k_right_torsion,
-        eq_left,
-        eq_center,
-        eq_right,
+        eq_left_torsion,
+        eq_center_torsion,
+        eq_right_torsion,
     ):
-    return esp.mm.functional.harnomic_periodic_coupled(
+    return esp.mm.functional.harmonic_periodic_coupled(
         x_harmonic=x_bond_left,
         x_periodic=x,
         k=k_left_torsion,
-        eq=eq_left,
+        eq=eq_left_torsion,
     ) + esp.mm.functional.harmonic_periodic_coupled(
         x_harmonic=x_bond_center,
         x_periodic=x,
         k=k_center_torsion,
-        eq=eq_center,
+        eq=eq_center_torsion,
     ) + esp.mm.functional.harmonic_periodic_coupled(
         x_harmonic=x_bond_right,
         x_periodic=x,
         k=k_right_torsion,
-        eq=eq_right,
+        eq=eq_right_torsion,
     )
