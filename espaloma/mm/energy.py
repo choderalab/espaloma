@@ -45,13 +45,26 @@ def apply_angle(nodes, suffix=""):
 
 def apply_torsion(nodes, suffix=""):
     """ Torsion energy in nodes. """
-    return {
-        "u%s"
-        % suffix: esp.mm.torsion.periodic_torsion(
-            x=nodes.data["x"],
-            k=nodes.data["k%s" % suffix],
-        )
-    }
+    if "phases%s" % suffix in nodes.data and "periodicity%s" % suffix in nodes.data:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=nodes.data["phases%s" % suffix],
+                periodicity=nodes.data["periodicity%s" % suffix],
+            )
+        }
+
+
+    else:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+            )
+        }
 
 def apply_bond_gaussian(nodes, suffix=""):
     """ Bond energy in nodes. """

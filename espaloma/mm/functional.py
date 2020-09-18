@@ -75,20 +75,44 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
             periodicity, device=x.device, dtype=torch.get_default_dtype(),
         )
 
-    n_theta = periodicity[None, None, :].repeat(
-        x.shape[0],
-        x.shape[1],
-        1
-    ) * x[:, :, None]
+    if periodicity.ndim == 1:
+        periodicity = periodicity[None, None, :].repeat(
+            x.shape[0],
+            x.shape[1],
+            1
+        )
 
-    n_theta_minus_phases = n_theta - phases[None, None, :]
+    elif periodicity.ndim == 2:
+        periodicity = periodicity[:, None, :].repeat(
+            1,
+            x.shape[1],
+            1
+        )
+
+    if phases.ndim == 1:
+        phases = phases[None, None, :].repeat(
+            x.shape[0],
+            x.shape[1],
+            1,
+        )
+
+    elif phases.ndim == 2:
+        phases = phases[:, None, :].repeat(
+            1,
+            x.shape[1],
+            1,
+        )
+
+    n_theta = periodicity * x[:, :, None]
+
+    n_theta_minus_phases = n_theta - phases
 
     cos_n_theta_minus_phases = n_theta_minus_phases.cos()
 
     k = k[:, None, :].repeat(
         1, x.shape[1], 1
     )
-
+    
     energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
 
     return energy
