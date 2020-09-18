@@ -9,7 +9,7 @@ from espaloma.units import *
 
 
 @pytest.mark.parametrize(
-    "g", esp.data.esol(first=2),
+    "g", esp.data.esol(first=10),
 )
 def test_energy_angle_and_bond(g):
 
@@ -103,6 +103,11 @@ def test_energy_angle_and_bond(g):
         g.nodes[term].data["epsilon"] = g.nodes[term].data["epsilon_ref"]
         # g.nodes[term].data['q'] = g.nodes[term].data['q_ref']
 
+    for term in ["n4"]:
+        g.nodes[term].data["phases"] = g.nodes[term].data["phases_ref"]
+        g.nodes[term].data["periodicity"] = g.nodes[term].data["periodicity_ref"]
+        g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
+
     # for each atom, store n_snapshots x 3
     g.nodes["n1"].data["xyz"] = torch.tensor(
         simulation.context.getState(getPositions=True)
@@ -130,6 +135,15 @@ def test_energy_angle_and_bond(g):
         energies["HarmonicAngleForce"],
         decimal=3,
     )
+
+    npt.assert_almost_equal(
+        g.nodes["g"].data["u_n4"].numpy(),
+        energies["PeriodicTorsionForce"],
+        decimal=1,
+    )
+
+    print(g.nodes["g"].data["u_n4"].numpy())
+    print(energies["PeriodicTorsionForce"])
 
     # TODO:
     # This is not working now, matching OpenMM nonbonded.

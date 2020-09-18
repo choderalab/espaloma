@@ -251,6 +251,55 @@ class LegacyForceField:
             ntype="n1",
         )
 
+        def apply_torsion(node, n_max_phases=6):
+            phases = torch.zeros(
+                g.heterograph.number_of_nodes("n4"),
+                n_max_phases,
+            )
+
+            periodicity = torch.zeros(
+                g.heterograph.number_of_nodes("n4"),
+                n_max_phases,
+            )
+
+            k = torch.zeros(
+                g.heterograph.number_of_nodes("n4"),
+                n_max_phases,
+            )
+
+            force = forces["ProperTorsions"]
+
+            for idx in range(g.heterograph.number_of_nodes("n4")):
+                idxs = tuple(node.data["idxs"][idx].numpy())
+                if idxs in force:
+                    _force = force[idxs]
+                    for sub_idx in range(len(_force.periodicity)):
+                        if hasattr(_force, 'k%s'%sub_idx):
+                            k[idx, sub_idx] = getattr(
+                                _force, 'k%s'%sub_idx
+                            ).value_in_unit(
+                                esp.units.ENERGY_UNIT
+                            )
+
+                            phases[idx, sub_idx] = getattr(
+                                _force, 'phase%s'%sub_idx
+                            ).value_in_unit(
+                                esp.units.ANGLE_UNIT
+                            )
+
+                            periodicity[idx, sub_idx] = getattr(
+                                _force, 'periodicity%s'%sub_idx
+                            )
+
+            return {
+                "k_ref": k,
+                "periodicity_ref": periodicity,
+                "phases_ref": phases,
+            }
+
+
+        g.heterograph.apply_nodes(apply_torsion, ntype="n4")
+
         return g
 
     def _multi_typing_smirnoff(self, g):

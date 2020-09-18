@@ -16,7 +16,6 @@ def test_smirnoff_strange_mol():
     )
     g = ff.parametrize(g)
 
-
 def test_multi_typing():
     ff = esp.graphs.legacy_force_field.LegacyForceField("smirnoff99Frosst")
     g = esp.data.esol(first=1)[0]

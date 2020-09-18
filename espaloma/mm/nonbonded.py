@@ -42,8 +42,6 @@ def arithmetic_mean(msg="m", out="sigma"):
 # =============================================================================
 # COMBINATION RULES FOR NONBONDED
 # =============================================================================
-
-
 def lorentz_berthelot(g, suffix=""):
 
     g.multi_update_all(
