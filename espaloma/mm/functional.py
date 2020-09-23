@@ -112,7 +112,7 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
     k = k[:, None, :].repeat(
         1, x.shape[1], 1
     )
-    
+
     energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
 
     return energy
@@ -161,15 +161,20 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     assert order.shape[0] == 2
     assert order.dim() == 1
 
+    # TODO:
+    # for experiments only
+    # erase later
+    x += switch
+
     # compute sigma over x
     sigma_over_x = sigma / x
 
     # erase values under switch
-    sigma_over_x = torch.where(
-        torch.lt(x, switch),
-        torch.zeros_like(sigma_over_x),
-        sigma_over_x,
-    )
+    # sigma_over_x = torch.where(
+    #     torch.lt(x, switch),
+    #     torch.zeros_like(sigma_over_x),
+    #     sigma_over_x,
+    # )
 
     return epsilon * (
             coefficients[0] * sigma_over_x ** order[0]

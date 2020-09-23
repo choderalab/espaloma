@@ -7,6 +7,7 @@ import abc
 # IMPORTS
 # =============================================================================
 import torch
+import numpy as np
 
 
 # =============================================================================
@@ -30,20 +31,54 @@ def std(metric, weight=1.0, dim=1):
 
     return _std
 
+def bootstrap(metric, n_samples=1000, ci=0.95):
+    def _bootstrap(input, target, metric=metric, n_samples=n_samples, ci=0.95):
+        original = metric(input=input, target=target)
+
+        idxs_all = np.arange(input.shape[0])
+        results = []
+        for _ in range(n_samples):
+            idxs = np.random.choice(
+                idxs_all,
+                len(idxs_all),
+                replace=True,
+            )
+
+            _metric = metric(
+                input=input[idxs],
+                target=target[idxs]
+            ).detach().cpu().numpy().item()
+
+            results.append(
+                _metric,
+            )
+
+        results = np.array(results)
+
+        low = np.percentile(results, 100.0*0.5*(1-ci))
+        high = np.percentile(results, (1-((1-ci)*0.5))*100.0)
+
+        return original.detach().cpu().numpy().item(), low, high
+
+    return _bootstrap
+
+def latex_format_ci(original, low, high):
+    return '%.4f_{%.4f}^{%.4f}' % (original, low, high)
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 def mse(input, target):
     return torch.nn.functional.mse_loss(target, input)
 
+def mape(input, target):
+    return ((input - target).abs() / target.abs()).mean()
 
 def rmse(input, target):
     return torch.sqrt(torch.nn.functional.mse_loss(target, input))
 
-
 def mae_of_log(input, target):
     return torch.nn.L1Loss()(torch.log(input), torch.log(target))
-
 
 def cross_entropy(input, target, reduction="mean"):
     loss_fn = torch.nn.CrossEntropyLoss(reduction=reduction)
@@ -241,7 +276,7 @@ class GraphHalfDerivativeMetric(Metric):
         self.d = self._translation(d, d_level)
         self.input_fn = self._translation(input_name, input_level)
         self.target_prime_fn = self._translation(
-                target_prime_name, 
+                target_prime_name,
                 target_prime_level
         )
 
