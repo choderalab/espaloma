@@ -169,11 +169,11 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     sigma_over_x = sigma / x
 
     # erase values under switch
-    # sigma_over_x = torch.where(
-    #     torch.lt(x, switch),
-    #     torch.zeros_like(sigma_over_x),
-    #     sigma_over_x,
-    # )
+    sigma_over_x = torch.where(
+        torch.lt(x, switch),
+        torch.zeros_like(sigma_over_x),
+        sigma_over_x,
+    )
 
     return epsilon * (
             coefficients[0] * sigma_over_x ** order[0]
