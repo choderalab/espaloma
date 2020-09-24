@@ -164,7 +164,6 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     # TODO:
     # for experiments only
     # erase later
-    x += switch
 
     # compute sigma over x
     sigma_over_x = sigma / x
@@ -178,7 +177,7 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
 
     return epsilon * (
             coefficients[0] * sigma_over_x ** order[0]
-            - coefficients[1] * sigma_over_x ** order[1]
+            # - coefficients[1] * sigma_over_x ** order[1]
         )
 
 def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
