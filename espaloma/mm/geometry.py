@@ -32,6 +32,9 @@ def copy_src(src, out):
 # =============================================================================
 def distance(x0, x1):
     """ Distance. """
+    # TODO:
+    # assertions / shape docstrings
+    # p=2 indicates Euclidian distance
     return torch.norm(x0 - x1, p=2, dim=-1)
 
 
@@ -56,9 +59,11 @@ def _dihedral(r0, r1):
     """ Dihedral between normal vectors. """
     return _angle(r0, r1)
 
-
-def dihedral(x0, x1, x2, x3, jitter=1e-5):
+def dihedral(x0, x1, x2, x3, jitter=1e-10):
     """ Dihedral between four points. """
+    # TODO:
+    # check out
+    # time-machine dihedral
     x0 = x0 + torch.randn_like(x0) * jitter
     x1 = x1 + torch.randn_like(x1) * jitter
     x2 = x2 + torch.randn_like(x2) * jitter
@@ -69,7 +74,6 @@ def dihedral(x0, x1, x2, x3, jitter=1e-5):
 
 
     return _dihedral(left, right)
-
 
 # =============================================================================
 # GEOMETRY IN HYPERNODES
@@ -100,7 +104,7 @@ def apply_angle(nodes):
             x1=nodes.data["xyz2"],
         ),
         "x_between": distance(
-            x0=nodes.data["xyz1"],
+            x0=nodes.data["xyz0"],
             x1=nodes.data["xyz2"],
         )
     }
