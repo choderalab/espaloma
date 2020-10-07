@@ -61,8 +61,17 @@ class LegacyForceField:
             # do nothing for now
             self._prepare_smirnoff()
 
+        elif "openff" in self.forcefield:
+            self._prepare_openff()
+
         else:
             raise NotImplementedError
+
+    def _prepare_openff(self):
+
+        from openforcefield.typing.engines.smirnoff import ForceField
+
+        self.FF = ForceField("%s.offxml" % self.forcefield)
 
     def _prepare_smirnoff(self):
 
@@ -357,7 +366,7 @@ class LegacyForceField:
         """ Parametrize a molecular graph.
 
         """
-        if "smirnoff" in self.forcefield:
+        if "smirnoff" in self.forcefield or "openff" in self.forcefield:
             return self._parametrize_smirnoff(g)
 
         else:
