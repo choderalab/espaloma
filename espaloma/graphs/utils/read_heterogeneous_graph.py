@@ -7,11 +7,25 @@
 import dgl
 import numpy as np
 import torch
-
+from espaloma.graphs.utils import offmol_indices
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
+
+def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
+    """For every (a,b,c,d) add a (d,c,b,a)
+
+    >>> indices = np.array([[0, 1, 2, 3], [1, 2, 3, 4]])
+    >>> duplicate_index_ordering(indices)
+    array([[0, 1, 2, 3],
+           [1, 2, 3, 4],
+           [3, 2, 1, 0],
+           [4, 3, 2, 1]])
+    """
+    return np.vstack([indices, indices[:, ::-1]])
+
+
 def relationship_indices_from_adjacency_matrix(a, max_size=4):
     r""" Read the relatinoship indices from adjacency matrix.
 
