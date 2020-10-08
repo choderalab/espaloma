@@ -73,11 +73,12 @@ def openmm_system_from_graph(
     #     for position, idxs in enumerate(g.nodes['n4'].data['idxs'])
     # }
 
+    # create openmm system
     sys = ff.create_openmm_system(g.mol.to_topology())
 
-    for force in sys.getForces():
-        name = force.__class__.__name__
-        if 'HarmonicBondForce' in name:
+    for force in sys.getForces(): # loop through the forces
+        name = force.__class__.__name__ # get the name of the force
+        if 'HarmonicBondForce' in name: # bonds
             for idx in range(force.getNumBonds()):
                 idx0, idx1, eq, k = force.getBondParameters(idx)
                 position = bond_lookup[(idx0, idx1)]
@@ -86,19 +87,22 @@ def openmm_system_from_graph(
                 _k = g.nodes['n2'].data['k%s' % suffix][position].detach(
                     ).numpy().item()
 
-                _eq = Quantity(
+                _eq = Quantity( # bond length
                     _eq,
                     esp.units.DISTANCE_UNIT,
                 ).value_in_unit(OPENMM_BOND_EQ_UNIT)
 
-                _k = 2.0 * Quantity(
+                _k = 2.0 * Quantity( # bond force constant:
+                    # since everything is enumerated twice in espaloma
+                    # and once in OpenMM,
+                    # we insert a coefficient of 2.0
                     _k,
                     esp.units.FORCE_CONSTANT_UNIT,
                 ).value_in_unit(OPENMM_BOND_K_UNIT)
 
                 force.setBondParameters(idx, idx0, idx1, _eq, _k)
 
-        if 'HarmonicAngleForce' in name:
+        if 'HarmonicAngleForce' in name: # angles
             for idx in range(force.getNumAngles()):
                 idx0, idx1, idx2, eq, k = force.getAngleParameters(idx)
                 position = angle_lookup[(idx0, idx1, idx2)]
@@ -112,7 +116,10 @@ def openmm_system_from_graph(
                     esp.units.ANGLE_UNIT,
                 ).value_in_unit(OPENMM_ANGLE_EQ_UNIT)
 
-                _k = 2.0 * Quantity(
+                _k = 2.0 * Quantity( # force constant
+                    # since everything is enumerated twice in espaloma
+                    # and once in OpenMM,
+                    # we insert a coefficient of 2.0
                     _k,
                     esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                 ).value_in_unit(OPENMM_ANGLE_K_UNIT)
@@ -163,6 +170,10 @@ def openmm_system_from_graph(
 
                             if count_idx < number_of_torsions:
                                 force.setTorsionParameters(
+                                # since everything is enumerated
+                                # twice in espaloma
+                                # and once in OpenMM,
+                                # we insert a coefficient of 2.0
                                     count_idx,
                                     idx0, idx1, idx2, idx3,
                                     _periodicity, _phase, 2.0 * k,
@@ -170,6 +181,10 @@ def openmm_system_from_graph(
 
                             else:
                                 force.addTorsion(
+                                    # since everything is enumerated
+                                    # twice in espaloma
+                                    # and once in OpenMM,
+                                    # we insert a coefficient of 2.0
                                     idx0, idx1, idx2, idx3,
                                     _periodicity, _phase, 2.0 * k,
                                 )
