@@ -81,6 +81,8 @@ def openmm_system_from_graph(
     for force in sys.getForces():
         name = force.__class__.__name__
         if 'HarmonicBondForce' in name:
+            assert(force.getNumBonds() * 2 == g.heterograph.number_of_nodes('n2'))
+
             for idx in range(force.getNumBonds()):
                 idx0, idx1, eq, k = force.getBondParameters(idx)
                 position = bond_lookup[(idx0, idx1)]
@@ -105,6 +107,8 @@ def openmm_system_from_graph(
                 force.setBondParameters(idx, idx0, idx1, _eq, _k)
 
         if 'HarmonicAngleForce' in name:
+            assert (force.getNumAngles() * 2 == g.heterograph.number_of_nodes('n3'))
+
             for idx in range(force.getNumAngles()):
                 idx0, idx1, idx2, eq, k = force.getAngleParameters(idx)
                 position = angle_lookup[(idx0, idx1, idx2)]
@@ -130,6 +134,10 @@ def openmm_system_from_graph(
 
         if 'PeriodicTorsionForce' in name:
             number_of_torsions = force.getNumTorsions()
+            assert(number_of_torsions <= g.heterograph.number_of_nodes('n4'))
+
+            # TODO: An alternative would be to start with an empty PeriodicTorsionForce and always call force.addTorsion
+
             if 'periodicity%s' % suffix not in g.nodes['n4'].data\
                 or 'phase%s' % suffix not in g.nodes['n4'].data:
 
