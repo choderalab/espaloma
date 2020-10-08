@@ -25,6 +25,19 @@ OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT ** 2)
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
+
+def load_forcefield(forcefield="openff_unconstrained-1.1.0"):
+    # get a forcefield
+    try:
+        ff = ForceField("%s.offxml" % forcefield)
+    except:
+        try:
+            ff = ForceField("test_forcefields/%s.offxml" % forcefield)
+        except:
+            raise NotImplementedError
+    return ff
+
+
 def openmm_system_from_graph(
         g, forcefield="openff_unconstrained-1.1.0", suffix=""
     ):
@@ -37,6 +50,7 @@ def openmm_system_from_graph(
 
     forcefield : `str`
         Name of the force field. Have to be Open Force Field.
+        (this forcefield will be used to assign nonbonded parameters, but all of its valence parameters will be overwritten)
 
     suffix : `str`
         Suffix for the force terms.
@@ -48,14 +62,7 @@ def openmm_system_from_graph(
 
 
     """
-    # get a forcefield
-    try:
-        ff = ForceField("%s.offxml" % forcefield)
-    except:
-        try:
-            ff = ForceField("test_forcefields/%s.offxml" % forcefield)
-        except:
-            raise NotImplementedError
+    ff = load_forcefield(forcefield)
 
     # get the mapping between position and indices
     bond_lookup = {
