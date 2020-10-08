@@ -8,6 +8,8 @@ import dgl
 import numpy as np
 import torch
 from espaloma.graphs.utils import offmol_indices
+from openforcefield.topology import Molecule
+from typing import Dict
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -24,6 +26,30 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
            [4, 3, 2, 1]])
     """
     return np.vstack([indices, indices[:, ::-1]])
+
+
+def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor]:
+    """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
+
+    Notes
+    -----
+    * introduces 2x redundant indices (including (d,c,b,a) for every (a,b,c,d)) for compatibility with later processing
+    """
+    idxs = dict()
+    idxs["n2"] = offmol_indices.bond_indices(offmol)
+    idxs["n3"] = offmol_indices.angle_indices(offmol)
+    idxs["n4"] = offmol_indices.proper_torsion_indices(offmol)
+
+    # TODO (pending discussion with YW) : list n4_improper inside n4 ?
+    idxs["n4_improper"] = offmol_indices.improper_torsion_indices(offmol)
+
+    # TODO: enumerate indices for coupling-term nodes also
+    # TODO: big refactor of term names from "n4" to "proper_torsion", "improper_torsion", "angle_angle_coupling", etc.
+
+    for key in idxs:
+        idxs[key] = torch.from_numpy(duplicate_index_ordering(idxs[key]))
+
+    return idxs
 
 
 def relationship_indices_from_adjacency_matrix(a, max_size=4):
