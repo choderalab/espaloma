@@ -25,13 +25,21 @@ OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT ** 2)
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def openmm_system_from_graph(g, forcefield="openff_unconstrained-1.1.0", suffix=""):
+def openmm_system_from_graph(
+        g, forcefield="openff_unconstrained-1.1.0", suffix=""
+    ):
     """ Construct an openmm system from `espaloma.Graph`.
 
     Parameters
     ----------
     g : `espaloma.Graph`
         Input graph.
+
+    forcefield : `str`
+        Name of the force field. Have to be Open Force Field.
+
+    suffix : `str`
+        Suffix for the force terms.
 
     Returns
     -------
@@ -106,7 +114,7 @@ def openmm_system_from_graph(g, forcefield="openff_unconstrained-1.1.0", suffix=
 
                 _k = 2.0 * Quantity(
                     _k,
-                    esp.units.ANGLE_FORCE_CONSTANCE_UNIT,
+                    esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                 ).value_in_unit(OPENMM_ANGLE_K_UNIT)
 
                 force.setAngleParameters(idx, idx0, idx1, idx2, _eq, _k)
