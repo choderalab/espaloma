@@ -127,7 +127,7 @@ def openmm_system_from_graph(
                 or 'phase%s' % suffix not in g.nodes['n4'].data:
 
                 g.nodes['n4'].data['periodicity%s' % suffix] = torch.arange(
-                    1, 6
+                    1, 7
                 )[None, :].repeat(
                     g.heterograph.number_of_nodes('n4'), 1
                 )
