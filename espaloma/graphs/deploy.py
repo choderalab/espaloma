@@ -159,6 +159,7 @@ def openmm_system_from_graph(
                 idx2 = g.nodes['n4'].data['idxs'][idx, 2].item()
                 idx3 = g.nodes['n4'].data['idxs'][idx, 3].item()
 
+                # assuming both (a,b,c,d) and (d,c,b,a) are listed for every torsion, only pick one of the orderings
                 if idx0 < idx3:
                     periodicities = g.nodes['n4'].data['periodicity%s' % suffix][idx]
                     phases = g.nodes['n4'].data['phases%s' % suffix][idx]
