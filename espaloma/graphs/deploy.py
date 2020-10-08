@@ -68,11 +68,6 @@ def openmm_system_from_graph(
         for position, idxs in enumerate(g.nodes['n3'].data['idxs'])
     }
 
-    # torsion_lookup = {
-    #     tuple(idxs.detach().numpy()): position
-    #     for position, idxs in enumerate(g.nodes['n4'].data['idxs'])
-    # }
-
     # create openmm system
     sys = ff.create_openmm_system(g.mol.to_topology())
 
