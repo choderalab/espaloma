@@ -71,9 +71,9 @@ def openmm_system_from_graph(
     # create openmm system
     sys = ff.create_openmm_system(g.mol.to_topology())
 
-    for force in sys.getForces(): # loop through the forces
-        name = force.__class__.__name__ # get the name of the force
-        if 'HarmonicBondForce' in name: # bonds
+    for force in sys.getForces():
+        name = force.__class__.__name__
+        if 'HarmonicBondForce' in name:
             for idx in range(force.getNumBonds()):
                 idx0, idx1, eq, k = force.getBondParameters(idx)
                 position = bond_lookup[(idx0, idx1)]
@@ -97,7 +97,7 @@ def openmm_system_from_graph(
 
                 force.setBondParameters(idx, idx0, idx1, _eq, _k)
 
-        if 'HarmonicAngleForce' in name: # angles
+        if 'HarmonicAngleForce' in name:
             for idx in range(force.getNumAngles()):
                 idx0, idx1, idx2, eq, k = force.getAngleParameters(idx)
                 position = angle_lookup[(idx0, idx1, idx2)]
