@@ -5,7 +5,8 @@ from openforcefield.topology import Molecule
 def bond_indices(offmol: Molecule) -> np.ndarray:
     return np.array([(b.atom1_index, b.atom2_index) for b in offmol.bonds])
 
-# TODO: angle indices
+def angle_indices(offmol: Molecule) -> np.ndarray:
+    return np.array(sorted([tuple([atom.molecule_atom_index for atom in angle]) for angle in offmol.angles]))
 
 # TODO: proper torsion indices
 
