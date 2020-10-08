@@ -23,6 +23,7 @@ dependencies:
   - nose
   - nose-timer
   - coverage
+  - qcportal
   # Pip-only installs
   - pip:
       - torch
