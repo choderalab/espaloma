@@ -123,10 +123,8 @@ def openmm_system_from_graph(
 
         if 'PeriodicTorsionForce' in name:
             number_of_torsions = force.getNumTorsions()
-            blank_periodicity = False
             if 'periodicity%s' % suffix not in g.nodes['n4'].data\
                 or 'phase%s' % suffix not in g.nodes['n4'].data:
-                blank_periodicity = True
 
                 g.nodes['n4'].data['periodicity%s' % suffix] = torch.arange(
                     1, 6
