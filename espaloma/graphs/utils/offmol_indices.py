@@ -16,3 +16,16 @@ def proper_torsion_indices(offmol: Molecule) -> np.ndarray:
 
 def improper_torsion_indices(offmol: Molecule) -> np.ndarray:
     return np.array(sorted([tuple([atom.molecule_atom_index for atom in improper]) for improper in offmol.impropers]))
+
+
+def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
+    """For every (a,b,c,d) add a (d,c,b,a)
+
+    >>> indices = np.array([[0, 1, 2, 3], [1, 2, 3, 4]])
+    >>> duplicate_index_ordering(indices)
+    array([[0, 1, 2, 3],
+           [1, 2, 3, 4],
+           [3, 2, 1, 0],
+           [4, 3, 2, 1]])
+    """
+    return np.vstack([indices, indices[:, ::-1]])
