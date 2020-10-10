@@ -35,3 +35,7 @@ def test_save_and_load(graph):
     assert graph.homograph.number_of_nodes == graph.homograph.number_of_nodes
 
     assert graph.homograph.number_of_edges == graph.homograph.number_of_edges
+
+
+# TODO: test offmol_indices
+# TODO: test relationship_indices_from_offmol
