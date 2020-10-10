@@ -36,6 +36,7 @@ def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor
     * introduces 2x redundant indices (including (d,c,b,a) for every (a,b,c,d)) for compatibility with later processing
     """
     idxs = dict()
+    idxs["n1"] = offmol_indices.atom_indices(offmol)
     idxs["n2"] = offmol_indices.bond_indices(offmol)
     idxs["n3"] = offmol_indices.angle_indices(offmol)
     idxs["n4"] = offmol_indices.proper_torsion_indices(offmol)

@@ -2,6 +2,10 @@ import numpy as np
 from openforcefield.topology import Molecule
 
 
+def atom_indices(offmol: Molecule) -> np.ndarray:
+    return np.array([a.molecule_atom_index for a in offmol.atoms])
+
+
 def bond_indices(offmol: Molecule) -> np.ndarray:
     return np.array([(b.atom1_index, b.atom2_index) for b in offmol.bonds])
 
