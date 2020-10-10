@@ -18,6 +18,8 @@ from typing import Dict
 def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
     """For every (a,b,c,d) add a (d,c,b,a)
 
+    TODO: is there a way to avoid this duplication?
+
     >>> indices = np.array([[0, 1, 2, 3], [1, 2, 3, 4]])
     >>> duplicate_index_ordering(indices)
     array([[0, 1, 2, 3],
@@ -28,8 +30,8 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
     return np.vstack([indices, indices[:, ::-1]])
 
 
-def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor]:
-    """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
+def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, np.ndarray]:
+    """Construct a dictionary that maps node names (like "n2") to numpy arrays of indices
 
     Notes
     -----
@@ -40,82 +42,20 @@ def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor
     idxs["n2"] = offmol_indices.bond_indices(offmol)
     idxs["n3"] = offmol_indices.angle_indices(offmol)
     idxs["n4"] = offmol_indices.proper_torsion_indices(offmol)
-
-    # TODO (pending discussion with YW) : list n4_improper inside n4 ?
     idxs["n4_improper"] = offmol_indices.improper_torsion_indices(offmol)
 
     # TODO: enumerate indices for coupling-term nodes also
     # TODO: big refactor of term names from "n4" to "proper_torsion", "improper_torsion", "angle_angle_coupling", etc.
 
-    for key in idxs:
-        idxs[key] = torch.from_numpy(duplicate_index_ordering(idxs[key]))
+    # TODO (discuss with YW) : I think "n1" and "n4_improper" shouldn't be 2x redundant in current scheme
+    #   (also, unclear why we need "n2", "n3", "n4" to be 2x redundant, but that's something to consider changing later)
+    for key in ["n2", "n3", "n4"]:
+        idxs[key] = duplicate_index_ordering(idxs[key])
 
     return idxs
 
 
-def relationship_indices_from_adjacency_matrix(a, max_size=4):
-    r""" Read the relatinoship indices from adjacency matrix.
-
-    Parameters
-    ----------
-    a : torch.sparse.FloatTensor
-        adjacency matrix.
-
-    Returns
-    -------
-    idxs : dictionary
-        that contains the indices of subgraphs of various size.
-    """
-
-    # make sure max size is larger than 2
-    assert isinstance(max_size, int)
-    assert max_size >= 2
-
-    idxs = {}
-
-    # get the indices of n2
-    idxs["n2"] = a._indices().t().detach()  # just in case
-
-    # loop through the levels
-    for level in range(3, max_size + 1):
-        # get the indices that is the basis of the level
-        base_idxs = idxs["n%s" % (level - 1)]
-
-        # enumerate all the possible pairs at base level
-        base_pairs = torch.cat(
-            [
-                base_idxs[None, :, :].repeat(base_idxs.shape[0], 1, 1),
-                base_idxs[:, None, :].repeat(1, base_idxs.shape[0], 1),
-            ],
-            dim=-1,
-        ).reshape(-1, 2 * (level - 1))
-
-        mask = 1.0
-        # filter to get the ones that share some indices
-        for idx_pos in range(level - 2):
-            mask *= torch.eq(
-                base_pairs[:, idx_pos + 1], base_pairs[:, idx_pos + level - 1]
-            )
-
-        mask *= 1 - 1 * torch.eq(base_pairs[:, 0], base_pairs[:, -1])
-
-        mask = mask > 0.0
-
-        # filter the enumeration to be output
-        idxs_level = torch.cat(
-            [
-                base_pairs[mask][:, : (level - 1)],
-                base_pairs[mask][:, -1][:, None],
-            ],
-            dim=-1,
-        )
-
-        idxs["n%s" % level] = idxs_level
-
-    return idxs
-
-
-def from_homogeneous(g):
+def from_homogeneous_and_mol(g, offmol):
     r""" Build heterogeneous graph from homogeneous ones.
 
 
@@ -145,7 +85,7 @@ def from_homogeneous(g):
     a = g.adjacency_matrix()
 
     # get all the indices
-    idxs = relationship_indices_from_adjacency_matrix(a)
+    idxs = relationship_indices_from_offmol(offmol)
 
     # make them all numpy
     idxs = {key: value.numpy() for key, value in idxs.items()}
