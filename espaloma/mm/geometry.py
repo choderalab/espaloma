@@ -56,19 +56,27 @@ def _dihedral(r0, r1):
     """ Dihedral between normal vectors. """
     return _angle(r0, r1)
 
-
-def dihedral(x0, x1, x2, x3, jitter=1e-5):
+def dihedral(x0, x1, x2, x3):
     """ Dihedral between four points. """
-    x0 = x0 + torch.randn_like(x0) * jitter
-    x1 = x1 + torch.randn_like(x1) * jitter
-    x2 = x2 + torch.randn_like(x2) * jitter
-    x3 = x3 + torch.randn_like(x3) * jitter
+    # TODO:
+    # check out
+    # time-machine dihedral
+    # x0 = x0 + torch.randn_like(x0) * jitter
+    # x1 = x1 + torch.randn_like(x1) * jitter
+    # x2 = x2 + torch.randn_like(x2) * jitter
+    # 3x3 = x3 + torch.randn_like(x3) * jitter
 
     left = torch.cross(x1 - x0, x1 - x2)
     right = torch.cross(x2 - x1, x2 - x3)
+    middle = x2 - x1
 
- 
-    return _dihedral(left, right)
+    top = torch.sum(
+        torch.cross(left, right) * middle / middle.norm(p=2, dim=-1, keepdim=True),
+        dim=-1)
+
+    bottom = torch.sum(left * right, dim=-1)
+
+    return torch.atan2(top, bottom)
 
 
 # =============================================================================
