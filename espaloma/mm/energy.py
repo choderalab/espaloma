@@ -66,6 +66,12 @@ def apply_torsion(nodes, suffix=""):
             )
         }
 
+
+def apply_improper_torsion(nodes, suffix=""):
+    # TODO: decide if "trefoil" convention is better handled here or in pooling
+    raise (NotImplementedError)
+
+
 def apply_bond_gaussian(nodes, suffix=""):
     """ Bond energy in nodes. """
     # if suffix == '_ref':
@@ -148,6 +154,11 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbo
         g.apply_nodes(
             lambda node: apply_torsion(node, suffix=suffix),
             ntype="n4",
+        )
+    if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
+        g.apply_nodes(
+            lambda node: apply_improper_torsion(node, suffix=suffix),
+            ntype="n4_improper",
         )
 
     if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:
