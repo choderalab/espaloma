@@ -31,6 +31,10 @@ class Graph(BaseGraph):
     """
 
     def __init__(self, mol=None, homograph=None, heterograph=None):
+        # TODO : more pythonic way allow multiple constructors:
+        #   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...
+        #   rather than Graph(mol=None, homograph=None, ...)
+
         # input molecule
         if isinstance(mol, str):
             from openforcefield.topology import Molecule
