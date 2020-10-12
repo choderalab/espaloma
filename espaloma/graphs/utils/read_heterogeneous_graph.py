@@ -108,7 +108,7 @@ def from_homogeneous_and_mol(g, offmol):
     # build a mapping between indices and the ordering
     idxs_to_ordering = {}
 
-    for term in ["n1", "n2", "n3", "n4"]:
+    for term in ["n1", "n2", "n3", "n4", "n4_improper"]:
         idxs_to_ordering[term] = {
             tuple(subgraph_idxs): ordering
             for (ordering, subgraph_idxs) in enumerate(list(idxs[term]))
@@ -203,7 +203,7 @@ def from_homogeneous_and_mol(g, offmol):
     # ======================================
     # relationships between nodes and graphs
     # ======================================
-    for term in ["n1", "n2", "n3", "n4", "nonbonded", "onefour"]:
+    for term in ["n1", "n2", "n3", "n4", "n4_improper", "nonbonded", "onefour"]:
         hg[(term, "%s_in_g" % term, "g",)] = np.stack(
             [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
         )
@@ -217,7 +217,7 @@ def from_homogeneous_and_mol(g, offmol):
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
 
     # include indices in the nodes themselves
-    for term in ["n1", "n2", "n3", "n4"]:
+    for term in ["n1", "n2", "n3", "n4", "n4_improper"]:
         hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
 
     return hg
