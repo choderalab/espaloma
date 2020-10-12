@@ -99,6 +99,7 @@ def apply_bond_linear_mixture(nodes, suffix=""):
 # =============================================================================
 def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     """ Nonbonded in nodes. """
+    # TODO: should this be 9-6 or 12-6?
     return {
         "u%s"
         % suffix: scaling * esp.mm.nonbonded.lj_9_6(
