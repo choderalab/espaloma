@@ -30,8 +30,8 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
     return np.vstack([indices, indices[:, ::-1]])
 
 
-def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, np.ndarray]:
-    """Construct a dictionary that maps node names (like "n2") to numpy arrays of indices
+def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor]:
+    """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
     Notes
     -----
@@ -51,6 +51,10 @@ def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, np.ndarray]:
     #   (also, unclear why we need "n2", "n3", "n4" to be 2x redundant, but that's something to consider changing later)
     for key in ["n2", "n3", "n4"]:
         idxs[key] = duplicate_index_ordering(idxs[key])
+
+    # make them all torch.Tensors
+    for key in idxs:
+        idxs[key] = torch.from_numpy(idxs[key])
 
     return idxs
 
