@@ -36,7 +36,7 @@ class ValenceModel(nn.Module):
         propers = symmetry_pool(self.readouts.propers, indices.propers, proper_perms)
 
         # improper torsions: sum over (abcd, acdb, adbc)
-        improper_perms = [(0, 1, 2, 3), (0, 3, 4, 2), (0, 4, 2, 3)]
+        improper_perms = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
         impropers = symmetry_pool(self.readouts.impropers, indices.impropers, improper_perms)
 
         return ParameterizedSystem(atoms=atoms, bonds=bonds, angles=angles, propers=propers, impropers=impropers)
