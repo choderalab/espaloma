@@ -41,7 +41,7 @@ class Graph(BaseGraph):
             homograph = self.get_homograph_from_mol(mol)
 
         if homograph is not None and heterograph is None:
-            heterograph = self.get_heterograph_from_graph(homograph)
+            heterograph = self.get_heterograph_from_graph_and_mol(homograph, mol)
 
         self.mol = mol
         self.homograph = homograph
@@ -65,13 +65,13 @@ class Graph(BaseGraph):
         return graph
 
     @staticmethod
-    def get_heterograph_from_graph(graph):
+    def get_heterograph_from_graph_and_mol(graph, mol):
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."
 
-        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
-            graph
+        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol(
+            graph, mol
         )
 
         return heterograph
