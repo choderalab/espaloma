@@ -7,7 +7,7 @@ from simtk import openmm, unit
 import espaloma as esp
 from espaloma.units import *
 
-
+# TODO: parameterize on the individual energy terms also
 @pytest.mark.parametrize(
     "g", esp.data.esol(first=10),
 )
@@ -139,13 +139,16 @@ def test_energy_angle_and_bond(g):
         decimal=n_decimals,
     )
 
+    propers = g.nodes["g"].data["u_n4"].numpy()
+    impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
+    all_torsions = propers + impropers
     npt.assert_almost_equal(
-        g.nodes["g"].data["u_n4"].numpy(),
+        all_torsions,
         energies["PeriodicTorsionForce"],
         decimal=n_decimals,
     )
 
-    print(g.nodes["g"].data["u_n4"].numpy())
+    print(all_torsions)
     print(energies["PeriodicTorsionForce"])
 
     # TODO:
