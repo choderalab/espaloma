@@ -33,9 +33,11 @@ def periodic_torsion(x, k,
 
     # NOTE:
     # 0.5 because all torsions are calculated twice
-    return 0.5 * esp.mm.functional.periodic(
+    out = 0.5 * esp.mm.functional.periodic(
             x=x,
             k=k,
             periodicity=periodicity,
             phases=phases,
     )
+    assert(out.shape == (len(x), 1))
+    return out
