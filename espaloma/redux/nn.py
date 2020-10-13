@@ -1,4 +1,3 @@
-import torch
 import torch.nn.functional as F
 from dgl.nn.pytorch import TAGConv
 from torch import nn

@@ -35,7 +35,7 @@ element_encoder.fit(np.array(elements).reshape(-1, 1))
 
 
 @lru_cache(2 ** 20)
-def offmol_to_dgl(offmol: Molecule):
+def offmol_to_dgl(offmol: Molecule) -> dgl.DGLGraph:
     graph = dgl.from_networkx(offmol.to_networkx())
     atomic_nums = [a.element.atomic_number for a in offmol.atoms]
     X = element_encoder.transform(np.array(atomic_nums).reshape(-1, 1))
@@ -43,7 +43,7 @@ def offmol_to_dgl(offmol: Molecule):
     return graph
 
 @lru_cache(2**20)
-def offmol_to_indices(offmol: Molecule):
+def offmol_to_indices(offmol: Molecule) -> Indices:
     return Indices(offmol)
 
 
