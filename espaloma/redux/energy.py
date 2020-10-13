@@ -1,11 +1,8 @@
-import sys;
-
-sys.path.append("~/Documents/Github/espaloma/scripts/redux")
-from .symmetry import ParameterizedSystem, Indices
-from openforcefield.topology import Molecule
 import torch
+from openforcefield.topology import Molecule
 
 import espaloma as esp
+from .symmetry import ParameterizedSystem, Indices
 
 
 def compute_bonds(xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices):
@@ -25,7 +22,7 @@ def compute_angles(xyz: torch.Tensor, params: ParameterizedSystem, indices: Indi
 def compute_propers(xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices):
     # TODO: reduce code duplication
     a, b = xyz[:, indices.propers[:, 0]], xyz[:, indices.propers[:, 1]]
-    c, d = xyz[:, indices.propers[:, 2]], xyz[:,indices.propers[:, 3]]
+    c, d = xyz[:, indices.propers[:, 2]], xyz[:, indices.propers[:, 3]]
     dihedrals = esp.mm.geometry.dihedral(a, b, c, d)
     ks = params.propers
     return esp.mm.torsion.periodic_torsion(dihedrals, ks)
@@ -34,7 +31,7 @@ def compute_propers(xyz: torch.Tensor, params: ParameterizedSystem, indices: Ind
 def compute_impropers(xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices):
     # TODO: reduce code duplication
     a, b = xyz[:, indices.impropers[:, 0]], xyz[:, indices.impropers[:, 1]]
-    c, d = xyz[:, indices.impropers[:, 2]], xyz[:,indices.impropers[:, 3]]
+    c, d = xyz[:, indices.impropers[:, 2]], xyz[:, indices.impropers[:, 3]]
     dihedrals = esp.mm.geometry.dihedral(a, b, c, d)
     ks = params.impropers
     return esp.mm.torsion.periodic_torsion(dihedrals, ks)

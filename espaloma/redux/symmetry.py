@@ -42,7 +42,8 @@ def offmol_to_dgl(offmol: Molecule) -> dgl.DGLGraph:
     graph.ndata['element'] = torch.Tensor(X)
     return graph
 
-@lru_cache(2**20)
+
+@lru_cache(2 ** 20)
 def offmol_to_indices(offmol: Molecule) -> Indices:
     return Indices(offmol)
 
