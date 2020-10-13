@@ -62,7 +62,7 @@ class ValenceModel(nn.Module):
         self.node_representation = node_representation
         self.readouts = readouts
 
-    def forward(self, offmol: Molecule):
+    def forward(self, offmol: Molecule) -> ParameterizedSystem:
         indices = offmol_to_indices(offmol)
         graph = offmol_to_dgl(offmol)
         node_reps = self.node_representation.forward(graph, graph.ndata['element'])
