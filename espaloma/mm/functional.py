@@ -64,7 +64,10 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
     ----------
     x : `torch.Tensor`, `shape=(batch_size, 1)`
     k : `torch.Tensor`, `shape=(batch_size, number_of_phases)`
-    eq: `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    periodicity: either list of length number_of_phases, or
+        `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    phases : either list of length number_of_phases, or
+        `torch.Tensor`, `shape=(batch_size, number_of_phases)`
     """
 
     if isinstance(phases, list):
@@ -145,12 +148,12 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     epsilon : `torch.Tensor`, `shape=(batch_size, len(order))`
     sigma : `torch.Tensor`, `shape=(batch_size, len(order))`
     order : `int` or `List` of `int`
+    coefficients : torch.tensor or list
+    switch : unitless switch width (distance)
 
     Returns
     -------
     u : `torch.Tensor`, `shape=(batch_size, 1)`
-
-
     """
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
@@ -183,6 +186,11 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
 def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     r""" Gaussian basis function.
 
+    Parameters
+    ----------
+    x : torch.Tensor
+    coefficients : list or torch.Tensor of length n_phases
+    phases : list or torch.Tensor of length n_phases
     """
 
     if isinstance(phases, list):
@@ -200,6 +208,9 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
 def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
     r""" Linear mixture basis function.
 
+    x : torch.Tensor
+    coefficients : list or torch.Tensor of length 2
+    phases : list of length 2
     """
 
     assert len(phases) == 2, 'Only two phases now.'

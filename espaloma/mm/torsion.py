@@ -11,16 +11,18 @@ def periodic_torsion(x, k,
         periodicity=list(range(1, 7)),
         phases=[0.0 for _ in range(6)]
     ):
-    """ Harmonic bond energy.
+    """ Periodic torsion potential
 
     Parameters
     ----------
     x : `torch.Tensor`, `shape = (batch_size, 1)`
         Dihedral value.
-    k : `torch.Tensor`, `shape = (batch_size, periodicity)`
+    k : `torch.Tensor`, `shape = (batch_size, n_phases)`
         Force constants.
-    eq : `torch.Tensor`, `shape = (batch_size, periodicity)`
-        Phase offset.
+    periodicity : `torch.Tensor`, `shape = (batch_size, n_phases)`
+        Periodicities
+    phases : `torch.Tensor`, `shape = (batch_size, n_phases)`
+        Phase offsets
 
     Returns
     -------
