@@ -57,6 +57,45 @@ def harmonic(x, k, eq, order=[2]):
         dim=-1
     )
 
+
+def periodic_fixed_phases(dihedrals: torch.Tensor, ks: torch.Tensor) -> torch.Tensor:
+    """Periodic torsion term with n_phases = 6, periodicities = 1..n_phases, phases = zeros
+
+    Parameters
+    ----------
+    dihedrals : torch.Tensor, shape=(batch_size, n_phases)
+        dihedral angles -- TODO: confirm in radians?
+    ks : torch.Tensor, shape=(batch_size, n_phases)
+        force constants -- TODO: confirm in esp.unit.ENERGY_UNIT ?
+
+    Returns
+    -------
+    u : torch.Tensor, shape=(batch_size, 1)
+        potential energy of each snapshot
+
+    Notes
+    -----
+    TODO: is there a way to annotate / type-hint tensor shapes? (currently adding assert statements)
+    TODO: merge with esp.mm.functional.periodic -- adding this because I was having difficulty debugging runtime tensor
+      shape errors in esp.mm.functional.periodic, which allows for a more flexible mix of input shapes and types
+    """
+    n_phases = 6
+    # periodicity ns = 1..n_phases
+    assert (dihedrals.shape == ks.shape)
+    assert (dihedrals.shape[1] == n_phases)
+    batch_size = len(dihedrals)
+    ns = torch.arange(n_phases) + 1
+
+    # cos(n * theta) for n in 1..n_phases
+    energy_terms = ks * torch.cos(ns * dihedrals)
+
+    # sum over n
+    energy_sums = torch.sum(energy_terms, dim=1)
+    assert (energy_sums.shape == (batch_size, 1))
+
+    return energy_sums
+
+
 def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]):
     """ Periodic term.
 
