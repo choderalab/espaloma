@@ -1,11 +1,16 @@
-import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
-from simtk import openmm, unit
+from simtk import openmm
+from simtk import openmm as mm
+from simtk import unit
+
+angle_unit = unit.radian
+energy_unit = unit.kilojoule_per_mole
+
+from simtk.openmm import app
 
 import espaloma as esp
-from espaloma.units import *
 
 
 @pytest.mark.parametrize(
@@ -84,7 +89,7 @@ def test_energy_angle_and_bond(g):
             getEnergy=True, getParameters=True, groups=2 ** idx,
         )
 
-        energy = state.getPotentialEnergy().value_in_unit(ENERGY_UNIT)
+        energy = state.getPotentialEnergy().value_in_unit(esp.units.ENERGY_UNIT)
 
         energies[name] = energy
 
@@ -111,8 +116,8 @@ def test_energy_angle_and_bond(g):
     # for each atom, store n_snapshots x 3
     g.nodes["n1"].data["xyz"] = torch.tensor(
         simulation.context.getState(getPositions=True)
-        .getPositions(asNumpy=True)
-        .value_in_unit(DISTANCE_UNIT),
+            .getPositions(asNumpy=True)
+            .value_in_unit(esp.units.DISTANCE_UNIT),
         dtype=torch.float32,
     )[None, :, :].permute(1, 0, 2)
 
