@@ -12,12 +12,42 @@ from simtk.openmm import app
 
 import espaloma as esp
 
+def _create_torsion_sim(
+        periodicity: int = 2,
+        phase=0 * angle_unit,
+        k=10.0 * energy_unit
+) -> app.Simulation:
+    """Create a 4-particle OpenMM Simulation containing only a PeriodicTorsionForce"""
+    system = mm.System()
+
+    # add 4 particles of unit mass
+    for _ in range(4):
+        system.addParticle(1)
+
+    # add torsion force to system
+    force = mm.PeriodicTorsionForce()
+    force.addTorsion(0, 1, 2, 3, periodicity, phase, k)
+    system.addForce(force)
+
+    # create openmm Simulation, which requires a Topology and Integrator
+    topology = app.Topology()
+    chain = topology.addChain()
+    residue = topology.addResidue('torsion', chain)
+    for name in ['a', 'b', 'c', 'd']:
+        topology.addAtom(name, 'C', residue)
+    integrator = mm.VerletIntegrator(1.0)
+    sim = app.Simulation(topology, system, integrator)
+
+    return sim
+
+
+# TODO: assert consistency on torsion-only system
+
 
 @pytest.mark.parametrize(
     "g", esp.data.esol(first=10),
 )
 def test_energy_angle_and_bond(g):
-
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
 
@@ -82,7 +112,6 @@ def test_energy_angle_and_bond(g):
     )
 
     for idx, force in enumerate(forces):
-
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
