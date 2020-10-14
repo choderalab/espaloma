@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import math
 import dgl
 import torch
 
@@ -56,27 +55,40 @@ def _dihedral(r0, r1):
     """ Dihedral between normal vectors. """
     return _angle(r0, r1)
 
-def dihedral(x0, x1, x2, x3):
-    """ Dihedral between four points. """
-    # TODO:
-    # check out
-    # time-machine dihedral
-    # x0 = x0 + torch.randn_like(x0) * jitter
-    # x1 = x1 + torch.randn_like(x1) * jitter
-    # x2 = x2 + torch.randn_like(x2) * jitter
-    # 3x3 = x3 + torch.randn_like(x3) * jitter
 
-    left = torch.cross(x1 - x0, x1 - x2)
-    right = torch.cross(x2 - x1, x2 - x3)
-    middle = x2 - x1
+def dihedral(x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor) -> torch.Tensor:
+    """ Dihedral between four points.
 
-    top = torch.sum(
-        torch.cross(left, right) * middle / middle.norm(p=2, dim=-1, keepdim=True),
-        dim=-1)
+    Reference
+    ---------
+    Closely follows implementation in Yutong Zhao's timemachine:
+        https://github.com/proteneer/timemachine/blob/1a0ab45e605dc1e28c44ea90f38cb0dedce5c4db/timemachine/potentials/bonded.py#L152-L199
+    """
+    # check input shapes
+    num_torsions = len(x0)
+    for x in [x0, x1, x2, x3]:
+        assert (x.shape == (num_torsions, 3))
 
-    bottom = torch.sum(left * right, dim=-1)
+    # compute displacements 0->1, 2->1, 2->3
+    r01 = x1 - x0
+    r21 = x1 - x2
+    r23 = x3 - x2
 
-    return torch.atan2(top, bottom)
+    # compute normal planes
+    n1 = torch.cross(r01, r21)
+    n2 = torch.cross(r21, r23)
+
+    rkj_normed = r21 / torch.norm(r21, dim=-1, keepdim=True)
+
+    y = torch.sum(torch.mul(torch.cross(n1, n2), rkj_normed), dim=-1)
+    x = torch.sum(torch.mul(n1, n2), dim=-1)
+
+    # choose quadrant correctly
+    theta = torch.atan2(y, x)
+
+    assert (theta.shape == (num_torsions,))
+
+    return theta
 
 
 # =============================================================================
