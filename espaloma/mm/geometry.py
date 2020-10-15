@@ -67,7 +67,7 @@ def dihedral(x0, x1, x2, x3, jitter=1e-5):
     left = torch.cross(x1 - x0, x1 - x2)
     right = torch.cross(x2 - x1, x2 - x3)
 
- 
+
     return _dihedral(left, right)
 
 
@@ -151,6 +151,17 @@ def geometry_in_graph(g):
                 for term in ["nonbonded", "onefour"]
                 for pos_idx in [0, 1]
             },
+            **{
+                "n1_as_%s_in_%s"
+                % (pos_idx, term): (
+                    copy_src(src="xyz", out="m_xyz%s" % pos_idx),
+                    dgl.function.sum(
+                        msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
+                    ),
+                )
+                for term in ["n4_improper"]
+                for pos_idx in [0, 1, 2, 3]
+            },
         },
         cross_reducer="sum",
     )
@@ -168,6 +179,9 @@ def geometry_in_graph(g):
 
     if g.number_of_nodes("onefour") > 0:
         g.apply_nodes(apply_bond, ntype="onefour")
+
+    if g.number_of_nodes("n4_improper") > 0:
+        g.apply_nodes(apply_torsion, ntype="n4_improper")
 
     return g
 

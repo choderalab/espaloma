@@ -200,6 +200,19 @@ def from_homogeneous_and_mol(g, offmol):
                 axis=-1,
             )
 
+    # membership of n1 in n4_improper
+    for term in ["n4_improper"]:
+        for pos_idx in [0, 1, 2, 3]:
+            hg[(term, "%s_has_%s_n1" % (term, pos_idx), "n1")] = np.stack(
+                [np.arange(idxs[term].shape[0]), idxs[term][:, pos_idx]],
+                axis=-1,
+            )
+
+            hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
+                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                axis=-1,
+            )
+
     # ======================================
     # relationships between nodes and graphs
     # ======================================
