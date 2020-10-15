@@ -170,7 +170,6 @@ class JanossyPoolingImproper(torch.nn.Module):
             "k": 6,
         },
         out_features_dimensions=-1,
-        pool=torch.add,
     ):
         super(JanossyPoolingImproper, self).__init__()
 
@@ -180,7 +179,6 @@ class JanossyPoolingImproper(torch.nn.Module):
         # bookkeeping
         self.out_features = out_features
         self.levels = ["n4_improper"]
-        self.pool = pool
 
         # get output features
         mid_features = [x for x in config if isinstance(x, int)][-1]
@@ -199,7 +197,7 @@ class JanossyPoolingImproper(torch.nn.Module):
                 ),
             )
 
-            for feature, dimension in self.out_features[level].items():
+            for feature, dimension in self.out_features.items():
                 setattr(
                     self,
                     "f_out_%s_to_%s" % (level, feature),
@@ -227,7 +225,7 @@ class JanossyPoolingImproper(torch.nn.Module):
                     ),
                 )
                 for big_idx in self.levels
-                for relationship_idx in range(big_idx)
+                for relationship_idx in range(4)
             },
             cross_reducer="sum",
         )
@@ -242,38 +240,42 @@ class JanossyPoolingImproper(torch.nn.Module):
                     )(
                         getattr(self, "sequential_%s" % big_idx)(
                             g=None,
-                            x=self.pool(
-                                torch.cat(
-                                    [
-                                        nodes.data["h0"],
-                                        nodes.data["h1"],
-                                        nodes.data["h2"],
-                                        nodes.data["h3"]
-                                    ],
-                                    dim=1
-                                ),
-                                torch.cat(
-                                    [
-                                        nodes.data["h0"],
-                                        nodes.data["h2"],
-                                        nodes.data["h3"],
-                                        nodes.data["h1"],
-                                    ],
-                                    dim=1
-                                ),
-                                torch.cat(
-                                    [
-                                        nodes.data["h0"],
-                                        nodes.data["h3"],
-                                        nodes.data["h1"],
-                                        nodes.data["h2"],
-                                    ],
-                                    dim=1
-                                ),
+                            x=torch.sum(
+                                torch.stack([
+                                    torch.cat(
+                                        [
+                                            nodes.data["h0"],
+                                            nodes.data["h1"],
+                                            nodes.data["h2"],
+                                            nodes.data["h3"]
+                                        ],
+                                        dim=1
+                                    ),
+                                    torch.cat(
+                                        [
+                                            nodes.data["h0"],
+                                            nodes.data["h2"],
+                                            nodes.data["h3"],
+                                            nodes.data["h1"],
+                                        ],
+                                        dim=1
+                                    ),
+                                    torch.cat(
+                                        [
+                                            nodes.data["h0"],
+                                            nodes.data["h3"],
+                                            nodes.data["h1"],
+                                            nodes.data["h2"],
+                                        ],
+                                        dim=1
+                                    ),
+                                ],
+                                dim=0),
+                            dim=0,
                             ),
                         )
                     )
-                    for feature in self.out_features[big_idx].keys()
+                    for feature in self.out_features.keys()
                 },
                 ntype=big_idx,
             )

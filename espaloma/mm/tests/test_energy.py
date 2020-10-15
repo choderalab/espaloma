@@ -35,6 +35,12 @@ def test_energy():
                 4: ['k'],
             },
         ),
+        esp.nn.readout.janossy.JanossyPoolingImproper(
+            in_features=32, config=[32, "tanh"],
+            out_features={
+                'k': 6,
+            }
+        )
     )
 
     g = net(g.heterograph)
