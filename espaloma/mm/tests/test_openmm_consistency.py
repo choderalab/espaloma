@@ -8,8 +8,8 @@ from simtk import unit
 
 from espaloma.utils.geometry import _sample_four_particle_torsion_scan
 
-angle_unit = unit.radian
-energy_unit = unit.kilojoule_per_mole
+omm_angle_unit = unit.radian
+omm_energy_unit = unit.kilojoule_per_mole
 
 from simtk.openmm import app
 
@@ -18,8 +18,8 @@ import espaloma as esp
 
 def _create_torsion_sim(
         periodicity: int = 2,
-        phase=0 * angle_unit,
-        k=10.0 * energy_unit
+        phase=0 * omm_angle_unit,
+        k=10.0 * omm_energy_unit
 ) -> app.Simulation:
     """Create a 4-particle OpenMM Simulation containing only a PeriodicTorsionForce"""
     system = mm.System()
@@ -46,9 +46,9 @@ def _create_torsion_sim(
 
 
 # TODO: mark this properly: want to test periodicities 1..6, +ve, -ve k
-# @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * energy_unit, +10 * energy_unit])
-def test_periodic_torsion(periodicity=4, k=-10 * energy_unit, n_samples=100):
-    phase = 0 * angle_unit
+# @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * omm_energy_unit, +10 * omm_energy_unit])
+def test_periodic_torsion(periodicity=4, k=-10 * omm_energy_unit, n_samples=100):
+    phase = 0 * omm_angle_unit
     sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
     xyz_np = _sample_four_particle_torsion_scan(n_samples)
 
@@ -56,19 +56,20 @@ def test_periodic_torsion(periodicity=4, k=-10 * energy_unit, n_samples=100):
     openmm_energies = np.zeros(n_samples)
     for i, pos in enumerate(xyz_np):
         sim.context.setPositions(pos)
-        openmm_energies[i] = sim.context.getState(getEnergy=True).getPotentialEnergy() / energy_unit
+        openmm_energies[i] = sim.context.getState(getEnergy=True).getPotentialEnergy() / omm_energy_unit
 
     # compute energies using espaloma
     xyz = torch.tensor(xyz_np)
     x0, x1, x2, x3 = xyz[:, 0, :], xyz[:, 1, :], xyz[:, 2, :], xyz[:, 3, :]
     theta = esp.mm.geometry.dihedral(x0, x1, x2, x3).reshape((n_samples, 1))
     ks = torch.zeros(n_samples, 6)
-    ks[:, periodicity - 1] = k / esp.units.ENERGY_UNIT
+    ks[:, periodicity - 1] = k.value_in_unit(esp.units.ENERGY_UNIT)
 
-    # TODO: currently failing with run-time tensor index errors in esp.mm.functional.periodic
     espaloma_energies = esp.mm.functional.periodic(theta, ks) * esp.units.ENERGY_UNIT
+    espaloma_energies_in_omm_units = espaloma_energies.numpy().flatten().value_in_unit(omm_energy_unit)
 
-    np.testing.assert_almost_equal(actual=espaloma_energies.numpy().flatten() / energy_unit, desired=openmm_energies)
+    # currently failing, off by a factor of 0.00038088
+    np.testing.assert_almost_equal(actual=espaloma_energies_in_omm_units, desired=openmm_energies)
 
 
 @pytest.mark.parametrize(
