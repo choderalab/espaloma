@@ -62,13 +62,13 @@ def test_periodic_torsion(periodicity=4, k=-10 * energy_unit, n_samples=100):
     xyz = torch.tensor(xyz_np)
     x0, x1, x2, x3 = xyz[:, 0, :], xyz[:, 1, :], xyz[:, 2, :], xyz[:, 3, :]
     theta = esp.mm.geometry.dihedral(x0, x1, x2, x3).reshape((n_samples, 1))
-    ks = torch.zeros(6)
-    ks[periodicity - 1] = k / esp.units.ENERGY_UNIT
+    ks = torch.zeros(n_samples, 6)
+    ks[:, periodicity - 1] = k / esp.units.ENERGY_UNIT
 
     # TODO: currently failing with run-time tensor index errors in esp.mm.functional.periodic
     espaloma_energies = esp.mm.functional.periodic(theta, ks) * esp.units.ENERGY_UNIT
 
-    np.testing.assert_almost_equal(actual=espaloma_energies.numpy() / energy_unit, desired=openmm_energies)
+    np.testing.assert_almost_equal(actual=espaloma_energies.numpy().flatten() / energy_unit, desired=openmm_energies)
 
 
 @pytest.mark.parametrize(
