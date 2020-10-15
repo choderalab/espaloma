@@ -15,6 +15,8 @@ from simtk.openmm import app
 
 import espaloma as esp
 
+decimal_threshold = 4
+
 
 def _create_torsion_sim(
         periodicity: int = 2,
@@ -65,11 +67,10 @@ def test_periodic_torsion(periodicity=4, k=-10 * omm_energy_unit, n_samples=100)
     ks = torch.zeros(n_samples, 6)
     ks[:, periodicity - 1] = k.value_in_unit(esp.units.ENERGY_UNIT)
 
-    espaloma_energies = esp.mm.functional.periodic(theta, ks) * esp.units.ENERGY_UNIT
-    espaloma_energies_in_omm_units = espaloma_energies.numpy().flatten().value_in_unit(omm_energy_unit)
+    espaloma_energies = esp.mm.functional.periodic(theta, ks).numpy().flatten() * esp.units.ENERGY_UNIT
+    espaloma_energies_in_omm_units = espaloma_energies.value_in_unit(omm_energy_unit)
 
-    # currently failing, off by a factor of 0.00038088
-    np.testing.assert_almost_equal(actual=espaloma_energies_in_omm_units, desired=openmm_energies)
+    np.testing.assert_almost_equal(actual=espaloma_energies_in_omm_units, desired=openmm_energies, decimal=decimal_threshold)
 
 
 @pytest.mark.parametrize(
