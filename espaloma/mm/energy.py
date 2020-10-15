@@ -82,7 +82,7 @@ def apply_improper_torsion(nodes, suffix=""):
 
     else:
         return {
-            "u_improper%s"
+            "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
                 x=nodes.data["x"],
                 k=nodes.data["k%s" % suffix],
