@@ -1,3 +1,4 @@
+import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
@@ -5,12 +6,15 @@ from simtk import openmm
 from simtk import openmm as mm
 from simtk import unit
 
+from espaloma.utils.geometry import _sample_four_particle_torsion_scan
+
 angle_unit = unit.radian
 energy_unit = unit.kilojoule_per_mole
 
 from simtk.openmm import app
 
 import espaloma as esp
+
 
 def _create_torsion_sim(
         periodicity: int = 2,
@@ -41,7 +45,30 @@ def _create_torsion_sim(
     return sim
 
 
-# TODO: assert consistency on torsion-only system
+# TODO: mark this properly: want to test periodicities 1..6, +ve, -ve k
+# @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * energy_unit, +10 * energy_unit])
+def test_periodic_torsion(periodicity=4, k=-10 * energy_unit, n_samples=100):
+    phase = 0 * angle_unit
+    sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
+    xyz_np = _sample_four_particle_torsion_scan(n_samples)
+
+    # compute energies using OpenMM
+    openmm_energies = np.zeros(n_samples)
+    for i, pos in enumerate(xyz_np):
+        sim.context.setPositions(pos)
+        openmm_energies[i] = sim.context.getState(getEnergy=True).getPotentialEnergy() / energy_unit
+
+    # compute energies using espaloma
+    xyz = torch.tensor(xyz_np)
+    x0, x1, x2, x3 = xyz[:, 0, :], xyz[:, 1, :], xyz[:, 2, :], xyz[:, 3, :]
+    theta = esp.mm.geometry.dihedral(x0, x1, x2, x3).reshape((n_samples, 1))
+    ks = torch.zeros(6)
+    ks[periodicity - 1] = k / esp.units.ENERGY_UNIT
+
+    # TODO: currently failing with run-time tensor index errors in esp.mm.functional.periodic
+    espaloma_energies = esp.mm.functional.periodic(theta, ks) * esp.units.ENERGY_UNIT
+
+    np.testing.assert_almost_equal(actual=espaloma_energies.numpy() / energy_unit, desired=openmm_energies)
 
 
 @pytest.mark.parametrize(
