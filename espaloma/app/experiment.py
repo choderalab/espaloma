@@ -190,7 +190,7 @@ class Test(Experiment):
         for state_name, state in self.states.items():  # loop through states
             # load the state dict
             self.net.load_state_dict(state)
-            
+
             # local scope
             with g.local_scope():
 
@@ -222,6 +222,7 @@ class TrainAndTest(Experiment):
         net,
         ds_tr,
         ds_te,
+        ds_vl=None,
         metrics_tr=[esp.metrics.TypingCrossEntropy()],
         metrics_te=[esp.metrics.TypingCrossEntropy()],
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-2),
@@ -236,6 +237,7 @@ class TrainAndTest(Experiment):
         self.net = net
         self.ds_tr = ds_tr
         self.ds_te = ds_te
+        self.ds_vl = ds_vl
         self.optimizer = optimizer
         self.n_epochs = n_epochs
         self.metrics_tr = metrics_tr
@@ -309,5 +311,22 @@ class TrainAndTest(Experiment):
         self.ref_g_training = test.ref_g
 
         self.results_tr = test.results
+
+        if self.ds_vl is not None:
+
+            test = Test(
+                net=self.net,
+                data=self.ds_vl,
+                metrics=self.metrics_te,
+                states=self.states,
+                normalize=self.normalize,
+            )
+
+            test.test()
+            self.ref_g_validation = test.ref_g
+
+            self.results_vl = test.results
+
+            return {"test": self.results_te, "train": self.results_tr, "validate": self.results_vl}
 
         return {"test": self.results_te, "train": self.results_tr}

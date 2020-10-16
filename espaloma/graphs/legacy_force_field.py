@@ -210,7 +210,7 @@ class LegacyForceField:
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].k.value_in_unit(esp.units.ANGLE_FORCE_CONSTANCE_UNIT)
+                        ].k.value_in_unit(esp.units.ANGLE_FORCE_CONSTANT_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )[:, None]
