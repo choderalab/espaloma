@@ -2,17 +2,81 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
-from simtk import openmm, unit
+from simtk import openmm
+from simtk import openmm as mm
+from simtk import unit
+
+from espaloma.utils.geometry import _sample_four_particle_torsion_scan
+
+omm_angle_unit = unit.radian
+omm_energy_unit = unit.kilojoule_per_mole
+
+from simtk.openmm import app
 
 import espaloma as esp
-from espaloma.units import *
+
+decimal_threshold = 4
+
+
+def _create_torsion_sim(
+        periodicity: int = 2,
+        phase=0 * omm_angle_unit,
+        k=10.0 * omm_energy_unit
+) -> app.Simulation:
+    """Create a 4-particle OpenMM Simulation containing only a PeriodicTorsionForce"""
+    system = mm.System()
+
+    # add 4 particles of unit mass
+    for _ in range(4):
+        system.addParticle(1)
+
+    # add torsion force to system
+    force = mm.PeriodicTorsionForce()
+    force.addTorsion(0, 1, 2, 3, periodicity, phase, k)
+    system.addForce(force)
+
+    # create openmm Simulation, which requires a Topology and Integrator
+    topology = app.Topology()
+    chain = topology.addChain()
+    residue = topology.addResidue('torsion', chain)
+    for name in ['a', 'b', 'c', 'd']:
+        topology.addAtom(name, 'C', residue)
+    integrator = mm.VerletIntegrator(1.0)
+    sim = app.Simulation(topology, system, integrator)
+
+    return sim
+
+
+# TODO: mark this properly: want to test periodicities 1..6, +ve, -ve k
+# @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * omm_energy_unit, +10 * omm_energy_unit])
+def test_periodic_torsion(periodicity=4, k=-10 * omm_energy_unit, n_samples=100):
+    phase = 0 * omm_angle_unit
+    sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
+    xyz_np = _sample_four_particle_torsion_scan(n_samples)
+
+    # compute energies using OpenMM
+    openmm_energies = np.zeros(n_samples)
+    for i, pos in enumerate(xyz_np):
+        sim.context.setPositions(pos)
+        openmm_energies[i] = sim.context.getState(getEnergy=True).getPotentialEnergy() / omm_energy_unit
+
+    # compute energies using espaloma
+    xyz = torch.tensor(xyz_np)
+    x0, x1, x2, x3 = xyz[:, 0, :], xyz[:, 1, :], xyz[:, 2, :], xyz[:, 3, :]
+    theta = esp.mm.geometry.dihedral(x0, x1, x2, x3).reshape((n_samples, 1))
+    ks = torch.zeros(n_samples, 6)
+    ks[:, periodicity - 1] = k.value_in_unit(esp.units.ENERGY_UNIT)
+
+    espaloma_energies = esp.mm.functional.periodic(theta, ks).numpy().flatten() * esp.units.ENERGY_UNIT
+    espaloma_energies_in_omm_units = espaloma_energies.value_in_unit(omm_energy_unit)
+
+    np.testing.assert_almost_equal(actual=espaloma_energies_in_omm_units, desired=openmm_energies, decimal=decimal_threshold)
 
 # TODO: parameterize on the individual energy terms also
 @pytest.mark.parametrize(
     "g", esp.data.esol(first=10),
 )
 def test_energy_angle_and_bond(g):
-
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
 
@@ -77,14 +141,13 @@ def test_energy_angle_and_bond(g):
     )
 
     for idx, force in enumerate(forces):
-
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
             getEnergy=True, getParameters=True, groups=2 ** idx,
         )
 
-        energy = state.getPotentialEnergy().value_in_unit(ENERGY_UNIT)
+        energy = state.getPotentialEnergy().value_in_unit(esp.units.ENERGY_UNIT)
 
         energies[name] = energy
 
@@ -111,8 +174,8 @@ def test_energy_angle_and_bond(g):
     # for each atom, store n_snapshots x 3
     g.nodes["n1"].data["xyz"] = torch.tensor(
         simulation.context.getState(getPositions=True)
-        .getPositions(asNumpy=True)
-        .value_in_unit(DISTANCE_UNIT),
+            .getPositions(asNumpy=True)
+            .value_in_unit(esp.units.DISTANCE_UNIT),
         dtype=torch.float32,
     )[None, :, :].permute(1, 0, 2)
 
