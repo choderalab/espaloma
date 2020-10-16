@@ -5,7 +5,7 @@ import numpy as np
 from openforcefield.topology import Molecule, Topology
 from openforcefield.typing.engines.smirnoff import ForceField
 from simtk import openmm as mm
-
+import pytest
 import espaloma as esp
 
 import torch
@@ -46,6 +46,7 @@ def _create_impropers_only_system(smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(
 
     return openmm_system, topology, g
 
+@pytest.mark.slow
 def test_improper_recover():
     from simtk import openmm, unit
     from simtk.openmm.app import Simulation
