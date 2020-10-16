@@ -57,6 +57,65 @@ def harmonic(x, k, eq, order=[2]):
         dim=-1
     )
 
+
+def periodic_fixed_phases(dihedrals: torch.Tensor, ks: torch.Tensor) -> torch.Tensor:
+    """Periodic torsion term with n_phases = 6, periodicities = 1..n_phases, phases = zeros
+
+    Parameters
+    ----------
+    dihedrals : torch.Tensor, shape=(n_snapshots, n_dihedrals)
+        dihedral angles -- TODO: confirm in radians?
+    ks : torch.Tensor, shape=(n_dihedrals, n_phases)
+        force constants -- TODO: confirm in esp.unit.ENERGY_UNIT ?
+
+    Returns
+    -------
+    u : torch.Tensor, shape=(n_snapshots, 1)
+        potential energy of each snapshot
+
+    Notes
+    -----
+    TODO: is there a way to annotate / type-hint tensor shapes? (currently adding many assert statements)
+    TODO: merge with esp.mm.functional.periodic -- adding this because I was having difficulty debugging runtime tensor
+      shape errors in esp.mm.functional.periodic, which allows for a more flexible mix of input shapes and types
+    """
+
+    # periodicity = 1..n_phases
+    n_phases = 6
+    periodicity = torch.arange(n_phases) + 1
+
+    # assert input shape consistency
+    n_snapshots, n_dihedrals = dihedrals.shape
+    n_dihedrals_, n_phases_ = ks.shape
+    assert (n_dihedrals == n_dihedrals_)
+    assert (n_phases == n_phases_)
+
+    # promote everything to this shape
+    stacked_shape = (n_snapshots, n_dihedrals, n_phases)
+
+    # duplicate ks n_snapshots times
+    ks_stacked = torch.stack([ks] * n_snapshots, dim=0)
+    assert (ks_stacked.shape == stacked_shape)
+
+    # duplicate dihedral angles n_phases times
+    dihedrals_stacked = torch.stack([dihedrals] * n_phases, dim=2)
+    assert (dihedrals_stacked.shape == stacked_shape)
+
+    # duplicate periodicity n_snapshots * n_dihedrals times
+    ns = torch.stack([torch.stack([periodicity] * n_snapshots)] * n_dihedrals, dim=1)
+    assert (ns.shape == stacked_shape)
+
+    # compute k_n * cos(n * theta) for n in 1..n_phases, for each dihedral in each snapshot
+    energy_terms = ks_stacked * torch.cos(ns * dihedrals_stacked)
+    assert (energy_terms.shape == stacked_shape)
+
+    # sum over n_dihedrals and n_phases
+    energy_sums = energy_terms.sum(dim=(1, 2))
+    assert (energy_sums.shape == (n_snapshots,))
+
+    return energy_sums.reshape((n_snapshots, 1))
+
+
 def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]):
     """ Periodic term.
 
