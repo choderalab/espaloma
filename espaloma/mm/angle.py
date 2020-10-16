@@ -8,7 +8,7 @@ import espaloma as esp
 # MODULE FUNCTIONS
 # =============================================================================
 def harmonic_angle(x, k, eq):
-    """ Harmonic bond energy.
+    """ Harmonic angle energy.
 
     Parameters
     ----------
@@ -17,7 +17,7 @@ def harmonic_angle(x, k, eq):
     k : `torch.Tensor`, `shape = (batch_size, 1)`
         force constant
     eq : `torch.Tensor`, `shape = (batch_size, 1)`
-        eqilibrium value
+        equilibrium angle
 
     Returns
     -------

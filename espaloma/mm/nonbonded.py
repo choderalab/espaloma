@@ -79,15 +79,15 @@ def lorentz_berthelot(g, suffix=""):
 # ENERGY FUNCTIONS
 # =============================================================================
 def lj_12_6(x, sigma, epsilon):
-    """ Lenard-Jones 12-6.
+    """ Lennard-Jones 12-6.
 
     Parameters
     ----------
     x : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
-    k : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+    sigma : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
-    eq : `torch.Tensor`,
+    epsilon : `torch.Tensor`,
         `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
     Returns
@@ -99,15 +99,15 @@ def lj_12_6(x, sigma, epsilon):
     return esp.mm.functional.lj(x=x, sigma=sigma, epsilon=epsilon)
 
 def lj_9_6(x, sigma, epsilon):
-    """ Lenard-Jones 12-6.
+    """ Lennard-Jones 9-6.
 
     Parameters
     ----------
     x : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
-    k : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+    sigma : `torch.Tensor`, `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
-    eq : `torch.Tensor`,
+    epsilon : `torch.Tensor`,
         `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
 
     Returns

@@ -17,7 +17,7 @@ def harmonic_bond(x, k, eq):
     k : `torch.Tensor`, `shape = (batch_size, 1)`
         force constant
     eq : `torch.Tensor`, `shape = (batch_size, 1)`
-        eqilibrium value
+        equilibrium bond length
 
     Returns
     -------
