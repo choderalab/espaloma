@@ -39,5 +39,5 @@ def periodic_torsion(x, k,
             periodicity=periodicity,
             phases=phases,
     )
-    assert(out.shape == (len(x), 1))
+    # assert(out.shape == (len(x), 1))
     return out
