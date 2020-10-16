@@ -44,7 +44,7 @@ def fp_oe(atom):
                     atom.GetExplicitValence(),
                     atom.GetFormalCharge(),
                     atom.IsAromatic() * 1.0,
-                    atom.GetIsotope(),
+                    atom.GetIsotope(), # TODO: is this a good idea?
                     oechem.OEAtomIsInRingSize(atom, 3) * 1.0,
                     oechem.OEAtomIsInRingSize(atom, 4) * 1.0,
                     oechem.OEAtomIsInRingSize(atom, 5) * 1.0,

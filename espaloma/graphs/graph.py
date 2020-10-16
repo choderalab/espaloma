@@ -31,6 +31,10 @@ class Graph(BaseGraph):
     """
 
     def __init__(self, mol=None, homograph=None, heterograph=None):
+        # TODO : more pythonic way allow multiple constructors:
+        #   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...
+        #   rather than Graph(mol=None, homograph=None, ...)
+
         # input molecule
         if isinstance(mol, str):
             from openforcefield.topology import Molecule
@@ -41,7 +45,7 @@ class Graph(BaseGraph):
             homograph = self.get_homograph_from_mol(mol)
 
         if homograph is not None and heterograph is None:
-            heterograph = self.get_heterograph_from_graph(homograph)
+            heterograph = self.get_heterograph_from_graph_and_mol(homograph, mol)
 
         self.mol = mol
         self.homograph = homograph
@@ -65,13 +69,13 @@ class Graph(BaseGraph):
         return graph
 
     @staticmethod
-    def get_heterograph_from_graph(graph):
+    def get_heterograph_from_graph_and_mol(graph, mol):
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."
 
-        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
-            graph
+        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol(
+            graph, mol
         )
 
         return heterograph

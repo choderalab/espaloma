@@ -66,6 +66,29 @@ def apply_torsion(nodes, suffix=""):
             )
         }
 
+def apply_improper_torsion(nodes, suffix=""):
+    """ Improper torsion energy in nodes. """
+    if "phases%s" % suffix in nodes.data and "periodicity%s" % suffix in nodes.data:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=nodes.data["phases%s" % suffix],
+                periodicity=nodes.data["periodicity%s" % suffix],
+            )
+        }
+
+
+    else:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+            )
+        }
+
 def apply_bond_gaussian(nodes, suffix=""):
     """ Bond energy in nodes. """
     # if suffix == '_ref':
@@ -93,6 +116,7 @@ def apply_bond_linear_mixture(nodes, suffix=""):
 # =============================================================================
 def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     """ Nonbonded in nodes. """
+    # TODO: should this be 9-6 or 12-6?
     return {
         "u%s"
         % suffix: scaling * esp.mm.nonbonded.lj_9_6(
@@ -148,6 +172,11 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbo
         g.apply_nodes(
             lambda node: apply_torsion(node, suffix=suffix),
             ntype="n4",
+        )
+    if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
+        g.apply_nodes(
+            lambda node: apply_improper_torsion(node, suffix=suffix),
+            ntype="n4_improper",
         )
 
     if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:

@@ -7,74 +7,59 @@
 import dgl
 import numpy as np
 import torch
-
+from espaloma.graphs.utils import offmol_indices
+from openforcefield.topology import Molecule
+from typing import Dict
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
-def relationship_indices_from_adjacency_matrix(a, max_size=4):
-    r""" Read the relatinoship indices from adjacency matrix.
 
-    Parameters
-    ----------
-    a : torch.sparse.FloatTensor
-        adjacency matrix.
+def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
+    """For every (a,b,c,d) add a (d,c,b,a)
 
-    Returns
-    -------
-    idxs : dictionary
-        that contains the indices of subgraphs of various size.
+    TODO: is there a way to avoid this duplication?
+
+    >>> indices = np.array([[0, 1, 2, 3], [1, 2, 3, 4]])
+    >>> duplicate_index_ordering(indices)
+    array([[0, 1, 2, 3],
+           [1, 2, 3, 4],
+           [3, 2, 1, 0],
+           [4, 3, 2, 1]])
     """
+    return np.vstack([indices, indices[:, ::-1]])
 
-    # make sure max size is larger than 2
-    assert isinstance(max_size, int)
-    assert max_size >= 2
 
-    idxs = {}
+def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor]:
+    """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
-    # get the indices of n2
-    idxs["n2"] = a._indices().t().detach()  # just in case
+    Notes
+    -----
+    * introduces 2x redundant indices (including (d,c,b,a) for every (a,b,c,d)) for compatibility with later processing
+    """
+    idxs = dict()
+    idxs["n1"] = offmol_indices.atom_indices(offmol)
+    idxs["n2"] = offmol_indices.bond_indices(offmol)
+    idxs["n3"] = offmol_indices.angle_indices(offmol)
+    idxs["n4"] = offmol_indices.proper_torsion_indices(offmol)
+    idxs["n4_improper"] = offmol_indices.improper_torsion_indices(offmol)
 
-    # loop through the levels
-    for level in range(3, max_size + 1):
-        # get the indices that is the basis of the level
-        base_idxs = idxs["n%s" % (level - 1)]
+    # TODO: enumerate indices for coupling-term nodes also
+    # TODO: big refactor of term names from "n4" to "proper_torsion", "improper_torsion", "angle_angle_coupling", etc.
 
-        # enumerate all the possible pairs at base level
-        base_pairs = torch.cat(
-            [
-                base_idxs[None, :, :].repeat(base_idxs.shape[0], 1, 1),
-                base_idxs[:, None, :].repeat(1, base_idxs.shape[0], 1),
-            ],
-            dim=-1,
-        ).reshape(-1, 2 * (level - 1))
+    # TODO (discuss with YW) : I think "n1" and "n4_improper" shouldn't be 2x redundant in current scheme
+    #   (also, unclear why we need "n2", "n3", "n4" to be 2x redundant, but that's something to consider changing later)
+    for key in ["n2", "n3", "n4"]:
+        idxs[key] = duplicate_index_ordering(idxs[key])
 
-        mask = 1.0
-        # filter to get the ones that share some indices
-        for idx_pos in range(level - 2):
-            mask *= torch.eq(
-                base_pairs[:, idx_pos + 1], base_pairs[:, idx_pos + level - 1]
-            )
-
-        mask *= 1 - 1 * torch.eq(base_pairs[:, 0], base_pairs[:, -1])
-
-        mask = mask > 0.0
-
-        # filter the enumeration to be output
-        idxs_level = torch.cat(
-            [
-                base_pairs[mask][:, : (level - 1)],
-                base_pairs[mask][:, -1][:, None],
-            ],
-            dim=-1,
-        )
-
-        idxs["n%s" % level] = idxs_level
+    # make them all torch.Tensors
+    for key in idxs:
+        idxs[key] = torch.from_numpy(idxs[key])
 
     return idxs
 
 
-def from_homogeneous(g):
+def from_homogeneous_and_mol(g, offmol):
     r""" Build heterogeneous graph from homogeneous ones.
 
 
@@ -104,7 +89,7 @@ def from_homogeneous(g):
     a = g.adjacency_matrix()
 
     # get all the indices
-    idxs = relationship_indices_from_adjacency_matrix(a)
+    idxs = relationship_indices_from_offmol(offmol)
 
     # make them all numpy
     idxs = {key: value.numpy() for key, value in idxs.items()}
@@ -123,7 +108,7 @@ def from_homogeneous(g):
     # build a mapping between indices and the ordering
     idxs_to_ordering = {}
 
-    for term in ["n1", "n2", "n3", "n4"]:
+    for term in ["n1", "n2", "n3", "n4", "n4_improper"]:
         idxs_to_ordering[term] = {
             tuple(subgraph_idxs): ordering
             for (ordering, subgraph_idxs) in enumerate(list(idxs[term]))
@@ -215,10 +200,23 @@ def from_homogeneous(g):
                 axis=-1,
             )
 
+    # membership of n1 in n4_improper
+    for term in ["n4_improper"]:
+        for pos_idx in [0, 1, 2, 3]:
+            hg[(term, "%s_has_%s_n1" % (term, pos_idx), "n1")] = np.stack(
+                [np.arange(idxs[term].shape[0]), idxs[term][:, pos_idx]],
+                axis=-1,
+            )
+
+            hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
+                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                axis=-1,
+            )
+
     # ======================================
     # relationships between nodes and graphs
     # ======================================
-    for term in ["n1", "n2", "n3", "n4", "nonbonded", "onefour"]:
+    for term in ["n1", "n2", "n3", "n4", "n4_improper", "nonbonded", "onefour"]:
         hg[(term, "%s_in_g" % term, "g",)] = np.stack(
             [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
         )
@@ -232,7 +230,7 @@ def from_homogeneous(g):
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
 
     # include indices in the nodes themselves
-    for term in ["n1", "n2", "n3", "n4"]:
+    for term in ["n1", "n2", "n3", "n4", "n4_improper"]:
         hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
 
     return hg
