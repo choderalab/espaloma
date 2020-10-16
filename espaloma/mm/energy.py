@@ -66,11 +66,28 @@ def apply_torsion(nodes, suffix=""):
             )
         }
 
-
 def apply_improper_torsion(nodes, suffix=""):
-    # TODO: decide if "trefoil" convention is better handled here or in pooling
-    raise (NotImplementedError)
+    """ Improper torsion energy in nodes. """
+    if "phases%s" % suffix in nodes.data and "periodicity%s" % suffix in nodes.data:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=nodes.data["phases%s" % suffix],
+                periodicity=nodes.data["periodicity%s" % suffix],
+            )
+        }
 
+
+    else:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+            )
+        }
 
 def apply_bond_gaussian(nodes, suffix=""):
     """ Bond energy in nodes. """
