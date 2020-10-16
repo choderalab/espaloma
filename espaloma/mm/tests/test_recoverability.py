@@ -8,6 +8,7 @@ from simtk import openmm as mm
 
 import espaloma as esp
 
+import torch
 
 def _create_impropers_only_system(smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(C2COC(=O)N)OC)N4)N") -> mm.System:
     """Create a simulation that contains only improper torsion terms,
@@ -15,6 +16,7 @@ def _create_impropers_only_system(smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(
     """
 
     molecule = Molecule.from_smiles(smiles, allow_undefined_stereo=True)
+    g = esp.Graph(molecule)
 
     topology = Topology.from_molecules(molecule)
     forcefield = ForceField('openff-1.2.0.offxml')
@@ -42,44 +44,146 @@ def _create_impropers_only_system(smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(
 
     assert (num_impropers_retained > 0)  # otherwise this molecule is not a useful test case!
 
-    return openmm_system
+    return openmm_system, topology, g
+
+def test_improper_recover():
+    from simtk import openmm, unit
+    from simtk.openmm.app import Simulation
+    from simtk.unit.quantity import Quantity
+
+    TEMPERATURE = 500 * unit.kelvin
+    STEP_SIZE = 1 * unit.femtosecond
+    COLLISION_RATE = 1 / unit.picosecond
+
+    system, topology, g = _create_impropers_only_system()
+
+    # use langevin integrator, although it's not super useful here
+    integrator = openmm.LangevinIntegrator(
+        TEMPERATURE, COLLISION_RATE, STEP_SIZE
+    )
+
+    # initialize simulation
+    simulation = Simulation(
+        topology=topology, system=system, integrator=integrator
+    )
 
 
-caffeine_smiles = 'CN1C=NC2=C1C(=O)N(C(=O)N2C)C'
+    import openforcefield
+    # get conformer
+    g.mol.generate_conformers(
+        toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
+    )
 
+    # put conformer in simulation
+    simulation.context.setPositions(g.mol.conformers[0])
 
-def _create_random_impropers_only_system(smiles: str = caffeine_smiles, k_stddev: float = 10.0) -> mm.System:
-    """Create an OpenMM system that contains only a large number of improper torsion terms,
-    assigning random coefficients ~ N(0, k_stddev) kJ/mol"""
+    # minimize energy
+    simulation.minimizeEnergy()
 
-    molecule = Molecule.from_smiles(smiles, allow_undefined_stereo=True)
+    # set velocities
+    simulation.context.setVelocitiesToTemperature(TEMPERATURE)
 
-    topology = Topology.from_molecules(molecule)
-    forcefield = ForceField('openff-1.2.0.offxml')
-    openmm_system = forcefield.create_openmm_system(topology)
+    samples = []
+    us = []
 
-    # delete all forces
-    while openmm_system.getNumForces() > 0:
-        openmm_system.removeForce(0)
+    # loop through number of samples
+    for _ in range(10):
 
-    # add a torsion force
-    torsion_force = mm.PeriodicTorsionForce()
+        # run MD for `self.n_steps_per_sample` steps
+        simulation.step(10)
 
-    # for each improper torsion abcd, sample a periodicity, phase, and k, then add 3 terms to torsion_force
-    # with different indices abcd, acdb, adbc but identical periodicity, phase, and k
-    indices = esp.graphs.utils.offmol_indices.improper_torsion_indices(molecule)
-    improper_perms = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
+        # append samples to `samples`
+        samples.append(
+            simulation.context.getState(getPositions=True)
+            .getPositions(asNumpy=True)
+            .value_in_unit(esp.units.DISTANCE_UNIT)
+        )
 
-    for inds in indices:
-        periodicity = np.random.randint(1, 7)
-        phase = 0
-        k = np.random.randn() * k_stddev
-        for perm in improper_perms:
-            p1, p2, p3, p4 = [int(inds[p]) for p in perm]  # careful to pass python ints rather than np ints to openmm
-            torsion_force.addTorsion(p1, p2, p3, p4, periodicity, phase, k)
+        us.append(
+            simulation.context.getState(getEnergy=True)
+            .getPotentialEnergy()
+            .value_in_unit(esp.units.ENERGY_UNIT)
+        )
 
-    openmm_system.addForce(torsion_force)
+    # put samples into an array
+    samples = np.array(samples)
+    us = np.array(us)
 
-    return openmm_system
+    # put samples into tensor
+    samples = torch.tensor(samples, dtype=torch.float32)
+    us = torch.tensor(us, dtype=torch.float32)[None, :, None]
+
+    g.heterograph.nodes["n1"].data["xyz"] = samples.permute(1, 0, 2)
+
+    # require gradient for force matching
+    g.heterograph.nodes["n1"].data["xyz"].requires_grad = True
+
+    g.heterograph.nodes["g"].data["u_ref"] = us
+
+    # parametrize
+    layer = esp.nn.dgl_legacy.gn()
+    net = torch.nn.Sequential(
+        esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
+        esp.nn.readout.janossy.JanossyPoolingImproper(
+            in_features=32, config=[32, "tanh"],
+            out_features={
+                'k': 6,
+            }
+        ),
+        esp.mm.geometry.GeometryInGraph(),
+        esp.mm.energy.EnergyInGraph(terms=["n4_improper"])
+    )
+
+    optimizer = torch.optim.Adam(net.parameters(), 1e-3)
+
+    for _ in range(1500):
+        optimizer.zero_grad()
+
+        net(g.heterograph)
+        u_ref = g.nodes["g"].data["u"]
+        u = g.nodes["g"].data["u_ref"]
+        loss = torch.nn.MSELoss()(u_ref, u)
+        loss.backward()
+        print(loss)
+        optimizer.step()
+
+    assert loss.detach().numpy().item() < 0.1
+
+# caffeine_smiles = 'CN1C=NC2=C1C(=O)N(C(=O)N2C)C'
+#
+#
+# def _create_random_impropers_only_system(smiles: str = caffeine_smiles, k_stddev: float = 10.0) -> mm.System:
+#     """Create an OpenMM system that contains only a large number of improper torsion terms,
+#     assigning random coefficients ~ N(0, k_stddev) kJ/mol"""
+#
+#     molecule = Molecule.from_smiles(smiles, allow_undefined_stereo=True)
+#
+#     topology = Topology.from_molecules(molecule)
+#     forcefield = ForceField('openff-1.2.0.offxml')
+#     openmm_system = forcefield.create_openmm_system(topology)
+#
+#     # delete all forces
+#     while openmm_system.getNumForces() > 0:
+#         openmm_system.removeForce(0)
+#
+#     # add a torsion force
+#     torsion_force = mm.PeriodicTorsionForce()
+#
+#     # for each improper torsion abcd, sample a periodicity, phase, and k, then add 3 terms to torsion_force
+#     # with different indices abcd, acdb, adbc but identical periodicity, phase, and k
+#     indices = esp.graphs.utils.offmol_indices.improper_torsion_indices(molecule)
+#     improper_perms = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
+#
+#     for inds in indices:
+#         periodicity = np.random.randint(1, 7)
+#         phase = 0
+#         k = np.random.randn() * k_stddev
+#         for perm in improper_perms:
+#             p1, p2, p3, p4 = [int(inds[p]) for p in perm]  # careful to pass python ints rather than np ints to openmm
+#             torsion_force.addTorsion(p1, p2, p3, p4, periodicity, phase, k)
+#
+#     openmm_system.addForce(torsion_force)
+#
+#     return openmm_system
 
 # TODO: integration test where we recover this molecular mechanics system from energies/forces
