@@ -1,4 +1,5 @@
 import qcportal as ptl
+
 import espaloma as esp
 
 
@@ -20,7 +21,7 @@ def get_graph(collection, idx) -> None:
     print(idx, flush=True)
     record_names = list(collection.data.records)
     record_name = record_names[idx]
-    
+
     g = esp.data.qcarchive_utils.get_graph(collection, record_name)
 
     g.save('data/%s.th' % idx)
@@ -34,14 +35,15 @@ def run(idx, batch_size) -> None:
     idx = int(idx)
     batch_size = int(batch_size)
 
-
     collection = get_collection()
     before = batch_size * idx
-    for _idx in range(before, before+batch_size):
+    for _idx in range(before, before + batch_size):
         import os
         if not os.path.exists('data/%s.th' % _idx):
             get_graph(collection, _idx)
 
+
 if __name__ == '__main__':
     import sys
+
     run(sys.argv[1], sys.argv[2])
