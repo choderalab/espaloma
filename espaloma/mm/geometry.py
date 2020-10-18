@@ -66,7 +66,8 @@ def dihedral(x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Ten
     """
     # check input shapes
     # TODO: check this more carefully
-#    dim = x0.shape[-1]
+    dim = x0.shape[-1]
+    assert (dim == 3)
 #    num_torsions = x0.shape[-2]
 
     for x in [x0, x1, x2, x3]:
