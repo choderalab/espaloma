@@ -58,7 +58,7 @@ def get_energy_and_gradient(snapshot: qcportal.models.records.ResultRecord) -> T
 MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gradients'])
 
 
-def get_mol_with_targets(record, entry):
+def get_mol_with_targets(record:, entry) -> MolWithTargets:
     # offmol
     offmol = Molecule.from_qcschema(entry)
 
@@ -122,3 +122,5 @@ ds.df.to_hdf('some_of_optimization_dataset.h5', key='df')
 
 with open('all_mols_and_targets.pkl', 'wb') as f:
     dump(all_mols_and_targets, f)
+
+# TODO: allow batches
