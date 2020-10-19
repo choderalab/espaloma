@@ -27,7 +27,13 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
            [3, 2, 1, 0],
            [4, 3, 2, 1]])
     """
-    return np.vstack([indices, indices[:, ::-1]])
+    return np.concatenate(
+        [
+            indices,
+            np.flip(indices, axis=-1)
+        ],
+        axis=0
+    )
 
 
 def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor]:
@@ -43,6 +49,12 @@ def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor
     idxs["n3"] = offmol_indices.angle_indices(offmol)
     idxs["n4"] = offmol_indices.proper_torsion_indices(offmol)
     idxs["n4_improper"] = offmol_indices.improper_torsion_indices(offmol)
+
+    if len(idxs["n4"]) == 0:
+        idxs["n4"] = np.empty((0, 4))
+
+    if len(idxs["n4_improper"]) == 0:
+        idxs["n4_improper"] = np.empty((0, 4))
 
     # TODO: enumerate indices for coupling-term nodes also
     # TODO: big refactor of term names from "n4" to "proper_torsion", "improper_torsion", "angle_angle_coupling", etc.
@@ -122,9 +134,12 @@ def from_homogeneous_and_mol(g, offmol):
     # 'has' and 'in' relationships.
     # TODO:
     # we'll test later to see if this adds too much overhead
+    #
+
     for small_idx in range(1, 5):
         for big_idx in range(small_idx + 1, 5):
             for pos_idx in range(big_idx - small_idx + 1):
+
                 hg[
                     (
                         "n%s" % small_idx,
@@ -202,6 +217,7 @@ def from_homogeneous_and_mol(g, offmol):
 
     # membership of n1 in n4_improper
     for term in ["n4_improper"]:
+        print(idxs[term])
         for pos_idx in [0, 1, 2, 3]:
             hg[(term, "%s_has_%s_n1" % (term, pos_idx), "n1")] = np.stack(
                 [np.arange(idxs[term].shape[0]), idxs[term][:, pos_idx]],
