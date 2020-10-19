@@ -217,7 +217,6 @@ def from_homogeneous_and_mol(g, offmol):
 
     # membership of n1 in n4_improper
     for term in ["n4_improper"]:
-        print(idxs[term])
         for pos_idx in [0, 1, 2, 3]:
             hg[(term, "%s_has_%s_n1" % (term, pos_idx), "n1")] = np.stack(
                 [np.arange(idxs[term].shape[0]), idxs[term][:, pos_idx]],
