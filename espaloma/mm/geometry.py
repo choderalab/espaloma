@@ -64,7 +64,9 @@ def dihedral(x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Ten
         https://github.com/proteneer/timemachine/blob/1a0ab45e605dc1e28c44ea90f38cb0dedce5c4db/timemachine/potentials/bonded.py#L152-L199
     """
     # check input shapes
+
     assert x0.shape == x1.shape == x2.shape == x3.shape
+
 
     # compute displacements 0->1, 2->1, 2->3
     r01 = x1 - x0
