@@ -1,6 +1,8 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+from typing import Tuple
+
 import numpy as np
 import qcportal as ptl
 import torch
@@ -102,3 +104,14 @@ def get_graph(collection, record_name):
     )
 
     return g
+
+
+def get_energy_and_gradient(snapshot: ptl.models.records.ResultRecord) -> Tuple[float, np.ndarray]:
+    """Note: force = - gradient"""
+    d = snapshot.dict()
+    qcvars = d['extras']['qcvars']
+    energy = qcvars['CURRENT ENERGY']
+    flat_gradient = np.array(qcvars['CURRENT GRADIENT'])
+    num_atoms = len(flat_gradient) // 3
+    gradient = flat_gradient.reshape((num_atoms, 3))
+    return energy, gradient

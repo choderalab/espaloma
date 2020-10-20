@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 # Initialize FractalClient
 # As documented here: http://docs.qcarchive.molssi.org/projects/QCPortal/en/stable/client.html
+from espaloma.data.qcarchive_utils import get_energy_and_gradient
 
 client = qcportal.FractalClient()
 
@@ -43,16 +44,6 @@ specification = specifications[0]
 index = list(ds.df.index)
 record_names = list(ds.data.records)
 
-
-def get_energy_and_gradient(snapshot: qcportal.models.records.ResultRecord) -> Tuple[float, np.ndarray]:
-    """Note: force = - gradient"""
-    d = snapshot.dict()
-    qcvars = d['extras']['qcvars']
-    energy = qcvars['CURRENT ENERGY']
-    flat_gradient = np.array(qcvars['CURRENT GRADIENT'])
-    num_atoms = len(flat_gradient) // 3
-    gradient = flat_gradient.reshape((num_atoms, 3))
-    return energy, gradient
 
 
 MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gradients'])
