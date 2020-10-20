@@ -7,7 +7,7 @@ Closely following OpenFF 1.2 training dataset selection , as described here http
 Reference: https://zenodo.org/record/3777278
 
 `TorsionDriveDataset`s
-* "OpenFF Gen 2 Torsion Set s1 Roche 2"
+* "OpenFF Gen 2 Torsion Set 1 Roche 2"
 * "OpenFF Gen 2 Torsion Set 2 Coverage 2"
 * "OpenFF Gen 2 Torsion Set 3 Pfizer Discrepancy 2"
 * "OpenFF Gen 2 Torsion Set 4 eMolecules Discrepancy 2"
