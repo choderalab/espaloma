@@ -1,13 +1,13 @@
 # Attempt to download and save Pandas dataframes for all `OptimizationDataset`s, `TorsionDriveDataset`s, and `GridOptimizationDataset`s in QCArchive
 
 from collections import namedtuple
-from pickle import dump
-from typing import Tuple
 
 import numpy as np
 import qcportal
+from dataset_selection import optimization_datasets, dataset_type
 from openforcefield.topology import Molecule
 from tqdm import tqdm
+from pickle import dump
 
 # Initialize FractalClient
 # As documented here: http://docs.qcarchive.molssi.org/projects/QCPortal/en/stable/client.html
@@ -15,41 +15,10 @@ from espaloma.data.qcarchive_utils import get_energy_and_gradient
 
 client = qcportal.FractalClient()
 
-# print all collections
-collections: dict = client.list_collections(aslist=True)
-for dataset_type in collections.keys():
-    dataset_names = sorted(collections[dataset_type])
-    print(f'"{dataset_type}" ({len(dataset_names)} datasets)')
-    for i, dataset_name in enumerate(dataset_names):
-        print(f'\t{i}: "{dataset_name}"')
-
-# TODO: Loop over `(dataset_type, dataset_name)` pairs
-
-# Fetch dataset
-
-dataset_type = 'OptimizationDataset'
-dataset_name = 'OpenFF Full Optimization Benchmark 1'
-
-ds = client.get_collection(dataset_type, dataset_name)
-print('dir(ds)', dir(ds))
-print('type(ds)', type(ds))
-print('len(ds.df)', len(ds.df))
-print('ds.list_specifications()', ds.list_specifications())
-
-specifications = ds.list_specifications(description=False)
-
-# TODO: Also loop over specifications, in case there's more than one
-specification = specifications[0]
-
-index = list(ds.df.index)
-record_names = list(ds.data.records)
-
-
-
 MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gradients'])
 
 
-def get_mol_with_targets(record:, entry) -> MolWithTargets:
+def get_mol_with_targets(record, entry) -> MolWithTargets:
     # offmol
     offmol = Molecule.from_qcschema(entry)
 
@@ -68,50 +37,64 @@ def get_mol_with_targets(record:, entry) -> MolWithTargets:
     return MolWithTargets(offmol, xyz, energies, gradients)
 
 
-# fetch everything
-all_mols_and_targets = dict()
-exceptions = dict()
-skipped_status = dict()
+def fetch(ds, keys, specification='default'):
+    mols_and_targets = dict()
+    exceptions = dict()
+    skipped_status = dict()
 
-trange = tqdm(range(len(index)))
-for i in trange:
+    trange = tqdm(keys)
+    for key in trange:
 
-    # record and entry
-    record_name = record_names[i]
-    ind = index[i]
+        # record and entry
+        record = ds.get_record(key, specification)
+        entry = ds.get_entry(key)
 
-    record = ds.get_record(record_name, specification)
-    entry = ds.get_entry(ind)
+        # offmol with targets
+        if (record.status == 'COMPLETE') and (key not in mols_and_targets):
+            try:
+                mols_and_targets[key] = get_mol_with_targets(record, entry)
+            except Exception as e:
+                print(f'unspecified problem encountered with {key}!')
+                exceptions[key] = e
+        elif (key not in mols_and_targets):
+            print(f'skipping {key}, which has a status {record.status}')
+            skipped_status[key] = record.status
 
-    # offmol with targets
-    status = record.status
-    status_string = status.name
+        trange.set_postfix(
+            n_skipped=len(skipped_status),
+            n_exceptions=len(exceptions),
+            n_successful=len(mols_and_targets)
+        )
 
-    if status_string == 'complete':
-        try:
-            all_mols_and_targets[record_name] = get_mol_with_targets(record, entry)
-        except Exception as e:
-            print(f'unspecified problem encountered with {record_name}!')
-            exceptions[record_name] = e
-    else:
-        print(f'skipping {record_name}, which has a status {status}')
-        skipped_status[record_name] = status
+    return mols_and_targets, exceptions, skipped_status
 
-    trange.set_postfix(
-        n_skipped=len(skipped_status),
-        n_exceptions=len(exceptions),
-        n_successful=len(all_mols_and_targets)
+
+if __name__ == '__main__':
+    # get arguments
+    import sys
+
+    short_name = sys.argv[1]
+    batch_index = int(sys.argv[2])
+
+    print(short_name, batch_index)
+    path_to_keys = f'batches/{short_name}/{batch_index}.txt'
+    out_path = f'batches/{short_name}/{batch_index}.pkl'
+    print(f'reading from {path_to_keys}')
+    print(f'writing to {out_path}')
+
+    dataset_name = optimization_datasets[short_name]
+    ds = client.get_collection(dataset_type, dataset_name)
+
+    with open(path_to_keys, 'r') as f:
+        keys = [s.strip() for s in f.readlines()]
+    print(keys)
+
+    mols_and_targets, exceptions, skipped_status = fetch(ds, keys)
+    result = dict(
+        mols_and_targets=mols_and_targets,
+        exceptions=exceptions,
+        skipped_status=skipped_status
     )
 
-# what was the record status enum for each of the records we skipped?
-print('set(skipped_status.values())', set(skipped_status.values()))
-
-# save what we have for now...
-
-# TODO: does this ds.df thing contain all of the trajectories also?
-ds.df.to_hdf('some_of_optimization_dataset.h5', key='df')
-
-with open('all_mols_and_targets.pkl', 'wb') as f:
-    dump(all_mols_and_targets, f)
-
-# TODO: allow batches
+    with open(out_path, 'wb') as f:
+        dump(result, f)
