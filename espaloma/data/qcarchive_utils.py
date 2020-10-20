@@ -2,11 +2,13 @@
 # IMPORTS
 # =============================================================================
 import numpy as np
-import torch
 import qcportal as ptl
-import espaloma as esp
+import torch
 from simtk import unit
 from simtk.unit.quantity import Quantity
+
+import espaloma as esp
+
 
 # =============================================================================
 # CONSTANTS
@@ -19,12 +21,12 @@ from simtk.unit.quantity import Quantity
 def get_client():
     return ptl.FractalClient()
 
+
 def get_collection(
         client,
         collection_type="OptimizationDataset",
         name="OpenFF Full Optimization Benchmark 1",
-    ):
-
+):
     collection = client.get_collection(
         collection_type,
         name,
@@ -33,6 +35,7 @@ def get_collection(
     record_names = list(collection.data.records)
 
     return collection, record_names
+
 
 def get_graph(collection, record_name):
     # get record and trajectory
@@ -67,7 +70,7 @@ def get_graph(collection, record_name):
 
     g.nodes['n1'].data['xyz'] = torch.tensor(
         np.stack(
-                [
+            [
                 Quantity(
                     snapshot.get_molecule().geometry,
                     unit.bohr,
@@ -81,7 +84,6 @@ def get_graph(collection, record_name):
         requires_grad=True,
         dtype=torch.get_default_dtype(),
     )
-
 
     g.nodes['n1'].data['u_ref_prime'] = torch.stack(
         [
