@@ -106,6 +106,50 @@ def get_graph(collection, record_name):
     return g
 
 
+def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
+    final_molecules = record.get_final_molecules()
+    final_results = record.get_final_results()
+
+    angle_keys = list(final_molecules.keys())
+
+    xyzs = []
+    energies = []
+    gradients = []
+
+    for angle in angle_keys:
+        result = final_results[angle]
+        mol = final_molecules[angle]
+
+        e, g = get_energy_and_gradient(result)
+
+        xyzs.append(mol.geometry)
+        energies.append(e)
+        gradients.append(g)
+
+    # to arrays
+    xyz = np.array(xyzs)
+    energies = np.array(energies)
+    gradients = np.array(gradients)
+
+    # assume each angle key is a tuple -- sort by first angle in tuple
+
+    # NOTE: (for now making the assumption that these torsion drives are 1D)
+    for k in angle_keys:
+        assert (len(k) == 1)
+
+    to_ordered = np.argsort([k[0] for k in angle_keys])
+    angles_in_order = [angle_keys[i_] for i_ in to_ordered]
+    flat_angles = np.array(angles_in_order).flatten()
+
+    # put the xyz's, energies, and gradients in the same order as the angles
+    xyz_in_order = xyz[to_ordered]
+    energies_in_order = energies[to_ordered]
+    gradients_in_order = gradients[to_ordered]
+
+    # TODO: put this return blob into a better struct
+    return flat_angles, xyz_in_order, energies_in_order, gradients_in_order
+
+
 def get_energy_and_gradient(snapshot: ptl.models.records.ResultRecord) -> Tuple[float, np.ndarray]:
     """Note: force = - gradient"""
     d = snapshot.dict()
