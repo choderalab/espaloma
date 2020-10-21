@@ -1,7 +1,5 @@
 # Attempt to download and save Pandas dataframes for all `OptimizationDataset`s, `TorsionDriveDataset`s, and `GridOptimizationDataset`s in QCArchive
 
-from collections import namedtuple
-
 import numpy as np
 import qcportal
 from dataset_selection import optimization_datasets, dataset_type
@@ -11,11 +9,9 @@ from pickle import dump
 
 # Initialize FractalClient
 # As documented here: http://docs.qcarchive.molssi.org/projects/QCPortal/en/stable/client.html
-from espaloma.data.qcarchive_utils import get_energy_and_gradient
+from espaloma.data.qcarchive_utils import get_energy_and_gradient, MolWithTargets
 
 client = qcportal.FractalClient()
-
-MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gradients'])
 
 
 def get_mol_with_targets(record, entry) -> MolWithTargets:

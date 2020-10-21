@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+from collections import namedtuple
 from typing import Tuple
 
 import numpy as np
@@ -152,6 +153,9 @@ def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
 
 def get_energy_and_gradient(snapshot: ptl.models.records.ResultRecord) -> Tuple[float, np.ndarray]:
     """Note: force = - gradient"""
+
+    # TODO: attach units here? or later?
+
     d = snapshot.dict()
     qcvars = d['extras']['qcvars']
     energy = qcvars['CURRENT ENERGY']
@@ -159,3 +163,6 @@ def get_energy_and_gradient(snapshot: ptl.models.records.ResultRecord) -> Tuple[
     num_atoms = len(flat_gradient) // 3
     gradient = flat_gradient.reshape((num_atoms, 3))
     return energy, gradient
+
+
+MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gradients'])
