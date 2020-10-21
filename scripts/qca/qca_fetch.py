@@ -1,4 +1,4 @@
-# Attempt to download and save Pandas dataframes for all `OptimizationDataset`s, `TorsionDriveDataset`s, and `GridOptimizationDataset`s in QCArchive
+# Attempt to download and save all `OptimizationDataset`s appearing in Parsley training set
 
 import numpy as np
 import qcportal
