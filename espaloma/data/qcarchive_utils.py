@@ -240,7 +240,7 @@ def breakdown_along_time_axis(g, batch_size=32):
 
     return _gs
 
-def make_batch_size_consistent(g, batch_size=32):
+def make_batch_size_consistent(ds, batch_size=32):
     import itertools
     return esp.data.dataset.GraphDataset(
         list(
