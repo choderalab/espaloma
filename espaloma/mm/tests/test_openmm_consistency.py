@@ -181,7 +181,7 @@ def test_energy_angle_and_bond(g):
 
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
-    esp.mm.energy.energy_in_graph(g.heterograph)
+    esp.mm.energy.energy_in_graph(g.heterograph, terms=["n2", "n3", "n4"])
     # writes into nodes
     # .data['u_nonbonded'], .data['u_onefour'], .data['u2'], .data['u3'],
 
@@ -202,17 +202,17 @@ def test_energy_angle_and_bond(g):
         decimal=n_decimals,
     )
 
-    propers = g.nodes["g"].data["u_n4"].numpy()
-    impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
-    all_torsions = propers + impropers
-    npt.assert_almost_equal(
-        all_torsions,
-        energies["PeriodicTorsionForce"],
-        decimal=n_decimals,
-    )
+    # propers = g.nodes["g"].data["u_n4"].numpy()
+    # impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
+    # all_torsions = propers + impropers
+    # npt.assert_almost_equal(
+    #     all_torsions,
+    #     energies["PeriodicTorsionForce"],
+    #     decimal=n_decimals,
+    # )
 
-    print(all_torsions)
-    print(energies["PeriodicTorsionForce"])
+    # print(all_torsions)
+    # print(energies["PeriodicTorsionForce"])
 
     # TODO:
     # This is not working now, matching OpenMM nonbonded.
