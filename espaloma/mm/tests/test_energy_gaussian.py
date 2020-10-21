@@ -1,7 +1,7 @@
 import pytest
 
 
-'''
+"""
 def test_energy():
     import espaloma as esp
     import torch
@@ -41,4 +41,4 @@ def test_energy():
     esp.mm.energy.energy_in_graph(g)
 
     esp.mm.energy.energy_in_graph(g, suffix="_ref")
-'''
+"""

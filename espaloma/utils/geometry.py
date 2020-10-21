@@ -11,7 +11,7 @@ def _sample_unit_circle(n_samples: int = 1) -> np.ndarray:
     x = np.cos(theta)
     y = np.sin(theta)
     xy = np.array([x, y]).T
-    assert (xy.shape == (n_samples, 2))
+    assert xy.shape == (n_samples, 2)
     return xy
 
 
@@ -37,11 +37,11 @@ def _sample_four_particle_torsion_scan(n_samples: int = 1) -> np.ndarray:
 
     # form one 3D configuration
     conf = np.array([a, b, c, d])
-    assert (conf.shape == (4, 3))
+    assert conf.shape == (4, 3)
 
     # make n_samples copies
     xyz = np.array([conf] * n_samples, dtype=float)
-    assert (xyz.shape == (n_samples, 4, 3))
+    assert xyz.shape == (n_samples, 4, 3)
 
     # assign y and z coordinates of particle d to unit-circle samples
     xyz[:, 3, 1:] = _sample_unit_circle(n_samples)
@@ -64,7 +64,12 @@ def _timemachine_signed_torsion_angle(ci, cj, ck, cl):
     n1 = np.cross(rij, rkj)
     n2 = np.cross(rkj, rkl)
 
-    y = np.sum(np.multiply(np.cross(n1, n2), rkj / np.linalg.norm(rkj, axis=-1, keepdims=True)), axis=-1)
+    y = np.sum(
+        np.multiply(
+            np.cross(n1, n2), rkj / np.linalg.norm(rkj, axis=-1, keepdims=True)
+        ),
+        axis=-1,
+    )
     x = np.sum(np.multiply(n1, n2), -1)
 
     return np.arctan2(y, x)

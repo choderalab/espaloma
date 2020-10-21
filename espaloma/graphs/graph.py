@@ -45,7 +45,9 @@ class Graph(BaseGraph):
             homograph = self.get_homograph_from_mol(mol)
 
         if homograph is not None and heterograph is None:
-            heterograph = self.get_heterograph_from_graph_and_mol(homograph, mol)
+            heterograph = self.get_heterograph_from_graph_and_mol(
+                homograph, mol
+            )
 
         self.mol = mol
         self.homograph = homograph

@@ -35,15 +35,16 @@ def zinc(first=-1, *args, **kwargs):
     from openforcefield.topology import Molecule
     from rdkit import Chem
 
-    fname = 'parm_at_Frosst.tgz'
-    url = 'http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz'
+    fname = "parm_at_Frosst.tgz"
+    url = "http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz"
 
     if not exists(fname):
         import urllib.request
+
         urllib.request.urlretrieve(url, fname)
 
     archive = tarfile.open(fname)
-    zinc_file = archive.extractfile('parm_at_Frosst/zinc.sdf')
+    zinc_file = archive.extractfile("parm_at_Frosst/zinc.sdf")
     _mols = Chem.ForwardSDMolSupplier(zinc_file, removeHs=False)
 
     count = 0
@@ -67,13 +68,16 @@ def zinc(first=-1, *args, **kwargs):
 
     return esp.data.dataset.GraphDataset(gs, *args, **kwargs)
 
+
 def qcarchive(
-        collection_type="OptimizationDataset",
-        name="OpenFF Full Optimization Benchmark 1",
-        first=-1,
-        *args, **kwargs
-    ):
+    collection_type="OptimizationDataset",
+    name="OpenFF Full Optimization Benchmark 1",
+    first=-1,
+    *args,
+    **kwargs
+):
     from espaloma.data import qcarchive_utils
+
     client = qcarchive_utils.get_client()
     collection, record_names = qcarchive_utils.get_collection(client)
     if first != -1:
@@ -90,28 +94,28 @@ def qcarchive(
 
 def md17_old(*args, **kwargs):
     return [
-        esp.data.md17_utils.get_molecule(
-            name, *args, **kwargs
-        ).heterograph for name in [
-            # 'benzene', 
-            'uracil', 
-            'naphthalene',
-            'aspirin', 'salicylic',
-            'malonaldehyde', 
-            # 'ethanol', 
-            'toluene',
-   'paracetamol', 'azobenzene'
-        ]]
+        esp.data.md17_utils.get_molecule(name, *args, **kwargs).heterograph
+        for name in [
+            # 'benzene',
+            "uracil",
+            "naphthalene",
+            "aspirin",
+            "salicylic",
+            "malonaldehyde",
+            # 'ethanol',
+            "toluene",
+            "paracetamol",
+            "azobenzene",
+        ]
+    ]
+
 
 def md17_new(*args, **kwargs):
     return [
-        esp.data.md17_utils.get_molecule(
-            name, *args, **kwargs
-        ).heterograph for name in [
+        esp.data.md17_utils.get_molecule(name, *args, **kwargs).heterograph
+        for name in [
             # 'paracetamol', 'azobenzene',
-            'benzene', 'ethanol',
-        ]]
-
-
-
-
+            "benzene",
+            "ethanol",
+        ]
+    ]

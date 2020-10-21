@@ -7,7 +7,9 @@ from torch import nn
 
 
 class MLP(nn.Module):
-    def __init__(self, in_dim: int, out_dim: int, activation: Callable = F.relu):
+    def __init__(
+        self, in_dim: int, out_dim: int, activation: Callable = F.relu
+    ):
         super(MLP, self).__init__()
         self.fc1 = nn.Linear(in_dim, 64)
         self.fc2 = nn.Linear(64, 64)
@@ -21,7 +23,14 @@ class MLP(nn.Module):
 
 
 class TAG(nn.Module):
-    def __init__(self, in_dim: int, hidden_dim: int, out_dim: int, k: int = 2, activation: Callable = F.relu):
+    def __init__(
+        self,
+        in_dim: int,
+        hidden_dim: int,
+        out_dim: int,
+        k: int = 2,
+        activation: Callable = F.relu,
+    ):
         super(TAG, self).__init__()
         self.layer1 = TAGConv(in_dim, hidden_dim, k, activation=activation)
         self.layer2 = TAGConv(hidden_dim, hidden_dim, k, activation=activation)

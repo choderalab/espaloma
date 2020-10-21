@@ -43,6 +43,7 @@ def _angle(r0, r1):
 
     return angle
 
+
 def angle(x0, x1, x2):
     """ Angle between three points. """
     left = x1 - x0
@@ -55,7 +56,9 @@ def _dihedral(r0, r1):
     return _angle(r0, r1)
 
 
-def dihedral(x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor) -> torch.Tensor:
+def dihedral(
+    x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor
+) -> torch.Tensor:
     """ Dihedral between four points.
 
     Reference
@@ -66,7 +69,6 @@ def dihedral(x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Ten
     # check input shapes
 
     assert x0.shape == x1.shape == x2.shape == x3.shape
-
 
     # compute displacements 0->1, 2->1, 2->3
     r01 = x1 - x0
