@@ -172,6 +172,11 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return self
 
+    def __add__(self, x):
+        return self.__class__(
+            self.graphs + x.graphs
+        )
+
 
 class GraphDataset(Dataset):
     """ Dataset with additional support for only viewing
