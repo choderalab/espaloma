@@ -95,14 +95,20 @@ def md17_new(*args, **kwargs):
 class qca(object):
     pass
 
-df_names = ['Bayer', 'Converage', 'eMolecules', 'Pfizer', 'Roche']
-for df_name in df_names:
-    def _get_ds(cls):
-        import os
-        import pandas as pd
-        path = os.path.dirname(esp.__file__) + "/../data/qca/%s.h5" % df_name
-        df = pd.read_hdf(path)
-        ds = esp.data.qcarchive_utils.h5_to_dataset(df)
-        return ds
+df_names = ['Bayer', 'Coverage', 'eMolecules', 'Pfizer', 'Roche']
 
-    setattr(qca, df_name.lower(), classmethod(_get_ds))
+def _get_ds(cls, df_name):
+    import os
+    import pandas as pd
+    path = os.path.dirname(esp.__file__) + "/../data/qca/%s.h5" % df_name
+    df = pd.read_hdf(path)
+    ds = esp.data.qcarchive_utils.h5_to_dataset(df)
+    return ds
+
+from functools import partial
+for df_name in df_names:
+    setattr(
+        qca,
+        df_name.lower(),
+        classmethod(partial(_get_ds, df_name=df_name)),
+    )
