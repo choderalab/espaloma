@@ -165,4 +165,60 @@ def get_energy_and_gradient(snapshot: ptl.models.records.ResultRecord) -> Tuple[
     return energy, gradient
 
 
+
+
 MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gradients'])
+
+
+
+def h5_to_dataset(df):
+    df['smiles'] = df.apply(lambda x: x['offmol'].to_smiles(), axis=1)
+    groups = df.groupby("smiles")
+    gs = []
+    for name, group in groups:
+        mol_ref = group['offmol'][0]
+        assert all(mol_ref == entry for entry in group['offmol'])
+        g = esp.Graph(mol_ref)
+
+        u_ref = np.concatenate(group['energies'].values)
+        u_ref_prime = np.concatenate(group['gradients'].values, axis=0).transpose(1, 0, 2)
+        xyz = np.concatenate(group['xyz'].values, axis=0).transpose(1, 0, 2)
+
+        assert u_ref_prime.shape[0] == xyz.shape[0] == mol_ref.n_atoms
+        assert u_ref.shape[0] == u_ref_prime.shape[1] == xyz.shape[1]
+
+        # energy is already hartree
+        g.nodes['g'].data['u_ref'] = torch.tensor(
+            Quantity(
+                u_ref,
+                esp.units.HARTREE_PER_PARTICLE
+            ).value_in_unit(
+                esp.units.ENERGY_UNIT
+            ),
+            dtype=torch.get_default_dtype(),
+        )[None, :]
+
+        g.nodes['n1'].data['xyz'] = torch.tensor(
+            Quantity(
+                xyz,
+                unit.bohr,
+            ).value_in_unit(
+                esp.units.DISTANCE_UNIT
+            ),
+            requires_grad=True,
+            dtype=torch.get_default_dtype(),
+        )
+
+        g.nodes['n1'].data['u_ref_prime'] = torch.tensor(
+                Quantity(
+                    u_ref_prime,
+                    esp.units.HARTREE_PER_PARTICLE / unit.bohr,
+                ).value_in_unit(
+                    esp.units.FORCE_UNIT
+                ),
+                dtype=torch.get_default_dtype(),
+        )
+
+        gs.append(g)
+
+    return esp.data.dataset.GraphDataset(gs)
