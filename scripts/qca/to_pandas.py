@@ -10,7 +10,9 @@ import pandas as pd
 
 
 if __name__ == '__main__':
-    name = 'Roche'
+    import sys
+
+    name = sys.argv[1]
 
     with open(f'{name}.pkl', 'rb') as f:
         pkl = load(f)
