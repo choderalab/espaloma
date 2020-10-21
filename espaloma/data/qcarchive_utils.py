@@ -222,3 +222,36 @@ def h5_to_dataset(df):
         gs.append(g)
 
     return esp.data.dataset.GraphDataset(gs)
+
+def breakdown_along_time_axis(g, batch_size=32):
+    n_snapshots = g.nodes['g'].data['u_ref'].flatten().shape[0]
+    idxs = list(range(n_snapshots))
+    from random import shuffle
+    shuffle(idxs)
+    chunks = [idxs[_idx * batch_size : (_idx + 1) * batch_size] for _idx in range(n_snapshots // batch_size)]
+
+    _gs = []
+    for chunk in chunks:
+        _g = esp.Graph(g.mol)
+        _g.nodes['g'].data['u_ref'] = g.nodes['g'].data['u_ref'][:, chunk]
+        _g.nodes['n1'].data['xyz'] = g.nodes['n1'].data['xyz'][:, chunk, :]
+        _g.nodes['n1'].data['u_ref_prime'] = g.nodes['n1'].data['u_ref_prime'][:, chunk, :]
+        _gs.append(_g)
+
+    return _gs
+
+def make_batch_size_consistent(g, batch_size=32):
+    import itertools
+    return esp.data.dataset.GraphDataset(
+        list(
+            itertools.chain.from_iterable(
+                [
+                    breakdown_along_time_axis(
+                        g,
+                        batch_size=batch_size
+                    )
+                    for g in ds
+                ]
+            )
+        )
+    )
