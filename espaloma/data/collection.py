@@ -67,7 +67,6 @@ def zinc(first=-1, *args, **kwargs):
 
     return esp.data.dataset.GraphDataset(gs, *args, **kwargs)
 
-
 def md17_old(*args, **kwargs):
     return [
         esp.data.md17_utils.get_molecule(
@@ -91,3 +90,19 @@ def md17_new(*args, **kwargs):
             # 'paracetamol', 'azobenzene',
             'benzene', 'ethanol',
         ]]
+
+
+class qca(object):
+    pass
+
+df_names = ['Bayer', 'Converage', 'eMolecules', 'Pfizer', 'Roche']
+for df_name in df_names:
+    def _get_ds(cls):
+        import os
+        import pandas as pd
+        path = os.path.dirname(esp.__file__) + "/../data/qca/%s.h5" % df_name
+        df = pd.read_hdf(path)
+        ds = esp.data.qcarchive_utils.h5_to_dataset(df)
+        return ds
+
+    setattr(qca, df_name.lower(), classmethod(_get_ds))
