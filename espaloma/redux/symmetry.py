@@ -78,8 +78,14 @@ class ValenceModel(nn.Module):
         proper_perms = [(0, 1, 2, 3), (3, 2, 1, 0)]
         propers = symmetry_pool(self.readouts.propers, indices.propers, proper_perms)
 
-        # improper torsions: sum over (abcd, acdb, adbc)
-        improper_perms = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
+        # improper torsions: sum over 3 cyclic permutations of non-central atoms, following smirnoff trefoil convention
+        #   https://github.com/openforcefield/openforcefield/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openforcefield/typing/engines/smirnoff/parameters.py#L3326-L3360
+
+        central = 1
+        others = [0, 2, 3]
+        other_perms = [(0, 1, 2), (1, 2, 0), (2, 0, 1)]
+        improper_perms = [(others[i], central, others[j], others[k]) for (i, j, k) in other_perms]
+
         impropers = symmetry_pool(self.readouts.impropers, indices.impropers, improper_perms)
 
         return ParameterizedSystem(atoms=atoms, bonds=bonds, angles=angles, propers=propers, impropers=impropers)
