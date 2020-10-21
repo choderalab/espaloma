@@ -92,7 +92,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     def shuffle(self):
         from random import shuffle
         shuffle(self.graphs)
-        return self        
+        return self
 
     def apply(self, fn, in_place=False):
         r""" Apply functions to the elements of the dataset.
@@ -170,6 +170,11 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             self.graphs = pickle.load(f_handle)
 
         return self
+
+    def __add__(self, x):
+        return self.__class__(
+            self.graphs + x.graphs
+        )
 
 
 class GraphDataset(Dataset):
