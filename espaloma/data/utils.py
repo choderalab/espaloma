@@ -134,8 +134,11 @@ def infer_mol_from_coordinates(
 
     # make sure we have the coordinates
     # in the unit system
-    coordinates = Quantity(coordinates, coordinates_unit).value_in_unit(
-        unit.angstrom  # to make openeye happy
+    coordinates = Quantity(
+        coordinates,
+        coordinates_unit
+    ).value_in_unit(
+        unit.angstrom # to make openeye happy
     )
 
     # initialize molecule
@@ -174,8 +177,10 @@ def infer_mol_from_coordinates(
         mol_ref = next(ims.GetOEMols())
         smiles_ref = oechem.OECreateCanSmiString(mol_ref)
         assert smiles_ref == smiles_can, (
-            "SMILES different. Input is %s, ref is %s"
-            % (smiles_can, smiles_ref,)
+            "SMILES different. Input is %s, ref is %s" % (
+                smiles_can,
+                smiles_ref,
+            )
         )
 
     from openforcefield.topology import Molecule
