@@ -19,9 +19,7 @@ decimal_threshold = 4
 
 
 def _create_torsion_sim(
-        periodicity: int = 2,
-        phase=0 * omm_angle_unit,
-        k=10.0 * omm_energy_unit
+    periodicity: int = 2, phase=0 * omm_angle_unit, k=10.0 * omm_energy_unit
 ) -> app.Simulation:
     """Create a 4-particle OpenMM Simulation containing only a PeriodicTorsionForce"""
     system = mm.System()
@@ -38,9 +36,9 @@ def _create_torsion_sim(
     # create openmm Simulation, which requires a Topology and Integrator
     topology = app.Topology()
     chain = topology.addChain()
-    residue = topology.addResidue('torsion', chain)
-    for name in ['a', 'b', 'c', 'd']:
-        topology.addAtom(name, 'C', residue)
+    residue = topology.addResidue("torsion", chain)
+    for name in ["a", "b", "c", "d"]:
+        topology.addAtom(name, "C", residue)
     integrator = mm.VerletIntegrator(1.0)
     sim = app.Simulation(topology, system, integrator)
 
@@ -49,7 +47,9 @@ def _create_torsion_sim(
 
 # TODO: mark this properly: want to test periodicities 1..6, +ve, -ve k
 # @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * omm_energy_unit, +10 * omm_energy_unit])
-def test_periodic_torsion(periodicity=4, k=-10 * omm_energy_unit, n_samples=100):
+def test_periodic_torsion(
+    periodicity=4, k=-10 * omm_energy_unit, n_samples=100
+):
     phase = 0 * omm_angle_unit
     sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
     xyz_np = _sample_four_particle_torsion_scan(n_samples)
@@ -58,7 +58,10 @@ def test_periodic_torsion(periodicity=4, k=-10 * omm_energy_unit, n_samples=100)
     openmm_energies = np.zeros(n_samples)
     for i, pos in enumerate(xyz_np):
         sim.context.setPositions(pos)
-        openmm_energies[i] = sim.context.getState(getEnergy=True).getPotentialEnergy() / omm_energy_unit
+        openmm_energies[i] = (
+            sim.context.getState(getEnergy=True).getPotentialEnergy()
+            / omm_energy_unit
+        )
 
     # compute energies using espaloma
     xyz = torch.tensor(xyz_np)
@@ -67,10 +70,20 @@ def test_periodic_torsion(periodicity=4, k=-10 * omm_energy_unit, n_samples=100)
     ks = torch.zeros(n_samples, 6)
     ks[:, periodicity - 1] = k.value_in_unit(esp.units.ENERGY_UNIT)
 
-    espaloma_energies = esp.mm.functional.periodic(theta, ks).numpy().flatten() * esp.units.ENERGY_UNIT
-    espaloma_energies_in_omm_units = espaloma_energies.value_in_unit(omm_energy_unit)
+    espaloma_energies = (
+        esp.mm.functional.periodic(theta, ks).numpy().flatten()
+        * esp.units.ENERGY_UNIT
+    )
+    espaloma_energies_in_omm_units = espaloma_energies.value_in_unit(
+        omm_energy_unit
+    )
 
-    np.testing.assert_almost_equal(actual=espaloma_energies_in_omm_units, desired=openmm_energies, decimal=decimal_threshold)
+    np.testing.assert_almost_equal(
+        actual=espaloma_energies_in_omm_units,
+        desired=openmm_energies,
+        decimal=decimal_threshold,
+    )
+
 
 # TODO: parameterize on the individual energy terms also
 @pytest.mark.parametrize(
@@ -147,7 +160,9 @@ def test_energy_angle_and_bond(g):
             getEnergy=True, getParameters=True, groups=2 ** idx,
         )
 
-        energy = state.getPotentialEnergy().value_in_unit(esp.units.ENERGY_UNIT)
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT
+        )
 
         energies[name] = energy
 
@@ -168,14 +183,16 @@ def test_energy_angle_and_bond(g):
 
     for term in ["n4"]:
         g.nodes[term].data["phases"] = g.nodes[term].data["phases_ref"]
-        g.nodes[term].data["periodicity"] = g.nodes[term].data["periodicity_ref"]
+        g.nodes[term].data["periodicity"] = g.nodes[term].data[
+            "periodicity_ref"
+        ]
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
 
     # for each atom, store n_snapshots x 3
     g.nodes["n1"].data["xyz"] = torch.tensor(
         simulation.context.getState(getPositions=True)
-            .getPositions(asNumpy=True)
-            .value_in_unit(esp.units.DISTANCE_UNIT),
+        .getPositions(asNumpy=True)
+        .value_in_unit(esp.units.DISTANCE_UNIT),
         dtype=torch.float32,
     )[None, :, :].permute(1, 0, 2)
 

@@ -15,6 +15,7 @@ from typing import Dict
 # UTILITY FUNCTIONS
 # =============================================================================
 
+
 def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
     """For every (a,b,c,d) add a (d,c,b,a)
 
@@ -27,16 +28,12 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
            [3, 2, 1, 0],
            [4, 3, 2, 1]])
     """
-    return np.concatenate(
-        [
-            indices,
-            np.flip(indices, axis=-1)
-        ],
-        axis=0
-    )
+    return np.concatenate([indices, np.flip(indices, axis=-1)], axis=0)
 
 
-def relationship_indices_from_offmol(offmol: Molecule) -> Dict[str, torch.Tensor]:
+def relationship_indices_from_offmol(
+    offmol: Molecule,
+) -> Dict[str, torch.Tensor]:
     """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
     Notes
@@ -231,7 +228,15 @@ def from_homogeneous_and_mol(g, offmol):
     # ======================================
     # relationships between nodes and graphs
     # ======================================
-    for term in ["n1", "n2", "n3", "n4", "n4_improper", "nonbonded", "onefour"]:
+    for term in [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n4_improper",
+        "nonbonded",
+        "onefour",
+    ]:
         hg[(term, "%s_in_g" % term, "g",)] = np.stack(
             [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
         )

@@ -10,11 +10,8 @@ import espaloma as esp
 # =============================================================================
 from simtk import unit
 from simtk.unit.quantity import Quantity
-LJ_SWITCH = Quantity(
-    1.0,
-    unit.angstrom).value_in_unit(
-        esp.units.DISTANCE_UNIT
-    )
+
+LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(esp.units.DISTANCE_UNIT)
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -58,7 +55,9 @@ def harmonic(x, k, eq, order=[2]):
     )
 
 
-def periodic_fixed_phases(dihedrals: torch.Tensor, ks: torch.Tensor) -> torch.Tensor:
+def periodic_fixed_phases(
+    dihedrals: torch.Tensor, ks: torch.Tensor
+) -> torch.Tensor:
     """Periodic torsion term with n_phases = 6, periodicities = 1..n_phases, phases = zeros
 
     Parameters
@@ -87,36 +86,40 @@ def periodic_fixed_phases(dihedrals: torch.Tensor, ks: torch.Tensor) -> torch.Te
     # assert input shape consistency
     n_snapshots, n_dihedrals = dihedrals.shape
     n_dihedrals_, n_phases_ = ks.shape
-    assert (n_dihedrals == n_dihedrals_)
-    assert (n_phases == n_phases_)
+    assert n_dihedrals == n_dihedrals_
+    assert n_phases == n_phases_
 
     # promote everything to this shape
     stacked_shape = (n_snapshots, n_dihedrals, n_phases)
 
     # duplicate ks n_snapshots times
     ks_stacked = torch.stack([ks] * n_snapshots, dim=0)
-    assert (ks_stacked.shape == stacked_shape)
+    assert ks_stacked.shape == stacked_shape
 
     # duplicate dihedral angles n_phases times
     dihedrals_stacked = torch.stack([dihedrals] * n_phases, dim=2)
-    assert (dihedrals_stacked.shape == stacked_shape)
+    assert dihedrals_stacked.shape == stacked_shape
 
     # duplicate periodicity n_snapshots * n_dihedrals times
-    ns = torch.stack([torch.stack([periodicity] * n_snapshots)] * n_dihedrals, dim=1)
-    assert (ns.shape == stacked_shape)
+    ns = torch.stack(
+        [torch.stack([periodicity] * n_snapshots)] * n_dihedrals, dim=1
+    )
+    assert ns.shape == stacked_shape
 
     # compute k_n * cos(n * theta) for n in 1..n_phases, for each dihedral in each snapshot
     energy_terms = ks_stacked * torch.cos(ns * dihedrals_stacked)
-    assert (energy_terms.shape == stacked_shape)
+    assert energy_terms.shape == stacked_shape
 
     # sum over n_dihedrals and n_phases
     energy_sums = energy_terms.sum(dim=(1, 2))
-    assert (energy_sums.shape == (n_snapshots,))
+    assert energy_sums.shape == (n_snapshots,)
 
     return energy_sums.reshape((n_snapshots, 1))
 
 
-def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]):
+def periodic(
+    x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
+):
     """ Periodic term.
 
     Parameters
@@ -139,31 +142,17 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
 
     if periodicity.ndim == 1:
         periodicity = periodicity[None, None, :].repeat(
-            x.shape[0],
-            x.shape[1],
-            1
+            x.shape[0], x.shape[1], 1
         )
 
     elif periodicity.ndim == 2:
-        periodicity = periodicity[:, None, :].repeat(
-            1,
-            x.shape[1],
-            1
-        )
+        periodicity = periodicity[:, None, :].repeat(1, x.shape[1], 1)
 
     if phases.ndim == 1:
-        phases = phases[None, None, :].repeat(
-            x.shape[0],
-            x.shape[1],
-            1,
-        )
+        phases = phases[None, None, :].repeat(x.shape[0], x.shape[1], 1,)
 
     elif phases.ndim == 2:
-        phases = phases[:, None, :].repeat(
-            1,
-            x.shape[1],
-            1,
-        )
+        phases = phases[:, None, :].repeat(1, x.shape[1], 1,)
 
     n_theta = periodicity * x[:, :, None]
 
@@ -171,13 +160,12 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
 
     cos_n_theta_minus_phases = n_theta_minus_phases.cos()
 
-    k = k[:, None, :].repeat(
-        1, x.shape[1], 1
-    )
+    k = k[:, None, :].repeat(1, x.shape[1], 1)
 
     energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
 
     return energy
+
 
 # simple implementation
 # def harmonic(x, k, eq):
@@ -193,7 +181,9 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
 #     return ka * (x - a) ** 2 + kb * (x - b) ** 2
 
 
-def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWITCH):
+def lj(
+    x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWITCH
+):
     r""" Lennard-Jones term.
 
     Notes
@@ -232,15 +222,14 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
 
     # erase values under switch
     sigma_over_x = torch.where(
-        torch.lt(x, switch),
-        torch.zeros_like(sigma_over_x),
-        sigma_over_x,
+        torch.lt(x, switch), torch.zeros_like(sigma_over_x), sigma_over_x,
     )
 
     return epsilon * (
-            coefficients[0] * sigma_over_x ** order[0]
-            - coefficients[1] * sigma_over_x ** order[1]
-        )
+        coefficients[0] * sigma_over_x ** order[0]
+        - coefficients[1] * sigma_over_x ** order[1]
+    )
+
 
 def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     r""" Gaussian basis function.
@@ -264,6 +253,7 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
 
     return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
 
+
 def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
     r""" Linear mixture basis function.
 
@@ -272,7 +262,7 @@ def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
     phases : list of length 2
     """
 
-    assert len(phases) == 2, 'Only two phases now.'
+    assert len(phases) == 2, "Only two phases now."
     assert coefficients.shape[-1] == 2
 
     # partition the dimensions

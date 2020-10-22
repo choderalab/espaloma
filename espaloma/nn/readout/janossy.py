@@ -166,9 +166,7 @@ class JanossyPoolingImproper(torch.nn.Module):
         self,
         config,
         in_features,
-        out_features={
-            "k": 6,
-        },
+        out_features={"k": 6,},
         out_features_dimensions=-1,
     ):
         super(JanossyPoolingImproper, self).__init__()
@@ -203,7 +201,6 @@ class JanossyPoolingImproper(torch.nn.Module):
                     "f_out_%s_to_%s" % (level, feature),
                     torch.nn.Linear(mid_features, dimension,),
                 )
-
 
     def forward(self, g):
         """ Forward pass.
@@ -244,37 +241,39 @@ class JanossyPoolingImproper(torch.nn.Module):
                         getattr(self, "sequential_%s" % big_idx)(
                             g=None,
                             x=torch.sum(
-                                torch.stack([
-                                    torch.cat(
-                                        [
-                                            nodes.data["h0"],
-                                            nodes.data["h1"],
-                                            nodes.data["h2"],
-                                            nodes.data["h3"]
-                                        ],
-                                        dim=1
-                                    ),
-                                    torch.cat(
-                                        [
-                                            nodes.data["h2"],
-                                            nodes.data["h1"],
-                                            nodes.data["h3"],
-                                            nodes.data["h0"],
-                                        ],
-                                        dim=1
-                                    ),
-                                    torch.cat(
-                                        [
-                                            nodes.data["h3"],
-                                            nodes.data["h1"],
-                                            nodes.data["h0"],
-                                            nodes.data["h2"],
-                                        ],
-                                        dim=1
-                                    ),
-                                ],
-                                dim=0),
-                            dim=0,
+                                torch.stack(
+                                    [
+                                        torch.cat(
+                                            [
+                                                nodes.data["h0"],
+                                                nodes.data["h1"],
+                                                nodes.data["h2"],
+                                                nodes.data["h3"],
+                                            ],
+                                            dim=1,
+                                        ),
+                                        torch.cat(
+                                            [
+                                                nodes.data["h2"],
+                                                nodes.data["h1"],
+                                                nodes.data["h3"],
+                                                nodes.data["h0"],
+                                            ],
+                                            dim=1,
+                                        ),
+                                        torch.cat(
+                                            [
+                                                nodes.data["h3"],
+                                                nodes.data["h1"],
+                                                nodes.data["h0"],
+                                                nodes.data["h2"],
+                                            ],
+                                            dim=1,
+                                        ),
+                                    ],
+                                    dim=0,
+                                ),
+                                dim=0,
                             ),
                         )
                     )

@@ -98,6 +98,7 @@ def lj_12_6(x, sigma, epsilon):
 
     return esp.mm.functional.lj(x=x, sigma=sigma, epsilon=epsilon)
 
+
 def lj_9_6(x, sigma, epsilon):
     """ Lennard-Jones 9-6.
 
@@ -117,8 +118,8 @@ def lj_9_6(x, sigma, epsilon):
     """
 
     return esp.mm.functional.lj(
-            x=x, sigma=sigma, epsilon=epsilon, order=[9, 6], coefficients=[2, 3]
-        )
+        x=x, sigma=sigma, epsilon=epsilon, order=[9, 6], coefficients=[2, 3]
+    )
 
 
 #

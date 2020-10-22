@@ -91,6 +91,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
     def shuffle(self):
         from random import shuffle
+
         shuffle(self.graphs)
         return self
 

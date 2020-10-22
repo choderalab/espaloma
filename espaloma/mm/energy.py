@@ -31,6 +31,7 @@ def apply_bond(nodes, suffix=""):
     #         )
     #     }
 
+
 def apply_angle(nodes, suffix=""):
     """ Angle energy in nodes. """
     return {
@@ -45,7 +46,10 @@ def apply_angle(nodes, suffix=""):
 
 def apply_torsion(nodes, suffix=""):
     """ Torsion energy in nodes. """
-    if "phases%s" % suffix in nodes.data and "periodicity%s" % suffix in nodes.data:
+    if (
+        "phases%s" % suffix in nodes.data
+        and "periodicity%s" % suffix in nodes.data
+    ):
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
@@ -56,19 +60,21 @@ def apply_torsion(nodes, suffix=""):
             )
         }
 
-
     else:
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
-                x=nodes.data["x"],
-                k=nodes.data["k%s" % suffix],
+                x=nodes.data["x"], k=nodes.data["k%s" % suffix],
             )
         }
+
 
 def apply_improper_torsion(nodes, suffix=""):
     """ Improper torsion energy in nodes. """
-    if "phases%s" % suffix in nodes.data and "periodicity%s" % suffix in nodes.data:
+    if (
+        "phases%s" % suffix in nodes.data
+        and "periodicity%s" % suffix in nodes.data
+    ):
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
@@ -79,15 +85,14 @@ def apply_improper_torsion(nodes, suffix=""):
             )
         }
 
-
     else:
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
-                x=nodes.data["x"],
-                k=nodes.data["k%s" % suffix],
+                x=nodes.data["x"], k=nodes.data["k%s" % suffix],
             )
         }
+
 
 def apply_bond_gaussian(nodes, suffix=""):
     """ Bond energy in nodes. """
@@ -100,6 +105,7 @@ def apply_bond_gaussian(nodes, suffix=""):
         )
     }
 
+
 def apply_bond_linear_mixture(nodes, suffix=""):
     """ Bond energy in nodes. """
     # if suffix == '_ref':
@@ -111,6 +117,7 @@ def apply_bond_linear_mixture(nodes, suffix=""):
         )
     }
 
+
 # =============================================================================
 # ENERGY IN HYPERNODES---NONBONDED
 # =============================================================================
@@ -119,7 +126,8 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     # TODO: should this be 9-6 or 12-6?
     return {
         "u%s"
-        % suffix: scaling * esp.mm.nonbonded.lj_9_6(
+        % suffix: scaling
+        * esp.mm.nonbonded.lj_9_6(
             x=nodes.data["x"],
             sigma=nodes.data["sigma%s" % suffix],
             epsilon=nodes.data["epsilon%s" % suffix],
@@ -130,7 +138,9 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
 # =============================================================================
 # ENERGY IN GRAPH
 # =============================================================================
-def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbonded"]):
+def energy_in_graph(
+    g, suffix="", terms=["n2", "n3", "n4"]
+):  # "onefour", "nonbonded"]):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
@@ -158,10 +168,8 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbo
     if "n2" in terms:
         # apply energy function
         g.apply_nodes(
-            lambda node: apply_bond(node, suffix=suffix),
-            ntype="n2",
+            lambda node: apply_bond(node, suffix=suffix), ntype="n2",
         )
-
 
     if "n3" in terms:
         g.apply_nodes(
@@ -170,8 +178,7 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbo
 
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
-            lambda node: apply_torsion(node, suffix=suffix),
-            ntype="n4",
+            lambda node: apply_torsion(node, suffix=suffix), ntype="n4",
         )
     if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
         g.apply_nodes(
@@ -187,9 +194,8 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbo
 
     if g.number_of_nodes("onefour") > 0 and "onefour" in terms:
         g.apply_nodes(
-            lambda node: apply_nonbonded(
-                node, suffix=suffix, scaling=0.5,
-            ), ntype="onefour"
+            lambda node: apply_nonbonded(node, suffix=suffix, scaling=0.5,),
+            ntype="onefour",
         )
 
     # sum up energy
@@ -218,10 +224,9 @@ def energy_in_graph(g, suffix="", terms=["n2", "n3", "n4"]): # "onefour", "nonbo
         ntype="g",
     )
 
-    if 'u0' in g.nodes['g'].data:
+    if "u0" in g.nodes["g"].data:
         g.apply_nodes(
-            lambda node: {'u': node.data['u'] + node.data['u0']},
-            ntype="g",
+            lambda node: {"u": node.data["u"] + node.data["u0"]}, ntype="g",
         )
 
     return g

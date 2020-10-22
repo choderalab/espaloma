@@ -25,11 +25,13 @@ def center(metric, weight=1.0, dim=1):
 
     return _centered
 
+
 def std(metric, weight=1.0, dim=1):
     def _std(input, target, metric=metric, weight=weight, dim=dim):
         return weight * metric(input, target).std(dim=dim).sum()
 
     return _std
+
 
 def bootstrap(metric, n_samples=1000, ci=0.95):
     def _bootstrap(input, target, metric=metric, n_samples=n_samples, ci=0.95):
@@ -38,32 +40,31 @@ def bootstrap(metric, n_samples=1000, ci=0.95):
         idxs_all = np.arange(input.shape[0])
         results = []
         for _ in range(n_samples):
-            idxs = np.random.choice(
-                idxs_all,
-                len(idxs_all),
-                replace=True,
+            idxs = np.random.choice(idxs_all, len(idxs_all), replace=True,)
+
+            _metric = (
+                metric(input=input[idxs], target=target[idxs])
+                .detach()
+                .cpu()
+                .numpy()
+                .item()
             )
 
-            _metric = metric(
-                input=input[idxs],
-                target=target[idxs]
-            ).detach().cpu().numpy().item()
-
-            results.append(
-                _metric,
-            )
+            results.append(_metric,)
 
         results = np.array(results)
 
-        low = np.percentile(results, 100.0*0.5*(1-ci))
-        high = np.percentile(results, (1-((1-ci)*0.5))*100.0)
+        low = np.percentile(results, 100.0 * 0.5 * (1 - ci))
+        high = np.percentile(results, (1 - ((1 - ci) * 0.5)) * 100.0)
 
         return original.detach().cpu().numpy().item(), low, high
 
     return _bootstrap
 
+
 def latex_format_ci(original, low, high):
-    return '%.4f_{%.4f}^{%.4f}' % (original, low, high)
+    return "%.4f_{%.4f}^{%.4f}" % (original, low, high)
+
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -71,14 +72,18 @@ def latex_format_ci(original, low, high):
 def mse(input, target):
     return torch.nn.functional.mse_loss(target, input)
 
+
 def mape(input, target):
     return ((input - target).abs() / target.abs()).mean()
+
 
 def rmse(input, target):
     return torch.sqrt(torch.nn.functional.mse_loss(target, input))
 
+
 def mae_of_log(input, target):
     return torch.nn.L1Loss()(torch.log(input), torch.log(target))
+
 
 def cross_entropy(input, target, reduction="mean"):
     loss_fn = torch.nn.CrossEntropyLoss(reduction=reduction)
@@ -249,7 +254,9 @@ class GraphDerivativeMetric(Metric):
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
-        return self.weight * self.base_metric(input=input_prime, target=target_prime,)
+        return self.weight * self.base_metric(
+            input=input_prime, target=target_prime,
+        )
 
 
 class GraphHalfDerivativeMetric(Metric):
@@ -276,8 +283,7 @@ class GraphHalfDerivativeMetric(Metric):
         self.d = self._translation(d, d_level)
         self.input_fn = self._translation(input_name, input_level)
         self.target_prime_fn = self._translation(
-                target_prime_name,
-                target_prime_level
+            target_prime_name, target_prime_level
         )
 
         self.base_metric = base_metric
@@ -322,7 +328,9 @@ class GraphHalfDerivativeMetric(Metric):
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
-        return self.weight * self.base_metric(input=input_prime, target=target_prime,)
+        return self.weight * self.base_metric(
+            input=input_prime, target=target_prime,
+        )
 
 
 # =============================================================================

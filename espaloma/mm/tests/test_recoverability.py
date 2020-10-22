@@ -10,7 +10,10 @@ import espaloma as esp
 
 import torch
 
-def _create_impropers_only_system(smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(C2COC(=O)N)OC)N4)N") -> mm.System:
+
+def _create_impropers_only_system(
+    smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(C2COC(=O)N)OC)N4)N",
+) -> mm.System:
     """Create a simulation that contains only improper torsion terms,
     by parameterizing with openff-1.2.0 and deleting  all terms but impropers
     """
@@ -19,32 +22,52 @@ def _create_impropers_only_system(smiles: str = "CC1=C(C(=O)C2=C(C1=O)N3CC4C(C3(
     g = esp.Graph(molecule)
 
     topology = Topology.from_molecules(molecule)
-    forcefield = ForceField('openff-1.2.0.offxml')
+    forcefield = ForceField("openff-1.2.0.offxml")
     openmm_system = forcefield.create_openmm_system(topology)
 
     # delete all forces except PeriodicTorsionForce
-    is_torsion = lambda force: 'PeriodicTorsionForce' in force.__class__.__name__
+    is_torsion = (
+        lambda force: "PeriodicTorsionForce" in force.__class__.__name__
+    )
     for i in range(openmm_system.getNumForces())[::-1]:
         if not is_torsion(openmm_system.getForce(i)):
             openmm_system.removeForce(i)
-    assert (openmm_system.getNumForces() == 1)
+    assert openmm_system.getNumForces() == 1
     torsion_force = openmm_system.getForce(0)
-    assert (is_torsion(torsion_force))
+    assert is_torsion(torsion_force)
 
     # set k = 0 for any torsion that's not an improper
-    indices = set(map(tuple, esp.graphs.utils.offmol_indices.improper_torsion_indices(molecule)))
+    indices = set(
+        map(
+            tuple,
+            esp.graphs.utils.offmol_indices.improper_torsion_indices(molecule),
+        )
+    )
     num_impropers_retained = 0
     for i in range(torsion_force.getNumTorsions()):
-        p1, p2, p3, p4, periodicity, phase, k = torsion_force.getTorsionParameters(i)
+        (
+            p1,
+            p2,
+            p3,
+            p4,
+            periodicity,
+            phase,
+            k,
+        ) = torsion_force.getTorsionParameters(i)
 
         if (p1, p2, p3, p4) in indices:
             num_impropers_retained += 1
         else:
-            torsion_force.setTorsionParameters(i, p1, p2, p3, p4, periodicity, phase, 0.0)
+            torsion_force.setTorsionParameters(
+                i, p1, p2, p3, p4, periodicity, phase, 0.0
+            )
 
-    assert (num_impropers_retained > 0)  # otherwise this molecule is not a useful test case!
+    assert (
+        num_impropers_retained > 0
+    )  # otherwise this molecule is not a useful test case!
 
     return openmm_system, topology, g
+
 
 @pytest.mark.skip(reason="too slow")
 def test_improper_recover():
@@ -68,8 +91,8 @@ def test_improper_recover():
         topology=topology, system=system, integrator=integrator
     )
 
-
     import openforcefield
+
     # get conformer
     g.mol.generate_conformers(
         toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
@@ -126,13 +149,10 @@ def test_improper_recover():
     net = torch.nn.Sequential(
         esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
         esp.nn.readout.janossy.JanossyPoolingImproper(
-            in_features=32, config=[32, "tanh"],
-            out_features={
-                'k': 6,
-            }
+            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
         ),
         esp.mm.geometry.GeometryInGraph(),
-        esp.mm.energy.EnergyInGraph(terms=["n4_improper"])
+        esp.mm.energy.EnergyInGraph(terms=["n4_improper"]),
     )
 
     optimizer = torch.optim.Adam(net.parameters(), 1e-3)
@@ -149,6 +169,7 @@ def test_improper_recover():
         optimizer.step()
 
     assert loss.detach().numpy().item() < 0.1
+
 
 # caffeine_smiles = 'CN1C=NC2=C1C(=O)N(C(=O)N2C)C'
 #

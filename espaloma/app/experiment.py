@@ -64,7 +64,7 @@ class Train(Experiment):
         n_epochs=100,
         record_interval=1,
         normalize=esp.data.normalize.ESOL100LogNormalNormalize,
-        device=torch.device('cpu'),
+        device=torch.device("cpu"),
     ):
         super(Train, self).__init__()
 
@@ -94,11 +94,11 @@ class Train(Experiment):
 
         self.loss = loss
 
-
-
     def train_once(self):
         """ Train the model for one batch. """
-        for idx, g in enumerate(self.data):  # TODO: does this have to be a single g?
+        for idx, g in enumerate(
+            self.data
+        ):  # TODO: does this have to be a single g?
             g = g.to(self.device)
 
             def closure(g=g):
@@ -111,7 +111,7 @@ class Train(Experiment):
 
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
-                        raise RuntimeError('Loss is Nan.')
+                        raise RuntimeError("Loss is Nan.")
 
                 return loss
 
@@ -134,6 +134,7 @@ class Train(Experiment):
         self.states["final"] = copy.deepcopy(self.net.state_dict())
 
         return self.net
+
 
 class Test(Experiment):
     """ Test experiment.
@@ -162,7 +163,7 @@ class Test(Experiment):
         metrics=[esp.metrics.TypingCrossEntropy()],
         normalize=esp.data.normalize.NotNormalize,
         sampler=None,
-        device=torch.device('cpu'), # it should cpu
+        device=torch.device("cpu"),  # it should cpu
     ):
         # bookkeeping
         self.device = device
@@ -208,7 +209,9 @@ class Test(Experiment):
 
         for term in self.ref_g.ntypes:
             for param in self.ref_g.nodes[term].data.keys():
-                g.nodes[term].data[param] = g.nodes[term].data[param].detach().cpu()
+                g.nodes[term].data[param] = (
+                    g.nodes[term].data[param].detach().cpu()
+                )
 
         # point this to self
         self.results = results
@@ -229,7 +232,7 @@ class TrainAndTest(Experiment):
         normalize=esp.data.normalize.NotNormalize,
         n_epochs=100,
         record_interval=1,
-        device=torch.device('cpu'),
+        device=torch.device("cpu"),
     ):
 
         # bookkeeping
@@ -327,6 +330,10 @@ class TrainAndTest(Experiment):
 
             self.results_vl = test.results
 
-            return {"test": self.results_te, "train": self.results_tr, "validate": self.results_vl}
+            return {
+                "test": self.results_te,
+                "train": self.results_tr,
+                "validate": self.results_vl,
+            }
 
         return {"test": self.results_te, "train": self.results_tr}

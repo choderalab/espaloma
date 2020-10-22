@@ -23,24 +23,22 @@ COLLISION_RATE = 1 / unit.picosecond
 # MODULE FUNCTIONS
 # =============================================================================
 def subtract_nonbonded_force(
-        g,
-        forcefield="test_forcefields/smirnoff99Frosst.offxml",
-    ):
+    g, forcefield="test_forcefields/smirnoff99Frosst.offxml",
+):
 
     # get the forcefield from str
     if isinstance(forcefield, str):
         forcefield = ForceField(forcefield)
 
     # partial charge
-    g.mol.assign_partial_charges("gasteiger") # faster
+    g.mol.assign_partial_charges("gasteiger")  # faster
 
     # parametrize topology
     topology = g.mol.to_topology()
 
     # create openmm system
     system = forcefield.create_openmm_system(
-        topology,
-        charge_from_molecules=[g.mol],
+        topology, charge_from_molecules=[g.mol],
     )
 
     # use langevin integrator, although it's not super useful here
@@ -59,37 +57,46 @@ def subtract_nonbonded_force(
     # loop through forces
     for force in forces:
         name = force.__class__.__name__
-        
+
         # turn off angle
-        if 'Angle' in name:
+        if "Angle" in name:
             for idx in range(force.getNumAngles()):
                 id1, id2, id3, angle, k = force.getAngleParameters(idx)
-                force.setAngleParameters(
-                    idx, id1, id2, id3, angle, 0.0
-                )
-        
-        elif 'Bond' in name:
+                force.setAngleParameters(idx, id1, id2, id3, angle, 0.0)
+
+        elif "Bond" in name:
             for idx in range(force.getNumBonds()):
                 id1, id2, length, k = force.getBondParameters(idx)
                 force.setBondParameters(
                     idx, id1, id2, length, 0.0,
                 )
 
-        elif 'Torsion' in name:
+        elif "Torsion" in name:
             for idx in range(force.getNumTorsions()):
-                id1, id2, id3, id4, periodicity, phase, k\
-                    = force.getTorsionParameters(idx)
+                (
+                    id1,
+                    id2,
+                    id3,
+                    id4,
+                    periodicity,
+                    phase,
+                    k,
+                ) = force.getTorsionParameters(idx)
                 force.setTorsionParameters(
                     idx, id1, id2, id3, id4, periodicity, phase, 0.0,
                 )
-        
+
         force.updateParametersInContext(simulation.context)
 
     # the snapshots
-    xs = Quantity(
-        g.nodes['n1'].data['xyz'].detach().numpy(),
-        esp.units.DISTANCE_UNIT,
-    ).value_in_unit(unit.nanometer).transpose((1, 0, 2))
+    xs = (
+        Quantity(
+            g.nodes["n1"].data["xyz"].detach().numpy(),
+            esp.units.DISTANCE_UNIT,
+        )
+        .value_in_unit(unit.nanometer)
+        .transpose((1, 0, 2))
+    )
 
     # loop through the snapshots
     energies = []
@@ -101,7 +108,6 @@ def subtract_nonbonded_force(
         state = simulation.context.getState(
             getEnergy=True, getParameters=True, getForces=True,
         )
-
 
         energy = state.getPotentialEnergy().value_in_unit(
             esp.units.ENERGY_UNIT,
@@ -116,28 +122,24 @@ def subtract_nonbonded_force(
 
     # put energies to a tensor
     energies = torch.tensor(
-            energies,
-            dtype=torch.get_default_dtype(),
-            ).flatten()[None, :]
+        energies, dtype=torch.get_default_dtype(),
+    ).flatten()[None, :]
     derivatives = torch.tensor(
-        np.stack(derivatives, axis=1),      
-        dtype=torch.get_default_dtype(),
+        np.stack(derivatives, axis=1), dtype=torch.get_default_dtype(),
     )
 
     # subtract the energies
     g.heterograph.apply_nodes(
-        lambda node: {'u_ref': node.data['u_ref']-energies},
-        ntype='g',
+        lambda node: {"u_ref": node.data["u_ref"] - energies}, ntype="g",
     )
 
     g.heterograph.apply_nodes(
-        lambda node: {'u_ref_prime': node.data['u_ref_prime']-derivatives},
-        ntype='n1',
+        lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
+        ntype="n1",
     )
 
     return g
 
-    
 
 # =============================================================================
 # MODULE CLASSES
@@ -221,11 +223,11 @@ class MoleculeVacuumSimulation(object):
             topology=topology, system=system, integrator=integrator
         )
 
-
         import openforcefield
+
         # get conformer
         g.mol.generate_conformers(
-            toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),        
+            toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
         )
 
         # put conformer in simulation
@@ -294,5 +296,3 @@ class MoleculeVacuumSimulation(object):
             return g
 
         return samples
-
-

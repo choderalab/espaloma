@@ -3,6 +3,7 @@ import torch
 
 import espaloma as esp
 
+
 def test_import():
     esp.mm.energy
 
@@ -27,20 +28,18 @@ def test_energy():
     net = torch.nn.Sequential(
         esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
         esp.nn.readout.janossy.JanossyPooling(
-            in_features=32, config=[32, "tanh"],
+            in_features=32,
+            config=[32, "tanh"],
             out_features={
-                1: ['epsilon', 'sigma'],
-                2: ['k', 'eq'],
-                3: ['k', 'eq'],
-                4: ['k'],
+                1: ["epsilon", "sigma"],
+                2: ["k", "eq"],
+                3: ["k", "eq"],
+                4: ["k"],
             },
         ),
         esp.nn.readout.janossy.JanossyPoolingImproper(
-            in_features=32, config=[32, "tanh"],
-            out_features={
-                'k': 6,
-            }
-        )
+            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
+        ),
     )
 
     g = net(g.heterograph)
@@ -50,6 +49,7 @@ def test_energy():
     # esp.mm.energy.energy_in_graph(g)
 
     esp.mm.energy.energy_in_graph(g, terms=["n2", "n3", "n4", "n4_improper"])
+
 
 # def test_energy_consistent():
 #     g = esp.Graph("c1ccccc1")
