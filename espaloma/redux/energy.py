@@ -35,7 +35,7 @@ def compute_propers(
         indices: Indices) -> torch.Tensor:
     # it's possible there are no proper torsions in the system (e.g. h2o)
     if len(indices.propers) == 0:
-        return torch.tensor(0.0)
+        return torch.tensor([[0.0]])
 
     # TODO: reduce code duplication with compute_impropers
     a, b = xyz[:, indices.propers[:, 0]], xyz[:, indices.propers[:, 1]]
@@ -51,7 +51,7 @@ def compute_impropers(
         indices: Indices) -> torch.Tensor:
     # it's possible there are no iproper torsions in the system (e.g. nh4)
     if len(indices.impropers) == 0:
-        return torch.tensor(0.0)
+        return torch.tensor([[0.0]])
 
     # TODO: reduce code duplication with compute_propers
     a, b = xyz[:, indices.impropers[:, 0]], xyz[:, indices.impropers[:, 1]]
