@@ -1,6 +1,6 @@
 # 1. Use DGL to compute atom-representations
 #   (optionally also bond and graph representations)
-# 2. Symmetry-pooled readout to compute atom/bond/angle/proper/improper parameters
+# 2. Symmetry-pooled readout to compute atom/bond/angle/proper/improper params
 #   (optionally also parameters for coupling terms)
 
 from collections import namedtuple
@@ -13,6 +13,8 @@ from openforcefield.topology import Molecule
 from sklearn.preprocessing import OneHotEncoder
 from torch import nn
 
+from espaloma.graphs.utils import offmol_indices
+
 terms = ["atoms", "bonds", "angles", "propers", "impropers"]
 Readouts = namedtuple("Readouts", terms)
 ParameterizedSystem = namedtuple("ParameterizedSystem", terms)
@@ -21,33 +23,10 @@ ParameterizedSystem = namedtuple("ParameterizedSystem", terms)
 class Indices:
     def __init__(self, offmol: Molecule):
         self.atoms = np.array([a.molecule_atom_index for a in offmol.atoms])
-        self.bonds = np.array(
-            [(b.atom1_index, b.atom2_index) for b in offmol.bonds]
-        )
-        self.angles = np.array(
-            sorted(
-                [
-                    tuple([atom.molecule_atom_index for atom in angle])
-                    for angle in offmol.angles
-                ]
-            )
-        )
-        self.propers = np.array(
-            sorted(
-                [
-                    tuple([atom.molecule_atom_index for atom in proper])
-                    for proper in offmol.propers
-                ]
-            )
-        )
-        self.impropers = np.array(
-            sorted(
-                [
-                    tuple([atom.molecule_atom_index for atom in improper])
-                    for improper in offmol.impropers
-                ]
-            )
-        )
+        self.bonds = offmol_indices.bond_indices(offmol)
+        self.angles = offmol_indices.angle_indices(offmol)
+        self.propers = offmol_indices.proper_torsion_indices(offmol)
+        self.impropers = offmol_indices.improper_torsion_indices(offmol)
 
 
 elements = [1, 3, 6, 7, 8, 9, 15, 16, 17, 19, 35, 53]
@@ -75,7 +54,8 @@ class ValenceModel(nn.Module):
         Parameters
         ----------
         node_representation is a nn.Module
-            with signature node_representation.forward(graph, initial_node_reps) -> node_reps
+            with signature
+            node_representation.forward(graph, initial_node_reps) -> node_reps
         readouts contains nn.Modules as attributes
             so that readouts.angles(node_reps[:,1], node_reps[:,1])
         """
@@ -86,29 +66,25 @@ class ValenceModel(nn.Module):
     def forward(self, offmol: Molecule) -> ParameterizedSystem:
         indices = offmol_to_indices(offmol)
         graph = offmol_to_dgl(offmol)
-        node_reps = self.node_representation.forward(
-            graph, graph.ndata["element"]
-        )
+        initial_reps = graph.ndata["element"]
+        node_reps = self.node_representation.forward(graph, initial_reps)
+
 
         def symmetry_pool(f, interactions, permutations):
-            return sum(
-                [
-                    f(
-                        torch.cat(
-                            [node_reps[interactions[:, i]] for i in perm],
-                            dim=1,
-                        )
-                    )
-                    for perm in permutations
-                ]
-            )
+            permuted_reps = []
+            for perm in permutations:
+                rep = [node_reps[interactions[:, i]] for i in perm]
+                permuted_reps.append(torch.cat(rep, dim=1))
+            return sum([f(rep) for rep in permuted_reps])
 
         atoms = self.readouts.atoms(node_reps)
-        bonds = symmetry_pool(
-            self.readouts.bonds, indices.bonds, [(0, 1), (1, 0)]
-        )
+
+        bond_perms = [(0, 1), (1, 0)]
+        bonds = symmetry_pool(self.readouts.bonds, indices.bonds, bond_perms)
+
+        angle_perms =  [(0, 1, 2), (2, 1, 0)]
         angles = symmetry_pool(
-            self.readouts.angles, indices.angles, [(0, 1, 2), (2, 1, 0)]
+            self.readouts.angles, indices.angles, angle_perms
         )
 
         # proper torsions: sum over (abcd, dcba)
@@ -117,7 +93,8 @@ class ValenceModel(nn.Module):
             self.readouts.propers, indices.propers, proper_perms
         )
 
-        # improper torsions: sum over 3 cyclic permutations of non-central atoms, following smirnoff trefoil convention
+        # improper torsions: sum over 3 cyclic permutations of non-central
+        #   atoms, following smirnoff trefoil convention:
         #   https://github.com/openforcefield/openforcefield/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openforcefield/typing/engines/smirnoff/parameters.py#L3326-L3360
 
         central = 1
@@ -127,10 +104,12 @@ class ValenceModel(nn.Module):
             (others[i], central, others[j], others[k])
             for (i, j, k) in other_perms
         ]
-
-        impropers = symmetry_pool(
-            self.readouts.impropers, indices.impropers, improper_perms
-        )
+        if len(indices.impropers > 0):
+            impropers = symmetry_pool(
+                self.readouts.impropers, indices.impropers, improper_perms
+            )
+        else:
+            impropers = None
 
         return ParameterizedSystem(
             atoms=atoms,
