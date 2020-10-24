@@ -109,7 +109,7 @@ class ValenceModel(nn.Module):
                 self.readouts.impropers, indices.impropers, improper_perms
             )
         else:
-            impropers = None
+            impropers = torch.zeros((0, 6))
 
         return ParameterizedSystem(
             atoms=atoms,
