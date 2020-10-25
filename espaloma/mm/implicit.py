@@ -29,16 +29,16 @@ def gbsa_obc2_energy(
     https://github.com/openforcefield/bayes-implicit-solvent/blob/067239fcbb8af28eb6310d702804887662692ec2/bayes_implicit_solvent/gb_models/jax_gb_models.py#L13-L60
     """
     # convert distances and radii into units of nanometers before proceeding
-    distance_matrix *= distance_to_nm
-    radii *= distance_to_nm
+    distance_matrix_in_nm = distance_matrix * distance_to_nm
+    radii_in_nm = distance_matrix * distance_to_nm
 
     # scales are unitless
 
-    N = len(radii)
-    eye = torch.eye(N, dtype=distance_matrix.dtype)
-    r = distance_matrix + eye
-    or1 = radii.reshape((N, 1)) - offset
-    or2 = radii.reshape((1, N)) - offset
+    N = len(radii_in_nm)
+    eye = torch.eye(N, dtype=distance_matrix_in_nm.dtype)
+    r = distance_matrix_in_nm + eye
+    or1 = radii_in_nm.reshape((N, 1)) - offset
+    or2 = radii_in_nm.reshape((1, N)) - offset
     sr2 = scales.reshape((1, N)) * or2
 
     L = torch.max(or1, torch.abs(r - sr2))
@@ -57,7 +57,7 @@ def gbsa_obc2_energy(
     I = torch.sum(I, dim=1)
 
     # okay, next compute born radii
-    offset_radius = radii - offset
+    offset_radius = radii_in_nm - offset
     psi = I * offset_radius
     psi_coefficient = 0.8
     psi2_coefficient = 0
@@ -66,13 +66,13 @@ def gbsa_obc2_energy(
     psi_term = (psi_coefficient * psi) + (psi2_coefficient * psi ** 2) + (
             psi3_coefficient * psi ** 3)
 
-    B = 1 / (1 / offset_radius - torch.tanh(psi_term) / radii)
+    B = 1 / (1 / offset_radius - torch.tanh(psi_term) / radii_in_nm)
 
     # finally, compute the three energy terms
     E = 0.0
 
     # single particle
-    E += torch.sum(surface_tension * (radii + 0.14) ** 2 * (radii / B) ** 6)
+    E += torch.sum(surface_tension * (radii_in_nm + 0.14) ** 2 * (radii_in_nm / B) ** 6)
     E += torch.sum(-0.5 * screening * (
             1 / solute_dielectric - 1 / solvent_dielectric) * charges ** 2 / B)
 
