@@ -30,7 +30,7 @@ def gbsa_obc2_energy(
     """
     # convert distances and radii into units of nanometers before proceeding
     distance_matrix_in_nm = distance_matrix * distance_to_nm
-    radii_in_nm = distance_matrix * distance_to_nm
+    radii_in_nm = radii * distance_to_nm
 
     # scales are unitless
 
