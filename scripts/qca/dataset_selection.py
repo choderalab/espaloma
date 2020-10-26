@@ -6,5 +6,5 @@ optimization_datasets = {
     "Pfizer": "OpenFF Gen 2 Opt Set 3 Pfizer Discrepancy",
     "eMolecules": "OpenFF Gen 2 Opt Set 4 eMolecules Discrepancy",
     "Bayer": "OpenFF Gen 2 Opt Set 5 Bayer",
-    "Benchmark": "OpenFF Benchmark Set",
+    "Benchmark": "OpenFF Full Optimization Benchmark 1",
 }
