@@ -32,6 +32,13 @@ def std(metric, weight=1.0, dim=1):
 
     return _std
 
+def weighted(metric, weight, reduction="mean"):
+    def _weighted(input, target, metric=metric, weight=weight):
+        _loss = metric(input, target)
+        for _ in range(_loss.dims()-1):
+            weight = weight.unsqueeze(-1)
+        return getattr(torch, reduction)(weight)
+    return _weighted
 
 def bootstrap(metric, n_samples=1000, ci=0.95):
     def _bootstrap(input, target, metric=metric, n_samples=n_samples, ci=0.95):
