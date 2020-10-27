@@ -255,3 +255,8 @@ def make_batch_size_consistent(ds, batch_size=32):
             )
         )
     )
+
+
+def weight_by_snapshots(g, key="weight"):
+    n_snapshots = g.nodes['n1'].data['xyz'].shape[1]
+    g.nodes['g'].data[key] = torch.tensor(float(1.0/n_snapshots))[None, :]
