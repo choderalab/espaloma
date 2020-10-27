@@ -33,7 +33,18 @@ def std(metric, weight=1.0, dim=1):
     return _std
 
 def weighted(metric, weight, reduction="mean"):
-    def _weighted(input, target, metric=metric, weight=weight):
+    def _weighted(
+            input, target, metric=metric, weight=weight, reduction=reduction
+        ):
+        _loss = metric(input, target)
+        for _ in range(_loss.dims()-1):
+            weight = weight.unsqueeze(-1)
+        return getattr(torch, reduction)(weight)
+    return _weighted
+
+def weighted_with_key(metric, key="weight", reduction="mean"):
+    def _weighted(input, target, metric=metric, key=key, reduction=reduction):
+        weight = target.nodes["g"].data[key].flatten()
         _loss = metric(input, target)
         for _ in range(_loss.dims()-1):
             weight = weight.unsqueeze(-1)
