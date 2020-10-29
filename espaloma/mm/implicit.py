@@ -36,50 +36,22 @@ def _gbsa_obc2_energy_omm(
 
     N = len(charges)
     eye = torch.eye(N, dtype=distance_matrix.dtype)
-    assert (eye.shape == (N, N))
 
     r = distance_matrix + eye
-    assert (r.shape == (N, N))
     or1 = radii.reshape((N, 1)) - dielectric_offset
     or2 = radii.reshape((1, N)) - dielectric_offset
-
-    assert (or1.shape == (N, 1))
-    assert (or2.shape == (1, N))
-
     sr2 = scales.reshape((1, N)) * or2
-    assert (sr2.shape == (1, N))
 
-    r_sr2 = abs(r - sr2)
-    assert (r_sr2.shape == (N, N))
-
-    L = torch.max(or1, r_sr2)
-    # TODO: check if elementwise
-    #print('L.shape', L.shape)
-    #print('or1.shape', or1.shape)
-    #print('r_sr2.shape', r_sr2.shape)
-    # TODO: this is fishy
-    # assert(L.shape == or1.shape)
-
+    L = torch.max(or1, abs(r - sr2))
     U = r + sr2
-    assert (U.shape == (N, N))
 
     I = 1 / L - 1 / U + 0.25 * (r - sr2 ** 2 / r) * (
             1 / (U ** 2) - 1 / (L ** 2)) + 0.5 * torch.log(
         L / U) / r
-    assert (I.shape == (N, N))
-
     # handle the interior case
-    condition = or1 < (sr2 - r)
-    if_true = I + 2 * (1 / or1 - 1 / L)
-    if_false = I
-    I = torch.where(condition, if_true, if_false)
-
+    I = torch.where(or1 < (sr2 - r), I + 2 * (1 / or1 - 1 / L), I)
     I = step(r + sr2 - or1) * 0.5 * I  # note the extra 0.5 here
-
-    # intention: zero out values on the diagonal
-    # TODO: possibly replace this diag(diag) with scatter update
     I -= torch.diag(torch.diag(I))
-
     I = torch.sum(I, dim=1)
 
     # okay, next compute born radii
@@ -95,32 +67,22 @@ def _gbsa_obc2_energy_omm(
             psi3_coefficient * psi ** 3)
 
     B = 1 / (1 / offset_radius - torch.tanh(psi_term) / radii)
-    assert (B.shape == (N,))
 
     E = 0.0
     # single particle
     # ACE
-    ACE_individual_terms = surface_tension * (radii + probe_radius) ** 2 * (
-                radii / B) ** 6
-    ACE = torch.sum(ACE_individual_terms)
-    assert (ACE_individual_terms.shape == (N,))
-    E += ACE
+    E += torch.sum(
+        surface_tension * (radii + probe_radius) ** 2 * (radii / B) ** 6)
 
     # on-diagonal
-    on_diagonal = -0.5 * (
-            1 / solute_dielectric - 1 / solvent_dielectric) * charges ** 2 / B
-    assert (on_diagonal.shape == (N,))
-    E += torch.sum(on_diagonal)
+    E += torch.sum(-0.5 * (
+            1 / solute_dielectric - 1 / solvent_dielectric) * charges ** 2 / B)
 
     # particle pair
     # note: np.outer --> torch.ger
-    assert (B.ndim == 1)
-
     f = torch.sqrt(r ** 2 + torch.ger(B, B) * torch.exp(
         -r ** 2 / (4 * torch.ger(B, B))))
     charge_products = torch.ger(charges, charges)
-    assert (f.shape == (N, N))
-    assert (charge_products.shape == (N, N))
 
     ixns = - (
             1 / solute_dielectric - 1 / solvent_dielectric) * charge_products / f
@@ -153,6 +115,5 @@ def gbsa_obc2_energy(
         solvent_dielectric=solvent_dielectric,
         probe_radius=probe_radius,
     )
-
 
     return E * energy_from_kjmol  # return E in espaloma energy unit
