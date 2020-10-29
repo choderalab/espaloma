@@ -133,13 +133,26 @@ def gbsa_obc2_energy(
         distance_matrix_in_bohr,
         radii_in_bohr, scales, charges,
         alpha=0.8, beta=0.0, gamma=2.909125,
-        **kwargs
+        dielectric_offset=0.009,
+        surface_tension=28.3919551,
+        solute_dielectric=1.0,
+        solvent_dielectric=78.5,
+        probe_radius=0.14
 ):
     # convert distances and radii into units of nanometers before proceeding
     distance_matrix = distance_matrix_in_bohr * distance_to_nm
     radii = radii_in_bohr * distance_to_nm
 
-    E = _gbsa_obc2_energy_omm(distance_matrix, radii, scales, charges, alpha,
-                              beta, gamma, **kwargs)
+    E = _gbsa_obc2_energy_omm(
+        distance_matrix,
+        radii, scales, charges,
+        alpha, beta, gamma,
+        dielectric_offset=dielectric_offset,
+        surface_tension=surface_tension,
+        solute_dielectric=solute_dielectric,
+        solvent_dielectric=solvent_dielectric,
+        probe_radius=probe_radius,
+    )
+
 
     return E * energy_from_kjmol  # return E in espaloma energy unit
