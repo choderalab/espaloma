@@ -54,9 +54,9 @@ def _gbsa_obc2_energy_omm(
 
     L = torch.max(or1, r_sr2)
     # TODO: check if elementwise
-    print('L.shape', L.shape)
-    print('or1.shape', or1.shape)
-    print('r_sr2.shape', r_sr2.shape)
+    #print('L.shape', L.shape)
+    #print('or1.shape', or1.shape)
+    #print('r_sr2.shape', r_sr2.shape)
     # TODO: this is fishy
     # assert(L.shape == or1.shape)
 
@@ -80,7 +80,7 @@ def _gbsa_obc2_energy_omm(
     # TODO: possibly replace this diag(diag) with scatter update
     I -= torch.diag(torch.diag(I))
 
-    I = torch.sum(I, dim=1) 
+    I = torch.sum(I, dim=1)
 
     # okay, next compute born radii
     offset_radius = radii - dielectric_offset
