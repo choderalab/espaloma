@@ -89,9 +89,12 @@ class ValenceModel(nn.Module):
 
         # proper torsions: sum over (abcd, dcba)
         proper_perms = [(0, 1, 2, 3), (3, 2, 1, 0)]
-        propers = symmetry_pool(
-            self.readouts.propers, indices.propers, proper_perms
-        )
+        if len(indices.propers > 0):
+            propers = symmetry_pool(
+                self.readouts.propers, indices.propers, proper_perms
+            )
+        else:
+            propers = torch.zeros((0, 6))
 
         # improper torsions: sum over 3 cyclic permutations of non-central
         #   atoms, following smirnoff trefoil convention:
