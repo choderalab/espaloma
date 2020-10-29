@@ -15,9 +15,9 @@ def step(x):
     return 1.0 * (x >= 0)
 
 
-def gbsa_obc2_energy(
-        distance_matrix_in_bohr,
-        radii_in_bohr, scales, charges,
+def _gbsa_obc2_energy_omm(
+        distance_matrix,
+        radii, scales, charges,
         alpha=0.8, beta=0.0, gamma=2.909125,
         dielectric_offset=0.009,
         surface_tension=28.3919551,
@@ -26,15 +26,13 @@ def gbsa_obc2_energy(
         probe_radius=0.14
 ):
     """
+    Assume everything is given in OpenMM units
     ported from jax/numpy implementation here:
     https://github.com/openforcefield/bayes-implicit-solvent/blob/067239fcbb8af28eb6310d702804887662692ec2/bayes_implicit_solvent/gb_models/jax_gb_models.py#L13-L60
 
     with corrections and refinements by Yutong Zhao here
     https://github.com/proteneer/timemachine/blob/417f4b0b1181b638935518532c78c380b03d7d19/timemachine/potentials/gbsa.py#L1-L111
     """
-    # convert distances and radii into units of nanometers before proceeding
-    distance_matrix = distance_matrix_in_bohr * distance_to_nm
-    radii = radii_in_bohr * distance_to_nm
 
     N = len(charges)
     eye = torch.eye(N, dtype=distance_matrix.dtype)
@@ -90,7 +88,18 @@ def gbsa_obc2_energy(
             1 / solute_dielectric - 1 / solvent_dielectric) * charge_products / f
 
     E += torch.sum(torch.triu(ixns, diagonal=1))
+    return E  # E is in kJ/mol at this point
 
-    # E is in kJ/mol at this point
-    # return E in espaloma energy unit
-    return E * energy_from_kjmol
+def gbsa_obc2_energy(
+        distance_matrix_in_bohr,
+        radii_in_bohr, scales, charges,
+        alpha=0.8, beta=0.0, gamma=2.909125,
+        **kwargs
+):
+    # convert distances and radii into units of nanometers before proceeding
+    distance_matrix = distance_matrix_in_bohr * distance_to_nm
+    radii = radii_in_bohr * distance_to_nm
+
+    E = _gbsa_obc2_energy_omm(distance_matrix, radii, scales, charges, alpha, beta, gamma, **kwargs)
+
+    return E * energy_from_kjmol # return E in espaloma energy unit
