@@ -16,8 +16,10 @@ def step(x):
 
 
 def _gbsa_obc2_energy_omm(
-        distance_matrix,
-        radii, scales, charges,
+        distance_matrix: torch.Tensor,
+        radii: torch.Tensor,
+        scales: torch.Tensor,
+        charges: torch.Tensor,
         alpha=0.8, beta=0.0, gamma=2.909125,
         dielectric_offset=0.009,
         surface_tension=28.3919551,
@@ -32,6 +34,23 @@ def _gbsa_obc2_energy_omm(
 
     with corrections and refinements by Yutong Zhao here
     https://github.com/proteneer/timemachine/blob/417f4b0b1181b638935518532c78c380b03d7d19/timemachine/potentials/gbsa.py#L1-L111
+
+    Parameters
+    ----------
+    distance_matrix: (N, N) tensor of interatomic distances,
+        assumed in OpenMM distance unit (nanometer)
+    radii: (N,) tensor of "intrinsic" radii,
+        assumed in OpenMM distance unit (nanometer)
+    charges: (N,) tensor of atomic partial charges,
+        assumed in OpenMM charge unit (elementary charge)
+    alpha, beta, gamma : floats or (N,)-tensors
+        coefficients that appear (I * offset_radius)**{1, 2, 3}, respectively
+    dielectric_offset: float
+    surface_tension:: float
+    solute_dielectric: float
+    solvent_dielectric: float
+    probe_radius: float representing radius of probe water molecule used for
+        compute ACE approximation to nonpolar solvation energy
     """
 
     N = len(charges)
