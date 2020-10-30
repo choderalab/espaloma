@@ -74,8 +74,11 @@ def _gbsa_obc2_energy_omm(
     E += torch.sum(
         surface_tension * (radii + probe_radius) ** 2 * (radii / B) ** 6)
 
+    # conversion from nm/(proton_charge**2) to kJ/mol
+    conversion = 138.935485
+
     # on-diagonal
-    E += torch.sum(-0.5 * (
+    E += torch.sum(-0.5 * conversion * (
             1 / solute_dielectric - 1 / solvent_dielectric) * charges ** 2 / B)
 
     # particle pair
@@ -87,7 +90,7 @@ def _gbsa_obc2_energy_omm(
     ixns = - (
             1 / solute_dielectric - 1 / solvent_dielectric) * charge_products / f
 
-    E += torch.sum(torch.triu(ixns, diagonal=1))
+    E += torch.sum(torch.triu(conversion * ixns, diagonal=1))
     return E  # E is in kJ/mol at this point
 
 
