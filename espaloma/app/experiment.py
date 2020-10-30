@@ -195,31 +195,31 @@ class Test(Experiment):
             self.net.load_state_dict(state)
 
             # local scope
-            with g.local_scope():
 
-                for metric in self.metrics:
-                    assert isinstance(metric, esp.metrics.Metric)
-                    input_fn, target_fn = metric.between
+            for metric in self.metrics:
+                assert isinstance(metric, esp.metrics.Metric)
+                input_fn, target_fn = metric.between
 
-                    inputs = []
-                    targets = []
+                inputs = []
+                targets = []
 
-                    for g in self.data:
+                for g in self.data:
+                    with g.local_scope():
                         g = g.to(self.device)
                         g_input = self.normalize.unnorm(self.net(g))
                         inputs.append(input_fn(g_input))
                         targets.append(target_fn(g_input))
 
-                    inputs = torch.cat(inputs, dim=0)
-                    targets = torch.cat(targets, dim=0)
+                inputs = torch.cat(inputs, dim=0)
+                targets = torch.cat(targets, dim=0)
 
-                    # loop through the metrics
-                    results[metric.__name__][state_name] = (
-                        metric.base_metric(inputs, targets)
-                        .detach()
-                        .cpu()
-                        .numpy()
-                    )
+                # loop through the metrics
+                results[metric.__name__][state_name] = (
+                    metric.base_metric(inputs, targets)
+                    .detach()
+                    .cpu()
+                    .numpy()
+                )
 
         self.ref_g = self.normalize.unnorm(self.net(g))
 
