@@ -48,6 +48,13 @@ for key in df.index:
 
 from espaloma.mm.implicit import gbsa_obc2_energy
 
+torch.manual_seed(12345)
+np.random.seed(12345)
+
+n_mols_per_batch = 10
+n_snapshots_per_mol = 25
+n_iterations = 1000
+
 
 def compute_obc2_energies(
         distance_matrices,
@@ -95,8 +102,7 @@ def one_sided_exp(w):
     return delta_f
 
 
-def predict_on_key(key: str, graph_model, batch_size: int = 25,
-                   verbose: bool = False) -> float:
+def predict_on_key(key: str, graph_model, batch_size: int = 25) -> float:
     offmol = df['offmol'][key]
 
     radii, scales = predict_obc2_params(offmol, graph_model)
@@ -108,15 +114,12 @@ def predict_on_key(key: str, graph_model, batch_size: int = 25,
 
     obc2_energies = compute_obc2_energies(distance_matrices[inds], radii,
                                           scales, charges)
-    if verbose:
-        print(obc2_energies)
     w = obc2_energies * to_kT
     pred_delta_f = one_sided_exp(w)
 
     return pred_delta_f
 
 
-np.random.seed(0)
 inds = list(df.index)
 np.random.shuffle(inds)
 train_inds = inds[::2]
@@ -131,11 +134,11 @@ for key in tqdm(train_inds):
 
 graph_model = initialize()
 
-learning_rate = 1e-4
+learning_rate = 1e-3
 optimizer = torch.optim.Adam(graph_model.parameters(), lr=learning_rate)
 
 # fit to a small chunk of the data
-keys = train_inds[:10]
+keys = train_inds[:n_mols_per_batch]
 
 predict_dict = dict()
 for key in tqdm(keys):
@@ -146,16 +149,10 @@ initial_x = np.array(
      keys])
 
 predictions = []
-
 batch_losses = []
-trange = tqdm(range(1000))
-
-n_mols_per_batch = 10
-n_snapshots_per_mol = 10
+trange = tqdm(range(n_iterations))
 
 for t in trange:
-    # keys = np.random.choice(train_inds, size=n_mols_per_batch)
-
     L = 0.0
     for key in keys:
         # make a free energy prediction using a random subset of snapshots
@@ -181,16 +178,20 @@ for t in trange:
 rmse_in_kcalmol = [np.sqrt(b * kT / unit.kilocalories_per_mole) for b in
                    batch_losses]
 
-title = f'GBSA hydration free energies\nFreeSolv subset overfitting check (n={len(x)})'
+plt.figure(figsize=(6, 6))
+title = f'GBSA hydration free energies\nFreeSolv subset overfitting check (n={len(initial_x)})'
 plt.title(title)
 plt.plot(rmse_in_kcalmol)
 plt.ylim(0, )
 plt.xlabel('Adam iterations')
 plt.ylabel('RMSE loss (kcal/mol)')
+plt.tight_layout()
+plt.savefig('overfitting_rmse_traj.pdf')
+plt.close()
 
 final_predict_dict = dict()
 for key in tqdm(keys):
-    final_predict_dict[key] = predict_on_key(key, graph_model, verbose=True)
+    final_predict_dict[key] = predict_on_key(key, graph_model)
 
 x = np.array(
     [final_predict_dict[key].detach() * kT / unit.kilocalorie_per_mole for key
@@ -200,7 +201,7 @@ y = [df['experimental value (kcal/mol)'][key] for key in keys]
 plt.figure(figsize=(12, 6))
 
 ax = plt.subplot(1, 2, 1)
-plt.scatter(x, y)
+plt.scatter(initial_x, y)
 plt.plot([min(y), max(y)], [min(y), max(y)])
 plt.xlabel('predicted (kcal/mol)')
 plt.ylabel('reference (kcal/mol)')
@@ -219,19 +220,12 @@ plt.savefig('freesolv_subset_overfitting.pdf')
 plt.close()
 
 # fit to a larger chunk of freesolv
-torch.manual_seed(12345)
-np.random.seed(12345)
-
 graph_model = initialize()
-learning_rate = 1e-3
 optimizer = torch.optim.Adam(graph_model.parameters(), lr=learning_rate)
 
 predictions = []
 batch_losses = []
-trange = tqdm(range(1000))
-
-n_mols_per_batch = 10
-n_snapshots_per_mol = 25
+trange = tqdm(range(n_iterations))
 
 for t in trange:
 
@@ -260,6 +254,7 @@ for t in trange:
         batch_losses[-1] * kT / unit.kilocalories_per_mole)
     trange.set_postfix(rmse_in_kcalmol=rmse_in_kcalmol)
 
+title = f'GBSA hydration free energies\nFreeSolv 50:50 (n={len(train_inds)})'
 rmse_in_kcalmol = [np.sqrt(b * kT / unit.kilocalories_per_mole) for b in
                    batch_losses]
 
@@ -269,10 +264,9 @@ plt.plot(rmse_in_kcalmol)
 plt.xlabel('Adam iteration')
 plt.ylabel('RMSE loss on current minibatch')
 plt.ylim(0, )
-title = f'GBSA hydration free energies\nFreeSolv 50:50 (n={len(train_inds)})'
-plt.title('minibatch training loss trajectory')
+plt.title(title + '\nminibatch training loss trajectory')
 plt.tight_layout()
-plt.savefig('minibatch_traj.pdf')
+plt.savefig('freesolv_50_50_minibatch_loss_traj.pdf')
 plt.close()
 
 # plot final training / validation scatter plots
@@ -304,11 +298,10 @@ for i, split_name in enumerate(splits):
     plt.plot([min(y), max(y)], [min(y), max(y)])
 
     plt.title(
-        f'GBSA hydration free energies\n({split_name} set: RMSE={rmse:.3f} kcal/mol)')
+        f'{title}\n({split_name} set: RMSE={rmse:.3f} kcal/mol)')
 plt.tight_layout()
-
-# In[55]:
-
+plt.savefig('freesolv_50_50_train_validate_scatter.pdf')
+plt.close()
 
 # compare with the RMSE that would be obtained by predicting a constant
 constant_pred_baseline = np.sqrt(np.mean((y - np.mean(y)) ** 2))
