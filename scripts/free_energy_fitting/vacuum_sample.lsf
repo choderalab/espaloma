@@ -11,6 +11,7 @@
 cd $LS_SUBCWD
 source ~/.bashrc
 conda activate espaloma
+export OPENMM_CPU_THREADS="1"
 
 # double check
 which python

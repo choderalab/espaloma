@@ -132,5 +132,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+*.pt
+
 # Parm@Frosst download
 parm_at_Frosst.tgz
