@@ -8,11 +8,7 @@ from simtk import unit
 # =============================================================================
 
 # scaled units
-PARTICLE = unit.mole.create_unit(
-    6.02214076e23 ** -1,
-    'particle',
-    'particle',
-)
+PARTICLE = unit.mole.create_unit(6.02214076e23 ** -1, "particle", "particle",)
 
 HARTREE_PER_PARTICLE = unit.hartree / PARTICLE
 

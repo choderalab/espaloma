@@ -61,13 +61,14 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
                 return graph
 
-        elif isinstance(idx, slice):  # implement slicing
+        elif isinstance(idx, slice):
+            # implement slicing
             if self.transforms is None:
                 # return a Dataset object rather than list
                 return self.__class__(graphs=self.graphs[idx])
             else:
                 graphs = []
-                for graph in self.graphs:
+                for graph in self.graphs[idx]:
 
                     # nested transforms
                     for transform in self.transforms:
@@ -75,6 +76,25 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                     graphs.append(graph)
 
                 return self.__class__(graphs=graphs)
+
+        elif isinstance(idx, list):
+            # implement slicing
+            if self.transforms is None:
+                # return a Dataset object rather than list
+                return self.__class__(
+                    graphs=[self.graphs[_idx] for _idx in idx]
+                )
+            else:
+                graphs = []
+                for _idx in idx:
+                    graph = self[_idx]
+                    # nested transforms
+                    for transform in self.transforms:
+                        graph = transform(graph)
+                    graphs.append(graph)
+
+                return self.__class__(graphs=graphs)
+
 
     def __iter__(self):
         if self.transforms is None:
@@ -91,8 +111,9 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
     def shuffle(self):
         from random import shuffle
+
         shuffle(self.graphs)
-        return self        
+        return self
 
     def apply(self, fn, in_place=False):
         r""" Apply functions to the elements of the dataset.
@@ -146,6 +167,24 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return ds
 
+    def subsample(self, ratio):
+        """ Subsample the dataset according to some ratio.
+
+        Parameters
+        ----------
+        ratio : float
+            Ratio between the size of the subsampled dataset and the
+            original dataset.
+
+        """
+        n_data = len(self)
+        idxs = list(range(n_data))
+        import random
+        _idxs = random.choices(idxs, k=int(n_data*ratio))
+        print(_idxs)
+        print(self[_idxs])
+        return self[_idxs]
+
     def save(self, path):
         """ Save dataset to path.
 
@@ -170,6 +209,11 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
             self.graphs = pickle.load(f_handle)
 
         return self
+
+    def __add__(self, x):
+        return self.__class__(
+            self.graphs + x.graphs
+        )
 
 
 class GraphDataset(Dataset):

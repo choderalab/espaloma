@@ -166,9 +166,7 @@ class JanossyPoolingImproper(torch.nn.Module):
         self,
         config,
         in_features,
-        out_features={
-            "k": 6,
-        },
+        out_features={"k": 6,},
         out_features_dimensions=-1,
     ):
         super(JanossyPoolingImproper, self).__init__()
@@ -204,7 +202,6 @@ class JanossyPoolingImproper(torch.nn.Module):
                     torch.nn.Linear(mid_features, dimension,),
                 )
 
-
     def forward(self, g):
         """ Forward pass.
 
@@ -231,6 +228,9 @@ class JanossyPoolingImproper(torch.nn.Module):
         )
 
         # pool
+        #   sum over three cyclic permutations of "h0", "h2", "h3", assuming "h1" is the central atom in the improper
+        #   following the smirnoff trefoil convention [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
+        #   https://github.com/openforcefield/openforcefield/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openforcefield/typing/engines/smirnoff/parameters.py#L3326-L3360
         for big_idx in self.levels:
 
             g.apply_nodes(
@@ -241,37 +241,39 @@ class JanossyPoolingImproper(torch.nn.Module):
                         getattr(self, "sequential_%s" % big_idx)(
                             g=None,
                             x=torch.sum(
-                                torch.stack([
-                                    torch.cat(
-                                        [
-                                            nodes.data["h0"],
-                                            nodes.data["h1"],
-                                            nodes.data["h2"],
-                                            nodes.data["h3"]
-                                        ],
-                                        dim=1
-                                    ),
-                                    torch.cat(
-                                        [
-                                            nodes.data["h0"],
-                                            nodes.data["h2"],
-                                            nodes.data["h3"],
-                                            nodes.data["h1"],
-                                        ],
-                                        dim=1
-                                    ),
-                                    torch.cat(
-                                        [
-                                            nodes.data["h0"],
-                                            nodes.data["h3"],
-                                            nodes.data["h1"],
-                                            nodes.data["h2"],
-                                        ],
-                                        dim=1
-                                    ),
-                                ],
-                                dim=0),
-                            dim=0,
+                                torch.stack(
+                                    [
+                                        torch.cat(
+                                            [
+                                                nodes.data["h0"],
+                                                nodes.data["h1"],
+                                                nodes.data["h2"],
+                                                nodes.data["h3"],
+                                            ],
+                                            dim=1,
+                                        ),
+                                        torch.cat(
+                                            [
+                                                nodes.data["h2"],
+                                                nodes.data["h1"],
+                                                nodes.data["h3"],
+                                                nodes.data["h0"],
+                                            ],
+                                            dim=1,
+                                        ),
+                                        torch.cat(
+                                            [
+                                                nodes.data["h3"],
+                                                nodes.data["h1"],
+                                                nodes.data["h0"],
+                                                nodes.data["h2"],
+                                            ],
+                                            dim=1,
+                                        ),
+                                    ],
+                                    dim=0,
+                                ),
+                                dim=0,
                             ),
                         )
                     )

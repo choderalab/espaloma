@@ -2,7 +2,10 @@ import numpy.testing as npt
 import torch
 
 import espaloma as esp
-from espaloma.utils.geometry import _sample_four_particle_torsion_scan, _timemachine_signed_torsion_angle
+from espaloma.utils.geometry import (
+    _sample_four_particle_torsion_scan,
+    _timemachine_signed_torsion_angle,
+)
 
 
 def test_dihedral_vectors():
@@ -29,7 +32,12 @@ def test_dihedral_points():
     xyz_np = _sample_four_particle_torsion_scan(n_samples)
 
     # compute dihedrals using timemachine (numpy / JAX)
-    ci, cj, ck, cl = xyz_np[:, 0, :], xyz_np[:, 1, :], xyz_np[:, 2, :], xyz_np[:, 3, :]
+    ci, cj, ck, cl = (
+        xyz_np[:, 0, :],
+        xyz_np[:, 1, :],
+        xyz_np[:, 2, :],
+        xyz_np[:, 3, :],
+    )
     theta_timemachine = _timemachine_signed_torsion_angle(ci, cj, ck, cl)
 
     # compute dihedrals using espaloma (PyTorch)
@@ -38,7 +46,5 @@ def test_dihedral_points():
     theta_espaloma = esp.dihedral(x0, x1, x2, x3).numpy()
 
     npt.assert_almost_equal(
-        theta_timemachine,
-        theta_espaloma,
-        decimal=8,
+        theta_timemachine, theta_espaloma, decimal=8,
     )

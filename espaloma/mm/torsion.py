@@ -7,10 +7,9 @@ import espaloma as esp
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def periodic_torsion(x, k,
-        periodicity=list(range(1, 7)),
-        phases=[0.0 for _ in range(6)]
-    ):
+def periodic_torsion(
+    x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
+):
     """ Periodic torsion potential
 
     Parameters
@@ -34,10 +33,7 @@ def periodic_torsion(x, k,
     # NOTE:
     # 0.5 because all torsions are calculated twice
     out = 0.5 * esp.mm.functional.periodic(
-            x=x,
-            k=k,
-            periodicity=periodicity,
-            phases=phases,
+        x=x, k=k, periodicity=periodicity, phases=phases,
     )
     # assert(out.shape == (len(x), 1))
     return out

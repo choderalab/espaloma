@@ -64,7 +64,7 @@ class Train(Experiment):
         n_epochs=100,
         record_interval=1,
         normalize=esp.data.normalize.ESOL100LogNormalNormalize,
-        device=torch.device('cpu'),
+        device=torch.device("cpu"),
     ):
         super(Train, self).__init__()
 
@@ -94,11 +94,11 @@ class Train(Experiment):
 
         self.loss = loss
 
-
-
     def train_once(self):
         """ Train the model for one batch. """
-        for idx, g in enumerate(self.data):  # TODO: does this have to be a single g?
+        for idx, g in enumerate(
+            self.data
+        ):  # TODO: does this have to be a single g?
             g = g.to(self.device)
 
             def closure(g=g):
@@ -111,7 +111,7 @@ class Train(Experiment):
 
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
-                        raise RuntimeError('Loss is Nan.')
+                        raise RuntimeError("Loss is Nan.")
 
                 return loss
 
@@ -134,6 +134,7 @@ class Train(Experiment):
         self.states["final"] = copy.deepcopy(self.net.state_dict())
 
         return self.net
+
 
 class Test(Experiment):
     """ Test experiment.
@@ -162,7 +163,7 @@ class Test(Experiment):
         metrics=[esp.metrics.TypingCrossEntropy()],
         normalize=esp.data.normalize.NotNormalize,
         sampler=None,
-        device=torch.device('cpu'), # it should cpu
+        device=torch.device("cpu"),  # it should cpu
     ):
         # bookkeeping
         self.device = device
@@ -182,33 +183,51 @@ class Test(Experiment):
         for metric in self.metrics:
             results[metric.__name__] = {}
 
+        # NOTE: we are not doing this here since this will lead to OOM
+        # from time to time
         # make it just one giant graph
-        g = list(self.data)
-        g = dgl.batch_hetero(g)
-        g = g.to(self.device)
+        # g = list(self.data)
+        # g = dgl.batch_hetero(g)
+        # g = g.to(self.device)
 
         for state_name, state in self.states.items():  # loop through states
             # load the state dict
             self.net.load_state_dict(state)
 
             # local scope
-            with g.local_scope():
 
-                for metric in self.metrics:
+            for metric in self.metrics:
+                assert isinstance(metric, esp.metrics.Metric)
+                input_fn, target_fn = metric.between
 
-                    # loop through the metrics
-                    results[metric.__name__][state_name] = (
-                        metric(g_input=self.normalize.unnorm(self.net(g)))
-                        .detach()
-                        .cpu()
-                        .numpy()
-                    )
+                inputs = []
+                targets = []
+
+                for g in self.data:
+                    with g.local_scope():
+                        g = g.to(self.device)
+                        g_input = self.normalize.unnorm(self.net(g))
+                        inputs.append(input_fn(g_input))
+                        targets.append(target_fn(g_input))
+
+                inputs = torch.cat(inputs, dim=0)
+                targets = torch.cat(targets, dim=0)
+
+                # loop through the metrics
+                results[metric.__name__][state_name] = (
+                    metric.base_metric(inputs, targets)
+                    .detach()
+                    .cpu()
+                    .numpy()
+                )
 
         self.ref_g = self.normalize.unnorm(self.net(g))
 
         for term in self.ref_g.ntypes:
             for param in self.ref_g.nodes[term].data.keys():
-                g.nodes[term].data[param] = g.nodes[term].data[param].detach().cpu()
+                g.nodes[term].data[param] = (
+                    g.nodes[term].data[param].detach().cpu()
+                )
 
         # point this to self
         self.results = results
@@ -229,7 +248,7 @@ class TrainAndTest(Experiment):
         normalize=esp.data.normalize.NotNormalize,
         n_epochs=100,
         record_interval=1,
-        device=torch.device('cpu'),
+        device=torch.device("cpu"),
     ):
 
         # bookkeeping
@@ -327,6 +346,10 @@ class TrainAndTest(Experiment):
 
             self.results_vl = test.results
 
-            return {"test": self.results_te, "train": self.results_tr, "validate": self.results_vl}
+            return {
+                "test": self.results_te,
+                "train": self.results_tr,
+                "validate": self.results_vl,
+            }
 
         return {"test": self.results_te, "train": self.results_tr}

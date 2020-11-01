@@ -11,17 +11,38 @@ def bond_indices(offmol: Molecule) -> np.ndarray:
 
 
 def angle_indices(offmol: Molecule) -> np.ndarray:
-    return np.array(sorted([tuple([atom.molecule_atom_index for atom in angle]) for angle in offmol.angles]))
+    return np.array(
+        sorted(
+            [
+                tuple([atom.molecule_atom_index for atom in angle])
+                for angle in offmol.angles
+            ]
+        )
+    )
 
 
 def proper_torsion_indices(offmol: Molecule) -> np.ndarray:
-    return np.array(sorted([tuple([atom.molecule_atom_index for atom in proper]) for proper in offmol.propers]))
+    return np.array(
+        sorted(
+            [
+                tuple([atom.molecule_atom_index for atom in proper])
+                for proper in offmol.propers
+            ]
+        )
+    )
 
 
 def _all_improper_torsion_indices(offmol: Molecule) -> np.ndarray:
     """"[*:1]~[*:2](~[*:3])~[*:4]" matches"""
 
-    return np.array(sorted([tuple([atom.molecule_atom_index for atom in improper]) for improper in offmol.impropers]))
+    return np.array(
+        sorted(
+            [
+                tuple([atom.molecule_atom_index for atom in improper])
+                for improper in offmol.impropers
+            ]
+        )
+    )
 
 
 def improper_torsion_indices(offmol: Molecule) -> np.ndarray:
