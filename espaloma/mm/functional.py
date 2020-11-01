@@ -106,8 +106,8 @@ def periodic_fixed_phases(
     )
     assert ns.shape == stacked_shape
 
-    # compute k_n * cos(n * theta) for n in 1..n_phases, for each dihedral in each snapshot
-    energy_terms = ks_stacked * torch.cos(ns * dihedrals_stacked)
+    # compute k_n * (1 + cos(n * theta)) for n in 1..n_phases, for each dihedral in each snapshot
+    energy_terms = ks_stacked * (1 + torch.cos(ns * dihedrals_stacked))
     assert energy_terms.shape == stacked_shape
 
     # sum over n_dihedrals and n_phases
