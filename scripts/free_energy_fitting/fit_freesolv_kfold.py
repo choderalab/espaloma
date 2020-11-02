@@ -207,34 +207,34 @@ if __name__ == '__main__':
             # TODO: modify loss function to depend on experimental error and simulation error
             L += (prediction - target) ** 2
 
-    L /= len(keys)
+        L /= len(keys)
 
-    optimizer.zero_grad()
-    L.backward()
-    optimizer.step()
+        optimizer.zero_grad()
+        L.backward()
+        optimizer.step()
 
-    batch_losses.append(L.detach().numpy())
-    rmse_in_kcalmol = np.sqrt(
-        batch_losses[-1] * kT / unit.kilocalories_per_mole)
-    trange.set_postfix(batch_rmse_in_kcalmol=rmse_in_kcalmol)
+        batch_losses.append(L.detach().numpy())
+        rmse_in_kcalmol = np.sqrt(
+            batch_losses[-1] * kT / unit.kilocalories_per_mole)
+        trange.set_postfix(batch_rmse_in_kcalmol=rmse_in_kcalmol)
 
-    if t % n_batches_per_epoch == 0:
-        epoch = int(t / n_batches_per_epoch)
-        p = get_all_preds(mini_freesolv)
-        predictions.append(p)
-        train_rmse, valid_rmse = report_train_and_validation_rmse(p)
-        print(f'training rmse: {train_rmse:.3f}')
-        print(f'validation rmse: {valid_rmse:.3f}')
-        name = f'cho_freesolv_fold={fold_index}_epoch={epoch}'
-        if (t % n_batches_per_epoch) / 10 == 0:
-            torch.save(graph_model, f'{name}.pt')
+        if t % n_batches_per_epoch == 0:
+            epoch = int(t / n_batches_per_epoch)
+            p = get_all_preds(mini_freesolv)
+            predictions.append(p)
+            train_rmse, valid_rmse = report_train_and_validation_rmse(p)
+            print(f'training rmse: {train_rmse:.3f}')
+            print(f'validation rmse: {valid_rmse:.3f}')
+            name = f'cho_freesolv_fold={fold_index}_epoch={epoch}'
+            if (t / n_batches_per_epoch) % 10 == 0:
+                torch.save(graph_model, f'{name}.pt')
 
-        # TODO: make this a nice pandas dataframe instead
-        from pickle import dump
+                # TODO: make this a nice pandas dataframe instead
+                from pickle import dump
 
-        with open(f'{name}.pkl', 'wb') as f:
-            dump({
-                'predictions': predictions,
-                'train_inds': train_inds,
-                'valid_inds': valid_inds},
-                f)
+                with open(f'{name}.pkl', 'wb') as f:
+                    dump({
+                        'predictions': predictions,
+                        'train_inds': train_inds,
+                        'valid_inds': valid_inds},
+                        f)
