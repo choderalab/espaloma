@@ -70,7 +70,12 @@ class Train(Experiment):
 
         # bookkeeping
         self.device = device
-        self.net = net.to(self.device)
+        if isinstance(net, torch.nn.DataParallel):
+            self.net = net
+        elif isinstance(net, torch.nn.parallel.DistributedDataParallel):
+            self.net = net
+        else:
+            self.net = net.to(self.device)
         self.data = data
         self.metrics = metrics
         self.n_epochs = n_epochs
@@ -99,6 +104,7 @@ class Train(Experiment):
         for idx, g in enumerate(
             self.data
         ):  # TODO: does this have to be a single g?
+
             g = g.to(self.device)
 
             def closure(g=g):
@@ -112,6 +118,8 @@ class Train(Experiment):
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
                         raise RuntimeError("Loss is Nan.")
+                
+                print(loss)
 
                 return loss
 
@@ -207,8 +215,8 @@ class Test(Experiment):
                     with g.local_scope():
                         g = g.to(self.device)
                         g_input = self.normalize.unnorm(self.net(g))
-                        inputs.append(input_fn(g_input))
-                        targets.append(target_fn(g_input))
+                        inputs.append(input_fn(g_input).detach())
+                        targets.append(target_fn(g_input).detach())
 
                 inputs = torch.cat(inputs, dim=0)
                 targets = torch.cat(targets, dim=0)
