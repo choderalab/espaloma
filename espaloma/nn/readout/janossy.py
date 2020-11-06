@@ -69,6 +69,9 @@ class JanossyPooling(torch.nn.Module):
                     torch.nn.Linear(mid_features, dimension,),
                 )
 
+        if 1 not in self.out_features:
+            return
+
         # atom level
         self.sequential_1 = esp.nn.sequential._Sequential(
             in_features=in_features, config=config, layer=torch.nn.Linear
@@ -140,6 +143,9 @@ class JanossyPooling(torch.nn.Module):
                 },
                 ntype="n%s" % big_idx,
             )
+
+        if 1 not in self.out_features:
+            return g
 
         # atom level
         g.apply_nodes(
@@ -226,6 +232,10 @@ class JanossyPoolingImproper(torch.nn.Module):
             },
             cross_reducer="sum",
         )
+
+
+        if g.number_of_nodes("n4_improper") == 0:
+            return g
 
         # pool
         #   sum over three cyclic permutations of "h0", "h2", "h3", assuming "h1" is the central atom in the improper
