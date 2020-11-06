@@ -172,7 +172,14 @@ MolWithTargets = namedtuple('MolWithTargets', ['offmol', 'xyz', 'energies', 'gra
 
 
 def h5_to_dataset(df):
-    df['smiles'] = df.apply(lambda x: x['offmol'].to_smiles(), axis=1)
+    def get_smiles(x):
+        try:
+            return x['offmol'].to_smiles()
+        except:
+            return np.nan
+
+    df['smiles'] = df.apply(get_smiles, axis=1)
+    df = df.dropna()
     groups = df.groupby("smiles")
     gs = []
     for name, group in groups:
@@ -233,9 +240,12 @@ def breakdown_along_time_axis(g, batch_size=32):
     _gs = []
     for chunk in chunks:
         _g = esp.Graph(g.mol)
-        _g.nodes['g'].data['u_ref'] = g.nodes['g'].data['u_ref'][:, chunk]
-        _g.nodes['n1'].data['xyz'] = g.nodes['n1'].data['xyz'][:, chunk, :]
-        _g.nodes['n1'].data['u_ref_prime'] = g.nodes['n1'].data['u_ref_prime'][:, chunk, :]
+        _g.nodes['g'].data['u_ref'] = g.nodes['g'].data['u_ref'][:, chunk].detach().clone()
+        _g.nodes['n1'].data['xyz'] = g.nodes['n1'].data['xyz'][:, chunk, :].detach().clone()
+        _g.nodes['n1'].data['u_ref_prime'] = g.nodes['n1'].data['u_ref_prime'][:, chunk, :].detach().clone()
+
+        _g.nodes['n1'].data['xyz'].requires_grad = True
+
         _gs.append(_g)
 
     return _gs
