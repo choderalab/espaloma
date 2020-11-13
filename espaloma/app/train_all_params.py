@@ -43,7 +43,7 @@ def run(args):
     readout = esp.nn.readout.janossy.JanossyPooling(
         in_features=units,
         config=args.janossy_config,
-        out_features={2: ["k", "eq"], 3: ["k", "eq"],},
+        out_features={1: ["k", "eq"], 2: ["k", "eq"], 3: ["k", "eq"]},
     )
 
     net = torch.nn.Sequential(representation, readout)
