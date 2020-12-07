@@ -24,7 +24,7 @@ def linear_mixture_to_original(k1, k2, b1, b2):
     k = k1 + k2
 
     # (batch_size, )
-    b = (k1 * b1 + k2 * b2) / (k + 1e-3)
+    b = (k1 * b1 + k2 * b2) / (k + 1e-7)
 
     return k, b
 
@@ -254,7 +254,7 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
 
 
-def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
+def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
     r""" Linear mixture basis function.
 
     x : torch.Tensor
@@ -276,12 +276,12 @@ def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
 
     # get the original parameters
     # (batch_size, )
-    k, b = linear_mixture_to_original(k1, k2, b1, b2)
+    # k, b = linear_mixture_to_original(k1, k2, b1, b2)
 
     # (batch_size, 1)
     u1 = k1 * (x - b1) ** 2
-    u2 = k2 * (x - b1) ** 2
+    u2 = k2 * (x - b2) ** 2
 
-    u = u1 + u2 - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
+    u = u1 + u2 # - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
 
     return u

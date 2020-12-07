@@ -70,7 +70,12 @@ class Train(Experiment):
 
         # bookkeeping
         self.device = device
-        self.net = net.to(self.device)
+        if isinstance(net, torch.nn.DataParallel):
+            self.net = net
+        elif isinstance(net, torch.nn.parallel.DistributedDataParallel):
+            self.net = net
+        else:
+            self.net = net.to(self.device)
         self.data = data
         self.metrics = metrics
         self.n_epochs = n_epochs
@@ -99,6 +104,12 @@ class Train(Experiment):
         for idx, g in enumerate(
             self.data
         ):  # TODO: does this have to be a single g?
+
+            if isinstance(self.optimizer, torch.optim.LBFGS):
+                retain_graph = True
+            else:
+                retain_graph=False
+
             g = g.to(self.device)
 
             def closure(g=g):
@@ -107,12 +118,12 @@ class Train(Experiment):
                 g = self.normalize.unnorm(g)
 
                 loss = self.loss(g)
-                loss.backward()
+                loss.backward(retain_graph=retain_graph)
 
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
                         raise RuntimeError("Loss is Nan.")
-
+                print(loss, flush=True)
                 return loss
 
             self.optimizer.step(closure)
@@ -124,6 +135,8 @@ class Train(Experiment):
         """
 
         for epoch_idx in range(int(self.n_epochs)):
+            print(epoch_idx, flush=True)
+
             self.train_once()
 
             # record when `record_interval` is hit
@@ -183,34 +196,57 @@ class Test(Experiment):
         for metric in self.metrics:
             results[metric.__name__] = {}
 
+        # NOTE: we are not doing this here since this will lead to OOM
+        # from time to time
         # make it just one giant graph
-        g = list(self.data)
-        g = dgl.batch_hetero(g)
-        g = g.to(self.device)
+        # g = list(self.data)
+        # g = dgl.batch_hetero(g)
+        # g = g.to(self.device)
+
+        if self.states is None:
+            self.states = {'final': None}
 
         for state_name, state in self.states.items():  # loop through states
-            # load the state dict
-            self.net.load_state_dict(state)
+            if state is not None:
+                # load the state dict
+                self.net.load_state_dict(state)
 
             # local scope
-            with g.local_scope():
 
-                for metric in self.metrics:
+            for metric in self.metrics:
+                assert isinstance(metric, esp.metrics.Metric)
+                input_fn, target_fn = metric.between
 
-                    # loop through the metrics
-                    results[metric.__name__][state_name] = (
-                        metric(g_input=self.normalize.unnorm(self.net(g)))
-                        .detach()
-                        .cpu()
-                        .numpy()
-                    )
+                inputs = []
+                targets = []
 
-        self.ref_g = self.normalize.unnorm(self.net(g))
+                idx = 0
+                for g in self.data:
+                    g = g.to(self.device)
+                    idx += 1
+                    with g.local_scope():
+                        g = g.to(self.device)
+                        g_input = self.normalize.unnorm(self.net(g))
+                        inputs.append(input_fn(g_input).detach().cpu())
+                        targets.append(target_fn(g_input).detach().cpu())
+
+                inputs = torch.cat(inputs, dim=0)
+                targets = torch.cat(targets, dim=0)
+
+                # loop through the metrics
+                results[metric.__name__][state_name] = (
+                    metric.base_metric(inputs, targets)
+                    .detach()
+                    .cpu()
+                    .numpy()
+                )
+
+        self.ref_g = self.normalize.unnorm(self.net(g)).to(torch.device('cpu'))
 
         for term in self.ref_g.ntypes:
             for param in self.ref_g.nodes[term].data.keys():
                 g.nodes[term].data[param] = (
-                    g.nodes[term].data[param].detach().cpu()
+                    g.nodes[term].data[param].detach()
                 )
 
         # point this to self
@@ -294,6 +330,7 @@ class TrainAndTest(Experiment):
             metrics=self.metrics_te,
             states=self.states,
             normalize=self.normalize,
+            device=self.device,
         )
 
         test.test()
@@ -308,6 +345,7 @@ class TrainAndTest(Experiment):
             metrics=self.metrics_te,
             states=self.states,
             normalize=self.normalize,
+            device=self.device,
         )
 
         test.test()
@@ -323,6 +361,7 @@ class TrainAndTest(Experiment):
                 metrics=self.metrics_te,
                 states=self.states,
                 normalize=self.normalize,
+                device=self.device,
             )
 
             test.test()

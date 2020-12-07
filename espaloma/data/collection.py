@@ -95,7 +95,7 @@ def md17_new(*args, **kwargs):
 class qca(object):
     pass
 
-df_names = ['Bayer', 'Coverage', 'eMolecules', 'Pfizer', 'Roche']
+df_names = ['Bayer', 'Coverage', 'eMolecules', 'Pfizer', 'Roche', "Benchmark", "fda"]
 
 def _get_ds(cls, df_name):
     import os
