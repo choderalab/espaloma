@@ -221,24 +221,12 @@ class Test(Experiment):
                 inputs = []
                 targets = []
 
-<<<<<<< HEAD
-                idx = 0
-                for g in self.data:
-                    g = g.to(self.device)
-                    idx += 1
-                    with g.local_scope():
-                        g = g.to(self.device)
-                        g_input = self.normalize.unnorm(self.net(g))
-                        inputs.append(input_fn(g_input).detach().cpu())
-                        targets.append(target_fn(g_input).detach().cpu())
-=======
                 for g in self.data:
                     with g.local_scope():
                         g = g.to(self.device)
                         g_input = self.normalize.unnorm(self.net(g))
                         inputs.append(input_fn(g_input).detach())
                         targets.append(target_fn(g_input).detach())
->>>>>>> 91f45f97a78082a5b3e313021a644297f7aae516
 
                 inputs = torch.cat(inputs, dim=0)
                 targets = torch.cat(targets, dim=0)
