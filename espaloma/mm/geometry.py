@@ -71,9 +71,9 @@ def dihedral(
     assert x0.shape == x1.shape == x2.shape == x3.shape
 
     # compute displacements 0->1, 2->1, 2->3
-    r01 = x1 - x0
-    r21 = x1 - x2
-    r23 = x3 - x2
+    r01 = x1 - x0 + torch.randn_like(x0) * 1e-5
+    r21 = x1 - x2 + torch.randn_like(x0) * 1e-5
+    r23 = x3 - x2 + torch.randn_like(x0) * 1e-5
 
     # compute normal planes
     n1 = torch.cross(r01, r21)

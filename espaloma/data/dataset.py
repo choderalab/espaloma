@@ -109,8 +109,12 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
             return graphs
 
-    def shuffle(self):
+    def shuffle(self, seed=None):
+        import random
         from random import shuffle
+
+        if seed is not None:
+            random.seed(seed)
 
         shuffle(self.graphs)
         return self
@@ -181,8 +185,6 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         idxs = list(range(n_data))
         import random
         _idxs = random.choices(idxs, k=int(n_data*ratio))
-        print(_idxs)
-        print(self[_idxs])
         return self[_idxs]
 
     def save(self, path):
