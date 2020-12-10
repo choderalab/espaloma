@@ -39,6 +39,42 @@ def run(args):
 
     g = next(iter(ds))
 
+
+    class FreeParameterBaseline(torch.nn.Module):
+        """ Parametrize a graph by populating the parameters with free
+        `torch.nn.Parameter`.
+
+
+        """
+
+        def __init__(self, g_ref):
+            super(FreeParameterBaseline, self).__init__()
+            self.g_ref = g_ref
+
+            self.n2_coeff = torch.nn.Parameter(
+                torch.zeros(
+                    g_ref.number_of_nodes('n2'),
+                    2
+                )
+            )
+
+            self.n3_coeff = torch.nn.Parameter(
+                torch.zeros(
+                    g_ref.number_of_nodes('n3'),
+                    2,
+                )
+            )
+
+
+        def forward(self, g):
+            update_dicts = {node: {} for node in self.g_ref.ntypes}
+
+            g.nodes['n2'].data['coefficients'] = self.n2_coeff
+            g.nodes['n3'].data['coefficients'] = self.n3_coeff
+
+            return g
+
+
     if args.layer != "Free":
         # layer
         layer = esp.nn.layers.dgl_legacy.gn(args.layer)
@@ -73,8 +109,9 @@ def run(args):
                 esp.mm.energy.EnergyInGraph(terms=["n2", "n3"], suffix='_ref'),
         )
 
+
     if args.layer == "Free":
-        representation = esp.nn.baselines.FreeParameterBaselineInitMean(next(iter(ds)))
+        representation = FreeParameterBaseline(next(iter(ds)))
         net = torch.nn.Sequential(
                 representation, 
                 # readout,
@@ -83,8 +120,6 @@ def run(args):
                 esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
                 esp.mm.energy.EnergyInGraph(terms=["n2", "n3"], suffix='_ref'),
         )
-        
-
 
     if args.metric_train == "energy":
         metrics_tr = [
@@ -144,7 +179,6 @@ def run(args):
         ),
     ]
 
-
     if args.opt == "Adam":
         opt = torch.optim.Adam(net.parameters(), 1e-5)
 
@@ -162,7 +196,6 @@ def run(args):
         opt = SGLD(net.parameters(), 1e-5)
 
 
-
     exp = esp.TrainAndTest(
         ds_tr=ds,
         ds_te=ds,
@@ -171,7 +204,7 @@ def run(args):
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
         normalize=esp.data.normalize.NotNormalize,
-        record_interval=100,
+        record_interval=1,
         optimizer=opt,
         device=torch.device('cuda:0'),
     )

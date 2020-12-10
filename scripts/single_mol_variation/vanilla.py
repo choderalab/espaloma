@@ -62,7 +62,6 @@ def run(args):
 
         readout = esp.nn.readout.janossy.JanossyPooling(
             in_features=units, config=janossy_config,
-            out_features={2: {'coefficients': 2}, 3: {'coefficients': 2}},
         )
 
         net = torch.nn.Sequential(
@@ -74,22 +73,20 @@ def run(args):
         )
 
     if args.layer == "Free":
-        representation = esp.nn.baselines.FreeParameterBaselineInitMean(next(iter(ds)))
+        representation = esp.nn.baselines.FreeParameterBaseline(next(iter(ds)))
         net = torch.nn.Sequential(
                 representation, 
                 # readout,
-                # add_mean,
                 esp.mm.geometry.GeometryInGraph(),
                 esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
                 esp.mm.energy.EnergyInGraph(terms=["n2", "n3"], suffix='_ref'),
         )
-        
 
 
     if args.metric_train == "energy":
         metrics_tr = [
             esp.metrics.GraphMetric(
-                base_metric=esp.metrics.center(torch.nn.MSELoss(reduction='none'), reduction='mean'),
+                base_metric=esp.metrics.center(torch.nn.MSELoss(reduction='none'), reduction='sum'),
                 between=['u', "u_ref"],
                 level="g",
             ),
@@ -144,7 +141,6 @@ def run(args):
         ),
     ]
 
-
     if args.opt == "Adam":
         opt = torch.optim.Adam(net.parameters(), 1e-5)
 
@@ -160,8 +156,6 @@ def run(args):
     elif args.opt == "SGLD":
         from pinot.samplers.sgld import SGLD
         opt = SGLD(net.parameters(), 1e-5)
-
-
 
     exp = esp.TrainAndTest(
         ds_tr=ds,

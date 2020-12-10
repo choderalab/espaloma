@@ -39,6 +39,17 @@ def run(args):
 
     g = next(iter(ds))
 
+    class AddMean(torch.nn.Module):
+        def forward(self, g):
+            g.nodes['n2'].data['k'] = g.nodes['n2'].data['k_ref'].detach().mean() + g.nodes['n2'].data['k']
+            g.nodes['n2'].data['eq'] = g.nodes['n2'].data['eq_ref'].detach().mean() + g.nodes['n2'].data['eq']
+            g.nodes['n3'].data['k'] = g.nodes['n3'].data['k_ref'].detach().mean() + g.nodes['n3'].data['k']
+            g.nodes['n3'].data['eq'] = g.nodes['n3'].data['eq_ref'].detach().mean() + g.nodes['n3'].data['eq']
+            
+            return g
+
+    add_mean = AddMean()
+
     if args.layer != "Free":
         # layer
         layer = esp.nn.layers.dgl_legacy.gn(args.layer)
@@ -62,7 +73,6 @@ def run(args):
 
         readout = esp.nn.readout.janossy.JanossyPooling(
             in_features=units, config=janossy_config,
-            out_features={2: {'coefficients': 2}, 3: {'coefficients': 2}},
         )
 
         net = torch.nn.Sequential(
@@ -89,7 +99,7 @@ def run(args):
     if args.metric_train == "energy":
         metrics_tr = [
             esp.metrics.GraphMetric(
-                base_metric=esp.metrics.center(torch.nn.MSELoss(reduction='none'), reduction='mean'),
+                base_metric=torch.nn.MSELoss(),
                 between=['u', "u_ref"],
                 level="g",
             ),
@@ -138,12 +148,41 @@ def run(args):
 
     metrics_te = [
         esp.metrics.GraphMetric(
-            base_metric=esp.metrics.center(esp.metrics.rmse),
+            base_metric=esp.metrics.r2,
             between=['u', 'u_ref'],
             level="g",
         ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.rmse,
+            between=['u', 'u_ref'],
+            level="g",
+        ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.mape,
+            between=['u', 'u_ref'],
+            level='g',
+        ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.mape,
+            between=["k", "k_ref"],
+            level="n2",
+        ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.mape,
+            between=["eq", "eq_ref"],
+            level="n2",
+        ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.mape,
+            between=["k", "k_ref"],
+            level="n3",
+        ),
+        esp.metrics.GraphMetric(
+            base_metric=esp.metrics.mape,
+            between=["eq", "eq_ref"],
+            level="n3",
+        ),
     ]
-
 
     if args.opt == "Adam":
         opt = torch.optim.Adam(net.parameters(), 1e-5)
@@ -161,8 +200,6 @@ def run(args):
         from pinot.samplers.sgld import SGLD
         opt = SGLD(net.parameters(), 1e-5)
 
-
-
     exp = esp.TrainAndTest(
         ds_tr=ds,
         ds_te=ds,
@@ -170,8 +207,8 @@ def run(args):
         metrics_tr=metrics_tr,
         metrics_te=metrics_te,
         n_epochs=args.n_epochs,
-        normalize=esp.data.normalize.NotNormalize,
-        record_interval=100,
+        normalize=esp.data.normalize.PositiveNotNormalize,
+        record_interval=1,
         optimizer=opt,
         device=torch.device('cuda:0'),
     )
