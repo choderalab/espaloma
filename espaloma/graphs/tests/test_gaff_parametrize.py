@@ -7,4 +7,6 @@ def test_gaff_parametrize():
         "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
     )
     ff.parametrize(g)
-    
+
+    print(g.nodes['n2'].data)
+    print(g.nodes['n3'].data)
