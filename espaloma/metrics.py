@@ -8,23 +8,41 @@ import abc
 # =============================================================================
 import torch
 import numpy as np
-
+from .units import GAS_CONSTANT
 
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
-def center(metric, weight=1.0, dim=1):
-    def _centered(input, target, metric=metric, weight=weight, dim=dim):
+def center(metric, dim=1, reduction="none"):
+    def _centered(input, target, metric=metric, dim=dim):
         # center input
         input = input - input.mean(dim=dim, keepdim=True)
 
         # center target
         target = target - target.mean(dim=dim, keepdim=True)
 
-        return weight * metric(input, target)
+        if reduction == "none":
+            return metric(input, target)
+        else:
+            return getattr(torch, reduction)(metric(input, target))
 
     return _centered
 
+def boltzmann_weighted(metric, reduction="mean", temperature=300.0):
+    def _weighted(input, target, metric=metric, reduction=reduction):
+        _loss = metric(input, target)
+
+        min_target, _ = torch.min(target, dim=-1, keepdims=True)
+        delta_target = target - min_target
+        
+        weight_target = torch.exp(
+            -delta_target / (GAS_CONSTANT * temperature)
+        )
+
+        _loss = _loss * weight_target
+
+        return getattr(torch, reduction)(_loss)
+    return _weighted
 
 def std(metric, weight=1.0, dim=1):
     def _std(input, target, metric=metric, weight=weight, dim=dim):
@@ -260,6 +278,7 @@ class GraphDerivativeMetric(Metric):
             self.d(g_input),
             create_graph=True,
             retain_graph=True,
+            allow_unused=True,
         )[0]
 
         target_prime = torch.autograd.grad(
@@ -267,6 +286,7 @@ class GraphDerivativeMetric(Metric):
             self.d(g_target),
             create_graph=True,
             retain_graph=True,
+            allow_unused=True,
         )[0]
 
         # compute loss using base loss
