@@ -143,6 +143,20 @@ class Metric(torch.nn.modules.loss._Loss):
 class GraphMetric(Metric):
     """ Loss between nodes attributes of graph or graphs.
 
+    Parameters
+    ----------
+    base_metric : callable
+        Metric on fixed dimensional space.
+        
+    between : List[str]
+        Names of quantities to compare.
+        
+    level : str
+        Level of nodes to compare with.
+    
+    Returns
+    -------
+    torch.Tensor
     """
 
     def __init__(self, base_metric, between, level="n1", *args, **kwargs):
