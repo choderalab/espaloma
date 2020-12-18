@@ -34,6 +34,48 @@ def run(args):
 
     data = data.apply(simulation.run, in_place=True)
 
+    def type_bonds_and_angles(g):
+
+        legacy_typing = g.nodes['n1'].data['legacy_typing']
+        legacy_typing_one_hot = torch.zeros(legacy_typing.shape[0], 117).scatter(
+                1, legacy_typing[:, None], 1.0,
+        )
+
+        bond_type_to_idx = {}
+        angle_type_to_idx = {}
+
+        _idx = 0
+        n2_typing = torch.zeros(g.heterograph.number_of_nodes('n2'), dtype=torch.int32).long()
+        for count, idx in enumerate(g.nodes['n2'].data['idxs']):
+            idx = tuple((legacy_typing[idx[0]].item(), legacy_typing[idx[1]].item()))
+            if idx in bond_type_to_idx:
+                n2_typing[count] = bond_type_to_idx[idx]
+            elif idx[::-1] in bond_type_to_idx:
+                n2_typing[count] = bond_type_to_idx[idx[::-1]]
+            else:
+                bond_type_to_idx[idx] = _idx
+                n2_typing[count] = _idx
+                _idx += 1
+
+        _idx = 0
+        n3_typing = torch.zeros(g.heterograph.number_of_nodes('n3'), dtype=torch.int32).long()
+        for count, idx in enumerate(g.nodes['n3'].data['idxs']):
+            idx = tuple((legacy_typing[idx[0]].item(), legacy_typing[idx[1]].item(), legacy_typing[idx[2]].item()))
+            if idx in angle_type_to_idx:
+                n3_typing[count] = angle_type_to_idx[idx]
+            elif idx[::-1] in angle_type_to_idx:
+                n3_typing[count] = angle_type_to_idx[idx[::-1]]
+            else:
+                angle_type_to_idx[idx] = _idx
+                n3_typing[count] = _idx
+                _idx += 1
+
+        g.nodes['n2'].data['legacy_typing'] = n2_typing
+        g.nodes['n3'].data['legacy_typing'] = n3_typing
+
+        return g
+
+
     # batch
     ds = data.view("graph", batch_size=1)
 
@@ -65,81 +107,66 @@ def run(args):
         )
 
         net = torch.nn.Sequential(
-                representation, 
+                representation,
                 readout,
-                esp.mm.geometry.GeometryInGraph(),
-                esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
-                esp.mm.energy.EnergyInGraph(terms=["n2", "n3"], suffix='_ref'),
         )
 
     if args.layer == "Free":
         representation = esp.nn.baselines.FreeParameterBaseline(next(iter(ds)))
         net = torch.nn.Sequential(
-                representation, 
-                # readout,
-                esp.mm.geometry.GeometryInGraph(),
-                esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
-                esp.mm.energy.EnergyInGraph(terms=["n2", "n3"], suffix='_ref'),
+                representation,
+                readout,
         )
 
 
-    if args.metric_train == "energy":
-        metrics_tr = [
-            esp.metrics.GraphMetric(
-                base_metric=esp.metrics.center(torch.nn.MSELoss(reduction='none'), reduction='sum'),
-                between=['u', "u_ref"],
-                level="g",
-            ),
+    from espaloma.metrics import GraphMetric
 
-        ]
-
-    elif args.metric_train == "force":
-        metrics_tr = [
-            esp.metrics.GraphDerivativeMetric(
-                    between=["u", "u_ref"],
-                    level="g",
-                    weight=1.0,
-                    base_metric=torch.nn.MSELoss(),
-            ),
-            esp.metrics.GraphMetric(
-                base_metric=torch.nn.MSELoss(),
-                between=['u', "u_ref"],
-                level="g",
-            ),
-        ]
-
-
-    elif args.metric_train == "param":
-        metrics_tr = [
-            esp.metrics.GraphMetric(
-                base_metric=torch.nn.MSELoss(),
-                between=["k", "k_ref"],
+    class BondTypingCrossEntropy(GraphMetric):
+        def __init__(self):
+            super(BondTypingCrossEntropy, self).__init__(
+                base_metric=torch.nn.CrossEntropyLoss(),
+                between=["nn_typing", "legacy_typing"],
                 level="n2",
-            ),
-            esp.metrics.GraphMetric(
-                base_metric=torch.nn.MSELoss(),
-                between=["eq", "eq_ref"],
-                level="n2",
-            ),
-            esp.metrics.GraphMetric(
-                base_metric=torch.nn.MSELoss(),
-                between=["k", "k_ref"],
-                level="n3",
-            ),
-            esp.metrics.GraphMetric(
-                base_metric=torch.nn.MSELoss(),
-                between=["eq", "eq_ref"],
-                level="n3",
-            ),
-        ]
+            )
 
-    metrics_te = [
-        esp.metrics.GraphMetric(
-            base_metric=esp.metrics.center(esp.metrics.rmse),
-            between=['u', 'u_ref'],
-            level="g",
-        ),
-    ]
+            self.__name__ = "BondTypingCrossEntropy"
+
+
+    class AngleTypingCrossEntropy(GraphMetric):
+        def __init__(self):
+            super(AngleTypingCrossEntropy, self).__init__(
+                base_metric=torch.nn.CrossEntropyLoss(),
+                between=["nn_typing", "legacy_typing"],
+                level="n3",
+            )
+
+            self.__name__ = "AngleTypingCrossEntropy"
+
+
+
+    class BondTypingAccuracy(GraphMetric):
+        def __init__(self):
+            super(BondTypingAccuracy, self).__init__(
+                base_metric=esp.metrics.accuracy,
+                between=["nn_typing", "legacy_typing"],
+                level="n2",
+            )
+
+            self.__name__ = "BondTypingAccuracy"
+
+
+    class AngleTypingAccuracy(GraphMetric):
+        def __init__(self):
+            super(AngleTypingAccuracy, self).__init__(
+                base_metric=esp.metrics.accuracy,
+                between=["nn_typing", "legacy_typing"],
+                level="n3",
+            )
+
+            self.__name__ = "AngleTypingAccuracy"
+
+    metrics_tr = [BondTypingCrossEntropy(), AngleTypingCrossEntropy()]
+    metrics_te = [BondTypingAccuracy(), AngleTypingAccuracy()]
 
     if args.opt == "Adam":
         opt = torch.optim.Adam(net.parameters(), 1e-5)
@@ -174,7 +201,6 @@ def run(args):
 
     print(esp.app.report.markdown(results))
 
-    import os
     os.mkdir(args.out)
 
     with open(args.out + "/architecture.txt", "w") as f_handle:
@@ -187,7 +213,7 @@ def run(args):
 
     for spec, curve in curves.items():
         np.save(args.out + "/" + "_".join(spec) + ".npy", curve)
-    
+
     import pickle
     pickle.dump(
         exp.ref_g_test,
