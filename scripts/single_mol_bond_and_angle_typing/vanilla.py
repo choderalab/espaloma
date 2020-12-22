@@ -19,11 +19,10 @@ def run(args):
         args.forcefield
     )
 
-    # param / typing
-    operation = forcefield.parametrize
 
     # apply to dataset
-    data = data.apply(operation, in_place=True)
+    data = data.apply(forcefield.parametrize, in_place=True)
+    data = data.apply(forcefield.typing, in_place=True)
 
     # apply simulation
     # make simulation
@@ -75,6 +74,8 @@ def run(args):
 
         return g
 
+    type_bonds_and_angles(g)
+    data = data.apply(type_bonds_and_angles, in_place=True)
 
     # batch
     ds = data.view("graph", batch_size=1)
@@ -104,6 +105,10 @@ def run(args):
 
         readout = esp.nn.readout.janossy.JanossyPooling(
             in_features=units, config=janossy_config,
+            out_features={
+                2: {'nn_typing': 50},
+                3: {'nn_typing': 50},
+            },
         )
 
         net = torch.nn.Sequential(
@@ -228,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument("--first", default=-1, type=int)
     parser.add_argument("--partition", default="4:1", type=str)
     parser.add_argument("--batch_size", default=8, type=int)
-    parser.add_argument("--forcefield", default="smirnoff99Frosst", type=str)
+    parser.add_argument("--forcefield", default="gaff-1.81", type=str)
     parser.add_argument("--layer", default="GraphConv", type=str)
     parser.add_argument("--n_classes", default=100, type=int)
     parser.add_argument(
