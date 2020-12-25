@@ -123,8 +123,6 @@ class Train(Experiment):
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
                         raise RuntimeError("Loss is Nan.")
-                
-                print(loss)
                 return loss
 
             self.optimizer.step(closure)
@@ -136,7 +134,6 @@ class Train(Experiment):
         """
 
         for epoch_idx in range(int(self.n_epochs)):
-            print(epoch_idx, flush=True)
 
             self.train_once()
 

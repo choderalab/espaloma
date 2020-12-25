@@ -168,9 +168,100 @@ class LegacyForceField:
 
         return g
 
-    def _parametrize_gaff(self, mol, g=None):
-        raise NotImplementedError
+    def _parametrize_gaff(self, g):
+        from openmmforcefields.generators import SystemGenerator
 
+        # define a system generator
+        system_generator = SystemGenerator(
+            small_molecule_forcefield=self.forcefield,
+        )
+
+        # create system
+        sys = system_generator.create_system(
+            topology=g.mol.to_topology().to_openmm(),
+            molecules=g.mol,
+        )
+
+        bond_lookup = {
+            tuple(idxs.detach().numpy()): position
+            for position, idxs in enumerate(g.nodes["n2"].data["idxs"])
+        }
+
+        angle_lookup = {
+            tuple(idxs.detach().numpy()): position
+            for position, idxs in enumerate(g.nodes["n3"].data["idxs"])
+        }
+
+        for force in sys.getForces():
+            name = force.__class__.__name__
+            if "HarmonicBondForce" in name:
+                assert force.getNumBonds() * 2 == g.heterograph.number_of_nodes(
+                    "n2"
+                )
+
+                g.nodes["n2"].data["eq_ref"] = torch.zeros(
+                    force.getNumBonds() * 2, 1
+                )
+
+                g.nodes["n2"].data["k_ref"] = torch.zeros(
+                    force.getNumBonds() * 2, 1
+                )
+
+                for idx in range(force.getNumBonds()):
+                    idx0, idx1, eq, k = force.getBondParameters(idx)
+
+                    position = bond_lookup[(idx0, idx1)]
+                    g.nodes["n2"].data["eq_ref"][position] = eq.value_in_unit(
+                        esp.units.DISTANCE_UNIT,
+                    )
+                    g.nodes["n2"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                        esp.units.FORCE_CONSTANT_UNIT,
+                    )
+
+                    position = bond_lookup[(idx1, idx0)]
+                    g.nodes["n2"].data["eq_ref"][position] = eq.value_in_unit(
+                        esp.units.DISTANCE_UNIT,
+                    )
+                    g.nodes["n2"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                        esp.units.FORCE_CONSTANT_UNIT,
+                    )
+
+            if "HarmonicAngleForce" in name:
+                assert force.getNumAngles() * 2 == g.heterograph.number_of_nodes(
+                    "n3"
+                )
+
+                g.nodes["n3"].data["eq_ref"] = torch.zeros(
+                    force.getNumAngles() * 2, 1
+                )
+
+                g.nodes["n3"].data["k_ref"] = torch.zeros(
+                    force.getNumAngles() * 2, 1
+                )
+
+
+                for idx in range(force.getNumAngles()):
+                    idx0, idx1, idx2, eq, k = force.getAngleParameters(idx)
+
+                    position = angle_lookup[(idx0, idx1, idx2)]
+                    g.nodes["n3"].data["eq_ref"][position] = eq.value_in_unit(
+                        esp.units.ANGLE_UNIT,
+                    )
+                    g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                        esp.units.ANGLE_FORCE_CONSTANT_UNIT,
+                    )
+
+                    position = angle_lookup[(idx2, idx1, idx0)]
+                    g.nodes["n3"].data["eq_ref"][position] = eq.value_in_unit(
+                        esp.units.ANGLE_UNIT,
+                    )
+                    g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                        esp.units.ANGLE_FORCE_CONSTANT_UNIT,
+                    )
+
+
+        return g
+        
     def _parametrize_smirnoff(self, g):
         # mol = self._convert_to_off(mol)
 
@@ -358,6 +449,9 @@ class LegacyForceField:
         """
         if "smirnoff" in self.forcefield or "openff" in self.forcefield:
             return self._parametrize_smirnoff(g)
+
+        elif "gaff" in self.forcefield:
+            return self._parametrize_gaff(g)
 
         else:
             raise NotImplementedError

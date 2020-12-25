@@ -56,7 +56,7 @@ class JanossyPooling(torch.nn.Module):
                 self,
                 "sequential_%s" % level,
                 esp.nn.sequential._Sequential(
-                    in_features=in_features * level,
+                    in_features=in_features*level,
                     config=config,
                     layer=torch.nn.Linear,
                 ),
@@ -117,9 +117,9 @@ class JanossyPooling(torch.nn.Module):
                     feature: getattr(
                         self, "f_out_%s_to_%s" % (big_idx, feature)
                     )(
-                        getattr(self, "sequential_%s" % big_idx)(
-                            g=None,
-                            x=self.pool(
+                        self.pool(
+                            getattr(self, "sequential_%s" % big_idx)(
+                                None,
                                 torch.cat(
                                     [
                                         nodes.data["h%s" % relationship_idx]
@@ -127,6 +127,9 @@ class JanossyPooling(torch.nn.Module):
                                     ],
                                     dim=1,
                                 ),
+                            ),
+                            getattr(self, "sequential_%s" % big_idx)(
+                                None,
                                 torch.cat(
                                     [
                                         nodes.data["h%s" % relationship_idx]
@@ -137,7 +140,7 @@ class JanossyPooling(torch.nn.Module):
                                     dim=1,
                                 ),
                             ),
-                        )
+                        ),
                     )
                     for feature in self.out_features[big_idx].keys()
                 },
