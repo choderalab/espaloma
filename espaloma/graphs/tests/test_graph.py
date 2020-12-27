@@ -17,9 +17,9 @@ def graph():
 
 
 def test_ndata_consistency(graph):
-    import torch
-
-    assert torch.equal(graph.ndata["h0"], graph.nodes["n1"].data["h0"])
+    import dgl
+    from dgl import backend as F
+    assert F.equal(graph.ndata["h0"], graph.nodes["n1"].data["h0"]).all()
 
 
 def test_save_and_load(graph):

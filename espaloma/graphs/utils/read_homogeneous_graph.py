@@ -5,39 +5,38 @@
 # IMPORTS
 # =============================================================================
 import dgl
-import torch
+import dgl.backend as F
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
 
-
 def fp_oe(atom):
     from openeye import oechem
 
     HYBRIDIZATION_OE = {
-        oechem.OEHybridization_sp: torch.tensor(
-            [1, 0, 0, 0, 0], dtype=torch.get_default_dtype()
-        ),
-        oechem.OEHybridization_sp2: torch.tensor(
-            [0, 1, 0, 0, 0], dtype=torch.get_default_dtype()
-        ),
-        oechem.OEHybridization_sp3: torch.tensor(
-            [0, 0, 1, 0, 0], dtype=torch.get_default_dtype()
-        ),
-        oechem.OEHybridization_sp3d: torch.tensor(
-            [0, 0, 0, 1, 0], dtype=torch.get_default_dtype()
-        ),
-        oechem.OEHybridization_sp3d2: torch.tensor(
-            [0, 0, 0, 0, 1], dtype=torch.get_default_dtype()
-        ),
-        oechem.OEHybridization_Unknown: torch.tensor(
-            [0, 0, 0, 0, 0], dtype=torch.get_default_dtype()
-        ),
+        oechem.OEHybridization_sp: F.tensor(
+            [1, 0, 0, 0, 0],
+        ) * 1.0,
+        oechem.OEHybridization_sp2: F.tensor(
+            [0, 1, 0, 0, 0],
+        ) * 1.0,
+        oechem.OEHybridization_sp3: F.tensor(
+            [0, 0, 1, 0, 0],
+        ) * 1.0,
+        oechem.OEHybridization_sp3d: F.tensor(
+            [0, 0, 0, 1, 0],
+        ) * 1.0,
+        oechem.OEHybridization_sp3d2: F.tensor(
+            [0, 0, 0, 0, 1],
+        ) * 1.0,
+        oechem.OEHybridization_Unknown: F.tensor(
+            [0, 0, 0, 0, 0],
+        ) * 1.0,
     }
-    return torch.cat(
+    return F.cat(
         [
-            torch.tensor(
+            F.tensor(
                 [
                     atom.GetDegree(),
                     atom.GetValence(),
@@ -52,7 +51,7 @@ def fp_oe(atom):
                     oechem.OEAtomIsInRingSize(atom, 7) * 1.0,
                     oechem.OEAtomIsInRingSize(atom, 8) * 1.0,
                 ],
-                dtype=torch.float32,
+                dtype=F.float32,
             ),
             HYBRIDIZATION_OE[atom.GetHyb()],
         ],
@@ -64,28 +63,28 @@ def fp_rdkit(atom):
     from rdkit import Chem
 
     HYBRIDIZATION_RDKIT = {
-        Chem.rdchem.HybridizationType.SP: torch.tensor(
-            [1, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
-        ),
-        Chem.rdchem.HybridizationType.SP2: torch.tensor(
-            [0, 1, 0, 0, 0], dtype=torch.get_default_dtype(),
-        ),
-        Chem.rdchem.HybridizationType.SP3: torch.tensor(
-            [0, 0, 1, 0, 0], dtype=torch.get_default_dtype(),
-        ),
-        Chem.rdchem.HybridizationType.SP3D: torch.tensor(
-            [0, 0, 0, 1, 0], dtype=torch.get_default_dtype(),
-        ),
-        Chem.rdchem.HybridizationType.SP3D2: torch.tensor(
-            [0, 0, 0, 0, 1], dtype=torch.get_default_dtype(),
-        ),
-        Chem.rdchem.HybridizationType.S: torch.tensor(
-            [0, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
-        ),
+        Chem.rdchem.HybridizationType.SP: F.tensor(
+            [1, 0, 0, 0, 0],
+        ) * 1.0,
+        Chem.rdchem.HybridizationType.SP2: F.tensor(
+            [0, 1, 0, 0, 0],
+        ) * 1.0,
+        Chem.rdchem.HybridizationType.SP3: F.tensor(
+            [0, 0, 1, 0, 0],
+        ) * 1.0,
+        Chem.rdchem.HybridizationType.SP3D: F.tensor(
+            [0, 0, 0, 1, 0],
+        ) * 1.0,
+        Chem.rdchem.HybridizationType.SP3D2: F.tensor(
+            [0, 0, 0, 0, 1],
+        ) * 1.0,
+        Chem.rdchem.HybridizationType.S: F.tensor(
+            [0, 0, 0, 0, 0],
+        ) * 1.0,
     }
-    return torch.cat(
+    return F.cat(
         [
-            torch.tensor(
+            F.tensor(
                 [
                     atom.GetTotalDegree(),
                     atom.GetTotalValence(),
@@ -100,7 +99,6 @@ def fp_rdkit(atom):
                     atom.IsInRingSize(7) * 1.0,
                     atom.IsInRingSize(8) * 1.0,
                 ],
-                dtype=torch.get_default_dtype(),
             ),
             HYBRIDIZATION_RDKIT[atom.GetHybridization()],
         ],
@@ -121,25 +119,28 @@ def from_openforcefield_mol(mol, use_fp=True):
     # enter nodes
     n_atoms = mol.n_atoms
     g.add_nodes(n_atoms)
-    g.ndata["type"] = torch.Tensor(
+    g.ndata["type"] = F.tensor(
         [[atom.atomic_number] for atom in mol.atoms]
     )
 
-    h_v = torch.zeros(
-        g.ndata["type"].shape[0], 100, dtype=torch.get_default_dtype()
+    h_v = F.zeros(
+        (g.ndata["type"].shape[0], 100,),
+        F.float32,
+        F.cpu(),
     )
 
-    h_v[
-        torch.arange(g.ndata["type"].shape[0]),
-        torch.squeeze(g.ndata["type"]).long(),
-    ] = 1.0
+    h_v = F.scatter_row(
+        h_v.transpose(),
+        F.squeeze(g.ndata["type"], -1),
+        1.0,
+    ).transpose()
 
-    h_v_fp = torch.stack(
-        [fp_rdkit(atom) for atom in mol.to_rdkit().GetAtoms()], axis=0
+    h_v_fp = F.stack(
+        [fp_rdkit(atom) for atom in mol.to_rdkit().GetAtoms()], dim=0
     )
 
     if use_fp == True:
-        h_v = torch.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
+        h_v = F.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
 
     g.ndata["h0"] = h_v
 
@@ -153,7 +154,7 @@ def from_openforcefield_mol(mol, use_fp=True):
     g.add_edges(bonds_begin_idxs, bonds_end_idxs)
     g.add_edges(bonds_end_idxs, bonds_begin_idxs)
 
-    # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
+    # g.edata["type"] = F.Tensor(bonds_types)[:, None].repeat(2, 1)
 
     return g
 
@@ -167,21 +168,21 @@ def from_oemol(mol, use_fp=True):
     # enter nodes
     n_atoms = mol.NumAtoms()
     g.add_nodes(n_atoms)
-    g.ndata["type"] = torch.Tensor(
+    g.ndata["type"] = F.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
     )
 
-    h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
+    h_v = F.zeros(g.ndata["type"].shape[0], 100, dtype=F.float32)
 
     h_v[
-        torch.arange(g.ndata["type"].shape[0]),
-        torch.squeeze(g.ndata["type"]).long(),
+        F.arange(g.ndata["type"].shape[0]),
+        F.squeeze(g.ndata["type"]).long(),
     ] = 1.0
 
-    h_v_fp = torch.stack([fp_oe(atom) for atom in mol.GetAtoms()], axis=0)
+    h_v_fp = F.stack([fp_oe(atom) for atom in mol.GetAtoms()], axis=0)
 
     if use_fp == True:
-        h_v = torch.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
+        h_v = F.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
 
     g.ndata["h0"] = h_v
 
@@ -195,7 +196,7 @@ def from_oemol(mol, use_fp=True):
     g.add_edges(bonds_begin_idxs, bonds_end_idxs)
     g.add_edges(bonds_end_idxs, bonds_begin_idxs)
 
-    # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
+    # g.edata["type"] = F.Tensor(bonds_types)[:, None].repeat(2, 1)
 
     return g
 
@@ -209,21 +210,21 @@ def from_rdkit_mol(mol, use_fp=True):
     # enter nodes
     n_atoms = mol.GetNumAtoms()
     g.add_nodes(n_atoms)
-    g.ndata["type"] = torch.Tensor(
+    g.ndata["type"] = F.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
     )
 
-    h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
+    h_v = F.zeros(g.ndata["type"].shape[0], 100, dtype=F.float32)
 
     h_v[
-        torch.arange(g.ndata["type"].shape[0]),
-        torch.squeeze(g.ndata["type"]).long(),
+        F.arange(g.ndata["type"].shape[0]),
+        F.squeeze(g.ndata["type"]).long(),
     ] = 1.0
 
-    h_v_fp = torch.stack([fp_rdkit(atom) for atom in mol.GetAtoms()], axis=0)
+    h_v_fp = F.stack([fp_rdkit(atom) for atom in mol.GetAtoms()], axis=0)
 
     if use_fp == True:
-        h_v = torch.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
+        h_v = F.cat([h_v, h_v_fp], dim=-1)  # (n_atoms, 117)
 
     g.ndata["h0"] = h_v
 
@@ -237,6 +238,6 @@ def from_rdkit_mol(mol, use_fp=True):
     g.add_edges(bonds_begin_idxs, bonds_end_idxs)
     g.add_edges(bonds_end_idxs, bonds_begin_idxs)
 
-    # g.edata["type"] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)
+    # g.edata["type"] = F.Tensor(bonds_types)[:, None].repeat(2, 1)
 
     return g

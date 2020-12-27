@@ -5,8 +5,8 @@
 # IMPORTS
 # =============================================================================
 import dgl
+import dgl.backend as F
 import numpy as np
-import torch
 from espaloma.graphs.utils import offmol_indices
 from openforcefield.topology import Molecule
 from typing import Dict
@@ -14,7 +14,6 @@ from typing import Dict
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
-
 
 def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
     """For every (a,b,c,d) add a (d,c,b,a)
@@ -31,9 +30,7 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
     return np.concatenate([indices, np.flip(indices, axis=-1)], axis=0)
 
 
-def relationship_indices_from_offmol(
-    offmol: Molecule,
-) -> Dict[str, torch.Tensor]:
+def relationship_indices_from_offmol(offmol):
     """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
     Notes
@@ -63,7 +60,7 @@ def relationship_indices_from_offmol(
 
     # make them all torch.Tensors
     for key in idxs:
-        idxs[key] = torch.from_numpy(idxs[key])
+        idxs[key] = F.tensor(idxs[key])
 
     return idxs
 
@@ -101,7 +98,7 @@ def from_homogeneous_and_mol(g, offmol):
     idxs = relationship_indices_from_offmol(offmol)
 
     # make them all numpy
-    idxs = {key: value.numpy() for key, value in idxs.items()}
+    idxs = {key: F.asnumpy(value) for key, value in idxs.items()}
 
     # also include n1
     idxs["n1"] = np.arange(g.number_of_nodes())[:, None]
@@ -187,7 +184,7 @@ def from_homogeneous_and_mol(g, offmol):
     # $A = AA = AAA = AAAA = 0$
 
     # make dense
-    a_ = a.to_dense().detach().numpy()
+    a_ = F.asnumpy(a.to_dense())
 
     idxs["nonbonded"] = np.stack(
         np.where(
@@ -251,6 +248,6 @@ def from_homogeneous_and_mol(g, offmol):
 
     # include indices in the nodes themselves
     for term in ["n1", "n2", "n3", "n4", "n4_improper"]:
-        hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
+        hg.nodes[term].data["idxs"] = F.tensor(idxs[term])
 
     return hg

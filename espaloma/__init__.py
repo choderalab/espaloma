@@ -8,7 +8,6 @@ from . import metrics, units
 import espaloma.app
 import espaloma.graphs
 import espaloma.mm
-import espaloma.nn
 from espaloma.app.experiment import *
 from espaloma.graphs.graph import Graph
 from espaloma.metrics import GraphMetric
