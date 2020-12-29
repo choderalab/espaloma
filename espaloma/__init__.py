@@ -12,6 +12,7 @@ from espaloma.app.experiment import *
 from espaloma.graphs.graph import Graph
 from espaloma.metrics import GraphMetric
 from espaloma.mm.geometry import *
+from . import nn
 
 # Add imports here
 # import espaloma
