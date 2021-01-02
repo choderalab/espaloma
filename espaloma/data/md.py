@@ -177,7 +177,7 @@ class MoleculeVacuumSimulation(object):
 
     def __init__(
         self,
-        forcefield="test_forcefields/smirnoff99Frosst.offxml",
+        forcefield="openff-1.2.0.offxml",
         n_samples=100,
         n_steps_per_sample=1000,
         temperature=TEMPERATURE,

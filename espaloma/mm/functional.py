@@ -2,7 +2,7 @@
 # IMPORTS
 # =============================================================================
 import math
-import torch
+import dgl.backend as F
 import espaloma as esp
 
 # =============================================================================
@@ -37,39 +37,41 @@ def harmonic(x, k, eq, order=[2]):
 
     Parameters
     ----------
-    x : `torch.Tensor`, `shape=(batch_size, 1)`
-    k : `torch.Tensor`, `shape=(batch_size, len(order))`
-    eq : `torch.Tensor`, `shape=(batch_size, len(order))`
+    x : `F.Tensor`, `shape=(batch_size, 1)`
+    k : `F.Tensor`, `shape=(batch_size, len(order))`
+    eq : `F.Tensor`, `shape=(batch_size, len(order))`
     order : `int` or `List` of `int`
 
     Returns
     -------
-    u : `torch.Tensor`, `shape=(batch_size, 1)`
+    u : `F.Tensor`, `shape=(batch_size, 1)`
     """
 
     if isinstance(order, list):
-        order = torch.tensor(order, device=x.device)
+        order = F.copy_to(F.tensor(order), F.context(x))
 
-    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
-        dim=-1
-    )
+    res = (k * ((x - eq)) ** (order[:, None, None]))
+
+    res = F.swapaxes(res, 0, 1)
+    res = F.swapaxes(res, 1, 2)
+    res = F.sum(res, -1)
+
+    return res
 
 
-def periodic_fixed_phases(
-    dihedrals: torch.Tensor, ks: torch.Tensor
-) -> torch.Tensor:
+def periodic_fixed_phases(dihedrals, ks):
     """Periodic torsion term with n_phases = 6, periodicities = 1..n_phases, phases = zeros
 
     Parameters
     ----------
-    dihedrals : torch.Tensor, shape=(n_snapshots, n_dihedrals)
+    dihedrals : F.Tensor, shape=(n_snapshots, n_dihedrals)
         dihedral angles -- TODO: confirm in radians?
-    ks : torch.Tensor, shape=(n_dihedrals, n_phases)
+    ks : F.Tensor, shape=(n_dihedrals, n_phases)
         force constants -- TODO: confirm in esp.unit.ENERGY_UNIT ?
 
     Returns
     -------
-    u : torch.Tensor, shape=(n_snapshots, 1)
+    u : F.Tensor, shape=(n_snapshots, 1)
         potential energy of each snapshot
 
     Notes
@@ -81,7 +83,7 @@ def periodic_fixed_phases(
 
     # periodicity = 1..n_phases
     n_phases = 6
-    periodicity = torch.arange(n_phases) + 1
+    periodicity = F.arange(n_phases) + 1
 
     # assert input shape consistency
     n_snapshots, n_dihedrals = dihedrals.shape
@@ -93,21 +95,21 @@ def periodic_fixed_phases(
     stacked_shape = (n_snapshots, n_dihedrals, n_phases)
 
     # duplicate ks n_snapshots times
-    ks_stacked = torch.stack([ks] * n_snapshots, dim=0)
+    ks_stacked = F.stack([ks] * n_snapshots, dim=0)
     assert ks_stacked.shape == stacked_shape
 
     # duplicate dihedral angles n_phases times
-    dihedrals_stacked = torch.stack([dihedrals] * n_phases, dim=2)
+    dihedrals_stacked = F.stack([dihedrals] * n_phases, dim=2)
     assert dihedrals_stacked.shape == stacked_shape
 
     # duplicate periodicity n_snapshots * n_dihedrals times
-    ns = torch.stack(
-        [torch.stack([periodicity] * n_snapshots)] * n_dihedrals, dim=1
+    ns = F.stack(
+        [F.stack([periodicity] * n_snapshots)] * n_dihedrals, dim=1
     )
     assert ns.shape == stacked_shape
 
     # compute k_n * cos(n * theta) for n in 1..n_phases, for each dihedral in each snapshot
-    energy_terms = ks_stacked * torch.cos(ns * dihedrals_stacked)
+    energy_terms = ks_stacked * F.cos(ns * dihedrals_stacked)
     assert energy_terms.shape == stacked_shape
 
     # sum over n_dihedrals and n_phases
@@ -124,45 +126,47 @@ def periodic(
 
     Parameters
     ----------
-    x : `torch.Tensor`, `shape=(batch_size, 1)`
-    k : `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    x : `F.Tensor`, `shape=(batch_size, 1)`
+    k : `F.Tensor`, `shape=(batch_size, number_of_phases)`
     periodicity: either list of length number_of_phases, or
-        `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+        `F.Tensor`, `shape=(batch_size, number_of_phases)`
     phases : either list of length number_of_phases, or
-        `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+        `F.Tensor`, `shape=(batch_size, number_of_phases)`
     """
 
     if isinstance(phases, list):
-        phases = torch.tensor(phases, device=x.device)
+        phases = F.copy_to(F.tensor(phases), F.context(x))
 
     if isinstance(periodicity, list):
-        periodicity = torch.tensor(
-            periodicity, device=x.device, dtype=torch.get_default_dtype(),
-        )
+        periodicity = F.copy_to(F.tensor(periodicity), F.context(x))
+
+    print(x.shape)
 
     if periodicity.ndim == 1:
-        periodicity = periodicity[None, None, :].repeat(
-            x.shape[0], x.shape[1], 1
-        )
+        periodicity = F.repeat(F.repeat(periodicity[None, None, :], x.shape[0], 0), x.shape[1], 1)
 
     elif periodicity.ndim == 2:
-        periodicity = periodicity[:, None, :].repeat(1, x.shape[1], 1)
+        periodicity = F.repeat(periodicity[:, None, :], x.shape[1], 1)
 
     if phases.ndim == 1:
-        phases = phases[None, None, :].repeat(x.shape[0], x.shape[1], 1,)
+        phases = F.repeat(F.repeat(phases[None, None, :], x.shape[0], 0), x.shape[1], 1)
 
     elif phases.ndim == 2:
-        phases = phases[:, None, :].repeat(1, x.shape[1], 1,)
+        phases = F.repeat(phases[:, None, :], x.shape[1], 1)
 
     n_theta = periodicity * x[:, :, None]
 
     n_theta_minus_phases = n_theta - phases
 
-    cos_n_theta_minus_phases = n_theta_minus_phases.cos()
+    cos_n_theta_minus_phases = F.cos(n_theta_minus_phases)
 
-    k = k[:, None, :].repeat(1, x.shape[1], 1)
+    k = F.repeat(
+        k[:, None, :],
+        x.shape[1],
+        1
+    )
 
-    energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
+    energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(-1)
 
     return energy
 
@@ -193,22 +197,22 @@ def lj(
 
     Parameters
     ----------
-    x : `torch.Tensor`, `shape=(batch_size, 1)`
-    epsilon : `torch.Tensor`, `shape=(batch_size, len(order))`
-    sigma : `torch.Tensor`, `shape=(batch_size, len(order))`
+    x : `F.Tensor`, `shape=(batch_size, 1)`
+    epsilon : `F.Tensor`, `shape=(batch_size, len(order))`
+    sigma : `F.Tensor`, `shape=(batch_size, len(order))`
     order : `int` or `List` of `int`
-    coefficients : torch.tensor or list
+    coefficients : F.tensor or list
     switch : unitless switch width (distance)
 
     Returns
     -------
-    u : `torch.Tensor`, `shape=(batch_size, 1)`
+    u : `F.Tensor`, `shape=(batch_size, 1)`
     """
     if isinstance(order, list):
-        order = torch.tensor(order, device=x.device)
+        order = F.tensor(order, device=x.device)
 
     if isinstance(coefficients, list):
-        coefficients = torch.tensor(coefficients, device=x.device)
+        coefficients = F.tensor(coefficients, device=x.device)
 
     assert order.shape[0] == 2
     assert order.dim() == 1
@@ -221,8 +225,8 @@ def lj(
     sigma_over_x = sigma / x
 
     # erase values under switch
-    sigma_over_x = torch.where(
-        torch.lt(x, switch), torch.zeros_like(sigma_over_x), sigma_over_x,
+    sigma_over_x = F.where(
+        F.lt(x, switch), F.zeros_like(sigma_over_x), sigma_over_x,
     )
 
     return epsilon * (
@@ -236,14 +240,14 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
 
     Parameters
     ----------
-    x : torch.Tensor
-    coefficients : list or torch.Tensor of length n_phases
-    phases : list or torch.Tensor of length n_phases
+    x : F.Tensor
+    coefficients : list or F.Tensor of length n_phases
+    phases : list or F.Tensor of length n_phases
     """
 
     if isinstance(phases, list):
         # (number_of_phases, )
-        phases = torch.tensor(phases, device=x.device)
+        phases = F.tensor(phases, device=x.device)
 
     # broadcasting
     # (number_of_hypernodes, number_of_snapshots, number_of_phases)
@@ -251,14 +255,14 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     x = x[:, :, None].repeat(1, 1, phases.shape[-1])
     coefficients = coefficients[:, None, :].repeat(1, x.shape[1], 1)
 
-    return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
+    return (coefficients * F.exp(-0.5 * (x - phases) ** 2)).sum(-1)
 
 
 def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
     r""" Linear mixture basis function.
 
-    x : torch.Tensor
-    coefficients : list or torch.Tensor of length 2
+    x : F.Tensor
+    coefficients : list or F.Tensor of length 2
     phases : list of length 2
     """
 

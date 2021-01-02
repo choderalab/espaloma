@@ -2,8 +2,7 @@
 # IMPORTS
 # =============================================================================
 import dgl
-import torch
-
+import dgl.backend as F
 import espaloma as esp
 
 
@@ -245,7 +244,7 @@ def energy_in_graph(
         lambda node: {
             "u%s"
             % suffix: sum(
-                node.data["u_%s%s" % (term, suffix)] for term in terms if "u_%s%s" % (term, suffix) in node.data 
+                node.data["u_%s%s" % (term, suffix)] for term in terms if "u_%s%s" % (term, suffix) in node.data
             )
         },
         ntype="g",
@@ -258,12 +257,13 @@ def energy_in_graph(
 
     return g
 
+if F.backend_name == "pytorch":
+    import torch
+    class EnergyInGraph(torch.nn.Module):
+        def __init__(self, *args, **kwargs):
+            super(EnergyInGraph, self).__init__()
+            self.args = args
+            self.kwargs = kwargs
 
-class EnergyInGraph(torch.nn.Module):
-    def __init__(self, *args, **kwargs):
-        super(EnergyInGraph, self).__init__()
-        self.args = args
-        self.kwargs = kwargs
-
-    def forward(self, g):
-        return energy_in_graph(g, *self.args, **self.kwargs)
+        def forward(self, g):
+            return energy_in_graph(g, *self.args, **self.kwargs)

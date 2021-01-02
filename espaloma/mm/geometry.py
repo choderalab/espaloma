@@ -2,7 +2,7 @@
 # IMPORTS
 # =============================================================================
 import dgl
-import torch
+import dgl.backend as F
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -20,7 +20,7 @@ def copy_src(src, out):
     """ Copy source of an edge. """
 
     def _copy_src(edges, src=src, out=out):
-        return {out: edges.src[src].clone()}
+        return {out: F.clone(edges.src[src])}
 
     return _copy_src
 
@@ -30,15 +30,14 @@ def copy_src(src, out):
 # =============================================================================
 def distance(x0, x1):
     """ Distance. """
-    return torch.norm(x0 - x1, p=2, dim=-1)
-
+    return F.sum((x0 - x1) ** 2, dim=-1) ** 0.5
 
 def _angle(r0, r1):
     """ Angle between vectors. """
 
-    angle = torch.atan2(
-        torch.norm(torch.cross(r0, r1), p=2, dim=-1),
-        torch.sum(torch.mul(r0, r1), dim=-1),
+    angle = F.arctan2(
+        F.norm(F.cross(r0, r1), dim=-1),
+        F.sum(r0 * r1, dim=-1),
     )
 
     return angle
@@ -56,9 +55,7 @@ def _dihedral(r0, r1):
     return _angle(r0, r1)
 
 
-def dihedral(
-    x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor
-) -> torch.Tensor:
+def dihedral(x0, x1, x2, x3):
     """ Dihedral between four points.
 
     Reference
@@ -67,25 +64,26 @@ def dihedral(
         https://github.com/proteneer/timemachine/blob/1a0ab45e605dc1e28c44ea90f38cb0dedce5c4db/timemachine/potentials/bonded.py#L152-L199
     """
     # check input shapes
+    import torch
 
     assert x0.shape == x1.shape == x2.shape == x3.shape
 
     # compute displacements 0->1, 2->1, 2->3
-    r01 = x1 - x0 + torch.randn_like(x0) * 1e-5
-    r21 = x1 - x2 + torch.randn_like(x0) * 1e-5
-    r23 = x3 - x2 + torch.randn_like(x0) * 1e-5
+    r01 = x1 - x0 # + torch.randn_like(x0) * 1e-5
+    r21 = x1 - x2 # + torch.randn_like(x0) * 1e-5
+    r23 = x3 - x2 # + torch.randn_like(x0) * 1e-5
 
     # compute normal planes
-    n1 = torch.cross(r01, r21)
-    n2 = torch.cross(r21, r23)
+    n1 = F.cross(r01, r21)
+    n2 = F.cross(r21, r23)
 
-    rkj_normed = r21 / torch.norm(r21, dim=-1, keepdim=True)
+    rkj_normed = r21 / F.norm(r21, dim=-1, keepdims=True)
 
-    y = torch.sum(torch.mul(torch.cross(n1, n2), rkj_normed), dim=-1)
-    x = torch.sum(torch.mul(n1, n2), dim=-1)
+    y = F.sum(F.cross(n1, n2) * rkj_normed, dim=-1)
+    x = F.sum(n1 * n2, dim=-1)
 
     # choose quadrant correctly
-    theta = torch.atan2(y, x)
+    theta = F.arctan2(y, x)
 
     return theta
 
@@ -204,12 +202,13 @@ def geometry_in_graph(g):
 
     return g
 
+if F.backend_name == "pytorch":
+    import torch
+    class GeometryInGraph(torch.nn.Module):
+        def __init__(self, *args, **kwargs):
+            super(GeometryInGraph, self).__init__()
+            self.args = args
+            self.kwargs = kwargs
 
-class GeometryInGraph(torch.nn.Module):
-    def __init__(self, *args, **kwargs):
-        super(GeometryInGraph, self).__init__()
-        self.args = args
-        self.kwargs = kwargs
-
-    def forward(self, g):
-        return geometry_in_graph(g, *self.args, **self.kwargs)
+        def forward(self, g):
+            return geometry_in_graph(g, *self.args, **self.kwargs)

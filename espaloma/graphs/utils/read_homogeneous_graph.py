@@ -129,11 +129,26 @@ def from_openforcefield_mol(mol, use_fp=True):
         F.cpu(),
     )
 
-    h_v = F.scatter_row(
-        h_v.transpose(),
-        F.squeeze(g.ndata["type"], -1),
-        1.0,
-    ).transpose()
+    if F.backend_name == "pytorch":
+        import torch
+        h_v[
+            torch.arange(g.ndata["type"].shape[0]),
+            torch.squeeze(g.ndata["type"]).long(),
+        ] = 1.0
+
+    elif F.backend_name == "jax":
+        import jax
+        import jax.numpy as jnp
+        h_v = jax.ops.index_update(
+            h_v,
+            jnp.concatenate(
+                [
+                    jnp.arange(g.ndata["type"].shape[0]),
+                    jnp.squeeze(g.ndata["type"]),
+                ]
+            ),
+            1.0,
+        )
 
     h_v_fp = F.stack(
         [fp_rdkit(atom) for atom in mol.to_rdkit().GetAtoms()], dim=0

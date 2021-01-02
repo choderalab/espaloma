@@ -1,8 +1,10 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import numpy as np
 import rdkit
-import torch
+import dgl
+import dgl.backend as F
 from openforcefield.topology import Molecule
 import espaloma as esp
 
@@ -162,7 +164,7 @@ class LegacyForceField:
         if g is None:
             g = esp.Graph(mol)
 
-        g.nodes["n1"].data["legacy_typing"] = torch.tensor(
+        g.nodes["n1"].data["legacy_typing"] = F.tensor(
             [self._str_2_idx[atom] for atom in gaff_types]
         )
 
@@ -183,12 +185,12 @@ class LegacyForceField:
         )
 
         bond_lookup = {
-            tuple(idxs.detach().numpy()): position
+            tuple(F.asnumpy(idxs)): position
             for position, idxs in enumerate(g.nodes["n2"].data["idxs"])
         }
 
         angle_lookup = {
-            tuple(idxs.detach().numpy()): position
+            tuple(F.asnumpy(idxs)): position
             for position, idxs in enumerate(g.nodes["n3"].data["idxs"])
         }
 
@@ -199,44 +201,47 @@ class LegacyForceField:
                     "n2"
                 )
 
-                g.nodes["n2"].data["eq_ref"] = torch.zeros(
-                    force.getNumBonds() * 2, 1
+                n2_eq_ref = np.zeros(
+                    (force.getNumBonds() * 2, 1)
                 )
 
-                g.nodes["n2"].data["k_ref"] = torch.zeros(
-                    force.getNumBonds() * 2, 1
+                n2_k_ref = np.zeros(
+                    (force.getNumBonds() * 2, 1)
                 )
 
                 for idx in range(force.getNumBonds()):
                     idx0, idx1, eq, k = force.getBondParameters(idx)
 
                     position = bond_lookup[(idx0, idx1)]
-                    g.nodes["n2"].data["eq_ref"][position] = eq.value_in_unit(
+                    n2_eq_ref[position] = eq.value_in_unit(
                         esp.units.DISTANCE_UNIT,
                     )
-                    g.nodes["n2"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    n2_k_ref[position] = (0.5 * k).value_in_unit(
                         esp.units.FORCE_CONSTANT_UNIT,
                     )
 
                     position = bond_lookup[(idx1, idx0)]
-                    g.nodes["n2"].data["eq_ref"][position] = eq.value_in_unit(
+                    n2_eq_ref[position] = eq.value_in_unit(
                         esp.units.DISTANCE_UNIT,
                     )
-                    g.nodes["n2"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    n2_k_ref[position] = (0.5 * k).value_in_unit(
                         esp.units.FORCE_CONSTANT_UNIT,
                     )
+
+                g.nodes['n2'].data['k_ref'] = F.tensor(n2_k_ref)
+                g.nodes['n2'].data['eq_ref'] = F.tensor(n2_eq_ref)
 
             if "HarmonicAngleForce" in name:
                 assert force.getNumAngles() * 2 == g.heterograph.number_of_nodes(
                     "n3"
                 )
 
-                g.nodes["n3"].data["eq_ref"] = torch.zeros(
-                    force.getNumAngles() * 2, 1
+                n3_eq_ref = np.zeros(
+                    (force.getNumAngles() * 2, 1),
                 )
 
-                g.nodes["n3"].data["k_ref"] = torch.zeros(
-                    force.getNumAngles() * 2, 1
+                n3_k_ref = np.zeros(
+                    (force.getNumAngles() * 2, 1),
                 )
 
 
@@ -244,24 +249,27 @@ class LegacyForceField:
                     idx0, idx1, idx2, eq, k = force.getAngleParameters(idx)
 
                     position = angle_lookup[(idx0, idx1, idx2)]
-                    g.nodes["n3"].data["eq_ref"][position] = eq.value_in_unit(
+                    n3_eq_ref[position] = eq.value_in_unit(
                         esp.units.ANGLE_UNIT,
                     )
-                    g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    n3_k_ref[position] = (0.5 * k).value_in_unit(
                         esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                     )
 
                     position = angle_lookup[(idx2, idx1, idx0)]
-                    g.nodes["n3"].data["eq_ref"][position] = eq.value_in_unit(
+                    n3_eq_ref[position] = eq.value_in_unit(
                         esp.units.ANGLE_UNIT,
                     )
-                    g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    n3_k_ref[position] = (0.5 * k).value_in_unit(
                         esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                     )
 
+                g.nodes['n3'].data['eq_ref'] = F.tensor(n3_eq_ref)
+                g.nodes['n3'].data['k_ref'] = F.tensor(n3_k_ref)
+
 
         return g
-        
+
     def _parametrize_smirnoff(self, g):
         # mol = self._convert_to_off(mol)
 
@@ -269,7 +277,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "k_ref": torch.Tensor(
+                "k_ref": F.tensor(
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -283,7 +291,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "eq_ref": torch.Tensor(
+                "eq_ref": F.tensor(
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -297,7 +305,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "k_ref": torch.Tensor(
+                "k_ref": F.tensor(
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -311,7 +319,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "eq_ref": torch.Tensor(
+                "eq_ref": F.tensor(
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -325,7 +333,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "epsilon_ref": torch.Tensor(
+                "epsilon_ref": F.tensor(
                     [
                         forces["vdW"][(idx,)].epsilon.value_in_unit(
                             esp.units.ENERGY_UNIT
@@ -339,7 +347,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "sigma_ref": torch.Tensor(
+                "sigma_ref": F.tensor(
                     [
                         forces["vdW"][(idx,)].rmin_half.value_in_unit(
                             esp.units.DISTANCE_UNIT
@@ -352,15 +360,15 @@ class LegacyForceField:
         )
 
         def apply_torsion(node, n_max_phases=6):
-            phases = torch.zeros(
-                g.heterograph.number_of_nodes("n4"), n_max_phases,
+            phases = np.zeros(
+                (g.heterograph.number_of_nodes("n4"), n_max_phases),
             )
 
-            periodicity = torch.zeros(
-                g.heterograph.number_of_nodes("n4"), n_max_phases,
+            periodicity = np.zeros(
+                (g.heterograph.number_of_nodes("n4"), n_max_phases),
             )
 
-            k = torch.zeros(g.heterograph.number_of_nodes("n4"), n_max_phases,)
+            k = F.zeros(g.heterograph.number_of_nodes("n4"), n_max_phases,)
 
             force = forces["ProperTorsions"]
 
@@ -383,9 +391,9 @@ class LegacyForceField:
                             )
 
             return {
-                "k_ref": k,
-                "periodicity_ref": periodicity,
-                "phases_ref": phases,
+                "k_ref": F.tensor(k),
+                "periodicity_ref": F.tensor(periodicity),
+                "phases_ref": F.tensor(phases),
             }
 
         g.heterograph.apply_nodes(apply_torsion, ntype="n4")
@@ -399,7 +407,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "legacy_typing": torch.Tensor(
+                "legacy_typing": F.Tensor(
                     [
                         int(
                             forces["Bonds"][
@@ -415,7 +423,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "legacy_typing": torch.Tensor(
+                "legacy_typing": F.Tensor(
                     [
                         int(
                             forces["Angles"][
@@ -431,7 +439,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "legacy_typing": torch.Tensor(
+                "legacy_typing": F.Tensor(
                     [
                         int(forces["vdW"][(idx,)].id[1:])
                         for idx in range(g.heterograph.number_of_nodes("n1"))

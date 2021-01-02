@@ -18,7 +18,7 @@ def test_energy():
     g = simulation.run(g, in_place=True)
 
     param = esp.graphs.legacy_force_field.LegacyForceField(
-        "smirnoff99Frosst"
+        "openff-1.2.0"
     ).parametrize
 
     g = param(g)
