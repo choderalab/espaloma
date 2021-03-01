@@ -3,7 +3,8 @@
 # =============================================================================
 import numpy as np
 import torch
-from openforcefield.typing.engines.smirnoff import ForceField
+
+from openmmforcefields.generators import SystemGenerator
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
 from simtk.unit.quantity import Quantity
@@ -177,7 +178,7 @@ class MoleculeVacuumSimulation(object):
 
     def __init__(
         self,
-        forcefield="test_forcefields/smirnoff99Frosst.offxml",
+        forcefield="gaff-1.81",
         n_samples=100,
         n_steps_per_sample=1000,
         temperature=TEMPERATURE,
@@ -190,27 +191,25 @@ class MoleculeVacuumSimulation(object):
         self.temperature = temperature
         self.collision_rate = collision_rate
         self.step_size = step_size
+        self.forcefield = forcefield
 
-        if isinstance(forcefield, str):
-            self.forcefield = ForceField(forcefield)
-        else:
-            # TODO: type assertion
-            self.forcefield = forcefield
 
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # assign partial charge
-        g.mol.assign_partial_charges("gasteiger")  # faster
+        # g.mol.assign_partial_charges("gasteiger")  # faster
 
         # parameterize topology
-        topology = g.mol.to_topology()
+        topology = g.mol.to_topology().to_openmm()
+
+        generator = SystemGenerator(
+            small_molecule_forcefield=self.forcefield,
+            molecules=[g.mol],
+        )
 
         # create openmm system
-        system = self.forcefield.create_openmm_system(
+        system = generator.create_system(
             topology,
-            # TODO:
-            # figure out whether `sqm` should be so slow
-            charge_from_molecules=[g.mol],
         )
 
         # use langevin integrator

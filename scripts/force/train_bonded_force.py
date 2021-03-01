@@ -49,7 +49,7 @@ def run(args):
     representation = esp.nn.Sequential(layer, config=args.config)
 
     # get the last bit of units
-    units = [int(x) for x in args.config if x.isdigit()][-1]
+    units = [int(x) for x in args.config if isinstance(x, int)][-1]
 
     print(args.janossy_config)
 
@@ -74,8 +74,8 @@ def run(args):
             representation, 
             readout,
             esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(),
-            esp.mm.energy.EnergyInGraph(suffix='_ref'),
+            esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
+            esp.mm.energy.EnergyInGraph(suffix='_ref', terms=["n2", "n3"]),
     )
     
     '''
@@ -144,7 +144,7 @@ def run(args):
         n_epochs=args.n_epochs,
         normalize=esp.data.normalize.NotNormalize,
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3),
-        device=torch.device('cuda:0'),
+        device=torch.device('cpu'),
     )
 
     results = exp.run()
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     parser.add_argument("--first", default=-1, type=int)
     parser.add_argument("--partition", default="4:1", type=str)
     parser.add_argument("--batch_size", default=8, type=int)
-    parser.add_argument("--forcefield", default="smirnoff99Frosst", type=str)
+    parser.add_argument("--forcefield", default="gaff-1.81", type=str)
     parser.add_argument("--layer", default="GraphConv", type=str)
     parser.add_argument("--n_classes", default=100, type=int)
     parser.add_argument(

@@ -176,10 +176,14 @@ class LegacyForceField:
             small_molecule_forcefield=self.forcefield,
         )
 
+        mol = g.mol
+        print(mol, flush=True)
+        mol.assign_partial_charges("formal_charge")
+        print(mol, flush=True)
         # create system
         sys = system_generator.create_system(
-            topology=g.mol.to_topology().to_openmm(),
-            molecules=g.mol,
+            topology=mol.to_topology().to_openmm(),
+            molecules=mol,
         )
 
         bond_lookup = {
@@ -258,7 +262,44 @@ class LegacyForceField:
                     g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
                         esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                     )
+        '''
+        def apply_torsion(node, n_max_phases=6):
+            phases = torch.zeros(
+                g.heterograph.number_of_nodes("n4"), n_max_phases,
+            )
 
+            periodicity = torch.zeros(
+                g.heterograph.number_of_nodes("n4"), n_max_phases,
+            )
+
+            k = torch.zeros(g.heterograph.number_of_nodes("n4"), n_max_phases,)
+
+            for idx in range(g.heterograph.number_of_nodes("n4")):
+                idxs = tuple(node.data["idxs"][idx].numpy())
+                if idxs in force:
+                    _force = force[idxs]
+                    for sub_idx in range(len(_force.periodicity)):
+                        if hasattr(_force, "k%s" % sub_idx):
+                            k[idx, sub_idx] = getattr(
+                                _force, "k%s" % sub_idx
+                            ).value_in_unit(esp.units.ENERGY_UNIT)
+
+                            phases[idx, sub_idx] = getattr(
+                                _force, "phase%s" % sub_idx
+                            ).value_in_unit(esp.units.ANGLE_UNIT)
+
+                            periodicity[idx, sub_idx] = getattr(
+                                _force, "periodicity%s" % sub_idx
+                            )
+
+            return {
+                "k_ref": k,
+                "periodicity_ref": periodicity,
+                "phases_ref": phases,
+            }
+
+        g.heterograph.apply_nodes(apply_torsion, ntype="n4")
+        '''
 
         return g
         

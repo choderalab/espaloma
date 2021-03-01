@@ -198,7 +198,7 @@ class JanossyPoolingImproper(torch.nn.Module):
                 self,
                 "sequential_%s" % level,
                 esp.nn.sequential._Sequential(
-                    in_features=in_features,
+                    in_features=4 * in_features,
                     config=config,
                     layer=torch.nn.Linear,
                 ),
@@ -248,7 +248,8 @@ class JanossyPoolingImproper(torch.nn.Module):
 
             g.apply_nodes(
                 func=lambda nodes: {
-                    feature: torch.sum(
+                    feature: getattr(self, "f_out_%s_to_%s" % (big_idx, feature))(
+                        torch.sum(
                                 torch.stack(
                                     [
                                         getattr(self, "sequential_%s" % big_idx)(
@@ -294,7 +295,7 @@ class JanossyPoolingImproper(torch.nn.Module):
                                     dim=0,
                                 ),
                                 dim=0,
-                    )
+                    ))
                     for feature in self.out_features.keys()
                 },
                 ntype=big_idx,

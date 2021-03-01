@@ -148,7 +148,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                 try:
                     _graphs.append(fn(graph))
                 except:
-                    continue
+                    pass
             self.graphs = _graphs
 
         return self  # to allow grammar: ds = ds.apply(...)
@@ -171,7 +171,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return ds
 
-    def subsample(self, ratio):
+    def subsample(self, ratio, seed=None):
         """ Subsample the dataset according to some ratio.
 
         Parameters
@@ -184,6 +184,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         n_data = len(self)
         idxs = list(range(n_data))
         import random
+        random.seed(seed)
         _idxs = random.choices(idxs, k=int(n_data*ratio))
         return self[_idxs]
 
@@ -199,7 +200,8 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         with open(path, "wb") as f_handle:
             pickle.dump(self.graphs, f_handle)
 
-    def load(self, path):
+    @classmethod
+    def load(cls, path):
         """ Load path to dataset.
 
         Parameters
@@ -208,9 +210,9 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         import pickle
 
         with open(path, "rb") as f_handle:
-            self.graphs = pickle.load(f_handle)
+            graphs = pickle.load(f_handle)
 
-        return self
+        return cls(graphs)
 
     def __add__(self, x):
         return self.__class__(
@@ -301,3 +303,18 @@ class GraphDataset(Dataset):
         return torch.utils.data.DataLoader(
             dataset=self, collate_fn=collate_fn, *args, **kwargs
         )
+
+    def save(self, path):
+        import os
+        os.mkdir(path)
+        for idx, graph in enumerate(self.graphs):
+            graph.save(path + "/" + str(idx))
+
+    @classmethod
+    def load(cls, path):
+        import os
+        paths = os.listdir(path)
+        paths = [_path for _path in paths if _path.isnumeric()]
+        graphs = [esp.Graph.load(path + "/" + _path) for _path in paths]
+        return cls(graphs)
+

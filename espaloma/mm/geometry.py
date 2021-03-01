@@ -95,6 +95,7 @@ def dihedral(
 # =============================================================================
 def apply_bond(nodes):
     """ Bond length in nodes. """
+
     return {"x": distance(x0=nodes.data["xyz0"], x1=nodes.data["xyz1"])}
 
 
