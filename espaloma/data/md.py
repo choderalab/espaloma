@@ -16,30 +16,29 @@ import espaloma as esp
 # CONSTANTS
 # =============================================================================
 # simulation specs
-TEMPERATURE = 500 * unit.kelvin
-STEP_SIZE = 1 * unit.femtosecond
-COLLISION_RATE = 1 / unit.picosecond
+TEMPERATURE = 350 * unit.kelvin
+STEP_SIZE = 1.0 * unit.femtosecond
+COLLISION_RATE = 1.0 / unit.picosecond
+EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 def subtract_nonbonded_force(
-    g, forcefield="test_forcefields/smirnoff99Frosst.offxml",
+    g, forcefield="gaff-1.81",
 ):
 
-    # get the forcefield from str
-    if isinstance(forcefield, str):
-        forcefield = ForceField(forcefield)
+    # parameterize topology
+    topology = g.mol.to_topology().to_openmm()
 
-    # partial charge
-    g.mol.assign_partial_charges("gasteiger")  # faster
-
-    # parametrize topology
-    topology = g.mol.to_topology()
+    generator = SystemGenerator(
+        small_molecule_forcefield=forcefield,
+        molecules=[g.mol],
+    )
 
     # create openmm system
-    system = forcefield.create_openmm_system(
-        topology, charge_from_molecules=[g.mol],
+    system = generator.create_system(
+        topology,
     )
 
     # use langevin integrator, although it's not super useful here
@@ -197,12 +196,12 @@ class MoleculeVacuumSimulation(object):
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # assign partial charge
-        # g.mol.assign_partial_charges("gasteiger")  # faster
+        # g.mol.assign_partial_charges("am1bcc")
 
         # parameterize topology
         topology = g.mol.to_topology().to_openmm()
 
-        generator = SystemGenerator(
+        generator = systemgenerator(
             small_molecule_forcefield=self.forcefield,
             molecules=[g.mol],
         )
@@ -212,6 +211,14 @@ class MoleculeVacuumSimulation(object):
             topology,
         )
 
+        # set epsilon minimum to 0.05 kJ/mol
+        for force in system.getForces():
+            if "Nonbonded" in force.__class__.__name__:
+                for particle_index in range(force.getNumParticles()):
+                    charge, sigma, epsilon = force.getParticleParameters(particle_index)
+                    if (epsilon < EPSILON_MIN):
+                        force.setParticleParameters(particle_index, charge, sigma, EPSILON_MIN)
+
         # use langevin integrator
         integrator = openmm.LangevinIntegrator(
             self.temperature, self.collision_rate, self.step_size
@@ -219,7 +226,8 @@ class MoleculeVacuumSimulation(object):
 
         # initialize simulation
         simulation = Simulation(
-            topology=topology, system=system, integrator=integrator
+            topology=topology, system=system, integrator=integrator,
+            platform=openmm.Platform.getPlatformByName("Reference"),
         )
 
         import openforcefield
@@ -231,9 +239,6 @@ class MoleculeVacuumSimulation(object):
 
         # put conformer in simulation
         simulation.context.setPositions(g.mol.conformers[0])
-
-        # minimize energy
-        simulation.minimizeEnergy()
 
         # set velocities
         simulation.context.setVelocitiesToTemperature(self.temperature)
@@ -267,6 +272,9 @@ class MoleculeVacuumSimulation(object):
         # initialize empty list for samples.
         samples = []
 
+        # minimize
+        simulation.minimizeEnergy()
+
         # loop through number of samples
         for _ in range(self.n_samples):
 
@@ -279,6 +287,10 @@ class MoleculeVacuumSimulation(object):
                 .getPositions(asNumpy=True)
                 .value_in_unit(DISTANCE_UNIT)
             )
+
+        # assert that energy is below zero
+        # final_energy = simulation.context.getState(getEnergy=True).getPotentialEnergy(
+        #        ).value_in_unit(ENERGY_UNIT)
 
         # put samples into an array
         samples = np.array(samples)
