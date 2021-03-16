@@ -34,6 +34,7 @@ def subtract_nonbonded_force(
     generator = SystemGenerator(
         small_molecule_forcefield=forcefield,
         molecules=[g.mol],
+        forcefield_kwargs={ 'constraints' : None, 'removeCMMotion' : False},
     )
 
     # create openmm system
@@ -201,7 +202,7 @@ class MoleculeVacuumSimulation(object):
         # parameterize topology
         topology = g.mol.to_topology().to_openmm()
 
-        generator = systemgenerator(
+        generator = SystemGenerator(
             small_molecule_forcefield=self.forcefield,
             molecules=[g.mol],
         )
