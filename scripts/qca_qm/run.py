@@ -167,11 +167,14 @@ def run(args):
                 cross_reducer="sum"
             )
 
+            return g
+
     net = torch.nn.Sequential(
             representation,
             readout,
             readout_improper,
             ExpCoeff(),
+            CarryII(),
             esp.mm.geometry.GeometryInGraph(),
             esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=True),
     )
