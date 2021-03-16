@@ -180,16 +180,13 @@ def run(args):
     )
 
 
-    torch.nn.init.normal_(
-             net[1].f_out_2_to_log_coefficients.bias,
-             mean=-5,
-    )
+    torch.nn.init.normal_(net[1].f_out_2_to_log_coefficients.bias, mean=-5,)
+    torch.nn.init.normal_(net[1].f_out_3_to_log_coefficients.bias, mean=-5,)
 
-    torch.nn.init.normal_(
-             net[1].f_out_3_to_log_coefficients.bias,
-             mean=-5,
-    )
-
+    for name, module in net[1].named_modules():
+        if "k" in name:
+            torch.nn.init.normal(module.bias, mean=0.0, std=1e-4)
+            torch.nn.init.normal(module.weight, mean=0.0, std=1e-4)
 
     # net = net.cuda()
     metrics_tr = [

@@ -279,7 +279,7 @@ def energy_in_graph(
 
         if ii is True:
             g.apply_nodes(
-                lambda node: apply_angle_ii(node, suffix=suffix), ntype="n4",
+                lambda node: apply_torsion_ii(node, suffix=suffix), ntype="n4",
             )
 
     if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:

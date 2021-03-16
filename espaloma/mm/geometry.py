@@ -103,7 +103,21 @@ def apply_angle(nodes):
     """ Angle values in nodes. """
     return {
         "x": angle(
-            x0=nodes.data["xyz0"], x1=nodes.data["xyz1"], x2=nodes.data["xyz2"]
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"],
+            x2=nodes.data["xyz2"],
+        ),
+        "x_left": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz0"],
+        ),
+        "x_right": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"],
+        ),
+        "x_between": distance(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz2"],
         )
     }
 
@@ -116,8 +130,31 @@ def apply_torsion(nodes):
             x1=nodes.data["xyz1"],
             x2=nodes.data["xyz2"],
             x3=nodes.data["xyz3"],
+        ),
+        "x_bond_left": distance(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"],
+        ),
+        "x_bond_center": distance(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"],
+        ),
+        "x_bond_right": distance(
+            x0=nodes.data["xyz2"],
+            x1=nodes.data["xyz3"],
+        ),
+        "x_angle_left": angle(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"],
+            x2=nodes.data["xyz2"],
+        ),
+        "x_angle_right": angle(
+            x0=nodes.data["xyz1"],
+            x1=nodes.data["xyz2"],
+            x2=nodes.data["xyz3"],
         )
     }
+
 
 
 # =============================================================================
