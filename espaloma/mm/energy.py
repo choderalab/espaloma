@@ -272,6 +272,16 @@ def energy_in_graph(
                 lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
             )
 
+            g.apply_nodes(
+                lambda node: {
+                    'u%s' % suffix:
+                    node.data['u_urey_bradley%s' % suffix]\
+                    + node.data['u_bond_bond%s' % suffix]\
+                    + node.data['u_bond_angle%s' % suffix]
+                },
+                ntype='n3'
+            )
+
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
             lambda node: apply_torsion(node, suffix=suffix), ntype="n4",
@@ -280,6 +290,16 @@ def energy_in_graph(
         if ii is True:
             g.apply_nodes(
                 lambda node: apply_torsion_ii(node, suffix=suffix), ntype="n4",
+            )
+            
+            g.apply_nodes(
+                lambda node: {
+                    'u%s' % suffix:
+                    node.data['u_angle_angle%s' % suffix]\
+                    + node.data['u_angle_angle_torsion%s' % suffix]\
+                    + node.data['u_bond_torsion%s' % suffix]
+                },
+                ntype='n4'
             )
 
     if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
