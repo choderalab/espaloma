@@ -168,7 +168,7 @@ class LegacyForceField:
 
         return g
 
-    def _parametrize_gaff(self, g):
+    def _parametrize_gaff(self, g, n_max_phases=6):
         from openmmforcefields.generators import SystemGenerator
 
         # define a system generator
@@ -177,9 +177,8 @@ class LegacyForceField:
         )
 
         mol = g.mol
-        print(mol, flush=True)
         mol.assign_partial_charges("formal_charge")
-        print(mol, flush=True)
+        
         # create system
         sys = system_generator.create_system(
             topology=mol.to_topology().to_openmm(),
@@ -195,6 +194,37 @@ class LegacyForceField:
             tuple(idxs.detach().numpy()): position
             for position, idxs in enumerate(g.nodes["n3"].data["idxs"])
         }
+
+        torsion_lookup = {
+            tuple(idxs.detach().numpy()): position
+            for position, idxs in enumerate(g.nodes["n4"].data["idxs"])
+        }
+
+        improper_lookup = {
+            tuple(idxs.detach().numpy()): position
+            for position, idxs in enumerate(g.nodes["n4_improper"].data["idxs"])
+        }
+
+        torsion_phases = torch.zeros(
+            g.heterograph.number_of_nodes("n4"), n_max_phases,
+        )
+
+        torsion_periodicities = torch.zeros(
+            g.heterograph.number_of_nodes("n4"), n_max_phases,
+        )
+
+        torsion_ks = torch.zeros(g.heterograph.number_of_nodes("n4"), n_max_phases,)
+
+
+        improper_phases = torch.zeros(
+            g.heterograph.number_of_nodes("n4"), n_max_phases,
+        )
+
+        improper_periodicities = torch.zeros(
+            g.heterograph.number_of_nodes("n4"), n_max_phases,
+        )
+
+        improper_ks = torch.zeros(g.heterograph.number_of_nodes("n4"), n_max_phases,)
 
         for force in sys.getForces():
             name = force.__class__.__name__
@@ -218,7 +248,7 @@ class LegacyForceField:
                     g.nodes["n2"].data["eq_ref"][position] = eq.value_in_unit(
                         esp.units.DISTANCE_UNIT,
                     )
-                    g.nodes["n2"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    g.nodes["n2"].data["k_ref"][position] = k.value_in_unit(
                         esp.units.FORCE_CONSTANT_UNIT,
                     )
 
@@ -226,7 +256,7 @@ class LegacyForceField:
                     g.nodes["n2"].data["eq_ref"][position] = eq.value_in_unit(
                         esp.units.DISTANCE_UNIT,
                     )
-                    g.nodes["n2"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    g.nodes["n2"].data["k_ref"][position] = k.value_in_unit(
                         esp.units.FORCE_CONSTANT_UNIT,
                     )
 
@@ -251,7 +281,7 @@ class LegacyForceField:
                     g.nodes["n3"].data["eq_ref"][position] = eq.value_in_unit(
                         esp.units.ANGLE_UNIT,
                     )
-                    g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    g.nodes["n3"].data["k_ref"][position] = k.value_in_unit(
                         esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                     )
 
@@ -259,9 +289,51 @@ class LegacyForceField:
                     g.nodes["n3"].data["eq_ref"][position] = eq.value_in_unit(
                         esp.units.ANGLE_UNIT,
                     )
-                    g.nodes["n3"].data["k_ref"][position] = (0.5 * k).value_in_unit(
+                    g.nodes["n3"].data["k_ref"][position] = k.value_in_unit(
                         esp.units.ANGLE_FORCE_CONSTANT_UNIT,
                     )
+
+            if "PeriodicTorsionForce" in name:
+                for idx in range(force.getNumTorsions()):
+                    idx0, idx1, idx2, idx3, periodicity, phase, k = force.getTorsionParameters(
+                            idx
+                    )
+
+                    if (idx0, idx1, idx2, idx3) in torsion_lookup:
+                        position = torsion_lookup[(idx0, idx1, idx2, idx3)]
+                        for sub_idx in range(n_max_phases):
+                            if torsion_ks[position, sub_idx] == 0: 
+                                torsion_ks[position, sub_idx] = 0.5 * k.value_in_unit(esp.units.ENERGY_UNIT)
+                                torsion_phases[position, sub_idx] = phase.value_in_unit(esp.units.ANGLE_UNIT)
+                                torsion_periodicities[position, sub_idx] = periodicity
+
+                                position = torsion_lookup[(idx3, idx2, idx1, idx0)]
+                                torsion_ks[position, sub_idx] = 0.5 * k.value_in_unit(esp.units.ENERGY_UNIT)
+                                torsion_phases[position, sub_idx] = phase.value_in_unit(esp.units.ANGLE_UNIT)
+                                torsion_periodicities[position, sub_idx] = periodicity
+                                break
+
+            g.heterograph.apply_nodes(
+                    lambda nodes: {
+                        "k_ref": torsion_ks,
+                        "periodicity_ref": torsion_periodicities,
+                        "phases_ref": torsion_phases,
+                    },
+                    ntype="n4"
+            )
+
+            '''
+            g.heterograph.apply_nodes(
+                    lambda nodes: {
+                        "k_ref": improper_ks,
+                        "periodicity_ref": improper_periodicities,
+                        "phases_ref": improper_phases,
+                    },
+                    ntype="n4_improper"
+            )
+
+            '''
+
         '''
         def apply_torsion(node, n_max_phases=6):
             phases = torch.zeros(
