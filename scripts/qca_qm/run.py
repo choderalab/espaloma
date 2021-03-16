@@ -6,6 +6,7 @@ import os
 
 import numpy as np
 import torch
+import dgl
 
 import espaloma as esp
 
@@ -50,7 +51,7 @@ def run(args):
     coverage = esp.data.dataset.GraphDataset.load('coverage')
     emolecules = esp.data.dataset.GraphDataset.load('emolecules')
     bayer = esp.data.dataset.GraphDataset.load('bayer')
-    roche = esp.data.dataset.GraphDataset.load('roche') 
+    roche = esp.data.dataset.GraphDataset.load('roche')
     fda = esp.data.dataset.GraphDataset.load('fda')
     # benchmark = esp.data.dataset.GraphDataset.load("benchmark")
 
@@ -92,8 +93,21 @@ def run(args):
         in_features=units, config=janossy_config,
         out_features={
                 2: {'log_coefficients': 2},
-                3: {'log_coefficients': 2},
-                4: {'k': 6},
+                3: {
+                    'log_coefficients': 2,
+                    'k_urey_bradley': 1,
+                    'eq_urey_bradley': 1,
+                    'k_bond_bond': 1,
+                    'k_bond_angle': 1,
+                    'k_bond_angle': 1,
+                    },
+                4: {
+                    'k': 6,
+                    'k_angle_angle': 1,
+                    'k_angle_angle_torsion': 1,
+                    'k_side_torsion': 1,
+                    'k_center_torsion': 1,
+                    },
         },
     )
 
@@ -107,6 +121,51 @@ def run(args):
             g.nodes['n3'].data['coefficients'] = g.nodes['n3'].data['log_coefficients'].exp()
             return g
 
+    class CarryII(torch.nn.Module):
+        def forward(self, g):
+            _, g.nodes['n2'].data['_eq'] = esp.mm.functional.linear_mixture_to_original(
+                g.nodes['n2'].data['coefficients'][:, 0][:, None],
+                g.nodes['n2'].data['coefficients'][:, 1][:, None],
+            )
+
+            _, g.nodes['n3'].data['_eq'] = esp.mm.functional.linear_mixture_to_original(
+                g.nodes['n3'].data['coefficients'][:, 0][:, None],
+                g.nodes['n3'].data['coefficients'][:, 1][:, None],
+            )
+
+            g.multi_update_all(
+                {
+                    "n2_as_0_in_n3": (
+                        dgl.function.copy_src("_eq", "m_eq_0"),
+                        dgl.function.sum("m_eq_0", "eq_left"),
+                    ),
+                    "n2_as_1_in_n3": (
+                        dgl.function.copy_src("_eq", "m_eq_1"),
+                        dgl.function.sum("m_eq_1", "eq_right"),
+                    ),
+                    "n2_as_0_in_n4": (
+                        dgl.function.copy_src("_eq", "m_eq_0"),
+                        dgl.function.sum("m_eq_0", "eq_left_torsion"),
+                    ),
+                    "n2_as_1_in_n4": (
+                        dgl.function.copy_src("_eq", "m_eq_1"),
+                        dgl.function.sum("m_eq_1", "eq_center_torsion"),
+                    ),
+                    "n2_as_2_in_n4": (
+                        dgl.function.copy_src("_eq", "m_eq_2"),
+                        dgl.function.sum("m_eq_2", "eq_right_torsion"),
+                    ),
+                    "n3_as_0_in_n4": (
+                        dgl.function.copy_src("_eq", "m3_eq_0"),
+                        dgl.function.sum("m3_eq_0", "eq_angle_left"),
+                    ),
+                    "n3_as_1_in_n4": (
+                        dgl.function.copy_src("_eq", "m3_eq_1"),
+                        dgl.function.sum("m3_eq_1", "eq_angle_right"),
+                    )
+                },
+                cross_reducer="sum"
+            )
 
     net = torch.nn.Sequential(
             representation,
@@ -114,7 +173,7 @@ def run(args):
             readout_improper,
             ExpCoeff(),
             esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"]),
+            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=True),
     )
 
 
@@ -165,7 +224,7 @@ def run(args):
     results = exp.run()
 
     print(esp.app.report.markdown(results), flush=True)
- 
+
     curves = esp.app.report.curve(results)
 
     import os
@@ -183,7 +242,7 @@ def run(args):
     '''
     for g in _ds_tr:
         net(g.heterograph)
-        
+
         _df = {
                 'SMILES': g.mol.to_smiles(),
                 'RMSE': 625 * esp.metrics.center(esp.metrics.rmse)(g.nodes['g'].data['u_ref'], g.nodes['g'].data['u']).cpu().detach().numpy().item(),
@@ -196,7 +255,7 @@ def run(args):
 
     for g in _ds_vl:
         net(g.heterograph)
-        
+
         _df = {
                 'SMILES': g.mol.to_smiles(),
                 'RMSE': 625 * esp.metrics.center(esp.metrics.rmse)(g.nodes['g'].data['u_ref'], g.nodes['g'].data['u']).cpu().detach().numpy().item(),
@@ -229,7 +288,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--janossy_config", nargs="*", default=[32, "leaky_relu"])
 
-    parser.add_argument("--graph_act", type=str, default="leaky_relu") 
+    parser.add_argument("--graph_act", type=str, default="leaky_relu")
 
     parser.add_argument("--n_epochs", default=10, type=int)
 
@@ -241,4 +300,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run(args)
-

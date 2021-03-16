@@ -68,8 +68,8 @@ def apply_angle_ii(nodes, suffix=""):
             eq_left=nodes.data["eq_left"],
             eq_right=nodes.data["eq_right"],
             eq_angle=nodes.data["eq"],
-            k_bond_angle_left=nodes.data["k_bond_angle_left"],
-            k_bond_angle_right=nodes.data["k_bond_angle_right"],
+            k_bond_angle_left=nodes.data["k_bond_angle"],
+            k_bond_angle_right=nodes.data["k_bond_angle"],
         )
     }
 
@@ -99,8 +99,8 @@ def apply_torsion_ii(nodes, suffix=""):
             x_bond_center=nodes.data["x_bond_center"],
             x_bond_right=nodes.data["x_bond_right"],
             x=nodes.data["x"],
-            k_left_torsion=nodes.data["k_left_torsion"],
-            k_right_torsion=nodes.data["k_right_torsion"],
+            k_left_torsion=nodes.data["k_side_torsion"],
+            k_right_torsion=nodes.data["k_side_torsion"],
             eq_left_torsion=nodes.data["eq_left_torsion"],
             eq_right_torsion=nodes.data["eq_right_torsion"],
             k_center_torsion=nodes.data["k_center_torsion"],
@@ -197,7 +197,6 @@ def apply_angle_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
         )
     }
 
-
 # =============================================================================
 # ENERGY IN HYPERNODES---NONBONDED
 # =============================================================================
@@ -272,7 +271,6 @@ def energy_in_graph(
             g.apply_nodes(
                 lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
             )
-
 
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
