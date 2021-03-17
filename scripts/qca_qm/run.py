@@ -120,73 +120,18 @@ def run(args):
             g.nodes['n2'].data['coefficients'] = g.nodes['n2'].data['log_coefficients'].exp()
             g.nodes['n3'].data['coefficients'] = g.nodes['n3'].data['log_coefficients'].exp()
             return g
-
-    class CarryII(torch.nn.Module):
-        def forward(self, g):
-            _, g.nodes['n2'].data['_eq'] = esp.mm.functional.linear_mixture_to_original(
-                g.nodes['n2'].data['coefficients'][:, 0][:, None],
-                g.nodes['n2'].data['coefficients'][:, 1][:, None],
-            )
-
-            _, g.nodes['n3'].data['_eq'] = esp.mm.functional.linear_mixture_to_original(
-                g.nodes['n3'].data['coefficients'][:, 0][:, None],
-                g.nodes['n3'].data['coefficients'][:, 1][:, None],
-            )
-
-            g.multi_update_all(
-                {
-                    "n2_as_0_in_n3": (
-                        dgl.function.copy_src("_eq", "m_eq_0"),
-                        dgl.function.sum("m_eq_0", "eq_left"),
-                    ),
-                    "n2_as_1_in_n3": (
-                        dgl.function.copy_src("_eq", "m_eq_1"),
-                        dgl.function.sum("m_eq_1", "eq_right"),
-                    ),
-                    "n2_as_0_in_n4": (
-                        dgl.function.copy_src("_eq", "m_eq_0"),
-                        dgl.function.sum("m_eq_0", "eq_left_torsion"),
-                    ),
-                    "n2_as_1_in_n4": (
-                        dgl.function.copy_src("_eq", "m_eq_1"),
-                        dgl.function.sum("m_eq_1", "eq_center_torsion"),
-                    ),
-                    "n2_as_2_in_n4": (
-                        dgl.function.copy_src("_eq", "m_eq_2"),
-                        dgl.function.sum("m_eq_2", "eq_right_torsion"),
-                    ),
-                    "n3_as_0_in_n4": (
-                        dgl.function.copy_src("_eq", "m3_eq_0"),
-                        dgl.function.sum("m3_eq_0", "eq_angle_left"),
-                    ),
-                    "n3_as_1_in_n4": (
-                        dgl.function.copy_src("_eq", "m3_eq_1"),
-                        dgl.function.sum("m3_eq_1", "eq_angle_right"),
-                    )
-                },
-                cross_reducer="sum"
-            )
-
-            return g
-
     net = torch.nn.Sequential(
             representation,
             readout,
             readout_improper,
             ExpCoeff(),
-            CarryII(),
             esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=True),
+            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=False),
     )
 
 
     torch.nn.init.normal_(net[1].f_out_2_to_log_coefficients.bias, mean=-5,)
     torch.nn.init.normal_(net[1].f_out_3_to_log_coefficients.bias, mean=-5,)
-
-    for name, module in net[1].named_modules():
-        if "k" in name:
-            torch.nn.init.normal(module.bias, mean=0.0, std=1e-4)
-            torch.nn.init.normal(module.weight, mean=0.0, std=1e-4)
 
     # net = net.cuda()
     metrics_tr = [

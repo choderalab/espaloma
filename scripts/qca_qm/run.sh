@@ -5,7 +5,7 @@
 #BSUB -W 36:00
 #BSUB -n 1
 
-n_epochs=3000
+n_epochs=10000
 layer="SAGEConv"
 units=128
 act="relu"
