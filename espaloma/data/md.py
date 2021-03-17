@@ -201,7 +201,7 @@ class MoleculeVacuumSimulation(object):
         # parameterize topology
         topology = g.mol.to_topology().to_openmm()
 
-        generator = systemgenerator(
+        generator = SystemGenerator(
             small_molecule_forcefield=self.forcefield,
             molecules=[g.mol],
         )
