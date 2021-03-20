@@ -39,9 +39,12 @@ class _Sequential(torch.nn.Module):
 
             # str -> activation
             elif isinstance(exe, str):
-                activation = getattr(torch.nn.functional, exe)
-
-                setattr(self, "a" + str(idx), activation)
+                if exe == "bn":
+                    setattr(self, "a" + str(idx), torch.nn.BatchNorm1d(dim))
+                
+                else:
+                    activation = getattr(torch.nn.functional, exe)
+                    setattr(self, "a" + str(idx), activation)
 
                 self.exes.append("a" + str(idx))
 

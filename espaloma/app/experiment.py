@@ -64,6 +64,7 @@ class Train(Experiment):
         n_epochs=100,
         record_interval=1,
         normalize=esp.data.normalize.ESOL100LogNormalNormalize,
+        scheduler=None,
         device=torch.device("cpu"),
     ):
         super(Train, self).__init__()
@@ -82,6 +83,7 @@ class Train(Experiment):
         self.record_interval = record_interval
         self.normalize = normalize()
         self.states = {}
+        self.scheduler = scheduler
 
         # make optimizer
         if callable(optimizer):
@@ -111,6 +113,7 @@ class Train(Experiment):
                 retain_graph=False
 
             g = g.to(self.device)
+            self.net.train()
 
             def closure(g=g):
                 self.optimizer.zero_grad()
@@ -125,7 +128,11 @@ class Train(Experiment):
                         raise RuntimeError("Loss is Nan.")
                 return loss
 
-            self.optimizer.step(closure)
+            loss = closure()
+            self.optimizer.step()
+            
+            if self.scheduler is not None:
+                self.scheduler.step(loss)
 
     def train(self):
         """ Train the model for multiple steps and
@@ -209,7 +216,7 @@ class Test(Experiment):
                 # load the state dict
                 self.net.load_state_dict(state)
 
-            # local scope
+            self.net.eval() 
 
             for metric in self.metrics:
                 assert isinstance(metric, esp.metrics.Metric)
@@ -264,6 +271,7 @@ class TrainAndTest(Experiment):
         n_epochs=100,
         record_interval=1,
         device=torch.device("cpu"),
+        scheduler=None,
     ):
 
         # bookkeeping
@@ -278,6 +286,7 @@ class TrainAndTest(Experiment):
         self.metrics_te = metrics_te
         self.normalize = normalize
         self.record_interval = record_interval
+        self.scheduler = scheduler
 
     def __str__(self):
         _str = ""
@@ -313,6 +322,7 @@ class TrainAndTest(Experiment):
             normalize=self.normalize,
             device=self.device,
             record_interval=self.record_interval,
+            scheduler=self.scheduler,
         )
 
         train.train()
