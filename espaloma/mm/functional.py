@@ -28,7 +28,6 @@ def linear_mixture_to_original(k1, k2, b1, b2):
 
     return k, b
 
-
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
@@ -50,7 +49,7 @@ def harmonic(x, k, eq, order=[2]):
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 
-    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
+    return 0.5 * k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
         dim=-1
     )
 
