@@ -178,7 +178,6 @@ class LegacyForceField:
 
         mol = g.mol
         # mol.assign_partial_charges("formal_charge")
-        
         # create system
         sys = system_generator.create_system(
             topology=mol.to_topology().to_openmm(),
@@ -302,7 +301,7 @@ class LegacyForceField:
                     if (idx0, idx1, idx2, idx3) in torsion_lookup:
                         position = torsion_lookup[(idx0, idx1, idx2, idx3)]
                         for sub_idx in range(n_max_phases):
-                            if torsion_ks[position, sub_idx] == 0: 
+                            if torsion_ks[position, sub_idx] == 0:
                                 torsion_ks[position, sub_idx] = 0.5 * k.value_in_unit(esp.units.ENERGY_UNIT)
                                 torsion_phases[position, sub_idx] = phase.value_in_unit(esp.units.ANGLE_UNIT)
                                 torsion_periodicities[position, sub_idx] = periodicity
@@ -374,7 +373,7 @@ class LegacyForceField:
         '''
 
         return g
-        
+
     def _parametrize_smirnoff(self, g):
         # mol = self._convert_to_off(mol)
 
