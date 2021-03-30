@@ -177,7 +177,7 @@ class LegacyForceField:
         )
 
         mol = g.mol
-        mol.assign_partial_charges("formal_charge")
+        # mol.assign_partial_charges("formal_charge")
         
         # create system
         sys = system_generator.create_system(
