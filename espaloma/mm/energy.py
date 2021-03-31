@@ -184,7 +184,7 @@ def energy_in_graph(
 
         if "coefficients%s" % suffix in g.nodes["n2"].data:
             g.apply_nodes(
-                lambda node: apply_bond_linear_mixture(node, suffix=suffix, phases=[1.5, 4.0]), ntype="n2",
+                lambda node: apply_bond_linear_mixture(node, suffix=suffix, phases=[1.5, 6.0]), ntype="n2",
             )
         else:
             g.apply_nodes(
@@ -245,7 +245,7 @@ def energy_in_graph(
         lambda node: {
             "u%s"
             % suffix: sum(
-                node.data["u_%s%s" % (term, suffix)] for term in terms if "u_%s%s" % (term, suffix) in node.data 
+                node.data["u_%s%s" % (term, suffix)] for term in terms if "u_%s%s" % (term, suffix) in node.data
             )
         },
         ntype="g",
