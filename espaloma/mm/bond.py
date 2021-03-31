@@ -44,4 +44,4 @@ def linear_mixture_bond(x, coefficients, phases):
     """ Bond energy with Linear basis function.
 
     """
-    return esp.mm.functional.linear_mixture(x=x, coefficients=coefficients, phases=phases)
+    return 0.5 * esp.mm.functional.linear_mixture(x=x, coefficients=coefficients, phases=phases)
