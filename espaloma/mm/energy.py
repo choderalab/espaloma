@@ -141,7 +141,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     return {
         "u%s"
         % suffix: scaling
-        * esp.mm.nonbonded.lj_9_6(
+        * esp.mm.nonbonded.lj_12_6(
             x=nodes.data["x"],
             sigma=nodes.data["sigma%s" % suffix],
             epsilon=nodes.data["epsilon%s" % suffix],
@@ -174,10 +174,6 @@ def energy_in_graph(
     """
     # TODO: this is all very restricted for now
     # we need to make this better
-
-    if "nonbonded" in terms or "onefour" in terms:
-        # apply combination rule
-        esp.mm.nonbonded.lorentz_berthelot(g, suffix=suffix)
 
     if "n2" in terms:
         # apply energy function
