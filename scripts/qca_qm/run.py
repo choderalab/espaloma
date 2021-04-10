@@ -3,7 +3,11 @@
 # =============================================================================
 import argparse
 import os
+<<<<<<< HEAD
+import math
+=======
 
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
 import numpy as np
 import torch
 import dgl
@@ -95,6 +99,11 @@ def run(args):
                 2: {'log_coefficients': 2},
                 3: {
                     'log_coefficients': 2,
+<<<<<<< HEAD
+                    },
+                4: {
+                    'k': 6,
+=======
                     'k_urey_bradley': 1,
                     'eq_urey_bradley': 1,
                     'k_bond_bond': 1,
@@ -107,6 +116,7 @@ def run(args):
                     'k_angle_angle_torsion': 1,
                     'k_side_torsion': 1,
                     'k_center_torsion': 1,
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
                     },
         },
     )
@@ -115,15 +125,45 @@ def run(args):
         in_features=units, config=janossy_config
     )
 
+<<<<<<< HEAD
+    readout_14 = esp.nn.readout.janossy.JanossyPooling14(
+        in_features=units, config=janossy_config,
+    )
+
+=======
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
     class ExpCoeff(torch.nn.Module):
         def forward(self, g):
             g.nodes['n2'].data['coefficients'] = g.nodes['n2'].data['log_coefficients'].exp()
             g.nodes['n3'].data['coefficients'] = g.nodes['n3'].data['log_coefficients'].exp()
             return g
+<<<<<<< HEAD
+
+=======
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
     net = torch.nn.Sequential(
             representation,
             readout,
             readout_improper,
+<<<<<<< HEAD
+            # readout_14,
+            ExpCoeff(),
+            esp.mm.geometry.GeometryInGraph(),
+            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"]),
+    )
+
+
+    torch.nn.init.normal_(
+             net[1].f_out_2_to_log_coefficients.bias,
+             mean=-5,
+    )
+
+    torch.nn.init.normal_(
+             net[1].f_out_3_to_log_coefficients.bias,
+             mean=-5,
+    )
+
+=======
             ExpCoeff(),
             esp.mm.geometry.GeometryInGraph(),
             esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=False),
@@ -132,6 +172,7 @@ def run(args):
 
     torch.nn.init.normal_(net[1].f_out_2_to_log_coefficients.bias, mean=-5,)
     torch.nn.init.normal_(net[1].f_out_3_to_log_coefficients.bias, mean=-5,)
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
 
     # net = net.cuda()
     metrics_tr = [
@@ -184,6 +225,19 @@ def run(args):
     import os
     torch.save(net.state_dict(), args.out + "/net.th")
 
+<<<<<<< HEAD
+
+
+
+    for state_name, state in exp.states.items():
+        torch.save(state, args.out + "/net%s.th" % state_name)
+
+
+
+
+
+=======
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
     '''
     for g in _ds_tr:
         net(g.heterograph)

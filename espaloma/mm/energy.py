@@ -206,7 +206,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     return {
         "u%s"
         % suffix: scaling
-        * esp.mm.nonbonded.lj_9_6(
+        * esp.mm.nonbonded.lj_12_6(
             x=nodes.data["x"],
             sigma=nodes.data["sigma%s" % suffix],
             epsilon=nodes.data["epsilon%s" % suffix],
@@ -240,16 +240,12 @@ def energy_in_graph(
     # TODO: this is all very restricted for now
     # we need to make this better
 
-    if "nonbonded" in terms or "onefour" in terms:
-        # apply combination rule
-        esp.mm.nonbonded.lorentz_berthelot(g, suffix=suffix)
-
     if "n2" in terms:
         # apply energy function
 
         if "coefficients%s" % suffix in g.nodes["n2"].data:
             g.apply_nodes(
-                lambda node: apply_bond_linear_mixture(node, suffix=suffix, phases=[1.5, 4.0]), ntype="n2",
+                lambda node: apply_bond_linear_mixture(node, suffix=suffix, phases=[1.5, 6.0]), ntype="n2",
             )
         else:
             g.apply_nodes(

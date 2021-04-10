@@ -30,14 +30,15 @@ def harmonic_angle(x, k, eq):
 
     # NOTE:
     # 0.25 because all angles are calculated twice
-    return 0.25 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
+    return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
 
 def linear_mixture_angle(x, coefficients, phases):
     """ Angle energy with Linear basis function.
 
     """
-    return esp.mm.functional.linear_mixture(x=x, coefficients=coefficients, phases=phases)
+
+    return 0.5 * esp.mm.functional.linear_mixture(x=x, coefficients=coefficients, phases=phases)
 
 
 def urey_bradley(x_between, k_urey_bradley, eq_urey_bradley):
@@ -73,3 +74,4 @@ def bond_angle(
         eq1=eq_angle,
         k=k_bond_angle_right,
     )
+
