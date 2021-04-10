@@ -34,6 +34,7 @@ def subtract_nonbonded_force(
     generator = SystemGenerator(
         small_molecule_forcefield=forcefield,
         molecules=[g.mol],
+        forcefield_kwargs={ 'constraints' : None, 'removeCMMotion' : False},
     )
 
     # create openmm system

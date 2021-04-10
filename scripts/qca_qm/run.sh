@@ -2,10 +2,17 @@
 #BSUB -o %J.stdout
 #BSUB -gpu "num=1:j_exclusive=yes"
 #BSUB -R "rusage[mem=30] span[ptile=1]"
+<<<<<<< HEAD
 #BSUB -W 24:00
 #BSUB -n 1
 
 n_epochs=5000
+=======
+#BSUB -W 36:00
+#BSUB -n 1
+
+n_epochs=10000
+>>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
 layer="SAGEConv"
 units=128
 act="relu"

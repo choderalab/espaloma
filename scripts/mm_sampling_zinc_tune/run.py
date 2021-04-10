@@ -3,14 +3,9 @@
 # =============================================================================
 import argparse
 import os
-<<<<<<< HEAD
-import math
-=======
 
->>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
 import numpy as np
 import torch
-import dgl
 
 import espaloma as esp
 
@@ -51,23 +46,22 @@ def run(args):
     ds_vl.save('coverage')
     '''
 
-    pfizer = esp.data.dataset.GraphDataset.load('pfizer')
-    coverage = esp.data.dataset.GraphDataset.load('coverage')
-    emolecules = esp.data.dataset.GraphDataset.load('emolecules')
-    bayer = esp.data.dataset.GraphDataset.load('bayer')
-    roche = esp.data.dataset.GraphDataset.load('roche')
-    fda = esp.data.dataset.GraphDataset.load('fda')
-    # benchmark = esp.data.dataset.GraphDataset.load("benchmark")
+    ds = esp.data.dataset.GraphDataset.load("zinc")
+    ds.shuffle(seed=2666)
 
+    def subsample(g, n_samples):
+        idxs = torch.randperm(g.nodes['n1'].data['xyz'].shape[1])[:n_samples]
+        g.nodes['n1'].data['xyz'] = g.nodes['n1'].data['xyz'][:, idxs, :]
+        return g
 
-    _ds_tr = pfizer + coverage + emolecules + bayer + roche
-    _ds_vl = fda  # benchmark
+    import functools
+    ds.apply(functools.partial(subsample, n_samples=args.n_samples), in_place=True)
 
-    print(len(_ds_tr))
-    print(len(_ds_vl))
+    _ds_vl = ds[5000:]
+    _ds_tr = ds[:args.first]
 
     # batch
-    ds_tr = _ds_tr.view("graph", batch_size=100, shuffle=False)
+    ds_tr = _ds_tr.view("graph", batch_size=100, shuffle=True)
     ds_vl = _ds_vl.view("graph", batch_size=100)
 
     g = next(iter(ds_tr))
@@ -97,59 +91,24 @@ def run(args):
         in_features=units, config=janossy_config,
         out_features={
                 2: {'log_coefficients': 2},
-                3: {
-                    'log_coefficients': 2,
-<<<<<<< HEAD
-                    },
-                4: {
-                    'k': 6,
-=======
-                    'k_urey_bradley': 1,
-                    'eq_urey_bradley': 1,
-                    'k_bond_bond': 1,
-                    'k_bond_angle': 1,
-                    'k_bond_angle': 1,
-                    },
-                4: {
-                    'k': 6,
-                    'k_angle_angle': 1,
-                    'k_angle_angle_torsion': 1,
-                    'k_side_torsion': 1,
-                    'k_center_torsion': 1,
->>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
-                    },
+                3: {'log_coefficients': 2},
         },
     )
 
-    readout_improper = esp.nn.readout.janossy.JanossyPoolingImproper(
-        in_features=units, config=janossy_config
-    )
-
-<<<<<<< HEAD
-    readout_14 = esp.nn.readout.janossy.JanossyPooling14(
-        in_features=units, config=janossy_config,
-    )
-
-=======
->>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
     class ExpCoeff(torch.nn.Module):
         def forward(self, g):
             g.nodes['n2'].data['coefficients'] = g.nodes['n2'].data['log_coefficients'].exp()
             g.nodes['n3'].data['coefficients'] = g.nodes['n3'].data['log_coefficients'].exp()
             return g
-<<<<<<< HEAD
 
-=======
->>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
+
     net = torch.nn.Sequential(
             representation,
             readout,
-            readout_improper,
-<<<<<<< HEAD
-            # readout_14,
             ExpCoeff(),
             esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"]),
+            esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
+            esp.mm.energy.EnergyInGraph(suffix='_ref', terms=["n2", "n3"]),
     )
 
 
@@ -162,17 +121,6 @@ def run(args):
              net[1].f_out_3_to_log_coefficients.bias,
              mean=-5,
     )
-
-=======
-            ExpCoeff(),
-            esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=False),
-    )
-
-
-    torch.nn.init.normal_(net[1].f_out_2_to_log_coefficients.bias, mean=-5,)
-    torch.nn.init.normal_(net[1].f_out_3_to_log_coefficients.bias, mean=-5,)
->>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
 
     # net = net.cuda()
     metrics_tr = [
@@ -210,7 +158,7 @@ def run(args):
     results = exp.run()
 
     print(esp.app.report.markdown(results), flush=True)
-
+ 
     curves = esp.app.report.curve(results)
 
     import os
@@ -225,23 +173,10 @@ def run(args):
     import os
     torch.save(net.state_dict(), args.out + "/net.th")
 
-<<<<<<< HEAD
-
-
-
-    for state_name, state in exp.states.items():
-        torch.save(state, args.out + "/net%s.th" % state_name)
-
-
-
-
-
-=======
->>>>>>> b3c4c9bfb18572034beece7a41ee6dd960fbb509
     '''
     for g in _ds_tr:
         net(g.heterograph)
-
+        
         _df = {
                 'SMILES': g.mol.to_smiles(),
                 'RMSE': 625 * esp.metrics.center(esp.metrics.rmse)(g.nodes['g'].data['u_ref'], g.nodes['g'].data['u']).cpu().detach().numpy().item(),
@@ -254,7 +189,7 @@ def run(args):
 
     for g in _ds_vl:
         net(g.heterograph)
-
+        
         _df = {
                 'SMILES': g.mol.to_smiles(),
                 'RMSE': 625 * esp.metrics.center(esp.metrics.rmse)(g.nodes['g'].data['u_ref'], g.nodes['g'].data['u']).cpu().detach().numpy().item(),
@@ -287,7 +222,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--janossy_config", nargs="*", default=[32, "leaky_relu"])
 
-    parser.add_argument("--graph_act", type=str, default="leaky_relu")
+    parser.add_argument("--graph_act", type=str, default="leaky_relu") 
 
     parser.add_argument("--n_epochs", default=10, type=int)
 
@@ -296,6 +231,8 @@ if __name__ == "__main__":
     parser.add_argument("--lr", default=1e-5, type=float)
     parser.add_argument("--batch_size", default=32, type=float)
     parser.add_argument("--first", default=32, type=int)
+    parser.add_argument("--n_samples", default=10, type=int)
     args = parser.parse_args()
 
     run(args)
+
