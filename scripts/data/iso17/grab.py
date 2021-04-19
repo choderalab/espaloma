@@ -3,7 +3,8 @@ import os
 import numpy as np
 import espaloma as esp
 from openeye import oechem
-
+from simtk import unit
+from simtk.unit.quantity import Quantity
 
 def run(idx, u_thres=0.1):
     # read xyz file
@@ -17,7 +18,7 @@ def run(idx, u_thres=0.1):
     for mol in ifs.GetOEGraphMols():
         mols.append(oechem.OEGraphMol(mol))
     assert len(mols) == len(energies)
-    
+
     # read smiles
     smiles = [oechem.OEMolToSmiles(mol) for mol in mols]
 
@@ -34,37 +35,38 @@ def run(idx, u_thres=0.1):
     ok_mols = [mols[_idx] for _idx in ok_idxs]
     ok_energies = [energies[_idx] for _idx in ok_idxs]
 
+    ofs = oechem.oemolostream()
+    ofs.open("mol.sdf")
+    oechem.OEWriteMolecule(ofs, ok_mols[0])
+
     # put coordinates in the graph
     xs = [mol.GetCoords() for mol in ok_mols]
     xs = torch.stack(
-            [torch.tensor([x[_idx] for _idx in range(len(x))]) for x in xs],
+            [
+                torch.tensor(
+                    [
+                        Quantity(
+                            x[_idx],
+                            unit.angstrom,
+                        ).value_in_unit(
+                            unit.bohr,
+                        )
+                        for _idx in range(len(x))
+                    ]
+                ) for x in xs],
             dim=1,
     )
-    
+
     us = torch.tensor(ok_energies)[None, :]
 
     from openforcefield.topology import Molecule
     g = esp.Graph(Molecule.from_openeye(mols[idx_ref], allow_undefined_stereo=True))
-
-
-    print(g.mol.to_smiles())
     g.nodes['n1'].data['xyz'] = xs
     g.nodes['g'].data['u_ref'] = us
- 
-    print(g.nodes['g'].data['u_ref'] - g.nodes['g'].data['u_ref'].mean())
-
-   
     g = esp.data.md.subtract_nonbonded_force(g, "openff-1.2.0")
-
-    print(g.nodes['n1'].data['xyz'].shape)
-
-
-    print(g.nodes['g'].data['u_ref'] - g.nodes['g'].data['u_ref'].mean())
-
+    print(g.nodes['g'].data['u_ref'] - g.nodes['g'].data['u_ref'].min())
     g.save("out/%s" % idx)
 
 if __name__ == "__main__":
     import sys
     run(sys.argv[1])
-    
-
