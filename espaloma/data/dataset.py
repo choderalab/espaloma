@@ -317,4 +317,3 @@ class GraphDataset(Dataset):
         paths = [_path for _path in paths if _path.isnumeric()]
         graphs = [esp.Graph.load(path + "/" + _path) for _path in paths]
         return cls(graphs)
-
