@@ -314,7 +314,17 @@ class GraphDataset(Dataset):
     def load(cls, path):
         import os
         paths = os.listdir(path)
-        paths = [_path for _path in paths if _path.isnumeric()]
-        graphs = [esp.Graph.load(path + "/" + _path) for _path in paths]
+        paths = [_path for _path in paths]
+
+        graphs = []
+        for _path in paths:
+            try:
+                graphs.append(
+                    esp.Graph.load(path + "/" + _path)
+                )
+
+            except:
+                pass
+        
         return cls(graphs)
 
