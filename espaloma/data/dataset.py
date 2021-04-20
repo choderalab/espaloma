@@ -327,4 +327,3 @@ class GraphDataset(Dataset):
                 pass
         
         return cls(graphs)
-
