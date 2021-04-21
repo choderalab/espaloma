@@ -189,7 +189,7 @@ def geometry_in_graph(g):
             **{
                 "n1_as_%s_in_n%s"
                 % (pos_idx, big_idx): (
-                    copy_src(src="xyz", out="m_xyz%s" % pos_idx),
+                    dgl.function.copy_src(src="xyz", out="m_xyz%s" % pos_idx),
                     dgl.function.sum(
                         msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
                     ),
@@ -200,7 +200,7 @@ def geometry_in_graph(g):
             **{
                 "n1_as_%s_in_%s"
                 % (pos_idx, term): (
-                    copy_src(src="xyz", out="m_xyz%s" % pos_idx),
+                    dgl.function.copy_src(src="xyz", out="m_xyz%s" % pos_idx),
                     dgl.function.sum(
                         msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
                     ),
@@ -211,7 +211,7 @@ def geometry_in_graph(g):
             **{
                 "n1_as_%s_in_%s"
                 % (pos_idx, term): (
-                    copy_src(src="xyz", out="m_xyz%s" % pos_idx),
+                    dgl.function.copy_src(src="xyz", out="m_xyz%s" % pos_idx),
                     dgl.function.sum(
                         msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
                     ),
