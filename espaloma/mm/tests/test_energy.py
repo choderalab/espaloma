@@ -28,26 +28,17 @@ def test_energy():
     net = torch.nn.Sequential(
         esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
         esp.nn.readout.janossy.JanossyPooling(
-            in_features=32, config=[32, "tanh"],
+            in_features=32,
+            config=[32, "tanh"],
             out_features={
-                1: ['epsilon', 'sigma'],
-                2: ['k','eq',],
-                3: [
-                    'k', 'eq',
-                    'k_urey_bradley', 'eq_urey_bradley',
-                    'k_bond_bond', 'eq_left', 'eq_right',
-                    'k_bond_angle_left', 'k_bond_angle_right'
-                ],
-                4: [
-                    'k',
-                    'eq_angle_left', 'eq_angle_right',
-                    'k_angle_torsion_left', 'k_angle_torsion_right',
-                    'k_angle_angle',
-                    'k_angle_angle_torsion',
-                    'k_left_torsion', 'k_right_torsion', 'k_center_torsion',
-                    'eq_left_torsion', 'eq_right_torsion', 'eq_center_torsion',
-                ],
+                1: ["epsilon", "sigma"],
+                2: ["k", "eq"],
+                3: ["k", "eq"],
+                4: ["k"],
             },
+        ),
+        esp.nn.readout.janossy.JanossyPoolingImproper(
+            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
         ),
     )
 
@@ -55,11 +46,10 @@ def test_energy():
 
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g)
-    esp.mm.energy.energy_in_graph(g)
+    # esp.mm.energy.energy_in_graph(g)
 
-    # esp.mm.energy.energy_in_graph(g, suffix="_ref")
-#
-#
+    esp.mm.energy.energy_in_graph(g, terms=["n2", "n3", "n4", "n4_improper"])
+
 # def test_energy_consistent():
 #     g = esp.Graph("c1ccccc1")
 #

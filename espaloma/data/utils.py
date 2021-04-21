@@ -23,6 +23,7 @@ OFFSETS = {
 def sum_offsets(elements):
     return sum([OFFSETS[element] for element in elements])
 
+
 def from_csv(path, toolkit="rdkit", smiles_col=-1, y_cols=[-2], seed=2666):
     """ Read csv from file.
     """
@@ -118,12 +119,10 @@ def batch(ds, batch_size, seed=2666):
 def collate_fn(graphs):
     return esp.HomogeneousGraph(dgl.batch(graphs))
 
+
 def infer_mol_from_coordinates(
-        coordinates,
-        species,
-        smiles_ref=None,
-        coordinates_unit='angstrom',
-    ):
+    coordinates, species, smiles_ref=None, coordinates_unit="angstrom",
+):
 
     # local import
     from openeye import oechem
@@ -131,10 +130,7 @@ def infer_mol_from_coordinates(
     from simtk.unit.quantity import Quantity
 
     if isinstance(coordinates_unit, str):
-        coordinates_unit = getattr(
-            unit,
-            coordinates_unit
-        )
+        coordinates_unit = getattr(unit, coordinates_unit)
 
     # make sure we have the coordinates
     # in the unit system
@@ -142,7 +138,7 @@ def infer_mol_from_coordinates(
         coordinates,
         coordinates_unit
     ).value_in_unit(
-        unit.angstrom # to make openeye happy 
+        unit.angstrom # to make openeye happy
     )
 
     # initialize molecule
@@ -150,23 +146,22 @@ def infer_mol_from_coordinates(
 
     if all(isinstance(symbol, str) for symbol in species):
         [
-            mol.NewAtom(getattr(oechem, 'OEElemNo_' + symbol))
+            mol.NewAtom(getattr(oechem, "OEElemNo_" + symbol))
             for symbol in species
         ]
 
     elif all(isinstance(symbol, int) for symbol in species):
         [
-            mol.NewAtom(getattr(
-                oechem, 'OEElemNo_' + oechem.OEGetAtomicSymbol(symbol)
-            ))
+            mol.NewAtom(
+                getattr(oechem, "OEElemNo_" + oechem.OEGetAtomicSymbol(symbol))
+            )
             for symbol in species
         ]
 
     else:
         raise RuntimeError(
-            'The species can only be all strings or all integers.'
+            "The species can only be all strings or all integers."
         )
-
 
     mol.SetCoords(coordinates.reshape([-1]))
     mol.SetDimension(3)
@@ -181,7 +176,7 @@ def infer_mol_from_coordinates(
         ims.openstring(smiles_ref)
         mol_ref = next(ims.GetOEMols())
         smiles_ref = oechem.OECreateCanSmiString(mol_ref)
-        assert smiles_ref == smiles_can, ( 
+        assert smiles_ref == smiles_can, (
             "SMILES different. Input is %s, ref is %s" % (
                 smiles_can,
                 smiles_ref,
@@ -189,6 +184,7 @@ def infer_mol_from_coordinates(
         )
 
     from openforcefield.topology import Molecule
+
     _mol = Molecule.from_openeye(mol, allow_undefined_stereo=True)
     g = esp.Graph(_mol)
 

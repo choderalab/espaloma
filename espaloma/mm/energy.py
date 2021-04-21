@@ -31,6 +31,7 @@ def apply_bond(nodes, suffix=""):
     #         )
     #     }
 
+
 def apply_angle(nodes, suffix=""):
     """ Angle energy in nodes. """
     return {
@@ -67,11 +68,52 @@ def apply_angle(nodes, suffix=""):
         )
     }
 
-def apply_torsion(nodes, suffix=""):
+def apply_angle_ii(nodes, suffix=""):
+    return {
+        "u_urey_bradley%s"
+        % suffix: esp.mm.angle.urey_bradley(
+            x_between=nodes.data["x_between"],
+            k_urey_bradley=nodes.data["k_urey_bradley"],
+            eq_urey_bradley=nodes.data["eq_urey_bradley"],
+        ),
+        "u_bond_bond%s"
+        % suffix: esp.mm.angle.bond_bond(
+            x_left=nodes.data["x_left"],
+            x_right=nodes.data["x_right"],
+            eq_left=nodes.data["eq_left"],
+            eq_right=nodes.data["eq_right"],
+            k_bond_bond=nodes.data["k_bond_bond"],
+        ),
+        "u_bond_angle%s"
+        % suffix: esp.mm.angle.bond_angle(
+            x_left=nodes.data["x_left"],
+            x_right=nodes.data["x_right"],
+            x_angle=nodes.data["x"],
+            eq_left=nodes.data["eq_left"],
+            eq_right=nodes.data["eq_right"],
+            eq_angle=nodes.data["eq"],
+            k_bond_angle_left=nodes.data["k_bond_angle"],
+            k_bond_angle_right=nodes.data["k_bond_angle"],
+        )
+    }
+
+def apply_torsion_ii(nodes, suffix=""):
     """ Torsion energy in nodes. """
     return {
-        "u%s"
-        % suffix: esp.mm.torsion.periodic_torsion(
+        "u_angle_angle%s"
+        % suffix: esp.mm.torsion.angle_angle(
+            x_angle_left=nodes.data["x_angle_left"],
+            x_angle_right=nodes.data["x_angle_right"],
+            eq_angle_left=nodes.data["eq_angle_left"],
+            eq_angle_right=nodes.data["eq_angle_right"],
+            k_angle_angle=nodes.data["k_angle_angle"],
+        ),
+        "u_angle_angle_torsion%s"
+        % suffix: esp.mm.torsion.angle_angle_torsion(
+            x_angle_left=nodes.data["x_angle_left"],
+            x_angle_right=nodes.data["x_angle_right"],
+            eq_angle_left=nodes.data["eq_angle_left"],
+            eq_angle_right=nodes.data["eq_angle_right"],
             x=nodes.data["x"],
             k=nodes.data["k%s" % suffix],
         ),
@@ -98,14 +140,66 @@ def apply_torsion(nodes, suffix=""):
             x_bond_center=nodes.data["x_bond_center"],
             x_bond_right=nodes.data["x_bond_right"],
             x=nodes.data["x"],
-            k_left_torsion=nodes.data["k_left_torsion"],
-            k_right_torsion=nodes.data["k_right_torsion"],
+            k_left_torsion=nodes.data["k_side_torsion"],
+            k_right_torsion=nodes.data["k_side_torsion"],
             eq_left_torsion=nodes.data["eq_left_torsion"],
             eq_right_torsion=nodes.data["eq_right_torsion"],
             k_center_torsion=nodes.data["k_center_torsion"],
             eq_center_torsion=nodes.data["eq_center_torsion"],
         )
     }
+
+
+
+def apply_torsion(nodes, suffix=""):
+    """ Torsion energy in nodes. """
+    if (
+        "phases%s" % suffix in nodes.data
+        and "periodicity%s" % suffix in nodes.data
+    ):
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=nodes.data["phases%s" % suffix],
+                periodicity=nodes.data["periodicity%s" % suffix],
+            )
+        }
+
+    else:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"], k=nodes.data["k%s" % suffix],
+            )
+        }
+
+
+def apply_improper_torsion(nodes, suffix=""):
+    """ Improper torsion energy in nodes. """
+    if (
+        "phases%s" % suffix in nodes.data
+        and "periodicity%s" % suffix in nodes.data
+    ):
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=nodes.data["phases%s" % suffix],
+                periodicity=nodes.data["periodicity%s" % suffix],
+            )
+        }
+
+    else:
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"], k=nodes.data["k%s" % suffix],
+            )
+        }
+
 
 def apply_bond_gaussian(nodes, suffix=""):
     """ Bond energy in nodes. """
@@ -118,7 +212,8 @@ def apply_bond_gaussian(nodes, suffix=""):
         )
     }
 
-def apply_bond_linear_mixture(nodes, suffix=""):
+
+def apply_bond_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
     """ Bond energy in nodes. """
     # if suffix == '_ref':
     return {
@@ -126,6 +221,20 @@ def apply_bond_linear_mixture(nodes, suffix=""):
         % suffix: esp.mm.bond.linear_mixture_bond(
             x=nodes.data["x"],
             coefficients=nodes.data["coefficients%s" % suffix],
+            phases=phases,
+        )
+    }
+
+
+def apply_angle_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
+    """ Bond energy in nodes. """
+    # if suffix == '_ref':
+    return {
+        "u%s"
+        % suffix: esp.mm.angle.linear_mixture_angle(
+            x=nodes.data["x"],
+            coefficients=nodes.data["coefficients%s" % suffix],
+            phases=phases,
         )
     }
 
@@ -134,9 +243,11 @@ def apply_bond_linear_mixture(nodes, suffix=""):
 # =============================================================================
 def apply_nonbonded(nodes, scaling=1.0, suffix=""):
     """ Nonbonded in nodes. """
+    # TODO: should this be 9-6 or 12-6?
     return {
         "u%s"
-        % suffix: scaling * esp.mm.nonbonded.lj_9_6(
+        % suffix: scaling
+        * esp.mm.nonbonded.lj_12_6(
             x=nodes.data["x"],
             sigma=nodes.data["sigma%s" % suffix],
             epsilon=nodes.data["epsilon%s" % suffix],
@@ -148,8 +259,8 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
 # ENERGY IN GRAPH
 # =============================================================================
 def energy_in_graph(
-        g, suffix="", terms=["n2", "n3", "n4"], class_ii=True,
-    ):
+    g, suffix="", terms=["n2", "n3", "n4"], ii=False,
+):  # "onefour", "nonbonded"]):
     """ Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
@@ -170,26 +281,68 @@ def energy_in_graph(
     # TODO: this is all very restricted for now
     # we need to make this better
 
-    if "nonbonded" in terms or "onefour" in terms:
-        # apply combination rule
-        esp.mm.nonbonded.lorentz_berthelot(g, suffix=suffix)
-
     if "n2" in terms:
         # apply energy function
-        g.apply_nodes(
-            lambda node: apply_bond(node, suffix=suffix),
-            ntype="n2",
-        )
+
+        if "coefficients%s" % suffix in g.nodes["n2"].data:
+            g.apply_nodes(
+                lambda node: apply_bond_linear_mixture(node, suffix=suffix, phases=[1.5, 6.0]), ntype="n2",
+            )
+        else:
+            g.apply_nodes(
+                lambda node: apply_bond(node, suffix=suffix), ntype="n2",
+            )
 
     if "n3" in terms:
-        g.apply_nodes(
-            lambda node: apply_angle(node, suffix=suffix), ntype="n3",
-        )
+        if "coefficients%s" % suffix in g.nodes["n3"].data:
+            import math
+            g.apply_nodes(
+                lambda node: apply_angle_linear_mixture(node, suffix=suffix, phases=[0.0, math.pi]), ntype="n3",
+            )
+        else:
+            g.apply_nodes(
+                lambda node: apply_angle(node, suffix=suffix), ntype="n3",
+            )
+
+        if ii is True:
+            g.apply_nodes(
+                lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
+            )
+
+            g.apply_nodes(
+                lambda node: {
+                    'u%s' % suffix:
+                    node.data['u_urey_bradley%s' % suffix]\
+                    + node.data['u_bond_bond%s' % suffix]\
+                    + node.data['u_bond_angle%s' % suffix]
+                },
+                ntype='n3'
+            )
 
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
-            lambda node: apply_torsion(node, suffix=suffix),
-            ntype="n4",
+            lambda node: apply_torsion(node, suffix=suffix), ntype="n4",
+        )
+
+        if ii is True:
+            g.apply_nodes(
+                lambda node: apply_torsion_ii(node, suffix=suffix), ntype="n4",
+            )
+            
+            g.apply_nodes(
+                lambda node: {
+                    'u%s' % suffix:
+                    node.data['u_angle_angle%s' % suffix]\
+                    + node.data['u_angle_angle_torsion%s' % suffix]\
+                    + node.data['u_bond_torsion%s' % suffix]
+                },
+                ntype='n4'
+            )
+
+    if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
+        g.apply_nodes(
+            lambda node: apply_improper_torsion(node, suffix=suffix),
+            ntype="n4_improper",
         )
 
     if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:
@@ -200,9 +353,8 @@ def energy_in_graph(
 
     if g.number_of_nodes("onefour") > 0 and "onefour" in terms:
         g.apply_nodes(
-            lambda node: apply_nonbonded(
-                node, suffix=suffix, scaling=0.5,
-            ), ntype="onefour"
+            lambda node: apply_nonbonded(node, suffix=suffix, scaling=0.5,),
+            ntype="onefour",
         )
 
     if class_ii is True:
@@ -237,7 +389,7 @@ def energy_in_graph(
                     msg="m_%s" % term, out="u_%s%s" % (term, suffix)
                 ),
             )
-            for term in terms
+            for term in terms if "u" in g.nodes[term].data
         },
         cross_reducer="sum",
     )
@@ -246,16 +398,15 @@ def energy_in_graph(
         lambda node: {
             "u%s"
             % suffix: sum(
-                node.data["u_%s%s" % (term, suffix)] for term in terms
+                node.data["u_%s%s" % (term, suffix)] for term in terms if "u_%s%s" % (term, suffix) in node.data
             )
         },
         ntype="g",
     )
 
-    if 'u0' in g.nodes['g'].data:
+    if "u0" in g.nodes["g"].data:
         g.apply_nodes(
-            lambda node: {'u': node.data['u'] + node.data['u0']},
-            ntype="g",
+            lambda node: {"u": node.data["u"] + node.data["u0"]}, ntype="g",
         )
 
     return g

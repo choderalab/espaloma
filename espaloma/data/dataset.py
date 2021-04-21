@@ -61,13 +61,14 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
                 return graph
 
-        elif isinstance(idx, slice):  # implement slicing
+        elif isinstance(idx, slice):
+            # implement slicing
             if self.transforms is None:
                 # return a Dataset object rather than list
                 return self.__class__(graphs=self.graphs[idx])
             else:
                 graphs = []
-                for graph in self.graphs:
+                for graph in self.graphs[idx]:
 
                     # nested transforms
                     for transform in self.transforms:
@@ -75,6 +76,25 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                     graphs.append(graph)
 
                 return self.__class__(graphs=graphs)
+
+        elif isinstance(idx, list):
+            # implement slicing
+            if self.transforms is None:
+                # return a Dataset object rather than list
+                return self.__class__(
+                    graphs=[self.graphs[_idx] for _idx in idx]
+                )
+            else:
+                graphs = []
+                for _idx in idx:
+                    graph = self[_idx]
+                    # nested transforms
+                    for transform in self.transforms:
+                        graph = transform(graph)
+                    graphs.append(graph)
+
+                return self.__class__(graphs=graphs)
+
 
     def __iter__(self):
         if self.transforms is None:
@@ -89,10 +109,15 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
             return graphs
 
-    def shuffle(self):
+    def shuffle(self, seed=None):
+        import random
         from random import shuffle
+
+        if seed is not None:
+            random.seed(seed)
+
         shuffle(self.graphs)
-        return self        
+        return self
 
     def apply(self, fn, in_place=False):
         r""" Apply functions to the elements of the dataset.
@@ -123,7 +148,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                 try:
                     _graphs.append(fn(graph))
                 except:
-                    continue
+                    pass
             self.graphs = _graphs
 
         return self  # to allow grammar: ds = ds.apply(...)
@@ -146,6 +171,23 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return ds
 
+    def subsample(self, ratio, seed=None):
+        """ Subsample the dataset according to some ratio.
+
+        Parameters
+        ----------
+        ratio : float
+            Ratio between the size of the subsampled dataset and the
+            original dataset.
+
+        """
+        n_data = len(self)
+        idxs = list(range(n_data))
+        import random
+        random.seed(seed)
+        _idxs = random.choices(idxs, k=int(n_data*ratio))
+        return self[_idxs]
+
     def save(self, path):
         """ Save dataset to path.
 
@@ -158,7 +200,8 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         with open(path, "wb") as f_handle:
             pickle.dump(self.graphs, f_handle)
 
-    def load(self, path):
+    @classmethod
+    def load(cls, path):
         """ Load path to dataset.
 
         Parameters
@@ -167,9 +210,14 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         import pickle
 
         with open(path, "rb") as f_handle:
-            self.graphs = pickle.load(f_handle)
+            graphs = pickle.load(f_handle)
 
-        return self
+        return cls(graphs)
+
+    def __add__(self, x):
+        return self.__class__(
+            self.graphs + x.graphs
+        )
 
 
 class GraphDataset(Dataset):
@@ -255,3 +303,27 @@ class GraphDataset(Dataset):
         return torch.utils.data.DataLoader(
             dataset=self, collate_fn=collate_fn, *args, **kwargs
         )
+
+    def save(self, path):
+        import os
+        os.mkdir(path)
+        for idx, graph in enumerate(self.graphs):
+            graph.save(path + "/" + str(idx))
+
+    @classmethod
+    def load(cls, path):
+        import os
+        paths = os.listdir(path)
+        paths = [_path for _path in paths]
+
+        graphs = []
+        for _path in paths:
+            try:
+                graphs.append(
+                    esp.Graph.load(path + "/" + _path)
+                )
+
+            except:
+                pass
+        
+        return cls(graphs)

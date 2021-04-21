@@ -8,7 +8,7 @@ import espaloma as esp
 # MODULE FUNCTIONS
 # =============================================================================
 def harmonic_angle(x, k, eq):
-    """ Harmonic bond energy.
+    """ Harmonic angle energy.
 
     Parameters
     ----------
@@ -17,7 +17,7 @@ def harmonic_angle(x, k, eq):
     k : `torch.Tensor`, `shape = (batch_size, 1)`
         force constant
     eq : `torch.Tensor`, `shape = (batch_size, 1)`
-        eqilibrium value
+        equilibrium angle
 
     Returns
     -------
@@ -30,7 +30,16 @@ def harmonic_angle(x, k, eq):
 
     # NOTE:
     # 0.25 because all angles are calculated twice
-    return 0.25 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
+
+    return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
+
+def linear_mixture_angle(x, coefficients, phases):
+    """ Angle energy with Linear basis function.
+
+    """
+
+    return 0.5 * esp.mm.functional.linear_mixture(x=x, coefficients=coefficients, phases=phases)
+
 
 def urey_bradley(x_between, k_urey_bradley, eq_urey_bradley):
     return esp.mm.functional.harmonic(
@@ -65,3 +74,4 @@ def bond_angle(
         eq1=eq_angle,
         k=k_bond_angle_right,
     )
+

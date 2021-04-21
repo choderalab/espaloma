@@ -276,11 +276,14 @@ class PositiveNotNormalize(BaseNormalize):
             return g
 
         def unnorm(g):
-            for term in ["n2", "n3",]:  # loop through terms
+            for term in [
+                "n2",
+                "n3",
+            ]:  # loop through terms
                 for key in g.nodes[
                     term
                 ].data.keys():  # loop through parameters
-                    if key == 'k' or key == 'eq':
+                    if key == "k" or key == "eq":
 
                         g.nodes[term].data[key] = torch.exp(
                             g.nodes[term].data[key]

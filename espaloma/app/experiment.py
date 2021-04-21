@@ -64,19 +64,26 @@ class Train(Experiment):
         n_epochs=100,
         record_interval=1,
         normalize=esp.data.normalize.ESOL100LogNormalNormalize,
-        device=torch.device('cpu'),
+        scheduler=None,
+        device=torch.device("cpu"),
     ):
         super(Train, self).__init__()
 
         # bookkeeping
         self.device = device
-        self.net = net.to(self.device)
+        if isinstance(net, torch.nn.DataParallel):
+            self.net = net
+        elif isinstance(net, torch.nn.parallel.DistributedDataParallel):
+            self.net = net
+        else:
+            self.net = net.to(self.device)
         self.data = data
         self.metrics = metrics
         self.n_epochs = n_epochs
         self.record_interval = record_interval
         self.normalize = normalize()
         self.states = {}
+        self.scheduler = scheduler
 
         # make optimizer
         if callable(optimizer):
@@ -94,12 +101,19 @@ class Train(Experiment):
 
         self.loss = loss
 
-
-
     def train_once(self):
         """ Train the model for one batch. """
-        for idx, g in enumerate(self.data):  # TODO: does this have to be a single g?
+        for idx, g in enumerate(
+            self.data
+        ):  # TODO: does this have to be a single g?
+
+            if isinstance(self.optimizer, torch.optim.LBFGS):
+                retain_graph = True
+            else:
+                retain_graph=False
+
             g = g.to(self.device)
+            self.net.train()
 
             def closure(g=g):
                 self.optimizer.zero_grad()
@@ -107,15 +121,18 @@ class Train(Experiment):
                 g = self.normalize.unnorm(g)
 
                 loss = self.loss(g)
-                loss.backward()
+                loss.backward(retain_graph=retain_graph)
 
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
-                        raise RuntimeError('Loss is Nan.')
-
+                        raise RuntimeError("Loss is Nan.")
                 return loss
 
-            self.optimizer.step(closure)
+            loss = closure()
+            self.optimizer.step()
+            
+            if self.scheduler is not None:
+                self.scheduler.step(loss)
 
     def train(self):
         """ Train the model for multiple steps and
@@ -124,6 +141,7 @@ class Train(Experiment):
         """
 
         for epoch_idx in range(int(self.n_epochs)):
+
             self.train_once()
 
             # record when `record_interval` is hit
@@ -134,6 +152,7 @@ class Train(Experiment):
         self.states["final"] = copy.deepcopy(self.net.state_dict())
 
         return self.net
+
 
 class Test(Experiment):
     """ Test experiment.
@@ -162,7 +181,7 @@ class Test(Experiment):
         metrics=[esp.metrics.TypingCrossEntropy()],
         normalize=esp.data.normalize.NotNormalize,
         sampler=None,
-        device=torch.device('cpu'), # it should cpu
+        device=torch.device("cpu"),  # it should cpu
     ):
         # bookkeeping
         self.device = device
@@ -182,33 +201,55 @@ class Test(Experiment):
         for metric in self.metrics:
             results[metric.__name__] = {}
 
+        # NOTE: we are not doing this here since this will lead to OOM
+        # from time to time
         # make it just one giant graph
-        g = list(self.data)
-        g = dgl.batch_hetero(g)
-        g = g.to(self.device)
+        # g = list(self.data)
+        # g = dgl.batch_hetero(g)
+        # g = g.to(self.device)
+
+        if self.states is None:
+            self.states = {'final': None}
 
         for state_name, state in self.states.items():  # loop through states
-            # load the state dict
-            self.net.load_state_dict(state)
-            
-            # local scope
-            with g.local_scope():
+            if state is not None:
+                # load the state dict
+                self.net.load_state_dict(state)
 
-                for metric in self.metrics:
+            self.net.eval() 
 
-                    # loop through the metrics
-                    results[metric.__name__][state_name] = (
-                        metric(g_input=self.normalize.unnorm(self.net(g)))
-                        .detach()
-                        .cpu()
-                        .numpy()
-                    )
+            for metric in self.metrics:
+                assert isinstance(metric, esp.metrics.Metric)
+                input_fn, target_fn = metric.between
 
-        self.ref_g = self.normalize.unnorm(self.net(g))
+                inputs = []
+                targets = []
+
+                for g in self.data:
+                    with g.local_scope():
+                        g = g.to(self.device)
+                        g_input = self.normalize.unnorm(self.net(g))
+                        inputs.append(input_fn(g_input).detach())
+                        targets.append(target_fn(g_input).detach())
+
+                inputs = torch.cat(inputs, dim=0)
+                targets = torch.cat(targets, dim=0)
+
+                # loop through the metrics
+                results[metric.__name__][state_name] = (
+                    metric.base_metric(inputs, targets)
+                    .detach()
+                    .cpu()
+                    .numpy()
+                )
+
+        self.ref_g = self.normalize.unnorm(self.net(g)).to(torch.device('cpu'))
 
         for term in self.ref_g.ntypes:
             for param in self.ref_g.nodes[term].data.keys():
-                g.nodes[term].data[param] = g.nodes[term].data[param].detach().cpu()
+                g.nodes[term].data[param] = (
+                    g.nodes[term].data[param].detach()
+                )
 
         # point this to self
         self.results = results
@@ -229,7 +270,8 @@ class TrainAndTest(Experiment):
         normalize=esp.data.normalize.NotNormalize,
         n_epochs=100,
         record_interval=1,
-        device=torch.device('cpu'),
+        device=torch.device("cpu"),
+        scheduler=None,
     ):
 
         # bookkeeping
@@ -244,6 +286,7 @@ class TrainAndTest(Experiment):
         self.metrics_te = metrics_te
         self.normalize = normalize
         self.record_interval = record_interval
+        self.scheduler = scheduler
 
     def __str__(self):
         _str = ""
@@ -279,6 +322,7 @@ class TrainAndTest(Experiment):
             normalize=self.normalize,
             device=self.device,
             record_interval=self.record_interval,
+            scheduler=self.scheduler,
         )
 
         train.train()
@@ -291,6 +335,7 @@ class TrainAndTest(Experiment):
             metrics=self.metrics_te,
             states=self.states,
             normalize=self.normalize,
+            device=self.device,
         )
 
         test.test()
@@ -305,6 +350,7 @@ class TrainAndTest(Experiment):
             metrics=self.metrics_te,
             states=self.states,
             normalize=self.normalize,
+            device=self.device,
         )
 
         test.test()
@@ -320,6 +366,7 @@ class TrainAndTest(Experiment):
                 metrics=self.metrics_te,
                 states=self.states,
                 normalize=self.normalize,
+                device=self.device,
             )
 
             test.test()
@@ -327,6 +374,10 @@ class TrainAndTest(Experiment):
 
             self.results_vl = test.results
 
-            return {"test": self.results_te, "train": self.results_tr, "validate": self.results_vl}
+            return {
+                "test": self.results_te,
+                "train": self.results_tr,
+                "validate": self.results_vl,
+            }
 
         return {"test": self.results_te, "train": self.results_tr}

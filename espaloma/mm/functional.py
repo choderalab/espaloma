@@ -10,11 +10,8 @@ import espaloma as esp
 # =============================================================================
 from simtk import unit
 from simtk.unit.quantity import Quantity
-LJ_SWITCH = Quantity(
-    1.0,
-    unit.angstrom).value_in_unit(
-        esp.units.DISTANCE_UNIT
-    )
+
+LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(esp.units.DISTANCE_UNIT)
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -27,10 +24,9 @@ def linear_mixture_to_original(k1, k2, b1, b2):
     k = k1 + k2
 
     # (batch_size, )
-    b = (k1 * b1 + k2 * b2) / (k + 1e-3)
+    b = (k1 * b1 + k2 * b2) / (k + 1e-7)
 
     return k, b
-
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -53,18 +49,86 @@ def harmonic(x, k, eq, order=[2]):
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 
-    return k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
+    return 0.5 * k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
         dim=-1
     )
 
-def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]):
+
+def periodic_fixed_phases(
+    dihedrals: torch.Tensor, ks: torch.Tensor
+) -> torch.Tensor:
+    """Periodic torsion term with n_phases = 6, periodicities = 1..n_phases, phases = zeros
+
+    Parameters
+    ----------
+    dihedrals : torch.Tensor, shape=(n_snapshots, n_dihedrals)
+        dihedral angles -- TODO: confirm in radians?
+    ks : torch.Tensor, shape=(n_dihedrals, n_phases)
+        force constants -- TODO: confirm in esp.unit.ENERGY_UNIT ?
+
+    Returns
+    -------
+    u : torch.Tensor, shape=(n_snapshots, 1)
+        potential energy of each snapshot
+
+    Notes
+    -----
+    TODO: is there a way to annotate / type-hint tensor shapes? (currently adding many assert statements)
+    TODO: merge with esp.mm.functional.periodic -- adding this because I was having difficulty debugging runtime tensor
+      shape errors in esp.mm.functional.periodic, which allows for a more flexible mix of input shapes and types
+    """
+
+    # periodicity = 1..n_phases
+    n_phases = 6
+    periodicity = torch.arange(n_phases) + 1
+
+    # assert input shape consistency
+    n_snapshots, n_dihedrals = dihedrals.shape
+    n_dihedrals_, n_phases_ = ks.shape
+    assert n_dihedrals == n_dihedrals_
+    assert n_phases == n_phases_
+
+    # promote everything to this shape
+    stacked_shape = (n_snapshots, n_dihedrals, n_phases)
+
+    # duplicate ks n_snapshots times
+    ks_stacked = torch.stack([ks] * n_snapshots, dim=0)
+    assert ks_stacked.shape == stacked_shape
+
+    # duplicate dihedral angles n_phases times
+    dihedrals_stacked = torch.stack([dihedrals] * n_phases, dim=2)
+    assert dihedrals_stacked.shape == stacked_shape
+
+    # duplicate periodicity n_snapshots * n_dihedrals times
+    ns = torch.stack(
+        [torch.stack([periodicity] * n_snapshots)] * n_dihedrals, dim=1
+    )
+    assert ns.shape == stacked_shape
+
+    # compute k_n * cos(n * theta) for n in 1..n_phases, for each dihedral in each snapshot
+    energy_terms = ks_stacked * torch.cos(ns * dihedrals_stacked)
+    assert energy_terms.shape == stacked_shape
+
+    # sum over n_dihedrals and n_phases
+    energy_sums = energy_terms.sum(dim=(1, 2))
+    assert energy_sums.shape == (n_snapshots,)
+
+    return energy_sums.reshape((n_snapshots, 1))
+
+
+def periodic(
+    x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
+):
     """ Periodic term.
 
     Parameters
     ----------
     x : `torch.Tensor`, `shape=(batch_size, 1)`
     k : `torch.Tensor`, `shape=(batch_size, number_of_phases)`
-    eq: `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    periodicity: either list of length number_of_phases, or
+        `torch.Tensor`, `shape=(batch_size, number_of_phases)`
+    phases : either list of length number_of_phases, or
+        `torch.Tensor`, `shape=(batch_size, number_of_phases)`
     """
 
     if isinstance(phases, list):
@@ -75,23 +139,32 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
             periodicity, device=x.device, dtype=torch.get_default_dtype(),
         )
 
-    n_theta = periodicity[None, None, :].repeat(
-        x.shape[0],
-        x.shape[1],
-        1
-    ) * x[:, :, None]
+    if periodicity.ndim == 1:
+        periodicity = periodicity[None, None, :].repeat(
+            x.shape[0], x.shape[1], 1
+        )
 
-    n_theta_minus_phases = n_theta - phases[None, None, :]
+    elif periodicity.ndim == 2:
+        periodicity = periodicity[:, None, :].repeat(1, x.shape[1], 1)
+
+    if phases.ndim == 1:
+        phases = phases[None, None, :].repeat(x.shape[0], x.shape[1], 1,)
+
+    elif phases.ndim == 2:
+        phases = phases[:, None, :].repeat(1, x.shape[1], 1,)
+
+    n_theta = periodicity * x[:, :, None]
+
+    n_theta_minus_phases = n_theta - phases
 
     cos_n_theta_minus_phases = n_theta_minus_phases.cos()
 
-    k = k[:, None, :].repeat(
-        1, x.shape[1], 1
-    )
+    k = k[:, None, :].repeat(1, x.shape[1], 1)
 
     energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
 
     return energy
+
 
 # simple implementation
 # def harmonic(x, k, eq):
@@ -107,7 +180,9 @@ def periodic(x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
 #     return ka * (x - a) ** 2 + kb * (x - b) ** 2
 
 
-def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWITCH):
+def lj(
+    x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWITCH
+):
     r""" Lennard-Jones term.
 
     Notes
@@ -121,12 +196,12 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     epsilon : `torch.Tensor`, `shape=(batch_size, len(order))`
     sigma : `torch.Tensor`, `shape=(batch_size, len(order))`
     order : `int` or `List` of `int`
+    coefficients : torch.tensor or list
+    switch : unitless switch width (distance)
 
     Returns
     -------
     u : `torch.Tensor`, `shape=(batch_size, 1)`
-
-
     """
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
@@ -137,24 +212,32 @@ def lj(x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWIT
     assert order.shape[0] == 2
     assert order.dim() == 1
 
+    # TODO:
+    # for experiments only
+    # erase later
+
     # compute sigma over x
     sigma_over_x = sigma / x
 
     # erase values under switch
     sigma_over_x = torch.where(
-        torch.lt(x, switch),
-        torch.zeros_like(sigma_over_x),
-        sigma_over_x,
+        torch.lt(x, switch), torch.zeros_like(sigma_over_x), sigma_over_x,
     )
 
     return epsilon * (
-            coefficients[0] * sigma_over_x ** order[0]
-            - coefficients[1] * sigma_over_x ** order[1]
-        )
+        coefficients[0] * sigma_over_x ** order[0]
+        - coefficients[1] * sigma_over_x ** order[1]
+    )
+
 
 def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
     r""" Gaussian basis function.
 
+    Parameters
+    ----------
+    x : torch.Tensor
+    coefficients : list or torch.Tensor of length n_phases
+    phases : list or torch.Tensor of length n_phases
     """
 
     if isinstance(phases, list):
@@ -169,12 +252,16 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
 
     return (coefficients * torch.exp(-0.5 * (x - phases) ** 2)).sum(-1)
 
-def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
+
+def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
     r""" Linear mixture basis function.
 
+    x : torch.Tensor
+    coefficients : list or torch.Tensor of length 2
+    phases : list of length 2
     """
 
-    assert len(phases) == 2, 'Only two phases now.'
+    assert len(phases) == 2, "Only two phases now."
     assert coefficients.shape[-1] == 2
 
     # partition the dimensions
@@ -188,13 +275,13 @@ def linear_mixture(x, coefficients, phases=[0.10, 0.25]):
 
     # get the original parameters
     # (batch_size, )
-    k, b = linear_mixture_to_original(k1, k2, b1, b2)
+    # k, b = linear_mixture_to_original(k1, k2, b1, b2)
 
     # (batch_size, 1)
     u1 = k1 * (x - b1) ** 2
-    u2 = k2 * (x - b1) ** 2
+    u2 = k2 * (x - b2) ** 2
 
-    u = u1 + u2 - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
+    u = 0.5 * (u1 + u2) # - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
 
     return u
 

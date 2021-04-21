@@ -23,10 +23,18 @@ def alkethoh(*args, **kwargs):
 
     import pandas as pd
 
-    path = os.path.dirname(esp.__file__) + "/data/alkethoh.smi"
-    df = pd.read_csv(path)
-    smiles = df.iloc[:, 0]
+
+    df = pd.concat(
+        [
+            pd.read_csv("https://raw.githubusercontent.com/openforcefield/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi", header=None),
+            pd.read_csv("https://raw.githubusercontent.com/openforcefield/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi", header=None),
+        ],
+        axis=0,
+    )
+
+    smiles = df.iloc[:, 0].values
     return esp.data.dataset.GraphDataset(smiles, *args, **kwargs)
+
 
 
 def zinc(first=-1, *args, **kwargs):
@@ -67,38 +75,17 @@ def zinc(first=-1, *args, **kwargs):
 
     return esp.data.dataset.GraphDataset(gs, *args, **kwargs)
 
-def qcarchive(
-        collection_type="OptimizationDataset",
-        name="OpenFF Full Optimization Benchmark 1",
-        first=-1,
-        *args, **kwargs
-    ):
-    from espaloma.data import qcarchive_utils
-    client = qcarchive_utils.get_client()
-    collection, record_names = qcarchive_utils.get_collection(client)
-    if first != -1:
-        record_names = record_names[:first]
-    graphs = [
-        qcarchive_utils.get_graph(collection, record_name)
-        for record_name in record_names
-    ]
-
-    graphs = [graph for graph in graphs if graph is not None]
-
-    return esp.data.dataset.GraphDataset(graphs, *args, **kwargs)
-
-
 def md17_old(*args, **kwargs):
     return [
         esp.data.md17_utils.get_molecule(
             name, *args, **kwargs
-        ).heterograph for name in [
-            # 'benzene', 
-            'uracil', 
+        ) for name in [
+            'benzene',
+            'uracil',
             'naphthalene',
             'aspirin', 'salicylic',
-            'malonaldehyde', 
-            # 'ethanol', 
+            'malonaldehyde',
+            'ethanol',
             'toluene',
    'paracetamol', 'azobenzene'
         ]]
@@ -108,10 +95,28 @@ def md17_new(*args, **kwargs):
         esp.data.md17_utils.get_molecule(
             name, *args, **kwargs
         ).heterograph for name in [
-            # 'paracetamol', 'azobenzene',
+            'paracetamol', 'azobenzene',
             'benzene', 'ethanol',
         ]]
 
 
+class qca(object):
+    pass
 
+df_names = ['Bayer', 'Coverage', 'eMolecules', 'Pfizer', 'Roche', "Benchmark", "fda"]
 
+def _get_ds(cls, df_name):
+    import os
+    import pandas as pd
+    path = os.path.dirname(esp.__file__) + "/../data/qca/%s.h5" % df_name
+    df = pd.read_hdf(path)
+    ds = esp.data.qcarchive_utils.h5_to_dataset(df)
+    return ds
+
+from functools import partial
+for df_name in df_names:
+    setattr(
+        qca,
+        df_name.lower(),
+        classmethod(partial(_get_ds, df_name=df_name)),
+    )

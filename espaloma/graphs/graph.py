@@ -31,6 +31,10 @@ class Graph(BaseGraph):
     """
 
     def __init__(self, mol=None, homograph=None, heterograph=None):
+        # TODO : more pythonic way allow multiple constructors:
+        #   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...
+        #   rather than Graph(mol=None, homograph=None, ...)
+
         # input molecule
         if isinstance(mol, str):
             from openforcefield.topology import Molecule
@@ -41,11 +45,33 @@ class Graph(BaseGraph):
             homograph = self.get_homograph_from_mol(mol)
 
         if homograph is not None and heterograph is None:
-            heterograph = self.get_heterograph_from_graph(homograph)
+            heterograph = self.get_heterograph_from_graph_and_mol(
+                homograph, mol
+            )
 
         self.mol = mol
         self.homograph = homograph
         self.heterograph = heterograph
+
+    def save(self, path):
+        import os; import json
+        os.mkdir(path)
+        dgl.save_graphs(path+"/homograph.bin", [self.homograph])
+        dgl.save_graphs(path+"/heterograph.bin", [self.heterograph])
+        with open(path+"/mol.json", "w") as f_handle:
+            json.dump(self.mol.to_dict(), f_handle)
+
+    @classmethod
+    def load(cls, path):
+        import json
+        homograph = dgl.load_graphs(path+"/homograph.bin")[0][0]
+        heterograph = dgl.load_graphs(path+"/heterograph.bin")[0][0]
+
+        with open(path+"/mol.json", "r") as f_handle:
+            mol = json.load(f_handle)
+        from openforcefield.topology import Molecule
+        mol = Molecule.from_dict(mol)
+        return cls(mol=mol, homograph=homograph, heterograph=heterograph)
 
     @staticmethod
     def get_homograph_from_mol(mol):
@@ -65,13 +91,13 @@ class Graph(BaseGraph):
         return graph
 
     @staticmethod
-    def get_heterograph_from_graph(graph):
+    def get_heterograph_from_graph_and_mol(graph, mol):
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."
 
-        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous(
-            graph
+        heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol(
+            graph, mol
         )
 
         return heterograph
@@ -100,19 +126,3 @@ class Graph(BaseGraph):
     @property
     def nodes(self):
         return self.heterograph.nodes
-
-    def save(self, path):
-        import pickle
-
-        with open(path, "wb") as f_handle:
-            pickle.dump([self.mol, self.homograph, self.heterograph], f_handle)
-
-    def load(self, path):
-        import pickle
-
-        with open(path, "rb") as f_handle:
-            (self.mol, self.homograph, self.heterograph) = pickle.load(
-                f_handle
-            )
-
-        return self
