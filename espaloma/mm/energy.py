@@ -327,7 +327,7 @@ def energy_in_graph(
                     msg="m_%s" % term, out="u_%s%s" % (term, suffix)
                 ),
             )
-            for term in terms
+            for term in terms if "u" in g.nodes[term].data
         },
         cross_reducer="sum",
     )
