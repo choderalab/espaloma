@@ -366,3 +366,42 @@ class EnergyInGraphII(torch.nn.Module):
 
     def forward(self, g):
         return energy_in_graph_ii(g, *self.args, **self.kwargs)
+
+class CarryII(torch.nn.Module):
+    def forward(self, g):
+        import math
+        g.multi_update_all(
+            {
+                "n2_as_0_in_n3": (
+                    dgl.function.copy_src("u", "m_u_0"),
+                    dgl.function.sum("m_u_0", "u_left"),
+                ),
+                "n2_as_1_in_n3": (
+                    dgl.function.copy_src("u", "m_u_1"),
+                    dgl.function.sum("m_u_1", "u_right"),
+                ),
+                "n2_as_0_in_n4": (
+                    dgl.function.copy_src("u", "m_u_0"),
+                    dgl.function.sum("m_u_0", "u_bond_left"),
+                ),
+                "n2_as_1_in_n4": (
+                    dgl.function.copy_src("u", "m_u_1"),
+                    dgl.function.sum("m_u_1", "u_bond_center"),
+                ),
+                "n2_as_2_in_n4": (
+                    dgl.function.copy_src("u", "m_u_2"),
+                    dgl.function.sum("m_u_2", "u_bond_right"),
+                ),
+                "n3_as_0_in_n4": (
+                    dgl.function.copy_src("u", "m3_u_0"),
+                    dgl.function.sum("m3_u_0", "u_angle_left"),
+                ),
+                "n3_as_1_in_n4": (
+                    dgl.function.copy_src("u", "m3_u_1"),
+                    dgl.function.sum("m3_u_1", "u_angle_right"),
+                )
+            },
+            cross_reducer="sum"
+        )
+
+        return g
