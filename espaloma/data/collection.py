@@ -23,10 +23,18 @@ def alkethoh(*args, **kwargs):
 
     import pandas as pd
 
-    path = os.path.dirname(esp.__file__) + "/data/alkethoh.smi"
-    df = pd.read_csv(path)
-    smiles = df.iloc[:, 0]
+
+    df = pd.concat(
+        [
+            pd.read_csv("https://raw.githubusercontent.com/openforcefield/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi", header=None),
+            pd.read_csv("https://raw.githubusercontent.com/openforcefield/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi", header=None),
+        ],
+        axis=0,
+    )
+
+    smiles = df.iloc[:, 0].values
     return esp.data.dataset.GraphDataset(smiles, *args, **kwargs)
+
 
 
 def zinc(first=-1, *args, **kwargs):
@@ -71,13 +79,13 @@ def md17_old(*args, **kwargs):
     return [
         esp.data.md17_utils.get_molecule(
             name, *args, **kwargs
-        ).heterograph for name in [
-            # 'benzene',
+        ) for name in [
+            'benzene',
             'uracil',
             'naphthalene',
             'aspirin', 'salicylic',
             'malonaldehyde',
-            # 'ethanol',
+            'ethanol',
             'toluene',
    'paracetamol', 'azobenzene'
         ]]
@@ -87,7 +95,7 @@ def md17_new(*args, **kwargs):
         esp.data.md17_utils.get_molecule(
             name, *args, **kwargs
         ).heterograph for name in [
-            # 'paracetamol', 'azobenzene',
+            'paracetamol', 'azobenzene',
             'benzene', 'ethanol',
         ]]
 
