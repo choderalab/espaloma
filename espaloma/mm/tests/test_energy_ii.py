@@ -37,8 +37,7 @@ def test_energy():
                 2: {'log_coefficients': 2},
                 3: {
                     'log_coefficients': 2,
-                    'k_urey_bradley': 1,
-                    'eq_urey_bradley': 1,
+                    'coefficients_urey_bradley': 2,
                     'k_bond_bond': 1,
                     'k_bond_angle': 1,
                     'k_bond_angle': 1,
@@ -47,6 +46,7 @@ def test_energy():
                     'k': 6,
                     'k_angle_angle': 1,
                     'k_angle_angle_torsion': 1,
+                    'k_angle_torsion': 1,
                     'k_side_torsion': 1,
                     'k_center_torsion': 1,
                     },
@@ -66,47 +66,35 @@ def test_energy():
     class CarryII(torch.nn.Module):
         def forward(self, g):
             import math
-            _, g.nodes['n2'].data['eq'] = esp.mm.functional.linear_mixture_to_original(
-                g.nodes['n2'].data['coefficients'][:, 0][:, None],
-                g.nodes['n2'].data['coefficients'][:, 1][:, None],
-                1.5, 4.0,
-            )
-
-            _, g.nodes['n3'].data['eq'] = esp.mm.functional.linear_mixture_to_original(
-                g.nodes['n3'].data['coefficients'][:, 0][:, None],
-                g.nodes['n3'].data['coefficients'][:, 1][:, None],
-                0.0, math.pi,
-            )
-
             g.multi_update_all(
                 {
                     "n2_as_0_in_n3": (
-                        dgl.function.copy_src("eq", "m_eq_0"),
-                        dgl.function.sum("m_eq_0", "eq_left"),
+                        dgl.function.copy_src("u", "m_u_0"),
+                        dgl.function.sum("m_u_0", "u_left"),
                     ),
                     "n2_as_1_in_n3": (
-                        dgl.function.copy_src("eq", "m_eq_1"),
-                        dgl.function.sum("m_eq_1", "eq_right"),
+                        dgl.function.copy_src("u", "m_u_1"),
+                        dgl.function.sum("m_u_1", "u_right"),
                     ),
                     "n2_as_0_in_n4": (
-                        dgl.function.copy_src("eq", "m_eq_0"),
-                        dgl.function.sum("m_eq_0", "eq_left_torsion"),
+                        dgl.function.copy_src("u", "m_u_0"),
+                        dgl.function.sum("m_u_0", "u_bond_left"),
                     ),
                     "n2_as_1_in_n4": (
-                        dgl.function.copy_src("eq", "m_eq_1"),
-                        dgl.function.sum("m_eq_1", "eq_center_torsion"),
+                        dgl.function.copy_src("u", "m_u_1"),
+                        dgl.function.sum("m_u_1", "u_bond_center"),
                     ),
                     "n2_as_2_in_n4": (
-                        dgl.function.copy_src("eq", "m_eq_2"),
-                        dgl.function.sum("m_eq_2", "eq_right_torsion"),
+                        dgl.function.copy_src("u", "m_u_2"),
+                        dgl.function.sum("m_u_2", "u_bond_right"),
                     ),
                     "n3_as_0_in_n4": (
-                        dgl.function.copy_src("eq", "m3_eq_0"),
-                        dgl.function.sum("m3_eq_0", "eq_angle_left"),
+                        dgl.function.copy_src("u", "m3_u_0"),
+                        dgl.function.sum("m3_u_0", "u_angle_left"),
                     ),
                     "n3_as_1_in_n4": (
-                        dgl.function.copy_src("eq", "m3_eq_1"),
-                        dgl.function.sum("m3_eq_1", "eq_angle_right"),
+                        dgl.function.copy_src("u", "m3_u_1"),
+                        dgl.function.sum("m3_u_1", "u_angle_right"),
                     )
                 },
                 cross_reducer="sum"
@@ -119,9 +107,10 @@ def test_energy():
             readout,
             readout_improper,
             ExpCoeff(),
-            CarryII(),
             esp.mm.geometry.GeometryInGraph(),
-            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"], ii=True),
+            esp.mm.energy.EnergyInGraph(terms=["n2", "n3", "n4", "n4_improper"]),
+            CarryII(),
+            esp.mm.energy.EnergyInGraphII(),
     )
 
     torch.nn.init.normal_(net[1].f_out_2_to_log_coefficients.bias, mean=-5,)

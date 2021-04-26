@@ -40,86 +40,50 @@ def periodic_torsion(
 
 
 def angle_angle(
-        x_angle_left,
-        x_angle_right,
-        eq_angle_left,
-        eq_angle_right,
+        u_angle_left,
+        u_angle_right,
         k_angle_angle,
     ):
-    return esp.mm.functional.harmonic_harmonic_coupled(
-        x0=x_angle_left,
-        eq0=eq_angle_left,
-        x1=x_angle_right,
-        eq1=eq_angle_right,
-        k=k_angle_angle,
-    )
+
+    u_angle_left = u_angle_left - u_angle_left.min(dim=-1, keepdims=True)[0]
+    u_angle_right = u_angle_right - u_angle_right.min(dim=-1, keepdims=True)[0]
+    return k_angle_angle * (u_angle_left ** 0.5) * (u_angle_right ** 0.5)
 
 def angle_torsion(
-        x_angle_left,
-        x_angle_right,
-        eq_angle_left,
-        eq_angle_right,
-        x,
-        k_angle_torsion_left,
-        k_angle_torsion_right,
-        periodicity=list(range(1,3)),
+        u_angle_left,
+        u_angle_right,
+        u_torsion,
+        k_angle_torsion,
     ):
-    return esp.mm.functional.harmonic_periodic_coupled(
-        x_harmonic=x_angle_left,
-        x_periodic=x,
-        k=k_angle_torsion_left,
-        eq=eq_angle_left,
-        periodicity=periodicity,
-    ) + esp.mm.functional.harmonic_periodic_coupled(
-        x_harmonic=x_angle_right,
-        x_periodic=x,
-        k=k_angle_torsion_right,
-        eq=eq_angle_right,
-        periodicity=periodicity,
-    )
+    u_angle_left = u_angle_left - u_angle_left.min(dim=-1, keepdims=True)[0]
+    u_angle_right = u_angle_right - u_angle_right.min(dim=-1, keepdims=True)[0]
+    return k_angle_torsion * (u_angle_left ** 0.5) * u_torsion\
+     + k_angle_torsion * (u_angle_right ** 0.5) * u_torsion
 
 def angle_angle_torsion(
-        x_angle_left,
-        x_angle_right,
-        eq_angle_left,
-        eq_angle_right,
-        x,
+        u_angle_left,
+        u_angle_right,
+        u_torsion,
         k_angle_angle_torsion,
     ):
-    return esp.mm.functional.harmonic_harmonic_periodic_coupled(
-        theta0=x_angle_left,
-        theta1=x_angle_right,
-        eq0=eq_angle_left,
-        eq1=eq_angle_right,
-        phi=x,
-        k=k_angle_angle_torsion,
-    )
+    u_angle_left = u_angle_left - u_angle_left.min(dim=-1, keepdims=True)[0]
+    u_angle_right = u_angle_right - u_angle_right.min(dim=-1, keepdims=True)[0]
+    return k_angle_angle_torsion * (u_angle_left ** 0.5)\
+        * (u_angle_right ** 0.5)\
+        * u_torsion
 
 def bond_torsion(
-        x_bond_left,
-        x_bond_center,
-        x_bond_right,
-        x,
-        k_left_torsion,
+        u_bond_left,
+        u_bond_right,
+        u_bond_center,
+        u_torsion,
+        k_side_torsion,
         k_center_torsion,
-        k_right_torsion,
-        eq_left_torsion,
-        eq_center_torsion,
-        eq_right_torsion,
     ):
-    return esp.mm.functional.harmonic_periodic_coupled(
-        x_harmonic=x_bond_left,
-        x_periodic=x,
-        k=k_left_torsion,
-        eq=eq_left_torsion,
-    ) + esp.mm.functional.harmonic_periodic_coupled(
-        x_harmonic=x_bond_center,
-        x_periodic=x,
-        k=k_center_torsion,
-        eq=eq_center_torsion,
-    ) + esp.mm.functional.harmonic_periodic_coupled(
-        x_harmonic=x_bond_right,
-        x_periodic=x,
-        k=k_right_torsion,
-        eq=eq_right_torsion,
-    )
+
+    u_bond_left = u_bond_left - u_bond_left.min(dim=-1, keepdims=True)[0]
+    u_bond_right = u_bond_right - u_bond_right.min(dim=-1, keepdims=True)[0]
+    u_bond_center = u_bond_center - u_bond_center.min(dim=-1, keepdims=True)[0]
+    return k_side_torsion * u_torsion * (u_bond_left ** 0.5)\
+     + k_side_torsion * u_torsion * (u_bond_right ** 0.5)\
+     + k_center_torsion * u_torsion * (u_bond_center ** 0.5)

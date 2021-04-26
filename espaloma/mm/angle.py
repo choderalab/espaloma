@@ -40,38 +40,23 @@ def linear_mixture_angle(x, coefficients, phases):
 
     return 0.5 * esp.mm.functional.linear_mixture(x=x, coefficients=coefficients, phases=phases)
 
-
-def urey_bradley(x_between, k_urey_bradley, eq_urey_bradley):
-    return esp.mm.functional.harmonic(
+def urey_bradley(x_between, coefficients, phases):
+    return esp.mm.functional.linear_mixture(
         x=x_between,
-        k=k_urey_bradley,
-        eq=eq_urey_bradley,
+        coefficients=coefficients,
+        phases=phases,
     )
 
-def bond_bond(x_left, x_right, eq_left, eq_right, k_bond_bond):
-    return esp.mm.functional.harmonic_harmonic_coupled(
-        x0=x_left,
-        x1=x_right,
-        eq0=eq_left,
-        eq1=eq_right,
-        k=k_bond_bond,
-    )
+def bond_bond(u_left, u_right, k_bond_bond):
+    u_left = u_left - u_left.min(dim=-1, keepdims=True)[0]
+    u_right = u_right - u_right.min(dim=-1, keepdims=True)[0]
+    return k_bond_bond * (u_left ** 0.5) * (u_right ** 0.5)
 
 def bond_angle(
-        x_left, x_right, x_angle, eq_left, eq_right, eq_angle,
-        k_bond_angle_left, k_bond_angle_right,
+        u_left, u_right, u_angle, k_bond_angle,
     ):
-    return esp.mm.functional.harmonic_harmonic_coupled(
-        x0=x_left,
-        x1=x_angle,
-        eq0=eq_left,
-        eq1=eq_angle,
-        k=k_bond_angle_left,
-    ) + esp.mm.functional.harmonic_harmonic_coupled(
-        x0=x_right,
-        x1=x_angle,
-        eq0=eq_right,
-        eq1=eq_angle,
-        k=k_bond_angle_right,
-    )
 
+    u_left = u_left - u_left.min(dim=-1, keepdims=True)[0]
+    u_right = u_right - u_right.min(dim=-1, keepdims=True)[0]
+    u_angle = u_angle - u_angle.min(dim=-1, keepdims=True)[0]
+    return k_bond_angle * (u_left ** 0.5) * (u_angle ** 0.5) + k_bond_angle * (u_right ** 0.5) * (u_angle ** 0.5)
