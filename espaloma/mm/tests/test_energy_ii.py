@@ -46,6 +46,7 @@ def test_energy():
                 4: {
                     'k': 6,
                     'k_angle_angle': 1,
+                    'k_angle_torsion': 1,
                     'k_angle_angle_torsion': 1,
                     'k_side_torsion': 1,
                     'k_center_torsion': 1,

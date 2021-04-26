@@ -60,20 +60,19 @@ def angle_torsion(
         eq_angle_left,
         eq_angle_right,
         x,
-        k_angle_torsion_left,
-        k_angle_torsion_right,
+        k_angle_torsion,
         periodicity=list(range(1,3)),
     ):
     return esp.mm.functional.harmonic_periodic_coupled(
         x_harmonic=x_angle_left,
         x_periodic=x,
-        k=k_angle_torsion_left,
+        k=k_angle_torsion,
         eq=eq_angle_left,
         periodicity=periodicity,
     ) + esp.mm.functional.harmonic_periodic_coupled(
         x_harmonic=x_angle_right,
         x_periodic=x,
-        k=k_angle_torsion_right,
+        k=k_angle_torsion,
         eq=eq_angle_right,
         periodicity=periodicity,
     )
