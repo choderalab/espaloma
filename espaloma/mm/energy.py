@@ -46,6 +46,12 @@ def apply_angle(nodes, suffix=""):
 
 def apply_angle_ii(nodes, suffix=""):
     return {
+        "u_angle_high%s"
+        % suffix: esp.mm.angle.angle_high(
+            u_angle=nodes.data["u"],
+            k3=nodes.data["k3"],
+            k4=nodes.data["k4"],
+        ),
         "u_urey_bradley%s"
         % suffix: esp.mm.angle.urey_bradley(
             x_between=nodes.data["x_between"],
@@ -64,6 +70,16 @@ def apply_angle_ii(nodes, suffix=""):
             u_right=nodes.data["u_right"],
             u_angle=nodes.data["u"],
             k_bond_angle=nodes.data["k_bond_angle"],
+        )
+    }
+
+def apply_bond_ii(nodes, suffix=""):
+    return {
+        "u_bond_high%s"
+        % suffix: esp.mm.bond.bond_high(
+            u_bond=nodes.data["u"],
+            k3=nodes.data["k3"],
+            k4=nodes.data["k4"],
         )
     }
 
@@ -317,6 +333,18 @@ def energy_in_graph_ii(
 ):
 
     g.apply_nodes(
+        lambda node: apply_bond_ii(node, suffix=suffix), ntype="n2",
+    )
+
+    g.apply_nodes(
+        lambda node: {
+            'u%s' % suffix:
+            node.data['u%s' % suffix] \
+            + node.data['u_bond_high%s' % suffix]
+        }
+    )
+
+    g.apply_nodes(
         lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
     )
 
@@ -326,7 +354,8 @@ def energy_in_graph_ii(
             node.data['u%s' % suffix] \
             + node.data['u_urey_bradley%s' % suffix]\
             + node.data['u_bond_bond%s' % suffix]\
-            + node.data['u_bond_angle%s' % suffix]
+            + node.data['u_bond_angle%s' % suffix]\
+            + node.data['u_angle_high']
         },
         ntype='n3'
     )
