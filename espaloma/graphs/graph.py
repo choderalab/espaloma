@@ -59,7 +59,7 @@ class Graph(BaseGraph):
         dgl.save_graphs(path+"/homograph.bin", [self.homograph])
         dgl.save_graphs(path+"/heterograph.bin", [self.heterograph])
         with open(path+"/mol.json", "w") as f_handle:
-            json.dump(self.mol.to_dict(), f_handle)
+            json.dump(self.mol.to_json(), f_handle)
 
     @classmethod
     def load(cls, path):
@@ -70,7 +70,10 @@ class Graph(BaseGraph):
         with open(path+"/mol.json", "r") as f_handle:
             mol = json.load(f_handle)
         from openforcefield.topology import Molecule
-        mol = Molecule.from_dict(mol)
+        try:
+            mol = Molecule.from_json(mol)
+        except:
+            mol = Molecule.from_dict(mol)
         return cls(mol=mol, homograph=homograph, heterograph=heterograph)
 
     @staticmethod

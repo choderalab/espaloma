@@ -318,12 +318,9 @@ class GraphDataset(Dataset):
 
         graphs = []
         for _path in paths:
-            try:
                 graphs.append(
                     esp.Graph.load(path + "/" + _path)
                 )
 
-            except:
-                pass
         
         return cls(graphs)
