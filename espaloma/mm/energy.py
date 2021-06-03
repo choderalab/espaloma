@@ -46,12 +46,12 @@ def apply_angle(nodes, suffix=""):
 
 def apply_angle_ii(nodes, suffix=""):
     return {
-        "u_angle_high%s"
-        % suffix: esp.mm.angle.angle_high(
-            u_angle=nodes.data["u"],
-            k3=nodes.data["k3"],
-            k4=nodes.data["k4"],
-        ),
+        # "u_angle_high%s"
+        # % suffix: esp.mm.angle.angle_high(
+        #     u_angle=nodes.data["u"],
+        #     k3=nodes.data["k3"],
+        #     k4=nodes.data["k4"],
+        # ),
         "u_urey_bradley%s"
         % suffix: esp.mm.angle.urey_bradley(
             x_between=nodes.data["x_between"],
@@ -305,7 +305,7 @@ def energy_in_graph(
                     msg="m_%s" % term, out="u_%s%s" % (term, suffix)
                 ),
             )
-            for term in terms if "u" in g.nodes[term].data
+            for term in terms if "u%s" % suffix in g.nodes[term].data
         },
         cross_reducer="sum",
     )
@@ -333,19 +333,7 @@ def energy_in_graph_ii(
 ):
 
     g.apply_nodes(
-        lambda node: apply_bond_ii(node, suffix=suffix), ntype="n2",
-    )
-
-    g.apply_nodes(
-        lambda node: {
-            'u%s' % suffix:
-            node.data['u%s' % suffix] \
-            + node.data['u_bond_high%s' % suffix]
-        }
-    )
-
-    g.apply_nodes(
-        lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
+         lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
     )
 
     g.apply_nodes(
@@ -354,8 +342,7 @@ def energy_in_graph_ii(
             node.data['u%s' % suffix] \
             + node.data['u_urey_bradley%s' % suffix]\
             + node.data['u_bond_bond%s' % suffix]\
-            + node.data['u_bond_angle%s' % suffix]\
-            + node.data['u_angle_high']
+            + node.data['u_bond_angle%s' % suffix]
         },
         ntype='n3'
     )

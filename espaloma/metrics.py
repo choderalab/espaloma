@@ -35,8 +35,9 @@ def boltzmann_weighted(metric, reduction="mean", temperature=300.0):
         min_target, _ = torch.min(target, dim=-1, keepdims=True)
         delta_target = target - min_target
         
-        weight_target = torch.exp(
-            -delta_target / (GAS_CONSTANT * temperature)
+        weight_target = torch.softmax(
+            -delta_target / (GAS_CONSTANT * temperature),
+            dim=-1,
         )
 
         _loss = _loss * weight_target
@@ -69,8 +70,8 @@ def weighted_with_key(metric, key="weight", reduction="mean"):
         return getattr(torch, reduction)(weight)
     return _weighted
 
-def bootstrap(metric, n_samples=1000, ci=0.95):
-    def _bootstrap(input, target, metric=metric, n_samples=n_samples, ci=0.95):
+def bootstrap(metric, n_samples=100, ci=0.95):
+    def _bootstrap(input, target, metric=metric, n_samples=n_samples, ci=ci):
         original = metric(input=input, target=target)
 
         idxs_all = np.arange(input.shape[0])
@@ -99,7 +100,7 @@ def bootstrap(metric, n_samples=1000, ci=0.95):
 
 
 def latex_format_ci(original, low, high):
-    return "%.4f_{%.4f}^{%.4f}" % (original, low, high)
+    return "$%.4f_{%.4f}^{%.4f}$" % (original, low, high)
 
 
 # =============================================================================
@@ -302,6 +303,10 @@ class GraphDerivativeMetric(Metric):
             retain_graph=True,
             allow_unused=True,
         )[0]
+
+        print(input_fn(g_input))
+        print(input_prime)
+        print(target_prime)
 
         # compute loss using base loss
         # NOTE:

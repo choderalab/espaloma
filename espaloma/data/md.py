@@ -275,10 +275,12 @@ def subtract_nonbonded_force_except_14(
         lambda node: {"u_ref": node.data["u_ref"] - energies}, ntype="g",
     )
 
-    g.heterograph.apply_nodes(
-        lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
-        ntype="n1",
-    )
+    if "u_ref_prime" in g.nodes['n1'].data:
+
+        g.heterograph.apply_nodes(
+            lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
+            ntype="n1",
+        )
 
     return g
 

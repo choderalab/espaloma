@@ -122,7 +122,6 @@ class Train(Experiment):
 
                 loss = self.loss(g)
                 loss.backward(retain_graph=retain_graph)
-
                 if idx == 0:
                     if torch.isnan(loss).cpu().numpy().item() is True:
                         raise RuntimeError("Loss is Nan.")

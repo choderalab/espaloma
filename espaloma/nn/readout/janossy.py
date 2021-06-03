@@ -92,7 +92,7 @@ class JanossyPooling(torch.nn.Module):
         g : dgl.DGLHeteroGraph,
             input graph.
         """
-
+        
         # copy
         g.multi_update_all(
             {
@@ -111,6 +111,9 @@ class JanossyPooling(torch.nn.Module):
 
         # pool
         for big_idx in self.levels:
+            
+            if g.number_of_nodes("n%s" % big_idx) == 0:
+                continue
 
             g.apply_nodes(
                 func=lambda nodes: {
