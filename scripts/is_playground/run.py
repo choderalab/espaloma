@@ -3,9 +3,6 @@
 
 # In[44]:
 
-
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '2')
 import espaloma as esp
 import torch
 import numpy as np
@@ -59,7 +56,8 @@ def leapfrog(xs, vs, closure, dt=1.0):
 # In[48]:
 
 
-gs = esp.data.dataset.GraphDataset([esp.Graph('C' * idx) for idx in range(1, 3)])
+gs = esp.data.dataset.GraphDataset([esp.Graph('C' * idx) for idx in range(1, 6)])
+
 gs.apply(
     esp.graphs.LegacyForceField('smirnoff99Frosst').parametrize,
     in_place=True,
@@ -81,7 +79,7 @@ readout = esp.nn.readout.janossy.JanossyPooling(
     in_features=128,
     config=[128, 'leaky_relu', 128, 'leaky_relu'],
     out_features={
-        1: {'epsilons': WINDOWS, 'sigma': 1},
+        1: {'epsilons': WINDOWS, 'sigma': 1, 'log_alpha': WINDOWS},
         2: {'ks': WINDOWS, 'eqs': WINDOWS},
         3: {'ks': WINDOWS, 'eqs': WINDOWS},
     }
@@ -92,12 +90,15 @@ net = torch.nn.Sequential(
     representation,
     readout,
 )
-
 realize = torch.nn.Sequential(
     esp.mm.geometry.GeometryInGraph(),
     esp.mm.energy.EnergyInGraph(suffix='_ref', terms=['n2', 'n3']),
 )
 
+
+if torch.cuda.is_available():
+    net = net.to(device=torch.device('cuda:0'))
+    realize = realize.to(device=torch.device('cuda:0'))
 
 # In[50]:
 
@@ -124,29 +125,39 @@ def closure(x, idx, g):
 def simulation(net, g):
     with g.local_scope():
         net(g)
+
+        log_alpha = g.nodes['n1'].data['log_alpha']
         
         particle_distribution = torch.distributions.normal.Normal(
             loc=torch.zeros(g.number_of_nodes('n1'), 128, 3),
             scale=g.nodes['n1'].data['sigma'][:, :, None].repeat(1, 128, 3).exp()
         )
 
-        #normal_distribution = torch.distributions.normal.Normal(0, 1.0)
+        normal_distribution = torch.distributions.normal.Normal(0, 1.0)
         
         x = torch.nn.Parameter(
             particle_distribution.rsample()
         )
         
-        v = torch.zeros_like(x)
+        v = normal_distribution.rsample(
+            sample_shape=[g.number_of_nodes('n1'), 128, 3],
+        )
 
         xs = [x]
         vs = [v]
         
 
         for idx in range(1, WINDOWS):
+            alpha = g.nodes['n1'].data['log_alpha'][:, idx].exp()
+
+            vs[-1] = vs[-1] * alpha[:, None, None].repeat(1, 128, 3)
 
             xs, vs = leapfrog(xs, vs, lambda x: closure(x, idx, g=g), 1e-2)
         
-        return xs, vs, particle_distribution
+
+        det_j = log_alpha.sum(dim=-1).mul(3.0).exp().sum()
+
+        return xs, vs, particle_distribution, det_j
 
 
 # In[53]:
@@ -155,23 +166,27 @@ def simulation(net, g):
 optimizer = torch.optim.Adam(net.parameters(), 1e-3)
 normal_distribution = torch.distributions.normal.Normal(0, 1.0)
 
-for _ in range(10000):
-    for g in ds:
+
+for g in ds:
+    if torch.cuda.is_available():
+        g = g.to(device=torch.device('cuda:0'))
+
+    for _ in range(10000):
         optimizer.zero_grad()
 
-        xs, vs, particle_distribution = simulation(net, g)
+        xs, vs, particle_distribution, det_j = simulation(net, g)
 
         energy = closure(xs[-1], idx=-1, g=g).sum()
 
         log_p = -energy/kT + normal_distribution.log_prob(vs[-1]).sum()
 
-        log_q = normal_distribution.log_prob(vs[0]).sum() + particle_distribution.log_prob(xs[0]).sum()
+        log_q = -det_j + normal_distribution.log_prob(vs[0]).sum() + particle_distribution.log_prob(xs[0]).sum()
 
         loss = -log_p + log_q
 
         loss.backward()
 
-        print(loss, energy)
+        print(loss, energy, flush=True)
 
         optimizer.step()
 

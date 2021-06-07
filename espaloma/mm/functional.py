@@ -285,7 +285,6 @@ def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
 
     return u
 
-
 def harmonic_periodic_coupled(
         x_harmonic,
         x_periodic,

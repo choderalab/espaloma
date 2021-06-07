@@ -30,8 +30,8 @@ def harmonic_angle(x, k, eq):
 
     # NOTE:
     # 0.25 because all angles are calculated twice
-    return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
+    return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
 def linear_mixture_angle(x, coefficients, phases):
     """ Angle energy with Linear basis function.

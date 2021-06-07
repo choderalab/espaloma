@@ -50,7 +50,6 @@ def test_energy():
 
     esp.mm.energy.energy_in_graph(g, terms=["n2", "n3", "n4", "n4_improper"])
 
-
 # def test_energy_consistent():
 #     g = esp.Graph("c1ccccc1")
 #

@@ -6,7 +6,7 @@ import espaloma as esp
 def run(layer_name):
     # grab dataset
     # esol = esp.data.esol(first=20)
-    ds = esp.data.zinc(first=1000).shuffle()
+    ds = esp.data.zinc().shuffle()
 
     # do some typing
     typing = esp.graphs.legacy_force_field.LegacyForceField('gaff-1.81')
