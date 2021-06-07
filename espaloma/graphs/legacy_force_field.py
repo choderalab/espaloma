@@ -6,6 +6,11 @@ import torch
 from openforcefield.topology import Molecule
 import espaloma as esp
 
+from openmmforcefields.generators import SystemGenerator
+from simtk import openmm, unit
+from simtk.openmm.app import Simulation
+from simtk.unit.quantity import Quantity
+
 # =============================================================================
 # CONSTANTS
 # =============================================================================
@@ -18,6 +23,11 @@ REDUNDANT_TYPES = {
     "nd": "nc",
 }
 
+# simulation specs
+TEMPERATURE = 350 * unit.kelvin
+STEP_SIZE = 1.0 * unit.femtosecond
+COLLISION_RATE = 1.0 / unit.picosecond
+EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 
 # =============================================================================
 # MODULE CLASSES
@@ -501,6 +511,62 @@ class LegacyForceField:
             }
 
         g.heterograph.apply_nodes(apply_torsion, ntype="n4")
+
+        return g
+
+    def baseline_energy(self, g, suffix=None):
+        if suffix is None:
+            suffix = "_" + self.forcefield
+
+        from openmmforcefields.generators import SystemGenerator
+
+        # define a system generator
+        system_generator = SystemGenerator(
+            small_molecule_forcefield=self.forcefield,
+        )
+
+        mol = g.mol
+        # mol.assign_partial_charges("formal_charge")
+        # create system
+        system = system_generator.create_system(
+            topology=mol.to_topology().to_openmm(),
+            molecules=mol,
+        )
+
+        # parameterize topology
+        topology = g.mol.to_topology().to_openmm()
+
+        integrator = openmm.LangevinIntegrator(
+            TEMPERATURE, COLLISION_RATE, STEP_SIZE
+        )
+
+        # create simulation
+        simulation = Simulation(
+            topology=topology, system=system, integrator=integrator
+        )
+
+        us = []
+
+        xs = (
+            Quantity(
+                g.nodes["n1"].data["xyz"].detach().numpy(),
+                esp.units.DISTANCE_UNIT,
+            )
+            .value_in_unit(unit.nanometer)
+            .transpose((1, 0, 2))
+        )
+
+        for x in xs:
+            simulation.context.setPositions(x)
+            us.append(
+                simulation.context.getState(
+                    getEnergy=True
+                ).getPotentialEnergy().value_in_unit(
+                    esp.units.ENERGY_UNIT
+                )
+            )
+
+        g.nodes['g'].data['u%s' % suffix] = us
 
         return g
 
