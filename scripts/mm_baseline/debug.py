@@ -1,6 +1,21 @@
 import qcportal as ptl
 from simtk import unit
+from openmmforcefields.generators import SystemGenerator
+from simtk import openmm, unit
+from simtk.openmm.app import Simulation
+from simtk.unit.quantity import Quantity
 
+from espaloma.units import *
+import espaloma as esp
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+# simulation specs
+TEMPERATURE = 350 * unit.kelvin
+STEP_SIZE = 1.0 * unit.femtosecond
+COLLISION_RATE = 1.0 / unit.picosecond
+EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 
 def run():
     # scaled units
@@ -38,7 +53,7 @@ def run():
         ]
     )
 
-    xyz = np.stack(
+    xs = np.stack(
                 [
                     Quantity(
                         snapshot.get_molecule().geometry,
@@ -48,7 +63,46 @@ def run():
                     )
                     for snapshot in trajectory
                 ],
-                axis=1
+                axis=0
     )
+
+
+    # define a system generator
+    system_generator = SystemGenerator(
+        small_molecule_forcefield="openff-1.2.0",
+    )
+
+    # mol.assign_partial_charges("formal_charge")
+    # create system
+    system = system_generator.create_system(
+        topology=mol.to_topology().to_openmm(),
+        molecules=mol,
+    )
+
+    # parameterize topology
+    topology = g.mol.to_topology().to_openmm()
+
+    integrator = openmm.LangevinIntegrator(
+        TEMPERATURE, COLLISION_RATE, STEP_SIZE
+    )
+
+    # create simulation
+    simulation = Simulation(
+        topology=topology, system=system, integrator=integrator
+    )
+
+    u_mm = []
+
+    for x in xs:
+        simulation.context.setPositions(x)
+        u_mm.append(
+            simulation.context.getState(
+                getEnergy=True
+            ).getPotentialEnergy().value_in_unit(
+                esp.units.ENERGY_UNIT
+            )
+        )
+
+
 if __name__ == "__main__":
     run()
