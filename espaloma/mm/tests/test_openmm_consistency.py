@@ -15,7 +15,7 @@ from simtk.openmm import app
 
 import espaloma as esp
 
-decimal_threshold = 4
+decimal_threshold = 2
 
 
 def _create_torsion_sim(
@@ -95,7 +95,7 @@ def test_energy_angle_and_bond(g):
 
     # get simulation
     simulation = MoleculeVacuumSimulation(
-        n_samples=1, n_steps_per_sample=10
+        n_samples=1, n_steps_per_sample=10, forcefield="gaff-1.81"
     ).simulation_from_graph(g)
 
     system = simulation.system
@@ -167,7 +167,7 @@ def test_energy_angle_and_bond(g):
         energies[name] = energy
 
     # parametrize
-    ff = esp.graphs.legacy_force_field.LegacyForceField("smirnoff99Frosst")
+    ff = esp.graphs.legacy_force_field.LegacyForceField("gaff-1.81")
     g = ff.parametrize(g)
 
     # n2 : bond, n3: angle, n1: nonbonded?
@@ -176,10 +176,12 @@ def test_energy_angle_and_bond(g):
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
         g.nodes[term].data["eq"] = g.nodes[term].data["eq_ref"]
 
+    '''
     for term in ["n1"]:
         g.nodes[term].data["sigma"] = g.nodes[term].data["sigma_ref"]
         g.nodes[term].data["epsilon"] = g.nodes[term].data["epsilon_ref"]
         # g.nodes[term].data['q'] = g.nodes[term].data['q_ref']
+    '''
 
     for term in ["n4"]:
         g.nodes[term].data["phases"] = g.nodes[term].data["phases_ref"]

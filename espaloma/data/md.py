@@ -3,7 +3,8 @@
 # =============================================================================
 import numpy as np
 import torch
-from openforcefield.typing.engines.smirnoff import ForceField
+
+from openmmforcefields.generators import SystemGenerator
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
 from simtk.unit.quantity import Quantity
@@ -15,30 +16,30 @@ import espaloma as esp
 # CONSTANTS
 # =============================================================================
 # simulation specs
-TEMPERATURE = 500 * unit.kelvin
-STEP_SIZE = 1 * unit.femtosecond
-COLLISION_RATE = 1 / unit.picosecond
+TEMPERATURE = 350 * unit.kelvin
+STEP_SIZE = 1.0 * unit.femtosecond
+COLLISION_RATE = 1.0 / unit.picosecond
+EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 def subtract_nonbonded_force(
-    g, forcefield="test_forcefields/smirnoff99Frosst.offxml",
+    g, forcefield="gaff-1.81",
 ):
 
-    # get the forcefield from str
-    if isinstance(forcefield, str):
-        forcefield = ForceField(forcefield)
+    # parameterize topology
+    topology = g.mol.to_topology().to_openmm()
 
-    # partial charge
-    g.mol.assign_partial_charges("gasteiger")  # faster
-
-    # parametrize topology
-    topology = g.mol.to_topology()
+    generator = SystemGenerator(
+        small_molecule_forcefield=forcefield,
+        molecules=[g.mol],
+        forcefield_kwargs={ 'constraints' : None, 'removeCMMotion' : False},
+    )
 
     # create openmm system
-    system = forcefield.create_openmm_system(
-        topology, charge_from_molecules=[g.mol],
+    system = generator.create_system(
+        topology,
     )
 
     # use langevin integrator, although it's not super useful here
@@ -64,12 +65,18 @@ def subtract_nonbonded_force(
                 id1, id2, id3, angle, k = force.getAngleParameters(idx)
                 force.setAngleParameters(idx, id1, id2, id3, angle, 0.0)
 
+            force.updateParametersInContext(simulation.context)
+
+
         elif "Bond" in name:
             for idx in range(force.getNumBonds()):
                 id1, id2, length, k = force.getBondParameters(idx)
                 force.setBondParameters(
                     idx, id1, id2, length, 0.0,
                 )
+
+            force.updateParametersInContext(simulation.context)
+
 
         elif "Torsion" in name:
             for idx in range(force.getNumTorsions()):
@@ -86,7 +93,8 @@ def subtract_nonbonded_force(
                     idx, id1, id2, id3, id4, periodicity, phase, 0.0,
                 )
 
-        force.updateParametersInContext(simulation.context)
+            force.updateParametersInContext(simulation.context)
+
 
     # the snapshots
     xs = (
@@ -133,12 +141,149 @@ def subtract_nonbonded_force(
         lambda node: {"u_ref": node.data["u_ref"] - energies}, ntype="g",
     )
 
-    g.heterograph.apply_nodes(
-        lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
-        ntype="n1",
-    )
+    if "u_ref_prime" in g.nodes['n1']:
+        g.heterograph.apply_nodes(
+            lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
+            ntype="n1",
+        )
 
     return g
+
+def subtract_nonbonded_force_except_14(
+    g, forcefield="gaff-1.81",
+):
+
+    # parameterize topology
+    topology = g.mol.to_topology().to_openmm()
+
+    generator = SystemGenerator(
+        small_molecule_forcefield=forcefield,
+        molecules=[g.mol],
+    )
+
+    # create openmm system
+    system = generator.create_system(
+        topology,
+    )
+
+    # use langevin integrator, although it's not super useful here
+    integrator = openmm.LangevinIntegrator(
+        TEMPERATURE, COLLISION_RATE, STEP_SIZE
+    )
+
+    # create simulation
+    simulation = Simulation(
+        topology=topology, system=system, integrator=integrator
+    )
+
+    # get forces
+    forces = list(system.getForces())
+
+    # loop through forces
+    for force in forces:
+        name = force.__class__.__name__
+
+        # turn off angle
+        if "Angle" in name:
+            for idx in range(force.getNumAngles()):
+                id1, id2, id3, angle, k = force.getAngleParameters(idx)
+                force.setAngleParameters(idx, id1, id2, id3, angle, 0.0)
+
+            force.updateParametersInContext(simulation.context)
+
+
+        elif "Bond" in name:
+            for idx in range(force.getNumBonds()):
+                id1, id2, length, k = force.getBondParameters(idx)
+                force.setBondParameters(
+                    idx, id1, id2, length, 0.0,
+                )
+
+            force.updateParametersInContext(simulation.context)
+
+
+        elif "Torsion" in name:
+            for idx in range(force.getNumTorsions()):
+                (
+                    id1,
+                    id2,
+                    id3,
+                    id4,
+                    periodicity,
+                    phase,
+                    k,
+                ) = force.getTorsionParameters(idx)
+                force.setTorsionParameters(
+                    idx, id1, id2, id3, id4, periodicity, phase, 0.0,
+                )
+
+            force.updateParametersInContext(simulation.context)
+
+
+        elif "Nonbonded" in name:
+            for exception_index in range(force.getNumExceptions()):
+                p1, p2, chargeprod, sigma, epsilon = force.getExceptionParameters(exception_index)
+                force.setExceptionParameters(exception_index, p1, p2, chargeprod, sigma, 1e-8*epsilon)
+
+
+            force.updateParametersInContext(simulation.context)
+
+        
+
+    # the snapshots
+    xs = (
+        Quantity(
+            g.nodes["n1"].data["xyz"].detach().numpy(),
+            esp.units.DISTANCE_UNIT,
+        )
+        .value_in_unit(unit.nanometer)
+        .transpose((1, 0, 2))
+    )
+
+    # loop through the snapshots
+    energies = []
+    derivatives = []
+
+    for x in xs:
+        simulation.context.setPositions(x)
+
+        state = simulation.context.getState(
+            getEnergy=True, getParameters=True, getForces=True,
+        )
+
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT,
+        )
+
+        derivative = state.getForces(asNumpy=True).value_in_unit(
+            esp.units.FORCE_UNIT,
+        )
+
+        energies.append(energy)
+        derivatives.append(derivative)
+
+    # put energies to a tensor
+    energies = torch.tensor(
+        energies, dtype=torch.get_default_dtype(),
+    ).flatten()[None, :]
+    derivatives = torch.tensor(
+        np.stack(derivatives, axis=1), dtype=torch.get_default_dtype(),
+    )
+
+    # subtract the energies
+    g.heterograph.apply_nodes(
+        lambda node: {"u_ref": node.data["u_ref"] - energies}, ntype="g",
+    )
+
+    if "u_ref_prime" in g.nodes['n1'].data:
+
+        g.heterograph.apply_nodes(
+            lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
+            ntype="n1",
+        )
+
+    return g
+
 
 
 # =============================================================================
@@ -177,7 +322,7 @@ class MoleculeVacuumSimulation(object):
 
     def __init__(
         self,
-        forcefield="test_forcefields/smirnoff99Frosst.offxml",
+        forcefield="gaff-1.81",
         n_samples=100,
         n_steps_per_sample=1000,
         temperature=TEMPERATURE,
@@ -190,28 +335,34 @@ class MoleculeVacuumSimulation(object):
         self.temperature = temperature
         self.collision_rate = collision_rate
         self.step_size = step_size
+        self.forcefield = forcefield
 
-        if isinstance(forcefield, str):
-            self.forcefield = ForceField(forcefield)
-        else:
-            # TODO: type assertion
-            self.forcefield = forcefield
 
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # assign partial charge
-        g.mol.assign_partial_charges("gasteiger")  # faster
+        # g.mol.assign_partial_charges("am1bcc")
 
         # parameterize topology
-        topology = g.mol.to_topology()
+        topology = g.mol.to_topology().to_openmm()
+
+        generator = SystemGenerator(
+            small_molecule_forcefield=self.forcefield,
+            molecules=[g.mol],
+        )
 
         # create openmm system
-        system = self.forcefield.create_openmm_system(
+        system = generator.create_system(
             topology,
-            # TODO:
-            # figure out whether `sqm` should be so slow
-            charge_from_molecules=[g.mol],
         )
+
+        # set epsilon minimum to 0.05 kJ/mol
+        for force in system.getForces():
+            if "Nonbonded" in force.__class__.__name__:
+                for particle_index in range(force.getNumParticles()):
+                    charge, sigma, epsilon = force.getParticleParameters(particle_index)
+                    if (epsilon < EPSILON_MIN):
+                        force.setParticleParameters(particle_index, charge, sigma, EPSILON_MIN)
 
         # use langevin integrator
         integrator = openmm.LangevinIntegrator(
@@ -220,7 +371,8 @@ class MoleculeVacuumSimulation(object):
 
         # initialize simulation
         simulation = Simulation(
-            topology=topology, system=system, integrator=integrator
+            topology=topology, system=system, integrator=integrator,
+            platform=openmm.Platform.getPlatformByName("Reference"),
         )
 
         import openforcefield
@@ -232,9 +384,6 @@ class MoleculeVacuumSimulation(object):
 
         # put conformer in simulation
         simulation.context.setPositions(g.mol.conformers[0])
-
-        # minimize energy
-        simulation.minimizeEnergy()
 
         # set velocities
         simulation.context.setVelocitiesToTemperature(self.temperature)
@@ -268,6 +417,9 @@ class MoleculeVacuumSimulation(object):
         # initialize empty list for samples.
         samples = []
 
+        # minimize
+        simulation.minimizeEnergy()
+
         # loop through number of samples
         for _ in range(self.n_samples):
 
@@ -280,6 +432,10 @@ class MoleculeVacuumSimulation(object):
                 .getPositions(asNumpy=True)
                 .value_in_unit(DISTANCE_UNIT)
             )
+
+        # assert that energy is below zero
+        # final_energy = simulation.context.getState(getEnergy=True).getPotentialEnergy(
+        #        ).value_in_unit(ENERGY_UNIT)
 
         # put samples into an array
         samples = np.array(samples)

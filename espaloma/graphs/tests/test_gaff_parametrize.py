@@ -10,3 +10,5 @@ def test_gaff_parametrize():
 
     print(g.nodes['n2'].data)
     print(g.nodes['n3'].data)
+    print(g.nodes['n4'].data)
+    print(g.nodes['n4_improper'].data)

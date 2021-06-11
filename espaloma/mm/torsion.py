@@ -37,3 +37,53 @@ def periodic_torsion(
     )
     # assert(out.shape == (len(x), 1))
     return out
+
+
+def angle_angle(
+        u_angle_left,
+        u_angle_right,
+        k_angle_angle,
+    ):
+
+    u_angle_left = u_angle_left - u_angle_left.min(dim=-1, keepdims=True)[0]
+    u_angle_right = u_angle_right - u_angle_right.min(dim=-1, keepdims=True)[0]
+    return k_angle_angle * (u_angle_left ** 0.5) * (u_angle_right ** 0.5)
+
+def angle_torsion(
+        u_angle_left,
+        u_angle_right,
+        u_torsion,
+        k_angle_torsion,
+    ):
+    u_angle_left = u_angle_left - u_angle_left.min(dim=-1, keepdims=True)[0]
+    u_angle_right = u_angle_right - u_angle_right.min(dim=-1, keepdims=True)[0]
+    return k_angle_torsion * (u_angle_left ** 0.5) * u_torsion\
+     + k_angle_torsion * (u_angle_right ** 0.5) * u_torsion
+
+def angle_angle_torsion(
+        u_angle_left,
+        u_angle_right,
+        u_torsion,
+        k_angle_angle_torsion,
+    ):
+    u_angle_left = u_angle_left - u_angle_left.min(dim=-1, keepdims=True)[0]
+    u_angle_right = u_angle_right - u_angle_right.min(dim=-1, keepdims=True)[0]
+    return k_angle_angle_torsion * (u_angle_left ** 0.5)\
+        * (u_angle_right ** 0.5)\
+        * u_torsion
+
+def bond_torsion(
+        u_bond_left,
+        u_bond_right,
+        u_bond_center,
+        u_torsion,
+        k_side_torsion,
+        k_center_torsion,
+    ):
+
+    u_bond_left = u_bond_left - u_bond_left.min(dim=-1, keepdims=True)[0]
+    u_bond_right = u_bond_right - u_bond_right.min(dim=-1, keepdims=True)[0]
+    u_bond_center = u_bond_center - u_bond_center.min(dim=-1, keepdims=True)[0]
+    return k_side_torsion * u_torsion * (u_bond_left ** 0.5)\
+     + k_side_torsion * u_torsion * (u_bond_right ** 0.5)\
+     + k_center_torsion * u_torsion * (u_bond_center ** 0.5)

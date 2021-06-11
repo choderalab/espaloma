@@ -53,6 +53,29 @@ class Graph(BaseGraph):
         self.homograph = homograph
         self.heterograph = heterograph
 
+    def save(self, path):
+        import os; import json
+        os.mkdir(path)
+        dgl.save_graphs(path+"/homograph.bin", [self.homograph])
+        dgl.save_graphs(path+"/heterograph.bin", [self.heterograph])
+        with open(path+"/mol.json", "w") as f_handle:
+            json.dump(self.mol.to_json(), f_handle)
+
+    @classmethod
+    def load(cls, path):
+        import json
+        homograph = dgl.load_graphs(path+"/homograph.bin")[0][0]
+        heterograph = dgl.load_graphs(path+"/heterograph.bin")[0][0]
+
+        with open(path+"/mol.json", "r") as f_handle:
+            mol = json.load(f_handle)
+        from openforcefield.topology import Molecule
+        try:
+            mol = Molecule.from_json(mol)
+        except:
+            mol = Molecule.from_dict(mol)
+        return cls(mol=mol, homograph=homograph, heterograph=heterograph)
+
     @staticmethod
     def get_homograph_from_mol(mol):
         assert isinstance(
@@ -106,19 +129,3 @@ class Graph(BaseGraph):
     @property
     def nodes(self):
         return self.heterograph.nodes
-
-    def save(self, path):
-        import pickle
-
-        with open(path, "wb") as f_handle:
-            pickle.dump([self.mol, self.homograph, self.heterograph], f_handle)
-
-    def load(self, path):
-        import pickle
-
-        with open(path, "rb") as f_handle:
-            (self.mol, self.homograph, self.heterograph) = pickle.load(
-                f_handle
-            )
-
-        return self

@@ -92,7 +92,7 @@ class JanossyPooling(torch.nn.Module):
         g : dgl.DGLHeteroGraph,
             input graph.
         """
-
+        
         # copy
         g.multi_update_all(
             {
@@ -111,6 +111,9 @@ class JanossyPooling(torch.nn.Module):
 
         # pool
         for big_idx in self.levels:
+            
+            if g.number_of_nodes("n%s" % big_idx) == 0:
+                continue
 
             g.apply_nodes(
                 func=lambda nodes: {
@@ -198,7 +201,7 @@ class JanossyPoolingImproper(torch.nn.Module):
                 self,
                 "sequential_%s" % level,
                 esp.nn.sequential._Sequential(
-                    in_features=in_features * 4,
+                    in_features=4 * in_features,
                     config=config,
                     layer=torch.nn.Linear,
                 ),
@@ -248,48 +251,172 @@ class JanossyPoolingImproper(torch.nn.Module):
 
             g.apply_nodes(
                 func=lambda nodes: {
-                    feature: getattr(
-                        self, "f_out_%s_to_%s" % (big_idx, feature)
-                    )(
-                        getattr(self, "sequential_%s" % big_idx)(
-                            g=None,
-                            x=torch.sum(
+                    feature: getattr(self, "f_out_%s_to_%s" % (big_idx, feature))(
+                        torch.sum(
                                 torch.stack(
                                     [
-                                        torch.cat(
-                                            [
-                                                nodes.data["h0"],
-                                                nodes.data["h1"],
-                                                nodes.data["h2"],
-                                                nodes.data["h3"],
-                                            ],
-                                            dim=1,
+                                        getattr(self, "sequential_%s" % big_idx)(
+                                            g=None, 
+                                            x = torch.cat(
+                                                [
+                                                    nodes.data["h0"],
+                                                    nodes.data["h1"],
+                                                    nodes.data["h2"],
+                                                    nodes.data["h3"],
+                                                ],
+                                                dim=1,
+                                            )
                                         ),
-                                        torch.cat(
-                                            [
-                                                nodes.data["h2"],
-                                                nodes.data["h1"],
-                                                nodes.data["h3"],
-                                                nodes.data["h0"],
-                                            ],
-                                            dim=1,
+
+                                         getattr(self, "sequential_%s" % big_idx)(
+                                            g=None, 
+                                            x = torch.cat(
+                                                [
+                                                    nodes.data["h2"],
+                                                    nodes.data["h1"],
+                                                    nodes.data["h3"],
+                                                    nodes.data["h0"],
+                                                ],
+                                                dim=1,
+                                            )
                                         ),
-                                        torch.cat(
-                                            [
-                                                nodes.data["h3"],
-                                                nodes.data["h1"],
-                                                nodes.data["h0"],
-                                                nodes.data["h2"],
-                                            ],
-                                            dim=1,
+
+                                        getattr(self, "sequential_%s" % big_idx)(
+                                            g=None, 
+                                            x = torch.cat(
+                                                [
+                                                    nodes.data["h3"],
+                                                    nodes.data["h1"],
+                                                    nodes.data["h0"],
+                                                    nodes.data["h2"],
+                                                ],
+                                                dim=1,
+                                            )
                                         ),
+ 
                                     ],
                                     dim=0,
                                 ),
                                 dim=0,
-                            ),
-                        )
-                    )
+                    ))
+                    for feature in self.out_features.keys()
+                },
+                ntype=big_idx,
+            )
+
+        return g
+
+
+
+
+
+class JanossyPoolingNonbonded(torch.nn.Module):
+    """ Janossy pooling (arXiv:1811.01900) to average node representation
+    for improper torsions.
+
+
+    """
+
+    def __init__(
+        self,
+        config,
+        in_features,
+        out_features={"sigma": 1, "epsilon": 1},
+        out_features_dimensions=-1,
+    ):
+        super(JanossyPoolingNonbonded, self).__init__()
+
+        # if users specify out features as lists,
+        # assume dimensions to be all zero
+
+        # bookkeeping
+        self.out_features = out_features
+        self.levels = ["onefour", "nonbonded"]
+
+        # get output features
+        mid_features = [x for x in config if isinstance(x, int)][-1]
+
+        # set up networks
+        for level in self.levels:
+
+            # set up individual sequential networks
+            setattr(
+                self,
+                "sequential_%s" % level,
+                esp.nn.sequential._Sequential(
+                    in_features=2 * in_features,
+                    config=config,
+                    layer=torch.nn.Linear,
+                ),
+            )
+
+            for feature, dimension in self.out_features.items():
+                setattr(
+                    self,
+                    "f_out_%s_to_%s" % (level, feature),
+                    torch.nn.Linear(mid_features, dimension,),
+                )
+
+    def forward(self, g):
+        """ Forward pass.
+
+        Parameters
+        ----------
+        g : dgl.DGLHeteroGraph,
+            input graph.
+        """
+
+        # copy
+        g.multi_update_all(
+            {
+                "n1_as_%s_in_%s"
+                % (relationship_idx, big_idx): (
+                    dgl.function.copy_src("h", "m%s" % relationship_idx),
+                    dgl.function.mean(
+                        "m%s" % relationship_idx, "h%s" % relationship_idx
+                    ),
+                )
+                for big_idx in self.levels
+                for relationship_idx in range(2)
+            },
+            cross_reducer="sum",
+        )
+
+        for big_idx in self.levels:
+
+            g.apply_nodes(
+                func=lambda nodes: {
+                    feature: getattr(self, "f_out_%s_to_%s" % (big_idx, feature))(
+                        torch.sum(
+                                torch.stack(
+                                    [
+                                        getattr(self, "sequential_%s" % big_idx)(
+                                            g=None, 
+                                            x = torch.cat(
+                                                [
+                                                    nodes.data["h0"],
+                                                    nodes.data["h1"],
+                                                ],
+                                                dim=1,
+                                            )
+                                        ),
+
+                                         getattr(self, "sequential_%s" % big_idx)(
+                                            g=None, 
+                                            x = torch.cat(
+                                                [
+                                                    nodes.data["h1"],
+                                                    nodes.data["h0"],
+                                                ],
+                                                dim=1,
+                                            )
+                                        ),
+
+                                    ],
+                                    dim=0,
+                                ),
+                                dim=0,
+                    ))
                     for feature in self.out_features.keys()
                 },
                 ntype=big_idx,
