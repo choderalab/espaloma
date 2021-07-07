@@ -1,0 +1,4 @@
+AlkEthOH_rings.npz filter=lfs diff=lfs merge=lfs -text
+AlkEthOH_rings.smi filter=lfs diff=lfs merge=lfs -text
+AlkEthOH_rings_offmols.pkl filter=lfs diff=lfs merge=lfs -text
+snapshots_and_energies_with_ani1ccx.zip filter=lfs diff=lfs merge=lfs -text

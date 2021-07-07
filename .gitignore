@@ -134,3 +134,10 @@ dmypy.json
 
 # Parm@Frosst download
 parm_at_Frosst.tgz
+
+# PyCharm
+.idea
+
+
+.DS_Store
+espaloma/data/alkethoh/snapshots_and_energies
