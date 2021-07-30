@@ -221,14 +221,14 @@ def test_energy_angle_and_bond(g):
         decimal=n_decimals,
     )
 
-    # propers = g.nodes["g"].data["u_n4"].numpy()
-    # impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
-    # all_torsions = propers + impropers
-    # npt.assert_almost_equal(
-    #     all_torsions,
-    #     energies["PeriodicTorsionForce"],
-    #     decimal=n_decimals,
-    # )
+    propers = g.nodes["g"].data["u_n4"].numpy()
+    impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
+    all_torsions = propers + impropers
+    npt.assert_almost_equal(
+        all_torsions,
+        energies["PeriodicTorsionForce"],
+        decimal=n_decimals,
+    )
 
     # print(all_torsions)
     # print(energies["PeriodicTorsionForce"])

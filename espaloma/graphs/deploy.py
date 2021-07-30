@@ -27,7 +27,7 @@ OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT ** 2)
 # =============================================================================
 
 
-def load_forcefield(forcefield="openff_unconstrained-1.1.0"):
+def load_forcefield(forcefield="openff_unconstrained-1.2.0"):
     # get a forcefield
     try:
         ff = ForceField("%s.offxml" % forcefield)
@@ -40,7 +40,7 @@ def load_forcefield(forcefield="openff_unconstrained-1.1.0"):
 
 
 def openmm_system_from_graph(
-    g, forcefield="openff_unconstrained-1.1.0", suffix=""
+    g, forcefield="openff_unconstrained-1.2.0", suffix=""
 ):
     """ Construct an openmm system from `espaloma.Graph`.
 
@@ -108,7 +108,7 @@ def openmm_system_from_graph(
                     _eq, esp.units.DISTANCE_UNIT,
                 ).value_in_unit(OPENMM_BOND_EQ_UNIT)
 
-                _k = 2.0 * Quantity(  # bond force constant:
+                _k = Quantity(  # bond force constant:
                     # since everything is enumerated twice in espaloma
                     # and once in OpenMM,
                     # we insert a coefficient of 2.0
@@ -145,7 +145,7 @@ def openmm_system_from_graph(
                     OPENMM_ANGLE_EQ_UNIT
                 )
 
-                _k = 2.0 * Quantity(  # force constant
+                _k = Quantity(  # force constant
                     # since everything is enumerated twice in espaloma
                     # and once in OpenMM,
                     # we insert a coefficient of 2.0
@@ -157,10 +157,6 @@ def openmm_system_from_graph(
 
         if "PeriodicTorsionForce" in name:
             number_of_torsions = force.getNumTorsions()
-            assert number_of_torsions <= g.heterograph.number_of_nodes("n4")
-
-            # TODO: An alternative would be to start with an empty PeriodicTorsionForce and always call force.addTorsion
-
             if (
                 "periodicity%s" % suffix not in g.nodes["n4"].data
                 or "phase%s" % suffix not in g.nodes["n4"].data
@@ -172,6 +168,14 @@ def openmm_system_from_graph(
 
                 g.nodes["n4"].data["phases%s" % suffix] = torch.zeros(
                     g.heterograph.number_of_nodes("n4"), 6
+                )
+
+                g.nodes["n4_improper"].data["periodicity%s" % suffix] = torch.arange(
+                    1, 7
+                )[None, :].repeat(g.heterograph.number_of_nodes("n4_improper"), 1)
+
+                g.nodes["n4_improper"].data["phases%s" % suffix] = torch.zeros(
+                    g.heterograph.number_of_nodes("n4_improper"), 6
                 )
 
             count_idx = 0
@@ -211,7 +215,7 @@ def openmm_system_from_graph(
                                     idx3,
                                     _periodicity,
                                     _phase,
-                                    2.0 * k,
+                                    k,
                                 )
 
                             else:
@@ -226,9 +230,66 @@ def openmm_system_from_graph(
                                     idx3,
                                     _periodicity,
                                     _phase,
-                                    2.0 * k,
+                                    k,
                                 )
 
                             count_idx += 1
+
+
+            if "k%s" % suffix in g.nodes["n4_improper"].data:
+                for idx in range(g.heterograph.number_of_nodes("n4_improper")):
+                    idx0 = g.nodes["n4_improper"].data["idxs"][idx, 0].item()
+                    idx1 = g.nodes["n4_improper"].data["idxs"][idx, 1].item()
+                    idx2 = g.nodes["n4_improper"].data["idxs"][idx, 2].item()
+                    idx3 = g.nodes["n4_improper"].data["idxs"][idx, 3].item()
+
+                    periodicities = g.nodes["n4"].data[
+                        "periodicity%s" % suffix
+                    ][idx]
+                    phases = g.nodes["n4_improper"].data["phases%s" % suffix][idx]
+                    ks = g.nodes["n4_improper"].data["k%s" % suffix][idx]
+                    for sub_idx in range(ks.flatten().shape[0]):
+                        k = ks[sub_idx].item()
+                        if k != 0.0:
+                            _periodicity = periodicities[sub_idx].item()
+                            _phase = phases[sub_idx].item()
+
+                            k = Quantity(
+                                k, esp.units.ENERGY_UNIT,
+                            ).value_in_unit(OPENMM_ENERGY_UNIT,)
+
+                            if count_idx < number_of_torsions:
+                                force.setTorsionParameters(
+                                    # since everything is enumerated
+                                    # twice in espaloma
+                                    # and once in OpenMM,
+                                    # we insert a coefficient of 2.0
+                                    count_idx,
+                                    idx0,
+                                    idx1,
+                                    idx2,
+                                    idx3,
+                                    _periodicity,
+                                    _phase,
+                                    0.5 * k,
+                                )
+
+                            else:
+                                force.addTorsion(
+                                    # since everything is enumerated
+                                    # twice in espaloma
+                                    # and once in OpenMM,
+                                    # we insert a coefficient of 2.0
+                                    idx0,
+                                    idx1,
+                                    idx2,
+                                    idx3,
+                                    _periodicity,
+                                    _phase,
+                                    0.5 * k,
+                                )
+
+                            count_idx += 1
+
 
     return sys
