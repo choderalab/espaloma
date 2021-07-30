@@ -386,12 +386,11 @@ class LegacyForceField:
 
     def _parametrize_smirnoff(self, g):
         # mol = self._convert_to_off(mol)
-
         forces = self.FF.label_molecules(g.mol.to_topology())[0]
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "k_ref": torch.Tensor(
+                "k_ref": 2.0 * torch.Tensor(
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -419,7 +418,7 @@ class LegacyForceField:
 
         g.heterograph.apply_nodes(
             lambda node: {
-                "k_ref": torch.Tensor(
+                "k_ref": 2.0 * torch.Tensor( # OpenFF records 1/2k as param
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
@@ -510,7 +509,49 @@ class LegacyForceField:
                 "phases_ref": phases,
             }
 
+
+        def apply_improper_torsion(node, n_max_phases=6):
+            phases = torch.zeros(
+                g.heterograph.number_of_nodes("n4_improper"), n_max_phases,
+            )
+
+            periodicity = torch.zeros(
+                g.heterograph.number_of_nodes("n4_improper"), n_max_phases,
+            )
+
+            k = torch.zeros(g.heterograph.number_of_nodes("n4_improper"), n_max_phases,)
+
+            force = forces["ImproperTorsions"]
+
+            for idx in range(g.heterograph.number_of_nodes("n4_improper")):
+                idxs = tuple(node.data["idxs"][idx].numpy())
+                if idxs in force:
+                    _force = force[idxs]
+                    for sub_idx in range(len(_force.periodicity)):
+
+                        if hasattr(_force, "k%s" % sub_idx):
+                            k[idx, sub_idx] = getattr(
+                                _force, "k%s" % sub_idx
+                            ).value_in_unit(esp.units.ENERGY_UNIT)
+
+                            phases[idx, sub_idx] = getattr(
+                                _force, "phase%s" % sub_idx
+                            ).value_in_unit(esp.units.ANGLE_UNIT)
+
+                            periodicity[idx, sub_idx] = getattr(
+                                _force, "periodicity%s" % sub_idx
+                            )
+
+
+            return {
+                "k_ref": k,
+                "periodicity_ref": periodicity,
+                "phases_ref": phases,
+            }
+
+
         g.heterograph.apply_nodes(apply_torsion, ntype="n4")
+        g.heterograph.apply_nodes(apply_improper_torsion, ntype="n4_improper")
 
         return g
 
