@@ -4,7 +4,7 @@
 import abc
 
 import dgl
-import openforcefield
+import openff.toolkit
 
 import espaloma as esp
 
@@ -37,7 +37,7 @@ class Graph(BaseGraph):
 
         # input molecule
         if isinstance(mol, str):
-            from openforcefield.topology import Molecule
+            from openff.toolkit.topology import Molecule
 
             mol = Molecule.from_smiles(mol, allow_undefined_stereo=True)
 
@@ -69,7 +69,7 @@ class Graph(BaseGraph):
 
         with open(path+"/mol.json", "r") as f_handle:
             mol = json.load(f_handle)
-        from openforcefield.topology import Molecule
+        from openff.toolkit.topology import Molecule
         try:
             mol = Molecule.from_json(mol)
         except:
@@ -79,7 +79,7 @@ class Graph(BaseGraph):
     @staticmethod
     def get_homograph_from_mol(mol):
         assert isinstance(
-            mol, openforcefield.topology.Molecule
+            mol, openff.toolkit.topology.Molecule
         ), "mol can only be OFF Molecule object."
 
         # TODO:
@@ -88,7 +88,7 @@ class Graph(BaseGraph):
         #     mol.to_rdkit()
         # )
 
-        graph = esp.graphs.utils.read_homogeneous_graph.from_openforcefield_mol(
+        graph = esp.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol(
             mol
         )
         return graph

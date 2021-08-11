@@ -1,5 +1,5 @@
 import torch
-from openforcefield.topology import Molecule
+from openff.toolkit.topology import Molecule
 
 import espaloma as esp
 from .symmetry import ParameterizedSystem, Indices

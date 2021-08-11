@@ -111,7 +111,7 @@ def fp_rdkit(atom):
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def from_openforcefield_mol(mol, use_fp=True):
+def from_openff_toolkit_mol(mol, use_fp=True):
     # initialize graph
     from rdkit import Chem
 

@@ -183,7 +183,7 @@ def infer_mol_from_coordinates(
             )
         )
 
-    from openforcefield.topology import Molecule
+    from openff.toolkit.topology import Molecule
 
     _mol = Molecule.from_openeye(mol, allow_undefined_stereo=True)
     g = esp.Graph(_mol)

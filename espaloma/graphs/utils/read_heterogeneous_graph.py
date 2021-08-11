@@ -8,7 +8,7 @@ import dgl
 import numpy as np
 import torch
 from espaloma.graphs.utils import offmol_indices
-from openforcefield.topology import Molecule
+from openff.toolkit.topology import Molecule
 from typing import Dict
 
 # =============================================================================

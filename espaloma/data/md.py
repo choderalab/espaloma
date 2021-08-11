@@ -375,11 +375,11 @@ class MoleculeVacuumSimulation(object):
             platform=openmm.Platform.getPlatformByName("Reference"),
         )
 
-        import openforcefield
+        import openff.toolkit
 
         # get conformer
         g.mol.generate_conformers(
-            toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
+            toolkit_registry=openff.toolkit.utils.RDKitToolkitWrapper(),
         )
 
         # put conformer in simulation

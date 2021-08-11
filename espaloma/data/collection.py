@@ -26,8 +26,8 @@ def alkethoh(*args, **kwargs):
 
     df = pd.concat(
         [
-            pd.read_csv("https://raw.githubusercontent.com/openforcefield/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi", header=None),
-            pd.read_csv("https://raw.githubusercontent.com/openforcefield/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi", header=None),
+            pd.read_csv("https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi", header=None),
+            pd.read_csv("https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi", header=None),
         ],
         axis=0,
     )
@@ -40,7 +40,7 @@ def alkethoh(*args, **kwargs):
 def zinc(first=-1, *args, **kwargs):
     import tarfile
     from os.path import exists
-    from openforcefield.topology import Molecule
+    from openff.toolkit.topology import Molecule
     from rdkit import Chem
 
     fname = 'parm_at_Frosst.tgz'

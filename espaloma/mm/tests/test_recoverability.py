@@ -2,8 +2,8 @@
 # Initially, interested in recovering a molecular mechanics model containing only improper torsion terms
 
 import numpy as np
-from openforcefield.topology import Molecule, Topology
-from openforcefield.typing.engines.smirnoff import ForceField
+from openff.toolkit.topology import Molecule, Topology
+from openff.toolkit.typing.engines.smirnoff import ForceField
 from simtk import openmm as mm
 import pytest
 import espaloma as esp
@@ -91,11 +91,11 @@ def test_improper_recover():
         topology=topology, system=system, integrator=integrator
     )
 
-    import openforcefield
+    import openff.toolkit
 
     # get conformer
     g.mol.generate_conformers(
-        toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
+        toolkit_registry=openff.toolkit.utils.RDKitToolkitWrapper(),
     )
 
     # put conformer in simulation

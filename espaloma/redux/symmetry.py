@@ -9,7 +9,7 @@ from functools import lru_cache
 import dgl
 import numpy as np
 import torch
-from openforcefield.topology import Molecule
+from openff.toolkit.topology import Molecule
 from sklearn.preprocessing import OneHotEncoder
 from torch import nn
 
@@ -118,7 +118,7 @@ class ValenceModel(nn.Module):
         )
 
         # improper torsions: sum over 3 cyclic permutations of non-central atoms, following smirnoff trefoil convention
-        #   https://github.com/openforcefield/openforcefield/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openforcefield/typing/engines/smirnoff/parameters.py#L3326-L3360
+        #   https://github.com/openff.toolkit/openff.toolkit/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openff.toolkit/typing/engines/smirnoff/parameters.py#L3326-L3360
 
         central = 1
         others = [0, 2, 3]
