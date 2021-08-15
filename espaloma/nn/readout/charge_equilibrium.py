@@ -79,7 +79,7 @@ class ChargeEquilibrium(torch.nn.Module):
                 etype='n1_in_g')
         else:
             g.nodes['g'].data['sum_q'] = torch.zeros(
-                g.batch_size,
+                g.batch_size, 1,
             )
 
         g.update_all(
