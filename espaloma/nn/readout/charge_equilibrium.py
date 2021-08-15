@@ -71,11 +71,16 @@ class ChargeEquilibrium(torch.nn.Module):
             'e_s_inv': node.data['e'] * node.data['s'] ** -1},
             ntype='n1')
 
-        # get total charge
-        g.update_all(
-            dgl.function.copy_src(src='q', out='m_q'),
-            dgl.function.sum(msg='m_q', out='sum_q'),
-            etype='n1_in_g')
+        if "q" in g.nodes['n1'].data:
+            # get total charge
+            g.update_all(
+                dgl.function.copy_src(src='q', out='m_q'),
+                dgl.function.sum(msg='m_q', out='sum_q'),
+                etype='n1_in_g')
+        else:
+            g.nodes['g'].data['sum_q'] = torch.zeros(
+                g.batch_size,
+            )
 
         g.update_all(
             dgl.function.copy_src(src='sum_q', out='m_sum_q'),
@@ -102,7 +107,7 @@ class ChargeEquilibrium(torch.nn.Module):
             dgl.function.copy_src(src='sum_e_s_inv', out='m_sum_e_s_inv'),
             dgl.function.sum(msg='m_sum_e_s_inv', out='sum_e_s_inv'),
             etype='g_has_n1')
-        
+
         g.apply_nodes(
             get_charges,
             ntype='n1')
