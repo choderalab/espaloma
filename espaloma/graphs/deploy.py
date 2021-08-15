@@ -40,7 +40,8 @@ def load_forcefield(forcefield="openff_unconstrained-1.2.0"):
 
 
 def openmm_system_from_graph(
-    g, forcefield="openff_unconstrained-1.2.0", suffix=""
+    g, forcefield="openff_unconstrained-1.2.0", suffix="",
+    gasteiger=False,
 ):
     """ Construct an openmm system from `espaloma.Graph`.
 
@@ -76,8 +77,17 @@ def openmm_system_from_graph(
         for position, idxs in enumerate(g.nodes["n3"].data["idxs"])
     }
 
-    # create openmm system
-    sys = ff.create_openmm_system(g.mol.to_topology())
+    if gasteiger:
+        # from rdkit.Chem.AllChem import ComputeGasteigerCharges
+        # rdkit_mol = g.mol.to_rdkit()
+        # ComputeGasteigerCharges(rdkit_mol)
+        # charges = [atom.GetDoubleProp("_GasteigerCharge") for atom in rdkit_mol.GetAtoms()]
+        g.mol.assign_partial_charges("gasteiger")
+        sys = ff.create_openmm_system(g.mol.to_topology(), charge_from_molecules=[g.mol])
+
+    else:
+        # create openmm system
+        sys = ff.create_openmm_system(g.mol.to_topology())
 
     for force in sys.getForces():
         name = force.__class__.__name__
