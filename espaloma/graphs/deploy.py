@@ -43,6 +43,7 @@ def load_forcefield(forcefield="openff_unconstrained-1.2.0"):
 def openmm_system_from_graph(
     g, forcefield="openff_unconstrained-1.2.0", suffix="",
     charge_method="am1bcc",
+    create_system_kwargs={},
 ):
     """ Construct an openmm system from `espaloma.Graph`.
 
@@ -92,7 +93,8 @@ def openmm_system_from_graph(
                 np.float64,
             )
         sys = ff.create_openmm_system(
-            g.mol.to_topology(), charge_from_molecules=[g.mol]
+            g.mol.to_topology(), charge_from_molecules=[g.mol],
+            allow_nonintegral_charges=True,
         )
 
     else:
