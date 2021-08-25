@@ -60,7 +60,7 @@ class ChargeEquilibrium(torch.nn.Module):
     def __init__(self):
         super(ChargeEquilibrium, self).__init__()
 
-    def forward(self, g):
+    def forward(self, g, total_charge=0.0):
         """ apply charge equilibrium to all molecules in batch """
         # calculate $s ^ {-1}$ and $ es ^ {-1}$
         g.apply_nodes(lambda node: {
@@ -78,9 +78,10 @@ class ChargeEquilibrium(torch.nn.Module):
                 dgl.function.sum(msg='m_q', out='sum_q'),
                 etype='n1_in_g')
         else:
-            g.nodes['g'].data['sum_q'] = torch.zeros(
+            g.nodes['g'].data['sum_q'] = torch.ones(
                 g.batch_size, 1,
-            )
+                device=g.nodes['n1'].data['s'].device,
+            ) * total_charge
 
         g.update_all(
             dgl.function.copy_src(src='sum_q', out='m_sum_q'),
