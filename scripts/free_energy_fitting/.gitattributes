@@ -1,0 +1,12 @@
+freesolv.h5 filter=lfs diff=lfs merge=lfs -text
+freesolv_with_samples.h5 filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=2_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=5_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=6_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=7_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=8_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=0_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=1_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=3_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=4_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text
+cho_freesolv_fold=9_epoch=250.pkl filter=lfs diff=lfs merge=lfs -text

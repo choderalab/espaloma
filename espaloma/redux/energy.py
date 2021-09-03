@@ -6,8 +6,9 @@ from .symmetry import ParameterizedSystem, Indices
 
 
 def compute_bonds(
-    xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices
-) -> torch.Tensor:
+        xyz: torch.Tensor,
+        params: ParameterizedSystem,
+        indices: Indices) -> torch.Tensor:
     a, b = xyz[:, indices.bonds[:, 0]], xyz[:, indices.bonds[:, 1]]
     distance = esp.mm.geometry.distance(a, b)
     k, eq = params.bonds[:, 0], params.bonds[:, 1]
@@ -15,21 +16,27 @@ def compute_bonds(
 
 
 def compute_angles(
-    xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices
-) -> torch.Tensor:
-    a, b, c = (
-        xyz[:, indices.angles[:, 0]],
-        xyz[:, indices.angles[:, 1]],
-        xyz[:, indices.angles[:, 2]],
-    )
+        xyz: torch.Tensor,
+        params: ParameterizedSystem,
+        indices: Indices) -> torch.Tensor:
+    # TODO; be less verbose about this
+    a = xyz[:, indices.angles[:, 0]]
+    b = xyz[:, indices.angles[:, 1]]
+    c = xyz[:, indices.angles[:, 2]]
+
     angles = esp.mm.geometry.angle(a, b, c)
     k, eq = params.angles[:, 0], params.angles[:, 1]
     return esp.mm.angle.harmonic_angle(angles, k, eq)
 
 
 def compute_propers(
-    xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices
-) -> torch.Tensor:
+        xyz: torch.Tensor,
+        params: ParameterizedSystem,
+        indices: Indices) -> torch.Tensor:
+    # it's possible there are no proper torsions in the system (e.g. h2o)
+    if len(indices.propers) == 0:
+        return torch.tensor([[0.0]])
+
     # TODO: reduce code duplication with compute_impropers
     a, b = xyz[:, indices.propers[:, 0]], xyz[:, indices.propers[:, 1]]
     c, d = xyz[:, indices.propers[:, 2]], xyz[:, indices.propers[:, 3]]
@@ -39,8 +46,13 @@ def compute_propers(
 
 
 def compute_impropers(
-    xyz: torch.Tensor, params: ParameterizedSystem, indices: Indices
-) -> torch.Tensor:
+        xyz: torch.Tensor,
+        params: ParameterizedSystem,
+        indices: Indices) -> torch.Tensor:
+    # it's possible there are no iproper torsions in the system (e.g. nh4)
+    if len(indices.impropers) == 0:
+        return torch.tensor([[0.0]])
+
     # TODO: reduce code duplication with compute_propers
     a, b = xyz[:, indices.impropers[:, 0]], xyz[:, indices.impropers[:, 1]]
     c, d = xyz[:, indices.impropers[:, 2]], xyz[:, indices.impropers[:, 3]]
@@ -50,13 +62,15 @@ def compute_impropers(
 
 
 def compute_valence_energy(
-    offmol: Molecule, xyz: torch.Tensor, params: ParameterizedSystem
-) -> torch.Tensor:
+        offmol: Molecule,
+        xyz: torch.Tensor,
+        params: ParameterizedSystem) -> torch.Tensor:
     indices = Indices(offmol)
-    harmonic_terms = compute_bonds(xyz, params, indices).sum(
-        1
-    ) + compute_angles(xyz, params, indices).sum(1)
-    torsion_terms = compute_propers(xyz, params, indices).sum(
-        1
-    ) + compute_impropers(xyz, params, indices).sum(1)
-    return harmonic_terms + torsion_terms
+
+    bonds = compute_bonds(xyz, params, indices).sum(1)
+    angles = compute_angles(xyz, params, indices).sum(1)
+    propers = compute_propers(xyz, params, indices).sum(1)
+    impropers = compute_impropers(xyz, params, indices).sum(1)
+    valence_energy = bonds + angles + propers + impropers
+
+    return valence_energy
