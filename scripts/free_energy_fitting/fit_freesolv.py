@@ -6,8 +6,6 @@
 # TODO: Update loss from un-scaled RMSE to something more like a likelihood
 #   (incorporating expt error + free-energy-estimator error)
 
-
-# TODO: update to use GraphSAGE [128, relu] * 3 instead of TAGConv [128, relu] * 3
 # TODO: update to use Espaloma atom features instead of one-hot element atom features
 
 import matplotlib.pyplot as plt
@@ -17,7 +15,7 @@ import torch
 torch.set_default_dtype(torch.float64)
 import numpy as np
 
-from espaloma.redux.nn import TAG, MLP
+from espaloma.redux.nn import GraphSAGE, MLP
 from espaloma.redux.symmetry import ValenceModel, Readouts, elements
 
 from tqdm import tqdm
@@ -81,7 +79,7 @@ def compute_obc2_energies(
 
 
 def initialize(hidden_dim=128, node_dim=128, atom_dim=2):
-    node_representation = TAG(in_dim=len(elements), hidden_dim=hidden_dim,
+    node_representation = GraphSAGE(in_dim=len(elements), hidden_dim=hidden_dim,
                               out_dim=node_dim)
     readouts = Readouts(atoms=MLP(node_dim, atom_dim),
                         bonds=MLP(2 * node_dim, 2),
