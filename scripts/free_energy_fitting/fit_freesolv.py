@@ -6,6 +6,10 @@
 # TODO: Update loss from un-scaled RMSE to something more like a likelihood
 #   (incorporating expt error + free-energy-estimator error)
 
+
+# TODO: update to use GraphSAGE [128, relu] * 3 instead of TAGConv [128, relu] * 3
+# TODO: update to use Espaloma atom features instead of one-hot element atom features
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
