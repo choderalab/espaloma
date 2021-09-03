@@ -2,7 +2,7 @@ from typing import Callable
 
 import torch
 import torch.nn.functional as F
-from dgl.nn.pytorch import TAGConv
+from dgl.nn.pytorch import TAGConv, SAGEConv
 from torch import nn
 
 
@@ -35,6 +35,31 @@ class TAG(nn.Module):
         self.layer1 = TAGConv(in_dim, hidden_dim, k, activation=activation)
         self.layer2 = TAGConv(hidden_dim, hidden_dim, k, activation=activation)
         self.layer3 = TAGConv(hidden_dim, out_dim, k, activation=activation)
+        self.activation = activation
+
+    def forward(self, graph, inputs):
+        h = self.layer1(graph, inputs)
+        h = self.activation(h)
+        h = self.layer2(graph, h)
+        h = self.activation(h)
+        h = self.layer3(graph, h)
+        return h
+
+
+
+class GraphSAGE(nn.Module):
+    def __init__(
+        self,
+        in_dim: int,
+        hidden_dim: int,
+        out_dim: int,
+        activation: Callable = F.relu,
+    ):
+
+        super(GraphSAGE, self).__init__()
+        self.layer1 = SAGEConv(in_dim, hidden_dim, aggregator_type='mean', activation=activation)
+        self.layer2 = SAGEConv(hidden_dim, hidden_dim, aggregator_type='mean', activation=activation)
+        self.layer3 = SAGEConv(hidden_dim, out_dim, aggregator_type='mean', activation=activation)
         self.activation = activation
 
     def forward(self, graph, inputs):
