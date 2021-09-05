@@ -83,7 +83,7 @@ jobs:
       - name: Run tests
         shell: bash -l {0}
         run: |
-          pytest -v --cov=espaloma --cov-report=xml --color=yes espaloma/tests/
+          pytest -v --cov=espaloma --cov-report=xml --color=yes espaloma/
 
       - name: CodeCov
         uses: codecov/codecov-action@v1
