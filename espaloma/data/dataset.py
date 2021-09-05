@@ -229,7 +229,7 @@ class GraphDataset(Dataset):
 
     def __init__(self, graphs=[], first=None):
         super(GraphDataset, self).__init__()
-        from openforcefield.topology import Molecule
+        from openff.toolkit.topology import Molecule
 
         if all(
             isinstance(graph, Molecule) or isinstance(graph, str)

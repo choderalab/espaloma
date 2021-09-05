@@ -324,6 +324,7 @@ class MoleculeVacuumSimulation(object):
         self,
         forcefield="gaff-1.81",
         n_samples=100,
+        n_conformers=10,
         n_steps_per_sample=1000,
         temperature=TEMPERATURE,
         collision_rate=COLLISION_RATE,
@@ -336,6 +337,7 @@ class MoleculeVacuumSimulation(object):
         self.collision_rate = collision_rate
         self.step_size = step_size
         self.forcefield = forcefield
+        self.n_conformers = n_conformers
 
 
     def simulation_from_graph(self, g):
@@ -375,19 +377,6 @@ class MoleculeVacuumSimulation(object):
             platform=openmm.Platform.getPlatformByName("Reference"),
         )
 
-        import openforcefield
-
-        # get conformer
-        g.mol.generate_conformers(
-            toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
-        )
-
-        # put conformer in simulation
-        simulation.context.setPositions(g.mol.conformers[0])
-
-        # set velocities
-        simulation.context.setVelocitiesToTemperature(self.temperature)
-
         return simulation
 
     def run(self, g, in_place=True):
@@ -414,28 +403,70 @@ class MoleculeVacuumSimulation(object):
         # build simulation
         simulation = self.simulation_from_graph(g)
 
-        # initialize empty list for samples.
+        import openff.toolkit
+
+        # get conformer
+        g.mol.generate_conformers(
+            toolkit_registry=openff.toolkit.utils.RDKitToolkitWrapper(),
+            n_conformers=self.n_conformers,
+        )
+
+        # get number of actual conformers
+        true_n_conformers = len(g.mol.conformers)
+
         samples = []
+        for idx in range(true_n_conformers):
+            # put conformer in simulation
+            simulation.context.setPositions(g.mol.conformers[idx])
 
-        # minimize
-        simulation.minimizeEnergy()
+            # set velocities
+            simulation.context.setVelocitiesToTemperature(self.temperature)
 
-        # loop through number of samples
-        for _ in range(self.n_samples):
+            # minimize
+            simulation.minimizeEnergy()
 
-            # run MD for `self.n_steps_per_sample` steps
-            simulation.step(self.n_steps_per_sample)
+            # loop through number of samples
+            for _ in range(self.n_samples // self.n_conformers):
 
-            # append samples to `samples`
-            samples.append(
-                simulation.context.getState(getPositions=True)
-                .getPositions(asNumpy=True)
-                .value_in_unit(DISTANCE_UNIT)
-            )
+                # run MD for `self.n_steps_per_sample` steps
+                simulation.step(self.n_steps_per_sample)
 
-        # assert that energy is below zero
-        # final_energy = simulation.context.getState(getEnergy=True).getPotentialEnergy(
-        #        ).value_in_unit(ENERGY_UNIT)
+                # append samples to `samples`
+                samples.append(
+                    simulation.context.getState(getPositions=True)
+                    .getPositions(asNumpy=True)
+                    .value_in_unit(DISTANCE_UNIT)
+                )
+
+        # if the `samples` array is not filled,
+        # pick a random conformer to do it again
+        if len(samples) < self.n_samples:
+            len_samples = len(samples)
+            import random
+            idx = random.choice(list(range(true_n_conformers)))
+            simulation.context.setPositions(g.mol.conformers[idx])
+
+            # set velocities
+            simulation.context.setVelocitiesToTemperature(self.temperature)
+
+            # minimize
+            simulation.minimizeEnergy()
+
+            # loop through number of samples
+            for _ in range(self.n_samples - len_samples):
+
+                # run MD for `self.n_steps_per_sample` steps
+                simulation.step(self.n_steps_per_sample)
+
+                # append samples to `samples`
+                samples.append(
+                    simulation.context.getState(getPositions=True)
+                    .getPositions(asNumpy=True)
+                    .value_in_unit(DISTANCE_UNIT)
+                )
+
+                
+        assert len(samples) == self.n_samples
 
         # put samples into an array
         samples = np.array(samples)

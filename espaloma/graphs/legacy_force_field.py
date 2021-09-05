@@ -3,7 +3,7 @@
 # =============================================================================
 import rdkit
 import torch
-from openforcefield.topology import Molecule
+from openff.toolkit.topology import Molecule
 import espaloma as esp
 
 from openmmforcefields.generators import SystemGenerator
@@ -48,12 +48,12 @@ class LegacyForceField:
 
     @staticmethod
     def _convert_to_off(mol):
-        import openforcefield
+        import openff.toolkit
 
         if isinstance(mol, esp.Graph):
             return mol.mol
 
-        elif isinstance(mol, openforcefield.topology.molecule.Molecule):
+        elif isinstance(mol, openff.toolkit.topology.molecule.Molecule):
             return mol
         elif isinstance(mol, rdkit.Chem.rdchem.Mol):
             return Molecule.from_rdkit(mol)
@@ -79,13 +79,13 @@ class LegacyForceField:
 
     def _prepare_openff(self):
 
-        from openforcefield.typing.engines.smirnoff import ForceField
+        from openff.toolkit.typing.engines.smirnoff import ForceField
 
         self.FF = ForceField("%s.offxml" % self.forcefield)
 
     def _prepare_smirnoff(self):
 
-        from openforcefield.typing.engines.smirnoff import ForceField
+        from openff.toolkit.typing.engines.smirnoff import ForceField
 
         self.FF = ForceField("test_forcefields/%s.offxml" % self.forcefield)
 
@@ -95,7 +95,7 @@ class LegacyForceField:
 
         import openmmforcefields
 
-        # get the openforcefields path
+        # get the openff.toolkits path
         openmmforcefields_path = os.path.dirname(openmmforcefields.__file__)
 
         # get the xml path
@@ -134,7 +134,7 @@ class LegacyForceField:
         # assert the forcefield is indeed of gaff family
         assert "gaff" in self.forcefield
 
-        # make sure mol is in OpenForceField format `
+        # make sure mol is in openff.toolkit format `
         mol = g.mol
 
         # import template generator

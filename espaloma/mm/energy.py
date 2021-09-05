@@ -331,37 +331,39 @@ def energy_in_graph(
 def energy_in_graph_ii(
     g, suffix="",
 ):
+    if g.number_of_nodes("n3") > 0: 
+       
+        g.apply_nodes(
+             lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
+        )
 
-    g.apply_nodes(
-         lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
-    )
+        g.apply_nodes(
+            lambda node: {
+                'u%s' % suffix:
+                node.data['u%s' % suffix] \
+                + node.data['u_urey_bradley%s' % suffix]\
+                + node.data['u_bond_bond%s' % suffix]\
+                + node.data['u_bond_angle%s' % suffix]
+            },
+            ntype='n3'
+        )
 
-    g.apply_nodes(
-        lambda node: {
-            'u%s' % suffix:
-            node.data['u%s' % suffix] \
-            + node.data['u_urey_bradley%s' % suffix]\
-            + node.data['u_bond_bond%s' % suffix]\
-            + node.data['u_bond_angle%s' % suffix]
-        },
-        ntype='n3'
-    )
+    if g.number_of_nodes("n4") > 0:
+        g.apply_nodes(
+            lambda node: apply_torsion_ii(node, suffix=suffix), ntype="n4",
+        )
 
-    g.apply_nodes(
-        lambda node: apply_torsion_ii(node, suffix=suffix), ntype="n4",
-    )
-
-    g.apply_nodes(
-        lambda node: {
-            'u%s' % suffix:
-            node.data['u%s' % suffix]\
-            + node.data['u_angle_angle%s' % suffix]\
-            + node.data['u_angle_torsion%s' % suffix]\
-            + node.data['u_angle_angle_torsion%s' % suffix]\
-            + node.data['u_bond_torsion%s' % suffix]
-        },
-        ntype='n4'
-    )
+        g.apply_nodes(
+            lambda node: {
+                'u%s' % suffix:
+                node.data['u%s' % suffix]\
+                + node.data['u_angle_angle%s' % suffix]\
+                + node.data['u_angle_torsion%s' % suffix]\
+                + node.data['u_angle_angle_torsion%s' % suffix]\
+                + node.data['u_bond_torsion%s' % suffix]
+            },
+            ntype='n4'
+        )
 
     return g
 

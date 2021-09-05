@@ -44,7 +44,7 @@ def get_graph(collection, record_name):
     # get record and trajectory
     record = collection.get_record(record_name, specification="default")
     entry = collection.get_entry(record_name)
-    from openforcefield.topology import Molecule
+    from openff.toolkit.topology import Molecule
     mol = Molecule.from_qcschema(entry)
 
     try:

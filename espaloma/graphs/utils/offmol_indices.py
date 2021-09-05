@@ -1,5 +1,5 @@
 import numpy as np
-from openforcefield.topology import Molecule
+from openff.toolkit.topology import Molecule
 
 
 def atom_indices(offmol: Molecule) -> np.ndarray:
@@ -51,7 +51,7 @@ def improper_torsion_indices(offmol: Molecule) -> np.ndarray:
     Notes
     -----
     Motivation: offmol.impropers returns a large number of impropers, and we may wish to restrict this number.
-    May update this filter definition based on discussion in https://github.com/openforcefield/openforcefield/issues/746
+    May update this filter definition based on discussion in https://github.com/openff.toolkit/openff.toolkit/issues/746
     """
     improper_smarts = "[*:1]~[X3:2](~[*:3])~[*:4]"
     return np.array(offmol.chemical_environment_matches(improper_smarts))

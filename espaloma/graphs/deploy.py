@@ -1,9 +1,10 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import numpy as np
 import rdkit
 import torch
-from openforcefield.typing.engines.smirnoff import ForceField
+from openff.toolkit.typing.engines.smirnoff import ForceField
 import espaloma as esp
 from simtk import unit
 from simtk.unit.quantity import Quantity
@@ -40,7 +41,9 @@ def load_forcefield(forcefield="openff_unconstrained-1.2.0"):
 
 
 def openmm_system_from_graph(
-    g, forcefield="openff_unconstrained-1.2.0", suffix=""
+    g, forcefield="openff_unconstrained-1.2.0", suffix="",
+    charge_method="am1bcc",
+    create_system_kwargs={},
 ):
     """ Construct an openmm system from `espaloma.Graph`.
 
@@ -76,8 +79,27 @@ def openmm_system_from_graph(
         for position, idxs in enumerate(g.nodes["n3"].data["idxs"])
     }
 
-    # create openmm system
-    sys = ff.create_openmm_system(g.mol.to_topology())
+    if charge_method == "gasteiger":
+        # from rdkit.Chem.AllChem import ComputeGasteigerCharges
+        # rdkit_mol = g.mol.to_rdkit()
+        # ComputeGasteigerCharges(rdkit_mol)
+        # charges = [atom.GetDoubleProp("_GasteigerCharge") for atom in rdkit_mol.GetAtoms()]
+        g.mol.assign_partial_charges("gasteiger")
+        sys = ff.create_openmm_system(g.mol.to_topology(), charge_from_molecules=[g.mol])
+
+    elif charge_method == "nn":
+        g.mol.partial_charges = unit.elementary_charge\
+            * g.nodes['n1'].data['q_hat'].flatten().detach().cpu().numpy().astype(
+                np.float64,
+            )
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol],
+            allow_nonintegral_charges=True,
+        )
+
+    else:
+        # create openmm system
+        sys = ff.create_openmm_system(g.mol.to_topology())
 
     for force in sys.getForces():
         name = force.__class__.__name__

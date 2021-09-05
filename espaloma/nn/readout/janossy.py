@@ -246,7 +246,7 @@ class JanossyPoolingImproper(torch.nn.Module):
         # pool
         #   sum over three cyclic permutations of "h0", "h2", "h3", assuming "h1" is the central atom in the improper
         #   following the smirnoff trefoil convention [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
-        #   https://github.com/openforcefield/openforcefield/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openforcefield/typing/engines/smirnoff/parameters.py#L3326-L3360
+        #   https://github.com/openff.toolkit/openff.toolkit/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openff.toolkit/typing/engines/smirnoff/parameters.py#L3326-L3360
         for big_idx in self.levels:
 
             g.apply_nodes(
