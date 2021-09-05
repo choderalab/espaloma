@@ -7,7 +7,7 @@ import torch
 from openff.toolkit.typing.engines.smirnoff import ForceField
 import espaloma as esp
 from simtk import unit
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 # =============================================================================
 # CONSTANTS
