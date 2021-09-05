@@ -1,6 +1,5 @@
 import pytest
 
-
 def test_save_and_load():
     import espaloma as esp
     g = esp.Graph('C')
@@ -9,4 +8,5 @@ def test_save_and_load():
 
     new_ds = esp.data.dataset.GraphDataset.load('ds')
 
+    import os
     os.rmdir('ds')

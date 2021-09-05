@@ -87,7 +87,7 @@ class LegacyForceField:
 
         from openff.toolkit.typing.engines.smirnoff import ForceField
 
-        self.FF = ForceField("test_forcefields/%s.offxml" % self.forcefield)
+        self.FF = ForceField("%s.offxml" % self.forcefield)
 
     def _prepare_gaff(self):
         import os
