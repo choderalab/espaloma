@@ -15,6 +15,8 @@ dependencies:
   - scipy
   - openff-toolkit
   - openff-forcefields
+  - openmm
+  - openmmforcefields
   # Pytorch
   - pytorch
   - dgl
