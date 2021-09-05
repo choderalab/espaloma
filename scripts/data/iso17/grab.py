@@ -4,7 +4,7 @@ import numpy as np
 import espaloma as esp
 from openeye import oechem
 from simtk import unit
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 def run(idx, u_thres=0.1):
     # read xyz file

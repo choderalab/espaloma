@@ -3,7 +3,7 @@ from simtk import unit
 from openmmforcefields.generators import SystemGenerator
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 from espaloma.units import *
 import espaloma as esp

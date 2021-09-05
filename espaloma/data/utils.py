@@ -127,7 +127,7 @@ def infer_mol_from_coordinates(
     # local import
     from openeye import oechem
     from simtk import unit
-    from simtk.unit.quantity import Quantity
+    from simtk.unit import Quantity
 
     if isinstance(coordinates_unit, str):
         coordinates_unit = getattr(unit, coordinates_unit)

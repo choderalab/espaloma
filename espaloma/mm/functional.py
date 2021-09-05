@@ -9,7 +9,7 @@ import espaloma as esp
 # CONSTANTS
 # =============================================================================
 from simtk import unit
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(esp.units.DISTANCE_UNIT)
 

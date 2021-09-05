@@ -7,7 +7,7 @@ from simtk import unit
 import pytest
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 from simtk.openmm import app
 

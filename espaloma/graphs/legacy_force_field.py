@@ -9,7 +9,7 @@ import espaloma as esp
 from openmmforcefields.generators import SystemGenerator
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 # =============================================================================
 # CONSTANTS

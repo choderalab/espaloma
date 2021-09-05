@@ -73,7 +73,7 @@ def _create_impropers_only_system(
 def test_improper_recover():
     from simtk import openmm, unit
     from simtk.openmm.app import Simulation
-    from simtk.unit.quantity import Quantity
+    from simtk.unit import Quantity
 
     TEMPERATURE = 500 * unit.kelvin
     STEP_SIZE = 1 * unit.femtosecond

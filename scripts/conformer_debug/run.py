@@ -2,7 +2,7 @@ import numpy as np
 from simtk import openmm, unit
 from openmmforcefields.generators import SystemGenerator
 from simtk.openmm.app import Simulation
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 from openforcefield.topology import Molecule
 
 TEMPERATURE = 300 * unit.kelvin
@@ -13,7 +13,7 @@ def run():
     mol = Molecule.from_smiles(
         "[H][O][S]1(=[O])=[N][C]2=[C]([C]([N]([H])[H])=[N]1)[N]([H])[C]([c]1[c]([H])[c]([H])[c]([H])[c]([H])[c]1[H])=[N]2",
     )
-    
+
     # assign partial charge
     # mol.assign_partial_charges("am1bcc")
 

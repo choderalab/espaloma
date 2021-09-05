@@ -8,7 +8,7 @@ import numpy as np
 import qcportal as ptl
 import torch
 from simtk import unit
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 import espaloma as esp
 

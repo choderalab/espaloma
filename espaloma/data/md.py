@@ -7,7 +7,7 @@ import torch
 from openmmforcefields.generators import SystemGenerator
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 from espaloma.units import *
 import espaloma as esp
@@ -228,7 +228,7 @@ def subtract_nonbonded_force_except_14(
 
             force.updateParametersInContext(simulation.context)
 
-        
+
 
     # the snapshots
     xs = (
@@ -465,7 +465,7 @@ class MoleculeVacuumSimulation(object):
                     .value_in_unit(DISTANCE_UNIT)
                 )
 
-                
+
         assert len(samples) == self.n_samples
 
         # put samples into an array
