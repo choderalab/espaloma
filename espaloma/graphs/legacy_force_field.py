@@ -109,7 +109,7 @@ class LegacyForceField:
         # parse xml
         tree = ET.parse(ffxml_path)
         root = tree.getroot()
-        nonbonded = root.getchildren()[-1]
+        nonbonded = list(root)[-1]
         atom_types = [atom.get("type") for atom in nonbonded.findall("Atom")]
 
         # remove redundant types
