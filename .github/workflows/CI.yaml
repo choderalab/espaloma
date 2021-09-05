@@ -5,7 +5,7 @@ on:
     branches:
       - '*'
   push:
-    branches: 
+    branches:
       - '*'
   schedule:
     # Nightly tests run on master by default:
@@ -15,19 +15,26 @@ on:
 
 jobs:
   test:
-    name: Test on ${{ matrix.os }} + Python ${{ matrix.python-version }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - 3.6
-          - 3.7
-          # - 3.8 # TODO: figure out why fail
-        os:
-          - ubuntu-latest
-          # disabling macOS test because they're always failing for some RAM issue
-          # - macOS-latest
+        include:
+          - name: Linux, Python 3.7
+            os: ubuntu-latest
+            python-version: "3.7"
+            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+
+          - name: Linux, Python 3.9
+            os: ubuntu-latest
+            python-version: "3.9"
+            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+
+          - name: MacOS, Python 3.7
+            os: macOS-latest
+            python-version: "3.7"
+            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-MacOSX-x86_64.sh
 
     env:
       CI_OS: ${{ matrix.os }}
@@ -37,43 +44,52 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          installer-url: ${{ matrix.conda-installer }}
+          python-version: ${{ matrix.python-version }}
+          activate-environment: test
+          channel-priority: true
+          environment-file: devtools/conda-envs/espaloma.yaml
+          auto-activate-base: false
+          use-mamba: true
+
       - name: Additional info about the build
         shell: bash
         run: |
           uname -a
           df -h
           ulimit -a
-
-      - name: Fix conda permissions in MacOS
-        shell: bash
-        if: startsWith(matrix.os, 'macOS')
+      - name: Environment Information
+        shell: bash -l {0}
         run: |
-          sudo chown -R $(id -u):$(id -g) ${CONDA}
-
-      - name: Configure conda
-        shell: bash
-        run: |
-          . devtools/gh-actions/initialize_conda.sh
-          conda activate
-          conda config --set always_yes yes
-          conda config --add channels conda-forge
-          conda install --quiet conda conda-build jinja2 anaconda-client
-          conda update --quiet --all
           conda info --all
           conda list
+          mamba --version
 
-      - name: Prepare test environment
-        shell: bash
+      - name: Decrypt and check OE license
+        shell: bash -l {0}
+        env:
+          OE_LICENSE_TEXT: ${{ secrets.OE_LICENSE }}
         run: |
-          . devtools/gh-actions/initialize_conda.sh
-          conda activate
-          python devtools/scripts/create_conda_env.py -n=test -p=$PYVER devtools/conda-envs/espaloma.yaml
-          conda activate test
+          echo "${OE_LICENSE_TEXT}" > ${OE_LICENSE}
+          python -c "import openeye; assert openeye.OEChemIsLicensed()"
+
+      - name: Install package
+        shell: bash -l {0}
+        run: |
           python -m pip install --no-deps .
 
-      - name: Test the package
-        shell: bash
+      - name: Run tests
+        shell: bash -l {0}
         run: |
-          . devtools/gh-actions/initialize_conda.sh
-          conda activate test
-          pytest -v
+          pytest -v --cov=espaloma --cov-report=xml --color=yes espaloma/tests/
+
+      - name: CodeCov
+        uses: codecov/codecov-action@v1
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          yml: ./.codecov.yml

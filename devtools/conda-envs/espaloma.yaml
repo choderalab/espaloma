@@ -2,12 +2,14 @@ name: test
 channels:
   - conda-forge
   - dglteam
+  - openeye
   - defaults
 dependencies:
   # Base dependencies
   - python
   - pip
   # 3rd party
+  - openeye-toolkits
   - numpy
   - matplotlib
   - scipy
@@ -24,4 +26,3 @@ dependencies:
   - nose-timer
   - coverage
   - qcportal
-  
