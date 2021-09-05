@@ -61,7 +61,7 @@ def leapfrog(xs, vs, closure, dt=1.0):
 
 gs = esp.data.dataset.GraphDataset([esp.Graph('C' * idx) for idx in range(1, 3)])
 gs.apply(
-    esp.graphs.LegacyForceField('smirnoff99Frosst').parametrize,
+    esp.graphs.LegacyForceField('smirnoff99Frosst-1.1.0').parametrize,
     in_place=True,
 )
 ds = gs.view(batch_size=len(gs))
@@ -105,7 +105,7 @@ realize = torch.nn.Sequential(
 def closure(x, idx, g):
     with g.local_scope():
         g.nodes['n1'].data['xyz'] = x
-        
+
         if idx != -1:
 
             g.nodes['n2'].data['eq_ref'] = g.nodes['n2'].data['eqs'][:, idx][:, None]
@@ -113,7 +113,7 @@ def closure(x, idx, g):
 
             g.nodes['n3'].data['eq_ref'] = g.nodes['n3'].data['eqs'][:, idx][:, None]
             g.nodes['n3'].data['k_ref'] = g.nodes['n3'].data['ks'][:, idx][:, None]
-            
+
         realize(g)
         return g.nodes['g'].data['u_ref']
 
@@ -124,28 +124,28 @@ def closure(x, idx, g):
 def simulation(net, g):
     with g.local_scope():
         net(g)
-        
+
         particle_distribution = torch.distributions.normal.Normal(
             loc=torch.zeros(g.number_of_nodes('n1'), 128, 3),
             scale=g.nodes['n1'].data['sigma'][:, :, None].repeat(1, 128, 3).exp()
         )
 
         #normal_distribution = torch.distributions.normal.Normal(0, 1.0)
-        
+
         x = torch.nn.Parameter(
             particle_distribution.rsample()
         )
-        
+
         v = torch.zeros_like(x)
 
         xs = [x]
         vs = [v]
-        
+
 
         for idx in range(1, WINDOWS):
 
             xs, vs = leapfrog(xs, vs, lambda x: closure(x, idx, g=g), 1e-2)
-        
+
         return xs, vs, particle_distribution
 
 
@@ -223,12 +223,8 @@ for idx_atom in range(mol.GetNumAtoms()):
             float(x[idx_atom, conf_idx, 1]),
             float(x[idx_atom, conf_idx, 2]),
         ))
-    
+
 nv.show_rdkit(mol)
 
 
 # In[ ]:
-
-
-
-

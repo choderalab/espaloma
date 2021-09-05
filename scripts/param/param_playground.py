@@ -8,7 +8,7 @@ def run():
     ds = esp.data.zinc(first=1000)
 
     # do some typing
-    param = esp.graphs.legacy_force_field.LegacyForceField('smirnoff99Frosst'
+    param = esp.graphs.legacy_force_field.LegacyForceField('smirnoff99Frosst-1.1.0'
         ).parametrize
     ds.apply(param, in_place=True) # this modify the original data
 
