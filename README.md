@@ -1,7 +1,7 @@
 espaloma
 ==============================
 [//]: # (Badges)
-![](https://github.com/choderalab/espaloma/workflows/CI/badge.svg)
+[![CI](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml/badge.svg?branch=master)](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/context:python)
 
@@ -36,9 +36,9 @@ molecule ---(graph nets)---> atom-embedding ---(pooling)---> hypernode-embedding
         * `ii/` energy terms used in Class-II force field.
             * `coupling.py` coupling terms
             * `polynomial.py` higher order polynomials.
-            
-        
-            
+
+
+
 
 # License
 
@@ -51,4 +51,3 @@ Authors:
 - Yuanqing Wang
 - Josh Fass
 - John D. Chodera
-
