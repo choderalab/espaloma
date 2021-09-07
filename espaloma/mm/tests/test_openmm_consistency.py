@@ -152,7 +152,7 @@ def test_energy_angle_and_bond(g):
     )
 
     _simulation.context.setPositions(
-        g.nodes['n1'].data['xyz'][:, 0, :].detach().numpy() * unit.nanometer
+        g.nodes['n1'].data['xyz'][:, 0, :].detach().numpy() * unit.bohr
     )
 
     for idx, force in enumerate(forces):
@@ -193,12 +193,12 @@ def test_energy_angle_and_bond(g):
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
 
     # for each atom, store n_snapshots x 3
-    g.nodes["n1"].data["xyz"] = torch.tensor(
-        simulation.context.getState(getPositions=True)
-        .getPositions(asNumpy=True)
-        .value_in_unit(esp.units.DISTANCE_UNIT),
-        dtype=torch.float32,
-    )[None, :, :].permute(1, 0, 2)
+    # g.nodes["n1"].data["xyz"] = torch.tensor(
+    #     simulation.context.getState(getPositions=True)
+    #     .getPositions(asNumpy=True)
+    #     .value_in_unit(esp.units.DISTANCE_UNIT),
+    #     dtype=torch.float32,
+    # )[None, :, :].permute(1, 0, 2)
 
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
