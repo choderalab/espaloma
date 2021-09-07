@@ -94,11 +94,13 @@ def test_energy_angle_and_bond(g):
     from espaloma.data.md import MoleculeVacuumSimulation
 
     # get simulation
-    simulation = MoleculeVacuumSimulation(
+    esp_simulation = MoleculeVacuumSimulation(
         n_samples=1, n_steps_per_sample=10, forcefield="gaff-1.81"
-    ).simulation_from_graph(g)
+    )
 
+    simulation = esp_simulation.simulation_from_graph(g)
     system = simulation.system
+    esp_simulation.run(g)
 
     forces = list(system.getForces())
 
@@ -150,7 +152,7 @@ def test_energy_angle_and_bond(g):
     )
 
     _simulation.context.setPositions(
-        simulation.context.getState(getPositions=True).getPositions()
+        g.nodes['n1'].data['xyz'][:, 0, :].detach().numpy() * unit.nanometer
     )
 
     for idx, force in enumerate(forces):
