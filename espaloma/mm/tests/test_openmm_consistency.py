@@ -211,20 +211,20 @@ def test_energy_angle_and_bond(g):
 
     # test bonds
     npt.assert_almost_equal(
-        g.nodes["g"].data["u_n2"].numpy(),
+        g.nodes["g"].data["u_n2"].detach().numpy(),
         energies["HarmonicBondForce"],
         decimal=n_decimals,
     )
 
     # test angles
     npt.assert_almost_equal(
-        g.nodes["g"].data["u_n3"].numpy(),
+        g.nodes["g"].data["u_n3"].detach().numpy(),
         energies["HarmonicAngleForce"],
         decimal=n_decimals,
     )
 
-    propers = g.nodes["g"].data["u_n4"].numpy()
-    impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
+    propers = g.nodes["g"].data["u_n4"].detach().numpy()
+    impropers =  g.nodes["g"].data["u_n4_improper"].detach().numpy()
     all_torsions = propers + impropers
     npt.assert_almost_equal(
         all_torsions,
