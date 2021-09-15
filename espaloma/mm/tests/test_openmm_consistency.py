@@ -202,7 +202,7 @@ def test_energy_angle_and_bond(g):
 
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
-    esp.mm.energy.energy_in_graph(g.heterograph, terms=["n2", "n3", "n4"])
+    esp.mm.energy.energy_in_graph(g.heterograph, terms=["n2", "n3", "n4", "n4_improper"])
     # writes into nodes
     # .data['u_nonbonded'], .data['u_onefour'], .data['u2'], .data['u3'],
 
