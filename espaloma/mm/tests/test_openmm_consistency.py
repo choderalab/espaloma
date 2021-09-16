@@ -100,7 +100,7 @@ def test_energy_angle_and_bond(g):
 
     simulation = esp_simulation.simulation_from_graph(g)
     system = simulation.system
-    esp_simulation.run(g)
+    esp_simulation.run(g, in_place=True)
 
     forces = list(system.getForces())
 
