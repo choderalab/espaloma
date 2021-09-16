@@ -329,6 +329,7 @@ class MoleculeVacuumSimulation(object):
         temperature=TEMPERATURE,
         collision_rate=COLLISION_RATE,
         step_size=STEP_SIZE,
+        charge_method=None,
     ):
 
         self.n_samples = n_samples
@@ -338,12 +339,14 @@ class MoleculeVacuumSimulation(object):
         self.step_size = step_size
         self.forcefield = forcefield
         self.n_conformers = n_conformers
+        self.charge_method = charge_method
 
 
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # assign partial charge
-        # g.mol.assign_partial_charges("am1bcc")
+        if self.charge_method is not None:
+            g.mol.assign_partial_charges(self.charge_method)
 
         # parameterize topology
         topology = g.mol.to_topology().to_openmm()
@@ -417,7 +420,9 @@ class MoleculeVacuumSimulation(object):
         samples = []
         for idx in range(true_n_conformers):
             # put conformer in simulation
-            simulation.context.setPositions(g.mol.conformers[idx])
+            simulation.context.setPositions(
+                g.mol.conformers[idx]
+            )
 
             # set velocities
             simulation.context.setVelocitiesToTemperature(self.temperature)
@@ -466,6 +471,7 @@ class MoleculeVacuumSimulation(object):
                 )
 
 
+        print(samples)
         assert len(samples) == self.n_samples
 
         # put samples into an array
