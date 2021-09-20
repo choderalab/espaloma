@@ -47,11 +47,20 @@ def test_parameter_consistent_caffeine():
                 )
 
 def test_energy_consistent_caffeine():
+    """ Deploy a caffeine molecule parametrized by a traditional force field
+    and deployed by espaloma, make sure the energies computed using espaloma
+    and OpenMM are same or close.
+
+    """
+    # grab a force field
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
+
+    # parametrize caffeine molecule using the parametrization
     g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
     g = ff.parametrize(g)
     system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
 
+    # compute energies using espaloma
     import torch
     g.nodes['n1'].data['xyz'] = torch.randn(
         g.heterograph.number_of_nodes('n1'), 1, 3
@@ -59,6 +68,7 @@ def test_energy_consistent_caffeine():
     esp.mm.geometry.geometry_in_graph(g.heterograph)
     esp.mm.energy.energy_in_graph(g.heterograph, terms=["n2", "n3", "n4", "n4_improper"], suffix="_ref")
 
+    # compute energies using OpenMM with bond, angle, and torsion breakdown
     forces = list(system.getForces())
 
     energies = {}
@@ -128,20 +138,21 @@ def test_energy_consistent_caffeine():
 
         energies[name] = energy
 
-    # test bonds
+    # test if bond energies are equal
     npt.assert_almost_equal(
         g.nodes["g"].data["u_n2_ref"].numpy(),
         energies["HarmonicBondForce"],
         decimal=3,
     )
 
-    # test angles
+    # test if angle energies are equal
     npt.assert_almost_equal(
         g.nodes["g"].data["u_n3_ref"].numpy(),
         energies["HarmonicAngleForce"],
         decimal=3,
     )
 
+    # test if torsion energies are equal
     npt.assert_almost_equal(
         g.nodes["g"].data["u_n4_ref"].numpy() + g.nodes["g"].data["u_n4_improper_ref"].numpy(),
         energies["PeriodicTorsionForce"],

@@ -50,8 +50,16 @@ def _create_torsion_sim(
 def test_periodic_torsion(
     periodicity=4, k=-10 * omm_energy_unit, n_samples=100
 ):
-    phase = 0 * omm_angle_unit
+    """ Using simulated torsion scan, test if espaloma torsion energies and
+    OpenMM torsion energies agree.
+
+    """
+    phase = 0 * omm_angle_unit # all zero phases
+
+    # create torsion simulation
     sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
+
+    # grab snapshots from torsion scan
     xyz_np = _sample_four_particle_torsion_scan(n_samples)
 
     # compute energies using OpenMM
@@ -102,7 +110,7 @@ def test_energy_angle_and_bond(g):
     simulation = esp_simulation.simulation_from_graph(g)
     system = simulation.system
     esp_simulation.run(g, in_place=True)
-    
+
     # if MD blows up, forget about it
     if g.nodes['n1'].data['xyz'].abs().max() > 100:
         return True
