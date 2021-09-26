@@ -90,6 +90,11 @@ jobs:
         run: |
           pytest -v --cov=espaloma --cov-report=xml --color=yes espaloma/
 
+      - name: Build Sphinx docs
+        uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/"
+
       - name: CodeCov
         uses: codecov/codecov-action@v1
         if: always()
