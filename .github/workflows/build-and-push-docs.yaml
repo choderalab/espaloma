@@ -1,6 +1,9 @@
-name: docs
+name: "Build Sphinx docs and push to GitHub Pages"
 
 on:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
