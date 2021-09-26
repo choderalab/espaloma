@@ -9,7 +9,7 @@ import espaloma as esp
 from openmmforcefields.generators import SystemGenerator
 from simtk import openmm, unit
 from simtk.openmm.app import Simulation
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 # =============================================================================
 # CONSTANTS
@@ -87,7 +87,7 @@ class LegacyForceField:
 
         from openff.toolkit.typing.engines.smirnoff import ForceField
 
-        self.FF = ForceField("test_forcefields/%s.offxml" % self.forcefield)
+        self.FF = ForceField("%s.offxml" % self.forcefield)
 
     def _prepare_gaff(self):
         import os
@@ -109,7 +109,7 @@ class LegacyForceField:
         # parse xml
         tree = ET.parse(ffxml_path)
         root = tree.getroot()
-        nonbonded = root.getchildren()[-1]
+        nonbonded = list(root)[-1]
         atom_types = [atom.get("type") for atom in nonbonded.findall("Atom")]
 
         # remove redundant types

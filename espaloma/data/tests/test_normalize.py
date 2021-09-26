@@ -12,7 +12,7 @@ def test_normalize_esol():
     normalize = esp.data.normalize.DatasetNormalNormalize(
         dataset=esp.data.esol(first=10).apply(
             esp.graphs.legacy_force_field.LegacyForceField(
-                "smirnoff99Frosst"
+                "smirnoff99Frosst-1.1.0"
             ).parametrize,
             in_place=True,
         )
@@ -25,7 +25,7 @@ def test_log_normalize_esol():
     normalize = esp.data.normalize.DatasetLogNormalNormalize(
         dataset=esp.data.esol(first=10).apply(
             esp.graphs.legacy_force_field.LegacyForceField(
-                "smirnoff99Frosst"
+                "smirnoff99Frosst-1.1.0"
             ).parametrize,
             in_place=True,
         )
@@ -38,7 +38,7 @@ def test_normal_normalize_reproduce():
     normalize = esp.data.normalize.DatasetNormalNormalize(
         dataset=esp.data.esol(first=10).apply(
             esp.graphs.legacy_force_field.LegacyForceField(
-                "smirnoff99Frosst"
+                "smirnoff99Frosst-1.1.0"
             ).parametrize,
             in_place=True,
         )
@@ -48,7 +48,7 @@ def test_normal_normalize_reproduce():
 
     # do some typing
     param = esp.graphs.legacy_force_field.LegacyForceField(
-        "smirnoff99Frosst"
+        "smirnoff99Frosst-1.1.0"
     ).parametrize
     esol.apply(param, in_place=True)  # this modify the original data
 
@@ -82,7 +82,7 @@ def test_log_normal_normalize_reproduce():
     normalize = esp.data.normalize.DatasetLogNormalNormalize(
         dataset=esp.data.esol(first=10).apply(
             esp.graphs.legacy_force_field.LegacyForceField(
-                "smirnoff99Frosst"
+                "smirnoff99Frosst-1.1.0"
             ).parametrize,
             in_place=True,
         )
@@ -92,7 +92,7 @@ def test_log_normal_normalize_reproduce():
 
     # do some typing
     param = esp.graphs.legacy_force_field.LegacyForceField(
-        "smirnoff99Frosst"
+        "smirnoff99Frosst-1.1.0"
     ).parametrize
     esol.apply(param, in_place=True)  # this modify the original data
 

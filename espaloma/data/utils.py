@@ -7,6 +7,7 @@ import dgl
 import numpy as np
 import pandas as pd
 import torch
+import contextlib
 
 import espaloma as esp
 
@@ -20,6 +21,16 @@ OFFSETS = {
 # ==============================================================================
 # UTILITY FUNCTIONS
 # ==============================================================================
+
+@contextlib.contextmanager
+def make_temp_directory():
+    import tempfile, shutil
+    temp_dir = tempfile.mkdtemp()
+    try:
+        yield temp_dir
+    finally:
+        shutil.rmtree(temp_dir)
+
 def sum_offsets(elements):
     return sum([OFFSETS[element] for element in elements])
 
@@ -127,7 +138,7 @@ def infer_mol_from_coordinates(
     # local import
     from openeye import oechem
     from simtk import unit
-    from simtk.unit.quantity import Quantity
+    from simtk.unit import Quantity
 
     if isinstance(coordinates_unit, str):
         coordinates_unit = getattr(unit, coordinates_unit)

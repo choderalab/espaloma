@@ -10,11 +10,11 @@ torch.set_default_dtype(torch.float32)
 
 import espaloma as esp
 from simtk import unit
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 
 def run(args):
-   
+
     '''
     ds = esp.data.dataset.GraphDataset().load(
         'ds.th',
@@ -31,7 +31,7 @@ def run(args):
         u_min = g.nodes['g'].data['u_ref'].min()
         u_threshold = u_min + 0.01 # hatree
         mask = torch.lt(g.nodes['g'].data['u_ref'], u_threshold).squeeze()
-        
+
         print('%s selected' % (mask.sum().numpy().item() / mask.shape[0]))
 
         g.nodes['g'].data['u_ref'] = g.nodes['g'].data['u_ref'][:, mask]
@@ -96,7 +96,7 @@ def run(args):
 
     ds_tr = ds_tr.view(batch_size=80, shuffle=True)
     ds_te = ds_te.view(batch_size=20, shuffle=True)
-    
+
     # layer
     layer = esp.nn.layers.dgl_legacy.gn(args.layer)
 
@@ -135,14 +135,14 @@ def run(args):
     )
 
     net = torch.nn.Sequential(
-            representation, 
+            representation,
             readout,
             global_readout,
             esp.mm.geometry.GeometryInGraph(),
             esp.mm.energy.EnergyInGraph(),
             # esp.mm.energy.EnergyInGraph(suffix='_ref'),
     )
-    
+
 
     metrics_tr = [
         esp.metrics.GraphMetric(
@@ -150,7 +150,7 @@ def run(args):
             between=['u', "u_ref"],
             level="g",
         ),
-        
+
         esp.metrics.GraphHalfDerivativeMetric(
                base_metric=torch.nn.MSELoss(),
                weight=args.weight,
@@ -256,7 +256,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--janossy_config", nargs="*", default=[32, "leaky_relu"])
 
-    parser.add_argument("--graph_act", type=str, default="leaky_relu") 
+    parser.add_argument("--graph_act", type=str, default="leaky_relu")
 
     parser.add_argument("--n_epochs", default=10, type=int)
 

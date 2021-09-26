@@ -15,7 +15,7 @@ g = esp.Graph('C')
 
 
 forcefield = esp.graphs.legacy_force_field.LegacyForceField(
-    "smirnoff99Frosst"
+    "smirnoff99Frosst-1.1.0"
 )
 
 forcefield.parametrize(g)
@@ -45,7 +45,7 @@ g.heterograph.nodes['n1'].data['xyz'].mean(dim=1)
 representation = esp.nn.baselines.FreeParameterBaseline(g_ref=g.heterograph)
 
 net = torch.nn.Sequential(
-        representation, 
+        representation,
         esp.mm.geometry.GeometryInGraph(),
         esp.mm.energy.EnergyInGraph(), # predicted energy -> u
         esp.mm.energy.EnergyInGraph(suffix='_ref') # reference energy -> u_ref,
@@ -83,24 +83,24 @@ for name, param in net.named_parameters():
 
 for _ in range(1000):
     optimizer.zero_grad()
-    
+
     def l():
         net(g.heterograph)
-        
-        
+
+
         loss = torch.nn.MSELoss()(
             g.nodes['n2'].data['u_ref'],
             g.nodes['n2'].data['u'],
         )
 
         loss = loss.sum()
-    
-        
+
+
         loss.backward()
-        
+
         print(loss)
         return loss
-    
+
     optimizer.step(l)
 
 
@@ -134,7 +134,7 @@ eqs.std(axis=0)
 
 for idx in range(8):
     plt.plot(np.diff(ks[:, idx]))
-    
+
 
 
 # In[55]:
@@ -159,7 +159,3 @@ plt.ylabel('pred')
 
 
 # In[ ]:
-
-
-
-

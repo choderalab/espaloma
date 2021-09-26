@@ -1,21 +1,26 @@
 name: test
 channels:
   - conda-forge
+  - dglteam
+  - openeye
   - defaults
-  - salilab
-  - omnia
 dependencies:
   # Base dependencies
   - python
   - pip
   # 3rd party
-  - modeller
-  - rdkit
+  - openeye-toolkits
   - numpy
   - matplotlib
   - scipy
-  - openforcefield
+  - openff-toolkit
+  - openff-forcefields
+  - smirnoff99Frosst
+  - openmm
   - openmmforcefields
+  # Pytorch
+  - pytorch
+  - dgl
   # Testing
   - pytest
   - pytest-cov
@@ -24,7 +29,3 @@ dependencies:
   - nose-timer
   - coverage
   - qcportal
-  # Pip-only installs
-  - pip:
-      - torch
-      - dgl

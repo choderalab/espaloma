@@ -45,7 +45,7 @@ def run(args):
     representation = esp.nn.baselines.FreeParameterBaseline(g_ref=g)
 
     net = torch.nn.Sequential(
-            representation, 
+            representation,
             esp.mm.geometry.GeometryInGraph(),
             esp.mm.energy.EnergyInGraph(),
             esp.mm.energy.EnergyInGraph(suffix='_ref'),
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="alkethoh", type=str)
-    parser.add_argument("--forcefield", default="smirnoff99Frosst", type=str)
+    parser.add_argument("--forcefield", default="smirnoff99Frosst-1.1.0", type=str)
     parser.add_argument("--layer", default="GraphConv", type=str)
     parser.add_argument("--n_classes", default=100, type=int)
     parser.add_argument(

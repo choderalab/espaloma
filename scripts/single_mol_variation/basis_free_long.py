@@ -102,7 +102,7 @@ def run(args):
         )
 
         net = torch.nn.Sequential(
-                representation, 
+                representation,
                 readout,
                 esp.mm.geometry.GeometryInGraph(),
                 esp.mm.energy.EnergyInGraph(terms=["n2", "n3"]),
@@ -113,7 +113,7 @@ def run(args):
     if args.layer == "Free":
         representation = FreeParameterBaseline(next(iter(ds)))
         net = torch.nn.Sequential(
-                representation, 
+                representation,
                 # readout,
                 # add_mean,
                 esp.mm.geometry.GeometryInGraph(),
@@ -226,7 +226,7 @@ def run(args):
 
     for spec, curve in curves.items():
         np.save(args.out + "/" + "_".join(spec) + ".npy", curve)
-    
+
     import pickle
     pickle.dump(
         exp.ref_g_test,
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     parser.add_argument("--first", default=-1, type=int)
     parser.add_argument("--partition", default="4:1", type=str)
     parser.add_argument("--batch_size", default=8, type=int)
-    parser.add_argument("--forcefield", default="smirnoff99Frosst", type=str)
+    parser.add_argument("--forcefield", default="smirnoff99Frosst-1.1.0", type=str)
     parser.add_argument("--layer", default="GraphConv", type=str)
     parser.add_argument("--n_classes", default=100, type=int)
     parser.add_argument(

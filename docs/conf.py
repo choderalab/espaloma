@@ -16,15 +16,15 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../espaloma'))
 
 import espaloma
+from espaloma import mm, nn, data, graphs
 
 # -- Project information -----------------------------------------------------
 
 project = 'espaloma'
-copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC. Project structure based on the "
-             "Computational Molecular Science Python Cookiecutter version 1.2")
+copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC")
 author = 'Yuanqing Wang @ choderalab // MSKCC'
 
 # The short X.Y version
@@ -50,6 +50,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinx.ext.coverage',
+    'numpydoc',
 ]
 
 autosummary_generate = True

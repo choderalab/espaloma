@@ -226,7 +226,7 @@ class ESOL100NormalNormalize(DatasetNormalNormalize):
         super(ESOL100NormalNormalize, self).__init__(
             dataset=esp.data.esol(first=100).apply(
                 esp.graphs.legacy_force_field.LegacyForceField(
-                    "smirnoff99Frosst"
+                    "smirnoff99Frosst-1.1.0"
                 ).parametrize,
                 in_place=True,
             )
@@ -238,7 +238,7 @@ class ESOL100LogNormalNormalize(DatasetLogNormalNormalize):
         super(ESOL100LogNormalNormalize, self).__init__(
             dataset=esp.data.esol(first=100).apply(
                 esp.graphs.legacy_force_field.LegacyForceField(
-                    "smirnoff99Frosst"
+                    "smirnoff99Frosst-1.1.0"
                 ).parametrize,
                 in_place=True,
             )

@@ -9,7 +9,7 @@ import espaloma as esp
 # CONSTANTS
 # =============================================================================
 from simtk import unit
-from simtk.unit.quantity import Quantity
+from simtk.unit import Quantity
 
 LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(esp.units.DISTANCE_UNIT)
 
@@ -162,6 +162,12 @@ def periodic(
     k = k[:, None, :].repeat(1, x.shape[1], 1)
 
     energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)
+
+    # energy = (
+    #     torch.nn.functional.relu(k) * (cos_n_theta_minus_phases + 1.0)
+    #    -torch.nn.functional.relu(0.0-k) * (cos_n_theta_minus_phases - 1.0)
+    # ).sum(dim=-1)
+
 
     return energy
 
