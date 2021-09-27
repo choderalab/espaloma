@@ -9,7 +9,7 @@ espaloma
 
 Extensible Surrogate Potential of Optimized by Message-passing Algorithms
 
-# Abstract
+# Paper Abstract
 Molecular mechanics (MM) potentials have long been a workhorse of computational chemistry.
 Leveraging accuracy and speed, these functional forms find use in a wide variety of applications in biomolecular modeling and drug discovery, from rapid virtual screening to detailed free energy calculations.
 Traditionally, MM potentials have relied on human-curated, inflexible, and poorly extensible discrete chemical perception rules _atom types_ for applying parameters to small molecules or biopolymers, making it difficult to optimize both types and parameters to fit quantum chemical or physical property data.
