@@ -5,9 +5,9 @@ espaloma
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/context:python)
 
-Extensible Surrogate Potential of Optimized by Message-passing Algorithms
-
 ![abstract](docs/_static/espaloma_abstract_v2-2.png)
+
+Extensible Surrogate Potential of Optimized by Message-passing Algorithms
 
 # Abstract
 Molecular mechanics (MM) potentials have long been a workhorse of computational chemistry.
@@ -49,6 +49,9 @@ This software is licensed under [MIT license](https://opensource.org/licenses/MI
 
 Copyright (c) 2020, Chodera Lab at Memorial Sloan Kettering Cancer Center and Authors:
 Authors:
-- Yuanqing Wang
+- [Yuanqing Wang](wangyq.net) [![GitHub](https://img.shields.io/badge/-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/yuanqing-wang/)
+[![Twitter](https://img.shields.io/badge/-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/yuanqingwang)
+[![LinkedIn](https://img.shields.io/badge/-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yuanqing-wang/)
+[![Google](https://img.shields.io/badge/-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://scholar.google.com/citations?user=Njp5EY4AAAAJ&hl=en)
 - Josh Fass
 - John D. Chodera
