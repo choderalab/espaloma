@@ -1,13 +1,17 @@
-espaloma
+espaloma: **E**xtensible **S**urrogate **P**otenti**al** **O**ptimized by **M**essage-passing **A**lgorithms
 ==============================
 [//]: # (Badges)
 [![CI](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml/badge.svg?branch=master)](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/context:python)
 
+
+
+Source code for [Wang Y, Fass J, and Chodera JD "End-to-End Differentiable Construction of Molecular Mechanics Force Fields."](https://arxiv.org/abs/2010.01196)
+
 ![abstract](docs/_static/espaloma_abstract_v2-2.png)
 
-Extensible Surrogate Potential of Optimized by Message-passing Algorithms
+
 
 # Paper Abstract
 Molecular mechanics (MM) potentials have long been a workhorse of computational chemistry.
