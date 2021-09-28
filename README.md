@@ -53,9 +53,6 @@ This software is licensed under [MIT license](https://opensource.org/licenses/MI
 
 Copyright (c) 2020, Chodera Lab at Memorial Sloan Kettering Cancer Center and Authors:
 Authors:
-- [Yuanqing Wang](wangyq.net) [![GitHub](https://img.shields.io/badge/-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/yuanqing-wang/)
-[![Twitter](https://img.shields.io/badge/-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/yuanqingwang)
-[![LinkedIn](https://img.shields.io/badge/-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yuanqing-wang/)
-[![Google](https://img.shields.io/badge/-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://scholar.google.com/citations?user=Njp5EY4AAAAJ&hl=en)
+- [Yuanqing Wang](wangyq.net)
 - Josh Fass
 - John D. Chodera
