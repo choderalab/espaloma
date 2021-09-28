@@ -28,7 +28,7 @@ jobs:
         python -m pip install --no-deps .
     - name: Compile
       run: |
-        pip install sphinx sphinx-rtd-theme
+        python -m pip install sphinx sphinx-rtd-theme
         cd docs && make html   
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
