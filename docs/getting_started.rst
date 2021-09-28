@@ -1,7 +1,7 @@
 Getting Started
 ===============
 
-![abstract](docs/_static/espaloma_abstract_v2-2.png)
+..image:: docs/_static/espaloma_abstract_v2-2.png
 
 Paper Abstract
 --------------
