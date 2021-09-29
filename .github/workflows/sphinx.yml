@@ -28,6 +28,7 @@ jobs:
         python -m pip install --no-deps .
     - name: Compile
       run: |
+        shell: bash -l {0}
         python -m pip install sphinx sphinx-rtd-theme
         cd docs && make html   
     - name: Deploy
