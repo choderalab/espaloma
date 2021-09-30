@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.mm.functional.gaussian &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>espaloma.mm.functional.gaussian</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/autosummary/espaloma.mm.functional.gaussian.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="espaloma-mm-functional-gaussian">
+<h1>espaloma.mm.functional.gaussian<a class="headerlink" href="#espaloma-mm-functional-gaussian" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="espaloma.mm.functional.gaussian">
+<span class="sig-prename descclassname"><span class="pre">espaloma.mm.functional.</span></span><span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.0,</span> <span class="pre">0.001,</span> <span class="pre">0.002,</span> <span class="pre">0.003,</span> <span class="pre">0.004,</span> <span class="pre">0.005,</span> <span class="pre">0.006,</span> <span class="pre">0.007,</span> <span class="pre">0.008,</span> <span class="pre">0.009000000000000001,</span> <span class="pre">0.01,</span> <span class="pre">0.011,</span> <span class="pre">0.012,</span> <span class="pre">0.013000000000000001,</span> <span class="pre">0.014,</span> <span class="pre">0.015,</span> <span class="pre">0.016,</span> <span class="pre">0.017,</span> <span class="pre">0.018000000000000002,</span> <span class="pre">0.019,</span> <span class="pre">0.02,</span> <span class="pre">0.021,</span> <span class="pre">0.022,</span> <span class="pre">0.023,</span> <span class="pre">0.024,</span> <span class="pre">0.025,</span> <span class="pre">0.026000000000000002,</span> <span class="pre">0.027,</span> <span class="pre">0.028,</span> <span class="pre">0.029,</span> <span class="pre">0.03,</span> <span class="pre">0.031,</span> <span class="pre">0.032,</span> <span class="pre">0.033,</span> <span class="pre">0.034,</span> <span class="pre">0.035,</span> <span class="pre">0.036000000000000004,</span> <span class="pre">0.037,</span> <span class="pre">0.038,</span> <span class="pre">0.039,</span> <span class="pre">0.04,</span> <span class="pre">0.041,</span> <span class="pre">0.042,</span> <span class="pre">0.043000000000000003,</span> <span class="pre">0.044,</span> <span class="pre">0.045,</span> <span class="pre">0.046,</span> <span class="pre">0.047,</span> <span class="pre">0.048,</span> <span class="pre">0.049,</span> <span class="pre">0.05,</span> <span class="pre">0.051000000000000004,</span> <span class="pre">0.052000000000000005,</span> <span class="pre">0.053,</span> <span class="pre">0.054,</span> <span class="pre">0.055,</span> <span class="pre">0.056,</span> <span class="pre">0.057,</span> <span class="pre">0.058,</span> <span class="pre">0.059000000000000004,</span> <span class="pre">0.06,</span> <span class="pre">0.061,</span> <span class="pre">0.062,</span> <span class="pre">0.063,</span> <span class="pre">0.064,</span> <span class="pre">0.065,</span> <span class="pre">0.066,</span> <span class="pre">0.067,</span> <span class="pre">0.068,</span> <span class="pre">0.069,</span> <span class="pre">0.07,</span> <span class="pre">0.07100000000000001,</span> <span class="pre">0.07200000000000001,</span> <span class="pre">0.073,</span> <span class="pre">0.074,</span> <span class="pre">0.075,</span> <span class="pre">0.076,</span> <span class="pre">0.077,</span> <span class="pre">0.078,</span> <span class="pre">0.079,</span> <span class="pre">0.08,</span> <span class="pre">0.081,</span> <span class="pre">0.082,</span> <span class="pre">0.083,</span> <span class="pre">0.084,</span> <span class="pre">0.085,</span> <span class="pre">0.08600000000000001,</span> <span class="pre">0.08700000000000001,</span> <span class="pre">0.088,</span> <span class="pre">0.089,</span> <span class="pre">0.09,</span> <span class="pre">0.091,</span> <span class="pre">0.092,</span> <span class="pre">0.093,</span> <span class="pre">0.094,</span> <span class="pre">0.095,</span> <span class="pre">0.096,</span> <span class="pre">0.097,</span> <span class="pre">0.098,</span> <span class="pre">0.099,</span> <span class="pre">0.1,</span> <span class="pre">0.101,</span> <span class="pre">0.10200000000000001,</span> <span class="pre">0.10300000000000001,</span> <span class="pre">0.10400000000000001,</span> <span class="pre">0.105,</span> <span class="pre">0.106,</span> <span class="pre">0.107,</span> <span class="pre">0.108,</span> <span class="pre">0.109,</span> <span class="pre">0.11,</span> <span class="pre">0.111,</span> <span class="pre">0.112,</span> <span class="pre">0.113,</span> <span class="pre">0.114,</span> <span class="pre">0.115,</span> <span class="pre">0.116,</span> <span class="pre">0.117,</span> <span class="pre">0.11800000000000001,</span> <span class="pre">0.11900000000000001,</span> <span class="pre">0.12,</span> <span class="pre">0.121,</span> <span class="pre">0.122,</span> <span class="pre">0.123,</span> <span class="pre">0.124,</span> <span class="pre">0.125,</span> <span class="pre">0.126,</span> <span class="pre">0.127,</span> <span class="pre">0.128,</span> <span class="pre">0.129,</span> <span class="pre">0.13,</span> <span class="pre">0.131,</span> <span class="pre">0.132,</span> <span class="pre">0.133,</span> <span class="pre">0.134,</span> <span class="pre">0.135,</span> <span class="pre">0.136,</span> <span class="pre">0.137,</span> <span class="pre">0.138,</span> <span class="pre">0.139,</span> <span class="pre">0.14,</span> <span class="pre">0.14100000000000001,</span> <span class="pre">0.14200000000000002,</span> <span class="pre">0.14300000000000002,</span> <span class="pre">0.14400000000000002,</span> <span class="pre">0.145,</span> <span class="pre">0.146,</span> <span class="pre">0.147,</span> <span class="pre">0.148,</span> <span class="pre">0.149,</span> <span class="pre">0.15,</span> <span class="pre">0.151,</span> <span class="pre">0.152,</span> <span class="pre">0.153,</span> <span class="pre">0.154,</span> <span class="pre">0.155,</span> <span class="pre">0.156,</span> <span class="pre">0.157,</span> <span class="pre">0.158,</span> <span class="pre">0.159,</span> <span class="pre">0.16,</span> <span class="pre">0.161,</span> <span class="pre">0.162,</span> <span class="pre">0.163,</span> <span class="pre">0.164,</span> <span class="pre">0.165,</span> <span class="pre">0.166,</span> <span class="pre">0.167,</span> <span class="pre">0.168,</span> <span class="pre">0.169,</span> <span class="pre">0.17,</span> <span class="pre">0.171,</span> <span class="pre">0.17200000000000001,</span> <span class="pre">0.17300000000000001,</span> <span class="pre">0.17400000000000002,</span> <span class="pre">0.17500000000000002,</span> <span class="pre">0.176,</span> <span class="pre">0.177,</span> <span class="pre">0.178,</span> <span class="pre">0.179,</span> <span class="pre">0.18,</span> <span class="pre">0.181,</span> <span class="pre">0.182,</span> <span class="pre">0.183,</span> <span class="pre">0.184,</span> <span class="pre">0.185,</span> <span class="pre">0.186,</span> <span class="pre">0.187,</span> <span class="pre">0.188,</span> <span class="pre">0.189,</span> <span class="pre">0.19,</span> <span class="pre">0.191,</span> <span class="pre">0.192,</span> <span class="pre">0.193,</span> <span class="pre">0.194,</span> <span class="pre">0.195,</span> <span class="pre">0.196,</span> <span class="pre">0.197,</span> <span class="pre">0.198,</span> <span class="pre">0.199]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/functional.html#gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.functional.gaussian" title="Permalink to this definition"></a></dt>
+<dd><p>Gaussian basis function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>)</p></li>
+<li><p><strong>coefficients</strong> (<em>list or torch.Tensor of length n_phases</em>)</p></li>
+<li><p><strong>phases</strong> (<em>list or torch.Tensor of length n_phases</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

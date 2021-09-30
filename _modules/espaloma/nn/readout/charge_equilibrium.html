@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.nn.readout.charge_equilibrium &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.nn.readout.charge_equilibrium</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.nn.readout.charge_equilibrium</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Charge equilibrium.ß</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="get_charges"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.charge_equilibrium.get_charges.html#espaloma.nn.readout.charge_equilibrium.get_charges">[docs]</a><span class="k">def</span> <span class="nf">get_charges</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Solve the function to get the absolute charges of atoms in a</span>
+<span class="sd">    molecule from parameters.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    e : tf.Tensor, dtype = tf.float32,</span>
+<span class="sd">        electronegativity.</span>
+<span class="sd">    s : tf.Tensor, dtype = tf.float32,</span>
+<span class="sd">        hardness.</span>
+<span class="sd">    Q : tf.Tensor, dtype = tf.float32, shape=(),</span>
+<span class="sd">        total charge of a molecule.</span>
+<span class="sd">    We use Lagrange multipliers to analytically give the solution.</span>
+<span class="sd">    $$</span>
+<span class="sd">    U({\bf q})</span>
+<span class="sd">    &amp;= \sum_{i=1}^N \left[ e_i q_i +  \frac{1}{2}  s_i q_i^2\right]</span>
+<span class="sd">        - \lambda \, \left( \sum_{j=1}^N q_j - Q \right) \\</span>
+<span class="sd">    &amp;= \sum_{i=1}^N \left[</span>
+<span class="sd">        (e_i - \lambda) q_i +  \frac{1}{2}  s_i q_i^2 \right</span>
+<span class="sd">        ] + Q</span>
+<span class="sd">    $$</span>
+<span class="sd">    This gives us:</span>
+<span class="sd">    $$</span>
+<span class="sd">    q_i^*</span>
+<span class="sd">    &amp;= - e_i s_i^{-1}</span>
+<span class="sd">    + \lambda s_i^{-1} \\</span>
+<span class="sd">    &amp;= - e_i s_i^{-1}</span>
+<span class="sd">    + s_i^{-1} \frac{</span>
+<span class="sd">        Q +</span>
+<span class="sd">         \sum\limits_{i=1}^N e_i \, s_i^{-1}</span>
+<span class="sd">        }{\sum\limits_{j=1}^N s_j^{-1}}</span>
+<span class="sd">    $$</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span>
+    <span class="n">sum_e_s_inv</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sum_e_s_inv&#39;</span><span class="p">]</span>
+    <span class="n">sum_s_inv</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sum_s_inv&#39;</span><span class="p">]</span>
+    <span class="n">sum_q</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sum_q&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;q_hat&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">e</span> <span class="o">*</span> <span class="n">s</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">s</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">sum_q</span> <span class="o">+</span> <span class="n">sum_e_s_inv</span><span class="p">,</span> <span class="n">sum_s_inv</span><span class="p">)}</span></div>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE CLASS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="ChargeEquilibrium"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.html#espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium">[docs]</a><span class="k">class</span> <span class="nc">ChargeEquilibrium</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Charge equilibrium within batches of molecules.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ChargeEquilibrium.__init__"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.html#espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChargeEquilibrium</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ChargeEquilibrium.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.html#espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">total_charge</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; apply charge equilibrium to all molecules in batch &quot;&quot;&quot;</span>
+        <span class="c1"># calculate $s ^ {-1}$ and $ es ^ {-1}$</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;s_inv&#39;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">},</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s1">&#39;n1&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;e_s_inv&#39;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">},</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s1">&#39;n1&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;q&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="c1"># get total charge</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span>
+                <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;m_q&#39;</span><span class="p">),</span>
+                <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s1">&#39;m_q&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;sum_q&#39;</span><span class="p">),</span>
+                <span class="n">etype</span><span class="o">=</span><span class="s1">&#39;n1_in_g&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sum_q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">total_charge</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;sum_q&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;m_sum_q&#39;</span><span class="p">),</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s1">&#39;m_sum_q&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;sum_q&#39;</span><span class="p">),</span>
+            <span class="n">etype</span><span class="o">=</span><span class="s1">&#39;g_has_n1&#39;</span><span class="p">)</span>
+
+        <span class="c1"># get the sum of $s^{-1}$ and $m_s^{-1}$</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;m_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s1">&#39;m_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;sum_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">etype</span><span class="o">=</span><span class="s1">&#39;n1_in_g&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;e_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;m_e_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s1">&#39;m_e_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;sum_e_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">etype</span><span class="o">=</span><span class="s1">&#39;n1_in_g&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;sum_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;m_sum_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s1">&#39;m_sum_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;sum_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">etype</span><span class="o">=</span><span class="s1">&#39;g_has_n1&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">update_all</span><span class="p">(</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;sum_e_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;m_sum_e_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s1">&#39;m_sum_e_s_inv&#39;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;sum_e_s_inv&#39;</span><span class="p">),</span>
+            <span class="n">etype</span><span class="o">=</span><span class="s1">&#39;g_has_n1&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="n">get_charges</span><span class="p">,</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s1">&#39;n1&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">g</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

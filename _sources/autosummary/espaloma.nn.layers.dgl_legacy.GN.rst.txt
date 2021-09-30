@@ -1,0 +1,71 @@
+﻿espaloma.nn.layers.dgl\_legacy.GN
+=================================
+
+.. currentmodule:: espaloma.nn.layers.dgl_legacy
+
+.. autoclass:: GN
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GN.__init__
+      ~GN.add_module
+      ~GN.apply
+      ~GN.bfloat16
+      ~GN.buffers
+      ~GN.children
+      ~GN.cpu
+      ~GN.cuda
+      ~GN.double
+      ~GN.eval
+      ~GN.extra_repr
+      ~GN.float
+      ~GN.forward
+      ~GN.get_buffer
+      ~GN.get_parameter
+      ~GN.get_submodule
+      ~GN.half
+      ~GN.load_state_dict
+      ~GN.modules
+      ~GN.named_buffers
+      ~GN.named_children
+      ~GN.named_modules
+      ~GN.named_parameters
+      ~GN.parameters
+      ~GN.register_backward_hook
+      ~GN.register_buffer
+      ~GN.register_forward_hook
+      ~GN.register_forward_pre_hook
+      ~GN.register_full_backward_hook
+      ~GN.register_parameter
+      ~GN.requires_grad_
+      ~GN.share_memory
+      ~GN.state_dict
+      ~GN.to
+      ~GN.to_empty
+      ~GN.train
+      ~GN.type
+      ~GN.xpu
+      ~GN.zero_grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GN.T_destination
+      ~GN.dump_patches
+      ~GN.training
+   
+   

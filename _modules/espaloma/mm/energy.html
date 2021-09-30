@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.mm.energy &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.mm.energy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.mm.energy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># ENERGY IN HYPERNODES---BONDED</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="apply_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_bond.html#espaloma.mm.energy.apply_bond">[docs]</a><span class="k">def</span> <span class="nf">apply_bond</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Bond energy in nodes. &quot;&quot;&quot;</span>
+    <span class="c1"># if suffix == &#39;_ref&#39;:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">bond</span><span class="o">.</span><span class="n">harmonic_bond</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">k</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="n">eq</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eq</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+    <span class="c1"># else:</span>
+    <span class="c1">#     return {</span>
+    <span class="c1">#         &#39;u%s&#39; % suffix: esp.mm.bond.harmonic_bond_re(</span>
+    <span class="c1">#             x=nodes.data[&#39;x&#39;],</span>
+    <span class="c1">#             k=nodes.data[&#39;k%s&#39; % suffix],</span>
+    <span class="c1">#             eq=nodes.data[&#39;eq%s&#39; % suffix],</span>
+    <span class="c1">#         )</span>
+    <span class="c1">#     }</span>
+
+
+<div class="viewcode-block" id="apply_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_angle.html#espaloma.mm.energy.apply_angle">[docs]</a><span class="k">def</span> <span class="nf">apply_angle</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Angle energy in nodes. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">harmonic_angle</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">k</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="n">eq</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eq</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_angle_ii"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_angle_ii.html#espaloma.mm.energy.apply_angle_ii">[docs]</a><span class="k">def</span> <span class="nf">apply_angle_ii</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="c1"># &quot;u_angle_high%s&quot;</span>
+        <span class="c1"># % suffix: esp.mm.angle.angle_high(</span>
+        <span class="c1">#     u_angle=nodes.data[&quot;u&quot;],</span>
+        <span class="c1">#     k3=nodes.data[&quot;k3&quot;],</span>
+        <span class="c1">#     k4=nodes.data[&quot;k4&quot;],</span>
+        <span class="c1"># ),</span>
+        <span class="s2">&quot;u_urey_bradley</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">urey_bradley</span><span class="p">(</span>
+            <span class="n">x_between</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x_between&quot;</span><span class="p">],</span>
+            <span class="n">coefficients</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients_urey_bradley&quot;</span><span class="p">],</span>
+            <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;u_bond_bond</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">bond_bond</span><span class="p">(</span>
+            <span class="n">u_left</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_left&quot;</span><span class="p">],</span>
+            <span class="n">u_right</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_right&quot;</span><span class="p">],</span>
+            <span class="n">k_bond_bond</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_bond_bond&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;u_bond_angle</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">bond_angle</span><span class="p">(</span>
+            <span class="n">u_left</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_left&quot;</span><span class="p">],</span>
+            <span class="n">u_right</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_right&quot;</span><span class="p">],</span>
+            <span class="n">u_angle</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">],</span>
+            <span class="n">k_bond_angle</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_bond_angle&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+<div class="viewcode-block" id="apply_bond_ii"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_bond_ii.html#espaloma.mm.energy.apply_bond_ii">[docs]</a><span class="k">def</span> <span class="nf">apply_bond_ii</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u_bond_high</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">bond</span><span class="o">.</span><span class="n">bond_high</span><span class="p">(</span>
+            <span class="n">u_bond</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">],</span>
+            <span class="n">k3</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k3&quot;</span><span class="p">],</span>
+            <span class="n">k4</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k4&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+<div class="viewcode-block" id="apply_torsion_ii"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_torsion_ii.html#espaloma.mm.energy.apply_torsion_ii">[docs]</a><span class="k">def</span> <span class="nf">apply_torsion_ii</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Torsion energy in nodes. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u_angle_angle</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">angle_angle</span><span class="p">(</span>
+            <span class="n">u_angle_left</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_angle_left&quot;</span><span class="p">],</span>
+            <span class="n">u_angle_right</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_angle_right&quot;</span><span class="p">],</span>
+            <span class="n">k_angle_angle</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_angle_angle&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;u_angle_torsion</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">angle_torsion</span><span class="p">(</span>
+            <span class="n">u_angle_left</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_angle_left&quot;</span><span class="p">],</span>
+            <span class="n">u_angle_right</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_angle_right&quot;</span><span class="p">],</span>
+            <span class="n">u_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">],</span>
+            <span class="n">k_angle_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_angle_torsion&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;u_angle_angle_torsion</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">angle_angle_torsion</span><span class="p">(</span>
+            <span class="n">u_angle_left</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_angle_left&quot;</span><span class="p">],</span>
+            <span class="n">u_angle_right</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_angle_right&quot;</span><span class="p">],</span>
+            <span class="n">u_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">],</span>
+            <span class="n">k_angle_angle_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_angle_angle_torsion&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;u_bond_torsion</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">bond_torsion</span><span class="p">(</span>
+            <span class="n">u_bond_left</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_bond_left&quot;</span><span class="p">],</span>
+            <span class="n">u_bond_right</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_bond_right&quot;</span><span class="p">],</span>
+            <span class="n">u_bond_center</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_bond_center&quot;</span><span class="p">],</span>
+            <span class="n">u_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">],</span>
+            <span class="n">k_side_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_side_torsion&quot;</span><span class="p">],</span>
+            <span class="n">k_center_torsion</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_center_torsion&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+<div class="viewcode-block" id="apply_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_torsion.html#espaloma.mm.energy.apply_torsion">[docs]</a><span class="k">def</span> <span class="nf">apply_torsion</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Torsion energy in nodes. &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="s2">&quot;phases</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">data</span>
+        <span class="ow">and</span> <span class="s2">&quot;periodicity</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">periodic_torsion</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+                <span class="n">k</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+                <span class="n">phases</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;phases</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+                <span class="n">periodicity</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;periodicity</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">periodic_torsion</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">k</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_improper_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_improper_torsion.html#espaloma.mm.energy.apply_improper_torsion">[docs]</a><span class="k">def</span> <span class="nf">apply_improper_torsion</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Improper torsion energy in nodes. &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="s2">&quot;phases</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">data</span>
+        <span class="ow">and</span> <span class="s2">&quot;periodicity</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">periodic_torsion</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+                <span class="n">k</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+                <span class="n">phases</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;phases</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+                <span class="n">periodicity</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;periodicity</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">torsion</span><span class="o">.</span><span class="n">periodic_torsion</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">k</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_bond_gaussian"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_bond_gaussian.html#espaloma.mm.energy.apply_bond_gaussian">[docs]</a><span class="k">def</span> <span class="nf">apply_bond_gaussian</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Bond energy in nodes. &quot;&quot;&quot;</span>
+    <span class="c1"># if suffix == &#39;_ref&#39;:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">bond</span><span class="o">.</span><span class="n">gaussian_bond</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">coefficients</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_bond_linear_mixture"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_bond_linear_mixture.html#espaloma.mm.energy.apply_bond_linear_mixture">[docs]</a><span class="k">def</span> <span class="nf">apply_bond_linear_mixture</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot; Bond energy in nodes. &quot;&quot;&quot;</span>
+    <span class="c1"># if suffix == &#39;_ref&#39;:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">bond</span><span class="o">.</span><span class="n">linear_mixture_bond</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">coefficients</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_angle_linear_mixture"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_angle_linear_mixture.html#espaloma.mm.energy.apply_angle_linear_mixture">[docs]</a><span class="k">def</span> <span class="nf">apply_angle_linear_mixture</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot; Bond energy in nodes. &quot;&quot;&quot;</span>
+    <span class="c1"># if suffix == &#39;_ref&#39;:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">linear_mixture_angle</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">coefficients</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># ENERGY IN HYPERNODES---NONBONDED</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="apply_nonbonded"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_nonbonded.html#espaloma.mm.energy.apply_nonbonded">[docs]</a><span class="k">def</span> <span class="nf">apply_nonbonded</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Nonbonded in nodes. &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: should this be 9-6 or 12-6?</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">scaling</span>
+        <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">nonbonded</span><span class="o">.</span><span class="n">lj_12_6</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sigma</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+            <span class="n">epsilon</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;epsilon</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># ENERGY IN GRAPH</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="energy_in_graph"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.energy_in_graph.html#espaloma.mm.energy.energy_in_graph">[docs]</a><span class="k">def</span> <span class="nf">energy_in_graph</span><span class="p">(</span>
+    <span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">terms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">],</span>
+<span class="p">):</span>  <span class="c1"># &quot;onefour&quot;, &quot;nonbonded&quot;]):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the energy of a small molecule given parameters and geometry.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g : `dgl.DGLHeteroGraph`</span>
+<span class="sd">        Input graph.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    g : `dgl.DGLHeteroGraph`</span>
+<span class="sd">        Output graph.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function modifies graphs in-place.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: this is all very restricted for now</span>
+    <span class="c1"># we need to make this better</span>
+
+    <span class="k">if</span> <span class="s2">&quot;n2&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="c1"># apply energy function</span>
+
+        <span class="k">if</span> <span class="s2">&quot;coefficients</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_bond_linear_mixture</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">]),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n2&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_bond</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n2&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;n3&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;coefficients</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">math</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_angle_linear_mixture</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">]),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n3&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_angle</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n3&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s2">&quot;n4&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_torsion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s2">&quot;n4_improper&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_improper_torsion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s2">&quot;nonbonded&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_nonbonded</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;onefour&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s2">&quot;onefour&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_nonbonded</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,),</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;onefour&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># sum up energy</span>
+    <span class="c1"># bonded</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_in_g&quot;</span>
+            <span class="o">%</span> <span class="n">term</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;m_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">term</span><span class="p">),</span>
+                <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;m_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">term</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;u_</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span> <span class="k">if</span> <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="p">},</span>
+        <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)]</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span> <span class="k">if</span> <span class="s2">&quot;u_</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span>
+            <span class="p">)</span>
+        <span class="p">},</span>
+        <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;u0&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;g&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u0&quot;</span><span class="p">]},</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="energy_in_graph_ii"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.energy_in_graph_ii.html#espaloma.mm.energy.energy_in_graph_ii">[docs]</a><span class="k">def</span> <span class="nf">energy_in_graph_ii</span><span class="p">(</span>
+    <span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n3&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+       
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+             <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_angle_ii</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n3&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;u</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span> \
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_urey_bradley</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_bond_bond</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_bond_angle</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s1">&#39;n3&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_torsion_ii</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">),</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;u</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_angle_angle</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_angle_torsion</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_angle_angle_torsion</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_bond_torsion</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s1">&#39;n4&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="EnergyInGraph"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.EnergyInGraph.html#espaloma.mm.energy.EnergyInGraph">[docs]</a><span class="k">class</span> <span class="nc">EnergyInGraph</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="EnergyInGraph.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.EnergyInGraph.html#espaloma.mm.energy.EnergyInGraph.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EnergyInGraph</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span></div>
+
+<div class="viewcode-block" id="EnergyInGraph.forward"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.EnergyInGraph.html#espaloma.mm.energy.EnergyInGraph.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">energy_in_graph</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="EnergyInGraphII"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.EnergyInGraphII.html#espaloma.mm.energy.EnergyInGraphII">[docs]</a><span class="k">class</span> <span class="nc">EnergyInGraphII</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="EnergyInGraphII.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.EnergyInGraphII.html#espaloma.mm.energy.EnergyInGraphII.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EnergyInGraphII</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span></div>
+
+<div class="viewcode-block" id="EnergyInGraphII.forward"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.EnergyInGraphII.html#espaloma.mm.energy.EnergyInGraphII.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">energy_in_graph_ii</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="CarryII"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII">[docs]</a><span class="k">class</span> <span class="nc">CarryII</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="CarryII.forward"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">math</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;n2_as_0_in_n3&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m_u_0&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m_u_0&quot;</span><span class="p">,</span> <span class="s2">&quot;u_left&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;n2_as_1_in_n3&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m_u_1&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m_u_1&quot;</span><span class="p">,</span> <span class="s2">&quot;u_right&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;n2_as_0_in_n4&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m_u_0&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m_u_0&quot;</span><span class="p">,</span> <span class="s2">&quot;u_bond_left&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;n2_as_1_in_n4&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m_u_1&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m_u_1&quot;</span><span class="p">,</span> <span class="s2">&quot;u_bond_center&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;n2_as_2_in_n4&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m_u_2&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m_u_2&quot;</span><span class="p">,</span> <span class="s2">&quot;u_bond_right&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;n3_as_0_in_n4&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m3_u_0&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m3_u_0&quot;</span><span class="p">,</span> <span class="s2">&quot;u_angle_left&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;n3_as_1_in_n4&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;m3_u_1&quot;</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;m3_u_1&quot;</span><span class="p">,</span> <span class="s2">&quot;u_angle_right&quot;</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">},</span>
+            <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">g</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

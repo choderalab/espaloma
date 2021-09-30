@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.data.md.MoleculeVacuumSimulation &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>espaloma.data.md.MoleculeVacuumSimulation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/autosummary/espaloma.data.md.MoleculeVacuumSimulation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="espaloma-data-md-moleculevacuumsimulation">
+<h1>espaloma.data.md.MoleculeVacuumSimulation<a class="headerlink" href="#espaloma-data-md-moleculevacuumsimulation" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="espaloma.data.md.MoleculeVacuumSimulation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">espaloma.data.md.</span></span><span class="sig-name descname"><span class="pre">MoleculeVacuumSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">forcefield='gaff-1.81'</span></em>, <em class="sig-param"><span class="pre">n_samples=100</span></em>, <em class="sig-param"><span class="pre">n_conformers=10</span></em>, <em class="sig-param"><span class="pre">n_steps_per_sample=1000</span></em>, <em class="sig-param"><span class="pre">temperature=Quantity(value=350</span></em>, <em class="sig-param"><span class="pre">unit=kelvin)</span></em>, <em class="sig-param"><span class="pre">collision_rate=Quantity(value=1.0</span></em>, <em class="sig-param"><span class="pre">unit=/picosecond)</span></em>, <em class="sig-param"><span class="pre">step_size=Quantity(value=1.0</span></em>, <em class="sig-param"><span class="pre">unit=femtosecond)</span></em>, <em class="sig-param"><span class="pre">charge_method=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/md.html#MoleculeVacuumSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.md.MoleculeVacuumSimulation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Simluate a single molecule system in vaccum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g</strong> (<cite>espaloma.Graph</cite>) – Input molecular graph.</p></li>
+<li><p><strong>n_samples</strong> (<cite>int</cite>) – Number of samples to collect.</p></li>
+<li><p><strong>n_steps_per_sample</strong> (<cite>int</cite>) – Number of steps between each sample.</p></li>
+<li><p><strong>temperature</strong> (<cite>float * unit.kelvin</cite>) – Temperature for the simluation.</p></li>
+<li><p><strong>collision_rate</strong> (<cite>float / unit.picosecond</cite>) – Collision rate.</p></li>
+<li><p><strong>timestep</strong> (<cite>float * unit.femtosecond</cite>) – Time step.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">simulation_from_graph</span> <span class="pre">:</span> <span class="pre">Create</span> <span class="pre">simluation</span> <span class="pre">from</span> <span class="pre">molecule.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">run</span> <span class="pre">:</span> <span class="pre">Run</span> <span class="pre">the</span> <span class="pre">simluation.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.md.MoleculeVacuumSimulation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">forcefield='gaff-1.81'</span></em>, <em class="sig-param"><span class="pre">n_samples=100</span></em>, <em class="sig-param"><span class="pre">n_conformers=10</span></em>, <em class="sig-param"><span class="pre">n_steps_per_sample=1000</span></em>, <em class="sig-param"><span class="pre">temperature=Quantity(value=350</span></em>, <em class="sig-param"><span class="pre">unit=kelvin)</span></em>, <em class="sig-param"><span class="pre">collision_rate=Quantity(value=1.0</span></em>, <em class="sig-param"><span class="pre">unit=/picosecond)</span></em>, <em class="sig-param"><span class="pre">step_size=Quantity(value=1.0</span></em>, <em class="sig-param"><span class="pre">unit=femtosecond)</span></em>, <em class="sig-param"><span class="pre">charge_method=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/md.html#MoleculeVacuumSimulation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.md.MoleculeVacuumSimulation.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.md.MoleculeVacuumSimulation.__init__" title="espaloma.data.md.MoleculeVacuumSimulation.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([forcefield, n_samples, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.md.MoleculeVacuumSimulation.run" title="espaloma.data.md.MoleculeVacuumSimulation.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(g[, in_place])</p></td>
+<td><p>Collect samples from simulation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.md.MoleculeVacuumSimulation.simulation_from_graph" title="espaloma.data.md.MoleculeVacuumSimulation.simulation_from_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simulation_from_graph</span></code></a>(g)</p></td>
+<td><p>Create simulation from moleucle</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.md.MoleculeVacuumSimulation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/md.html#MoleculeVacuumSimulation.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.md.MoleculeVacuumSimulation.run" title="Permalink to this definition"></a></dt>
+<dd><p>Collect samples from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g</strong> (<cite>esp.Graph</cite>) – Input graph.</p></li>
+<li><p><strong>in_place</strong> (<cite>bool</cite>) – If ture,</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>samples</strong> (<cite>torch.Tensor</cite>, <cite>shape=(n_samples, n_nodes, 3)</cite>) – <cite>in_place=True</cite>
+Sample.</p></li>
+<li><p><strong>graph</strong> (<cite>esp.Graph</cite>) – Modified graph.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.md.MoleculeVacuumSimulation.simulation_from_graph">
+<span class="sig-name descname"><span class="pre">simulation_from_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/md.html#MoleculeVacuumSimulation.simulation_from_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.md.MoleculeVacuumSimulation.simulation_from_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Create simulation from moleucle</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

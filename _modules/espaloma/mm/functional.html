@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.mm.functional &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.mm.functional</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.mm.functional</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># CONSTANTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
+<span class="kn">from</span> <span class="nn">simtk.unit</span> <span class="kn">import</span> <span class="n">Quantity</span>
+
+<span class="n">LJ_SWITCH</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span><span class="p">)</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="linear_mixture_to_original"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.linear_mixture_to_original.html#espaloma.mm.functional.linear_mixture_to_original">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture_to_original</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Translating linear mixture coefficients back to original</span>
+<span class="sd">    parameterization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># (batch_size, )</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">+</span> <span class="n">k2</span>
+
+    <span class="c1"># (batch_size, )</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">k1</span> <span class="o">*</span> <span class="n">b1</span> <span class="o">+</span> <span class="n">k2</span> <span class="o">*</span> <span class="n">b2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span></div>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="harmonic"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic.html#espaloma.mm.functional.harmonic">[docs]</a><span class="k">def</span> <span class="nf">harmonic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">eq</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot; Harmonic term.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : `torch.Tensor`, `shape=(batch_size, 1)`</span>
+<span class="sd">    k : `torch.Tensor`, `shape=(batch_size, len(order))`</span>
+<span class="sd">    eq : `torch.Tensor`, `shape=(batch_size, len(order))`</span>
+<span class="sd">    order : `int` or `List` of `int`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    u : `torch.Tensor`, `shape=(batch_size, 1)`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">eq</span><span class="p">))</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">order</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="periodic_fixed_phases"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.periodic_fixed_phases.html#espaloma.mm.functional.periodic_fixed_phases">[docs]</a><span class="k">def</span> <span class="nf">periodic_fixed_phases</span><span class="p">(</span>
+    <span class="n">dihedrals</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ks</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Periodic torsion term with n_phases = 6, periodicities = 1..n_phases, phases = zeros</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dihedrals : torch.Tensor, shape=(n_snapshots, n_dihedrals)</span>
+<span class="sd">        dihedral angles -- TODO: confirm in radians?</span>
+<span class="sd">    ks : torch.Tensor, shape=(n_dihedrals, n_phases)</span>
+<span class="sd">        force constants -- TODO: confirm in esp.unit.ENERGY_UNIT ?</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    u : torch.Tensor, shape=(n_snapshots, 1)</span>
+<span class="sd">        potential energy of each snapshot</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    TODO: is there a way to annotate / type-hint tensor shapes? (currently adding many assert statements)</span>
+<span class="sd">    TODO: merge with esp.mm.functional.periodic -- adding this because I was having difficulty debugging runtime tensor</span>
+<span class="sd">      shape errors in esp.mm.functional.periodic, which allows for a more flexible mix of input shapes and types</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># periodicity = 1..n_phases</span>
+    <span class="n">n_phases</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_phases</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c1"># assert input shape consistency</span>
+    <span class="n">n_snapshots</span><span class="p">,</span> <span class="n">n_dihedrals</span> <span class="o">=</span> <span class="n">dihedrals</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_dihedrals_</span><span class="p">,</span> <span class="n">n_phases_</span> <span class="o">=</span> <span class="n">ks</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">assert</span> <span class="n">n_dihedrals</span> <span class="o">==</span> <span class="n">n_dihedrals_</span>
+    <span class="k">assert</span> <span class="n">n_phases</span> <span class="o">==</span> <span class="n">n_phases_</span>
+
+    <span class="c1"># promote everything to this shape</span>
+    <span class="n">stacked_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_snapshots</span><span class="p">,</span> <span class="n">n_dihedrals</span><span class="p">,</span> <span class="n">n_phases</span><span class="p">)</span>
+
+    <span class="c1"># duplicate ks n_snapshots times</span>
+    <span class="n">ks_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ks</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_snapshots</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">ks_stacked</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">stacked_shape</span>
+
+    <span class="c1"># duplicate dihedral angles n_phases times</span>
+    <span class="n">dihedrals_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">dihedrals</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_phases</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dihedrals_stacked</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">stacked_shape</span>
+
+    <span class="c1"># duplicate periodicity n_snapshots * n_dihedrals times</span>
+    <span class="n">ns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">periodicity</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_snapshots</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n_dihedrals</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">ns</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">stacked_shape</span>
+
+    <span class="c1"># compute k_n * cos(n * theta) for n in 1..n_phases, for each dihedral in each snapshot</span>
+    <span class="n">energy_terms</span> <span class="o">=</span> <span class="n">ks_stacked</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ns</span> <span class="o">*</span> <span class="n">dihedrals_stacked</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">energy_terms</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">stacked_shape</span>
+
+    <span class="c1"># sum over n_dihedrals and n_phases</span>
+    <span class="n">energy_sums</span> <span class="o">=</span> <span class="n">energy_terms</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">energy_sums</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_snapshots</span><span class="p">,)</span>
+
+    <span class="k">return</span> <span class="n">energy_sums</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_snapshots</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="periodic"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.periodic.html#espaloma.mm.functional.periodic">[docs]</a><span class="k">def</span> <span class="nf">periodic</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">periodicity</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)),</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Periodic term.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : `torch.Tensor`, `shape=(batch_size, 1)`</span>
+<span class="sd">    k : `torch.Tensor`, `shape=(batch_size, number_of_phases)`</span>
+<span class="sd">    periodicity: either list of length number_of_phases, or</span>
+<span class="sd">        `torch.Tensor`, `shape=(batch_size, number_of_phases)`</span>
+<span class="sd">    phases : either list of length number_of_phases, or</span>
+<span class="sd">        `torch.Tensor`, `shape=(batch_size, number_of_phases)`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phases</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">phases</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">periodicity</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="n">periodicity</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">periodicity</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="n">periodicity</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">periodicity</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="n">periodicity</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">phases</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,)</span>
+
+    <span class="k">elif</span> <span class="n">phases</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,)</span>
+
+    <span class="n">n_theta</span> <span class="o">=</span> <span class="n">periodicity</span> <span class="o">*</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">n_theta_minus_phases</span> <span class="o">=</span> <span class="n">n_theta</span> <span class="o">-</span> <span class="n">phases</span>
+
+    <span class="n">cos_n_theta_minus_phases</span> <span class="o">=</span> <span class="n">n_theta_minus_phases</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">cos_n_theta_minus_phases</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># energy = (</span>
+    <span class="c1">#     torch.nn.functional.relu(k) * (cos_n_theta_minus_phases + 1.0)</span>
+    <span class="c1">#    -torch.nn.functional.relu(0.0-k) * (cos_n_theta_minus_phases - 1.0)</span>
+    <span class="c1"># ).sum(dim=-1)</span>
+
+
+    <span class="k">return</span> <span class="n">energy</span></div>
+
+
+<span class="c1"># simple implementation</span>
+<span class="c1"># def harmonic(x, k, eq):</span>
+<span class="c1">#     return k * (x - eq) ** 2</span>
+<span class="c1">#</span>
+<span class="c1"># def harmonic_re(x, k, eq, a=0.0, b=0.3):</span>
+<span class="c1">#     # temporary</span>
+<span class="c1">#     ka = k</span>
+<span class="c1">#     kb = eq</span>
+<span class="c1">#</span>
+<span class="c1">#     c = ((ka * a + kb * b) / (ka + kb)) ** 2 - a ** 2 - b ** 2</span>
+<span class="c1">#</span>
+<span class="c1">#     return ka * (x - a) ** 2 + kb * (x - b) ** 2</span>
+
+
+<div class="viewcode-block" id="lj"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.lj.html#espaloma.mm.functional.lj">[docs]</a><span class="k">def</span> <span class="nf">lj</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">switch</span><span class="o">=</span><span class="n">LJ_SWITCH</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Lennard-Jones term.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ..math::</span>
+<span class="sd">    E  = \epsilon  ((\sigma / r) ^ {12} - (\sigma / r) ^ 6)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : `torch.Tensor`, `shape=(batch_size, 1)`</span>
+<span class="sd">    epsilon : `torch.Tensor`, `shape=(batch_size, len(order))`</span>
+<span class="sd">    sigma : `torch.Tensor`, `shape=(batch_size, len(order))`</span>
+<span class="sd">    order : `int` or `List` of `int`</span>
+<span class="sd">    coefficients : torch.tensor or list</span>
+<span class="sd">    switch : unitless switch width (distance)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    u : `torch.Tensor`, `shape=(batch_size, 1)`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">coefficients</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">order</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">order</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="c1"># TODO:</span>
+    <span class="c1"># for experiments only</span>
+    <span class="c1"># erase later</span>
+
+    <span class="c1"># compute sigma over x</span>
+    <span class="n">sigma_over_x</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="n">x</span>
+
+    <span class="c1"># erase values under switch</span>
+    <span class="n">sigma_over_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">lt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">switch</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">sigma_over_x</span><span class="p">),</span> <span class="n">sigma_over_x</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">coefficients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma_over_x</span> <span class="o">**</span> <span class="n">order</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">coefficients</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma_over_x</span> <span class="o">**</span> <span class="n">order</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.gaussian.html#espaloma.mm.functional.gaussian">[docs]</a><span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">)]):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Gaussian basis function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : torch.Tensor</span>
+<span class="sd">    coefficients : list or torch.Tensor of length n_phases</span>
+<span class="sd">    phases : list or torch.Tensor of length n_phases</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phases</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="c1"># (number_of_phases, )</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">phases</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="c1"># broadcasting</span>
+    <span class="c1"># (number_of_hypernodes, number_of_snapshots, number_of_phases)</span>
+    <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">phases</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">coefficients</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">coefficients</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">phases</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="linear_mixture"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.linear_mixture.html#espaloma.mm.functional.linear_mixture">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Linear mixture basis function.</span>
+
+<span class="sd">    x : torch.Tensor</span>
+<span class="sd">    coefficients : list or torch.Tensor of length 2</span>
+<span class="sd">    phases : list of length 2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">phases</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Only two phases now.&quot;</span>
+    <span class="k">assert</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+
+    <span class="c1"># partition the dimensions</span>
+    <span class="c1"># (, )</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">b2</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># (batch_size, 1)</span>
+    <span class="n">k1</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">k2</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># get the original parameters</span>
+    <span class="c1"># (batch_size, )</span>
+    <span class="c1"># k, b = linear_mixture_to_original(k1, k2, b1, b2)</span>
+
+    <span class="c1"># (batch_size, 1)</span>
+    <span class="n">u1</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">u2</span> <span class="o">=</span> <span class="n">k2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">u1</span> <span class="o">+</span> <span class="n">u2</span><span class="p">)</span> <span class="c1"># - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2</span>
+
+    <span class="k">return</span> <span class="n">u</span></div>
+
+
+<div class="viewcode-block" id="harmonic_periodic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_periodic_coupled.html#espaloma.mm.functional.harmonic_periodic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_periodic_coupled</span><span class="p">(</span>
+        <span class="n">x_harmonic</span><span class="p">,</span>
+        <span class="n">x_periodic</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">,</span>
+        <span class="n">eq</span><span class="p">,</span>
+        <span class="n">periodicity</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">periodicity</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="n">periodicity</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">x_harmonic</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="n">n_theta</span> <span class="o">=</span> <span class="n">periodicity</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+        <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="n">x_periodic</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">cos_n_theta</span> <span class="o">=</span> <span class="n">n_theta</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="n">sum_k_cos_n_theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">cos_n_theta</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">x_minus_eq</span> <span class="o">=</span> <span class="n">x_harmonic</span> <span class="o">-</span> <span class="n">eq</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">x_minus_eq</span> <span class="o">*</span> <span class="n">sum_k_cos_n_theta</span>
+
+    <span class="k">return</span> <span class="n">energy</span></div>
+
+<div class="viewcode-block" id="harmonic_harmonic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_harmonic_coupled.html#espaloma.mm.functional.harmonic_harmonic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_harmonic_coupled</span><span class="p">(</span>
+        <span class="n">x0</span><span class="p">,</span>
+        <span class="n">x1</span><span class="p">,</span>
+        <span class="n">eq0</span><span class="p">,</span>
+        <span class="n">eq1</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="n">x0</span> <span class="o">-</span> <span class="n">eq0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">eq1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">energy</span></div>
+
+<div class="viewcode-block" id="harmonic_harmonic_periodic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_harmonic_periodic_coupled.html#espaloma.mm.functional.harmonic_harmonic_periodic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_harmonic_periodic_coupled</span><span class="p">(</span>
+        <span class="n">theta0</span><span class="p">,</span>
+        <span class="n">theta1</span><span class="p">,</span>
+        <span class="n">eq0</span><span class="p">,</span>
+        <span class="n">eq1</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta0</span> <span class="o">-</span> <span class="n">eq0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta1</span> <span class="o">-</span> <span class="n">eq1</span><span class="p">)</span> <span class="o">*</span> <span class="n">phi</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">energy</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

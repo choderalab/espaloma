@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.graphs.graph &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.graphs.graph</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.graphs.graph</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">openff.toolkit</span>
+
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE CLASSES</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="BaseGraph"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.BaseGraph.html#espaloma.graphs.graph.BaseGraph">[docs]</a><span class="k">class</span> <span class="nc">BaseGraph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class of graph. &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseGraph.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.BaseGraph.html#espaloma.graphs.graph.BaseGraph.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseGraph</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="Graph"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph">[docs]</a><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">BaseGraph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A unified graph object that support translation to and from</span>
+<span class="sd">    message-passing graphs and MM factor graph.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This object provides access to popular attributes of homograph and</span>
+<span class="sd">    heterograph.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Graph.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">homograph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">heterograph</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># TODO : more pythonic way allow multiple constructors:</span>
+        <span class="c1">#   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...</span>
+        <span class="c1">#   rather than Graph(mol=None, homograph=None, ...)</span>
+
+        <span class="c1"># input molecule</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_smiles</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">allow_undefined_stereo</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">homograph</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">heterograph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">homograph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_homograph_from_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">homograph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">heterograph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">heterograph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_heterograph_from_graph_and_mol</span><span class="p">(</span>
+                <span class="n">homograph</span><span class="p">,</span> <span class="n">mol</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mol</span> <span class="o">=</span> <span class="n">mol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">homograph</span> <span class="o">=</span> <span class="n">homograph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span> <span class="o">=</span> <span class="n">heterograph</span></div>
+
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">os</span><span class="p">;</span> <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/homograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">homograph</span><span class="p">])</span>
+        <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span><span class="p">])</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/mol.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_handle</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">f_handle</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">homograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/homograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">heterograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/mol.json&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_handle</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f_handle</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">mol</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span> <span class="n">homograph</span><span class="o">=</span><span class="n">homograph</span><span class="p">,</span> <span class="n">heterograph</span><span class="o">=</span><span class="n">heterograph</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_homograph_from_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">mol</span><span class="p">,</span> <span class="n">openff</span><span class="o">.</span><span class="n">toolkit</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">Molecule</span>
+        <span class="p">),</span> <span class="s2">&quot;mol can only be OFF Molecule object.&quot;</span>
+
+        <span class="c1"># TODO:</span>
+        <span class="c1"># rewrite this using OFF-generic grammar</span>
+        <span class="c1"># graph = esp.graphs.utils.read_homogeneous_graph.from_rdkit_mol(</span>
+        <span class="c1">#     mol.to_rdkit()</span>
+        <span class="c1"># )</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">read_homogeneous_graph</span><span class="o">.</span><span class="n">from_openff_toolkit_mol</span><span class="p">(</span>
+            <span class="n">mol</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">graph</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_heterograph_from_graph_and_mol</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span>
+        <span class="p">),</span> <span class="s2">&quot;graph can only be dgl Graph object.&quot;</span>
+
+        <span class="n">heterograph</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">read_heterogeneous_graph</span><span class="o">.</span><span class="n">from_homogeneous_and_mol</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span> <span class="n">mol</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">heterograph</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def mol(self):</span>
+    <span class="c1">#     return self._mol</span>
+    <span class="c1">#</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def homograph(self):</span>
+    <span class="c1">#     return self._homograph</span>
+    <span class="c1">#</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def heterograph(self):</span>
+    <span class="c1">#     return self._heterograph</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ndata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">homograph</span><span class="o">.</span><span class="n">ndata</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">edata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">homograph</span><span class="o">.</span><span class="n">edata</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">nodes</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

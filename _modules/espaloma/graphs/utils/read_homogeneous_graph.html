@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.graphs.utils.read_homogeneous_graph &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.graphs.utils.read_homogeneous_graph</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.graphs.utils.read_homogeneous_graph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Build simple graph from OpenEye or RDKit molecule object.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+
+
+<div class="viewcode-block" id="fp_oe"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.fp_oe.html#espaloma.graphs.utils.read_homogeneous_graph.fp_oe">[docs]</a><span class="k">def</span> <span class="nf">fp_oe</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">openeye</span> <span class="kn">import</span> <span class="n">oechem</span>
+
+    <span class="n">HYBRIDIZATION_OE</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">oechem</span><span class="o">.</span><span class="n">OEHybridization_sp</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="p">),</span>
+        <span class="n">oechem</span><span class="o">.</span><span class="n">OEHybridization_sp2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="p">),</span>
+        <span class="n">oechem</span><span class="o">.</span><span class="n">OEHybridization_sp3</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="p">),</span>
+        <span class="n">oechem</span><span class="o">.</span><span class="n">OEHybridization_sp3d</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="p">),</span>
+        <span class="n">oechem</span><span class="o">.</span><span class="n">OEHybridization_sp3d2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="p">),</span>
+        <span class="n">oechem</span><span class="o">.</span><span class="n">OEHybridization_Unknown</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetDegree</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetValence</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetExplicitValence</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsAromatic</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetIsotope</span><span class="p">(),</span>  <span class="c1"># TODO: is this a good idea?</span>
+                    <span class="n">oechem</span><span class="o">.</span><span class="n">OEAtomIsInRingSize</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">oechem</span><span class="o">.</span><span class="n">OEAtomIsInRingSize</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">oechem</span><span class="o">.</span><span class="n">OEAtomIsInRingSize</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">oechem</span><span class="o">.</span><span class="n">OEAtomIsInRingSize</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">oechem</span><span class="o">.</span><span class="n">OEAtomIsInRingSize</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">oechem</span><span class="o">.</span><span class="n">OEAtomIsInRingSize</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">HYBRIDIZATION_OE</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">GetHyb</span><span class="p">()],</span>
+        <span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fp_rdkit"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.fp_rdkit.html#espaloma.graphs.utils.read_homogeneous_graph.fp_rdkit">[docs]</a><span class="k">def</span> <span class="nf">fp_rdkit</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+
+    <span class="n">HYBRIDIZATION_RDKIT</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">HybridizationType</span><span class="o">.</span><span class="n">SP</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">HybridizationType</span><span class="o">.</span><span class="n">SP2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">HybridizationType</span><span class="o">.</span><span class="n">SP3</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">HybridizationType</span><span class="o">.</span><span class="n">SP3D</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">HybridizationType</span><span class="o">.</span><span class="n">SP3D2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">HybridizationType</span><span class="o">.</span><span class="n">S</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetTotalDegree</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetTotalValence</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetExplicitValence</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetIsAromatic</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">GetMass</span><span class="p">(),</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsInRingSize</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsInRingSize</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsInRingSize</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsInRingSize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsInRingSize</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">atom</span><span class="o">.</span><span class="n">IsInRingSize</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+            <span class="p">),</span>
+            <span class="n">HYBRIDIZATION_RDKIT</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">GetHybridization</span><span class="p">()],</span>
+        <span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="from_openff_toolkit_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol.html#espaloma.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol">[docs]</a><span class="k">def</span> <span class="nf">from_openff_toolkit_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">use_fp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="c1"># initialize graph</span>
+    <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+
+    <span class="c1"># initialize graph</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">()</span>
+
+    <span class="c1"># enter nodes</span>
+    <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">n_atoms</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
+        <span class="p">[[</span><span class="n">atom</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">h_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">100</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">h_v</span><span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">h_v_fp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">fp_rdkit</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">to_rdkit</span><span class="p">()</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_fp</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">h_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">h_v</span><span class="p">,</span> <span class="n">h_v_fp</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (n_atoms, 117)</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h_v</span>
+
+    <span class="c1"># enter bonds</span>
+    <span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">bonds</span><span class="p">)</span>
+    <span class="n">bonds_begin_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1_index</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+    <span class="n">bonds_end_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2_index</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+    <span class="n">bonds_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">bond_order</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+
+    <span class="c1"># NOTE: dgl edges are directional</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">bonds_begin_idxs</span><span class="p">,</span> <span class="n">bonds_end_idxs</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">bonds_end_idxs</span><span class="p">,</span> <span class="n">bonds_begin_idxs</span><span class="p">)</span>
+
+    <span class="c1"># g.edata[&quot;type&quot;] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="from_oemol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.from_oemol.html#espaloma.graphs.utils.read_homogeneous_graph.from_oemol">[docs]</a><span class="k">def</span> <span class="nf">from_oemol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">use_fp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">openeye</span> <span class="kn">import</span> <span class="n">oechem</span>
+
+    <span class="c1"># initialize graph</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">()</span>
+
+    <span class="c1"># enter nodes</span>
+    <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">NumAtoms</span><span class="p">()</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
+        <span class="p">[[</span><span class="n">atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">()]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()]</span>
+    <span class="p">)</span>
+
+    <span class="n">h_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">100</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">h_v</span><span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">h_v_fp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">fp_oe</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_fp</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">h_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">h_v</span><span class="p">,</span> <span class="n">h_v_fp</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (n_atoms, 117)</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h_v</span>
+
+    <span class="c1"># enter bonds</span>
+    <span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">())</span>
+    <span class="n">bonds_begin_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">GetBgnIdx</span><span class="p">()</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+    <span class="n">bonds_end_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">GetEndIdx</span><span class="p">()</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+    <span class="n">bonds_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">GetOrder</span><span class="p">()</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+
+    <span class="c1"># NOTE: dgl edges are directional</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">bonds_begin_idxs</span><span class="p">,</span> <span class="n">bonds_end_idxs</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">bonds_end_idxs</span><span class="p">,</span> <span class="n">bonds_begin_idxs</span><span class="p">)</span>
+
+    <span class="c1"># g.edata[&quot;type&quot;] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="from_rdkit_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.from_rdkit_mol.html#espaloma.graphs.utils.read_homogeneous_graph.from_rdkit_mol">[docs]</a><span class="k">def</span> <span class="nf">from_rdkit_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">use_fp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+
+    <span class="c1"># initialize graph</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">()</span>
+
+    <span class="c1"># enter nodes</span>
+    <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetNumAtoms</span><span class="p">()</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
+        <span class="p">[[</span><span class="n">atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">()]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()]</span>
+    <span class="p">)</span>
+
+    <span class="n">h_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">100</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">h_v</span><span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">h_v_fp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">fp_rdkit</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_fp</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">h_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">h_v</span><span class="p">,</span> <span class="n">h_v_fp</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (n_atoms, 117)</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h_v</span>
+
+    <span class="c1"># enter bonds</span>
+    <span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">())</span>
+    <span class="n">bonds_begin_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">GetBeginAtomIdx</span><span class="p">()</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+    <span class="n">bonds_end_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">GetEndAtomIdx</span><span class="p">()</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+    <span class="n">bonds_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">GetBondType</span><span class="p">()</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+
+    <span class="c1"># NOTE: dgl edges are directional</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">bonds_begin_idxs</span><span class="p">,</span> <span class="n">bonds_end_idxs</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">bonds_end_idxs</span><span class="p">,</span> <span class="n">bonds_begin_idxs</span><span class="p">)</span>
+
+    <span class="c1"># g.edata[&quot;type&quot;] = torch.Tensor(bonds_types)[:, None].repeat(2, 1)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

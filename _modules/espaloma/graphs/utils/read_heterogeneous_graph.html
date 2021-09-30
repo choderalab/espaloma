@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.graphs.utils.read_heterogeneous_graph &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.graphs.utils.read_heterogeneous_graph</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.graphs.utils.read_heterogeneous_graph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Build heterogeneous graph from homogeneous ones.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">espaloma.graphs.utils</span> <span class="kn">import</span> <span class="n">offmol_indices</span>
+<span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+
+
+<div class="viewcode-block" id="duplicate_index_ordering"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_heterogeneous_graph.duplicate_index_ordering.html#espaloma.graphs.utils.read_heterogeneous_graph.duplicate_index_ordering">[docs]</a><span class="k">def</span> <span class="nf">duplicate_index_ordering</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;For every (a,b,c,d) add a (d,c,b,a)</span>
+
+<span class="sd">    TODO: is there a way to avoid this duplication?</span>
+
+<span class="sd">    &gt;&gt;&gt; indices = np.array([[0, 1, 2, 3], [1, 2, 3, 4]])</span>
+<span class="sd">    &gt;&gt;&gt; duplicate_index_ordering(indices)</span>
+<span class="sd">    array([[0, 1, 2, 3],</span>
+<span class="sd">           [1, 2, 3, 4],</span>
+<span class="sd">           [3, 2, 1, 0],</span>
+<span class="sd">           [4, 3, 2, 1]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">indices</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="relationship_indices_from_offmol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_heterogeneous_graph.relationship_indices_from_offmol.html#espaloma.graphs.utils.read_heterogeneous_graph.relationship_indices_from_offmol">[docs]</a><span class="k">def</span> <span class="nf">relationship_indices_from_offmol</span><span class="p">(</span>
+    <span class="n">offmol</span><span class="p">:</span> <span class="n">Molecule</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Construct a dictionary that maps node names (like &quot;n2&quot;) to torch tensors of indices</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    * introduces 2x redundant indices (including (d,c,b,a) for every (a,b,c,d)) for compatibility with later processing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">atom_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">bond_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">angle_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">proper_torsion_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">improper_torsion_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="c1"># TODO: enumerate indices for coupling-term nodes also</span>
+    <span class="c1"># TODO: big refactor of term names from &quot;n4&quot; to &quot;proper_torsion&quot;, &quot;improper_torsion&quot;, &quot;angle_angle_coupling&quot;, etc.</span>
+
+    <span class="c1"># TODO (discuss with YW) : I think &quot;n1&quot; and &quot;n4_improper&quot; shouldn&#39;t be 2x redundant in current scheme</span>
+    <span class="c1">#   (also, unclear why we need &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot; to be 2x redundant, but that&#39;s something to consider changing later)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>
+        <span class="n">idxs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">duplicate_index_ordering</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="c1"># make them all torch.Tensors</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">idxs</span><span class="p">:</span>
+        <span class="n">idxs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">idxs</span></div>
+
+
+<div class="viewcode-block" id="from_homogeneous_and_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol.html#espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol">[docs]</a><span class="k">def</span> <span class="nf">from_homogeneous_and_mol</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">offmol</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Build heterogeneous graph from homogeneous ones.</span>
+
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    For now we name single node, two-, three, and four-,</span>
+<span class="sd">    hypernodes as `n1`, `n2`, `n3`, and `n4`. These correspond</span>
+<span class="sd">    to atom, bond, angle, and torsion nodes in chemical graphs.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g : `espaloma.HomogeneousGraph` object</span>
+<span class="sd">        the homogeneous graph to be translated.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    hg : `espaloma.HeterogeneousGraph` object</span>
+<span class="sd">        the resulting heterogeneous graph.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># initialize empty dictionary</span>
+    <span class="n">hg</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># get adjacency matrix</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">()</span>
+
+    <span class="c1"># get all the indices</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="n">relationship_indices_from_offmol</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+
+    <span class="c1"># make them all numpy</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">idxs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># also include n1</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">())[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># =========================</span>
+    <span class="c1"># neighboring relationships</span>
+    <span class="c1"># =========================</span>
+    <span class="c1"># NOTE:</span>
+    <span class="c1"># here we only define the neighboring relationship</span>
+    <span class="c1"># on atom level</span>
+    <span class="n">hg</span><span class="p">[(</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n1_neighbors_n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n1&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span>
+
+    <span class="c1"># build a mapping between indices and the ordering</span>
+    <span class="n">idxs_to_ordering</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">,</span> <span class="s2">&quot;n4_improper&quot;</span><span class="p">]:</span>
+        <span class="n">idxs_to_ordering</span><span class="p">[</span><span class="n">term</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">subgraph_idxs</span><span class="p">):</span> <span class="n">ordering</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="n">subgraph_idxs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">]))</span>
+        <span class="p">}</span>
+
+    <span class="c1"># ===============================================</span>
+    <span class="c1"># relationships between nodes of different levels</span>
+    <span class="c1"># ===============================================</span>
+    <span class="c1"># NOTE:</span>
+    <span class="c1"># here we define all the possible</span>
+    <span class="c1"># &#39;has&#39; and &#39;in&#39; relationships.</span>
+    <span class="c1"># TODO:</span>
+    <span class="c1"># we&#39;ll test later to see if this adds too much overhead</span>
+    <span class="c1">#</span>
+
+    <span class="k">for</span> <span class="n">small_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">big_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">small_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">big_idx</span> <span class="o">-</span> <span class="n">small_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="n">hg</span><span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">small_idx</span><span class="p">,</span>
+                        <span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">_as_</span><span class="si">%s</span><span class="s2">_in_n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">small_idx</span><span class="p">,</span> <span class="n">pos_idx</span><span class="p">,</span> <span class="n">big_idx</span><span class="p">),</span>
+                        <span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">idxs_to_ordering</span><span class="p">[</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">small_idx</span><span class="p">][</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+                                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">][</span>
+                                    <span class="p">:,</span> <span class="n">pos_idx</span> <span class="p">:</span> <span class="n">pos_idx</span> <span class="o">+</span> <span class="n">small_idx</span>
+                                <span class="p">]</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                    <span class="p">],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">hg</span><span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">,</span>
+                        <span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">_has_</span><span class="si">%s</span><span class="s2">_n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">big_idx</span><span class="p">,</span> <span class="n">pos_idx</span><span class="p">,</span> <span class="n">small_idx</span><span class="p">),</span>
+                        <span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">small_idx</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">idxs_to_ordering</span><span class="p">[</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">small_idx</span><span class="p">][</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+                                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">][</span>
+                                    <span class="p">:,</span> <span class="n">pos_idx</span> <span class="p">:</span> <span class="n">pos_idx</span> <span class="o">+</span> <span class="n">small_idx</span>
+                                <span class="p">]</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="c1"># ======================================</span>
+    <span class="c1"># nonbonded terms</span>
+    <span class="c1"># ======================================</span>
+    <span class="c1"># NOTE: everything is counted twice here</span>
+    <span class="c1"># nonbonded is where</span>
+    <span class="c1"># $A = AA = AAA = AAAA = 0$</span>
+
+    <span class="c1"># make dense</span>
+    <span class="n">a_</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">to_dense</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">a_</span> <span class="o">+</span> <span class="n">a_</span> <span class="o">@</span> <span class="n">a_</span> <span class="o">+</span> <span class="n">a_</span> <span class="o">@</span> <span class="n">a_</span> <span class="o">@</span> <span class="n">a_</span> <span class="o">+</span> <span class="n">a_</span> <span class="o">@</span> <span class="n">a_</span> <span class="o">@</span> <span class="n">a_</span> <span class="o">@</span> <span class="n">a_</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># onefour is the two ends of torsion</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;onefour&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">][:,</span> <span class="mi">3</span><span class="p">],],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># membership</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span> <span class="s2">&quot;onefour&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">hg</span><span class="p">[(</span><span class="n">term</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_has_</span><span class="si">%s</span><span class="s2">_n1&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">pos_idx</span><span class="p">),</span> <span class="s2">&quot;n1&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">][:,</span> <span class="n">pos_idx</span><span class="p">]],</span>
+                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">hg</span><span class="p">[(</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">term</span><span class="p">),</span> <span class="n">term</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">][:,</span> <span class="n">pos_idx</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),],</span>
+                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="c1"># membership of n1 in n4_improper</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="n">hg</span><span class="p">[(</span><span class="n">term</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_has_</span><span class="si">%s</span><span class="s2">_n1&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">pos_idx</span><span class="p">),</span> <span class="s2">&quot;n1&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">][:,</span> <span class="n">pos_idx</span><span class="p">]],</span>
+                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">hg</span><span class="p">[(</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">term</span><span class="p">),</span> <span class="n">term</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">][:,</span> <span class="n">pos_idx</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),],</span>
+                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="c1"># ======================================</span>
+    <span class="c1"># relationships between nodes and graphs</span>
+    <span class="c1"># ======================================</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;n1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n4&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n4_improper&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;onefour&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="n">hg</span><span class="p">[(</span><span class="n">term</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_in_g&quot;</span> <span class="o">%</span> <span class="n">term</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">])),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">]))],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">hg</span><span class="p">[(</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="s2">&quot;g_has_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">term</span><span class="p">,</span> <span class="n">term</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">])),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">])),],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">hg</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">heterograph</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">hg</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+    <span class="n">hg</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span>
+
+    <span class="c1"># include indices in the nodes themselves</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">,</span> <span class="s2">&quot;n4_improper&quot;</span><span class="p">]:</span>
+        <span class="n">hg</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;idxs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">term</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">hg</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.data.md &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.data.md</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.data.md</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">openmmforcefields.generators</span> <span class="kn">import</span> <span class="n">SystemGenerator</span>
+<span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">openmm</span><span class="p">,</span> <span class="n">unit</span>
+<span class="kn">from</span> <span class="nn">simtk.openmm.app</span> <span class="kn">import</span> <span class="n">Simulation</span>
+<span class="kn">from</span> <span class="nn">simtk.unit</span> <span class="kn">import</span> <span class="n">Quantity</span>
+
+<span class="kn">from</span> <span class="nn">espaloma.units</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># CONSTANTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="c1"># simulation specs</span>
+<span class="n">TEMPERATURE</span> <span class="o">=</span> <span class="mi">350</span> <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">kelvin</span>
+<span class="n">STEP_SIZE</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">femtosecond</span>
+<span class="n">COLLISION_RATE</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">unit</span><span class="o">.</span><span class="n">picosecond</span>
+<span class="n">EPSILON_MIN</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">kilojoules_per_mole</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="subtract_nonbonded_force"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.subtract_nonbonded_force.html#espaloma.data.md.subtract_nonbonded_force">[docs]</a><span class="k">def</span> <span class="nf">subtract_nonbonded_force</span><span class="p">(</span>
+    <span class="n">g</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="c1"># parameterize topology</span>
+    <span class="n">topology</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">()</span><span class="o">.</span><span class="n">to_openmm</span><span class="p">()</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">SystemGenerator</span><span class="p">(</span>
+        <span class="n">small_molecule_forcefield</span><span class="o">=</span><span class="n">forcefield</span><span class="p">,</span>
+        <span class="n">molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">],</span>
+        <span class="n">forcefield_kwargs</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;constraints&#39;</span> <span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;removeCMMotion&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># create openmm system</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">create_system</span><span class="p">(</span>
+        <span class="n">topology</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># use langevin integrator, although it&#39;s not super useful here</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">openmm</span><span class="o">.</span><span class="n">LangevinIntegrator</span><span class="p">(</span>
+        <span class="n">TEMPERATURE</span><span class="p">,</span> <span class="n">COLLISION_RATE</span><span class="p">,</span> <span class="n">STEP_SIZE</span>
+    <span class="p">)</span>
+
+    <span class="c1"># create simulation</span>
+    <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
+        <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">,</span> <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span>
+    <span class="p">)</span>
+
+    <span class="c1"># get forces</span>
+    <span class="n">forces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">getForces</span><span class="p">())</span>
+
+    <span class="c1"># loop through forces</span>
+    <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="n">forces</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="c1"># turn off angle</span>
+        <span class="k">if</span> <span class="s2">&quot;Angle&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumAngles</span><span class="p">()):</span>
+                <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getAngleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setAngleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+        <span class="k">elif</span> <span class="s2">&quot;Bond&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumBonds</span><span class="p">()):</span>
+                <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getBondParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setBondParameters</span><span class="p">(</span>
+                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+        <span class="k">elif</span> <span class="s2">&quot;Torsion&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumTorsions</span><span class="p">()):</span>
+                <span class="p">(</span>
+                    <span class="n">id1</span><span class="p">,</span>
+                    <span class="n">id2</span><span class="p">,</span>
+                    <span class="n">id3</span><span class="p">,</span>
+                    <span class="n">id4</span><span class="p">,</span>
+                    <span class="n">periodicity</span><span class="p">,</span>
+                    <span class="n">phase</span><span class="p">,</span>
+                    <span class="n">k</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getTorsionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setTorsionParameters</span><span class="p">(</span>
+                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">id4</span><span class="p">,</span> <span class="n">periodicity</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+    <span class="c1"># the snapshots</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Quantity</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">nanometer</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1"># loop through the snapshots</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
+        <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span>
+            <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getParameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getForces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">getPotentialEnergy</span><span class="p">()</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">derivative</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">getForces</span><span class="p">(</span><span class="n">asNumpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">FORCE_UNIT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+        <span class="n">derivatives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">derivative</span><span class="p">)</span>
+
+    <span class="c1"># put energies to a tensor</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="n">energies</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># subtract the energies</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">},</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;u_ref_prime&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">derivatives</span><span class="p">},</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+<div class="viewcode-block" id="subtract_nonbonded_force_except_14"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.subtract_nonbonded_force_except_14.html#espaloma.data.md.subtract_nonbonded_force_except_14">[docs]</a><span class="k">def</span> <span class="nf">subtract_nonbonded_force_except_14</span><span class="p">(</span>
+    <span class="n">g</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="c1"># parameterize topology</span>
+    <span class="n">topology</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">()</span><span class="o">.</span><span class="n">to_openmm</span><span class="p">()</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">SystemGenerator</span><span class="p">(</span>
+        <span class="n">small_molecule_forcefield</span><span class="o">=</span><span class="n">forcefield</span><span class="p">,</span>
+        <span class="n">molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="c1"># create openmm system</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">create_system</span><span class="p">(</span>
+        <span class="n">topology</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># use langevin integrator, although it&#39;s not super useful here</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">openmm</span><span class="o">.</span><span class="n">LangevinIntegrator</span><span class="p">(</span>
+        <span class="n">TEMPERATURE</span><span class="p">,</span> <span class="n">COLLISION_RATE</span><span class="p">,</span> <span class="n">STEP_SIZE</span>
+    <span class="p">)</span>
+
+    <span class="c1"># create simulation</span>
+    <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
+        <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">,</span> <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span>
+    <span class="p">)</span>
+
+    <span class="c1"># get forces</span>
+    <span class="n">forces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">system</span><span class="o">.</span><span class="n">getForces</span><span class="p">())</span>
+
+    <span class="c1"># loop through forces</span>
+    <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="n">forces</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="c1"># turn off angle</span>
+        <span class="k">if</span> <span class="s2">&quot;Angle&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumAngles</span><span class="p">()):</span>
+                <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getAngleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setAngleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+        <span class="k">elif</span> <span class="s2">&quot;Bond&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumBonds</span><span class="p">()):</span>
+                <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getBondParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setBondParameters</span><span class="p">(</span>
+                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+        <span class="k">elif</span> <span class="s2">&quot;Torsion&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumTorsions</span><span class="p">()):</span>
+                <span class="p">(</span>
+                    <span class="n">id1</span><span class="p">,</span>
+                    <span class="n">id2</span><span class="p">,</span>
+                    <span class="n">id3</span><span class="p">,</span>
+                    <span class="n">id4</span><span class="p">,</span>
+                    <span class="n">periodicity</span><span class="p">,</span>
+                    <span class="n">phase</span><span class="p">,</span>
+                    <span class="n">k</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getTorsionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setTorsionParameters</span><span class="p">(</span>
+                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">id4</span><span class="p">,</span> <span class="n">periodicity</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+        <span class="k">elif</span> <span class="s2">&quot;Nonbonded&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">exception_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumExceptions</span><span class="p">()):</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">chargeprod</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getExceptionParameters</span><span class="p">(</span><span class="n">exception_index</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setExceptionParameters</span><span class="p">(</span><span class="n">exception_index</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">chargeprod</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mf">1e-8</span><span class="o">*</span><span class="n">epsilon</span><span class="p">)</span>
+
+
+            <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+
+
+    <span class="c1"># the snapshots</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Quantity</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">nanometer</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1"># loop through the snapshots</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
+        <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span>
+            <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getParameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getForces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">getPotentialEnergy</span><span class="p">()</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">derivative</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">getForces</span><span class="p">(</span><span class="n">asNumpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">FORCE_UNIT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+        <span class="n">derivatives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">derivative</span><span class="p">)</span>
+
+    <span class="c1"># put energies to a tensor</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="n">energies</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># subtract the energies</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">},</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;u_ref_prime&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">derivatives</span><span class="p">},</span>
+            <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE CLASSES</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="MoleculeVacuumSimulation"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation">[docs]</a><span class="k">class</span> <span class="nc">MoleculeVacuumSimulation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simluate a single molecule system in vaccum.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g : `espaloma.Graph`</span>
+<span class="sd">        Input molecular graph.</span>
+
+<span class="sd">    n_samples : `int`</span>
+<span class="sd">        Number of samples to collect.</span>
+
+<span class="sd">    n_steps_per_sample : `int`</span>
+<span class="sd">        Number of steps between each sample.</span>
+
+<span class="sd">    temperature : `float * unit.kelvin`</span>
+<span class="sd">        Temperature for the simluation.</span>
+
+<span class="sd">    collision_rate : `float / unit.picosecond`</span>
+<span class="sd">        Collision rate.</span>
+
+<span class="sd">    timestep : `float * unit.femtosecond`</span>
+<span class="sd">        Time step.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    simulation_from_graph : Create simluation from molecule.</span>
+
+<span class="sd">    run : Run the simluation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MoleculeVacuumSimulation.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
+        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">n_conformers</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">n_steps_per_sample</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">TEMPERATURE</span><span class="p">,</span>
+        <span class="n">collision_rate</span><span class="o">=</span><span class="n">COLLISION_RATE</span><span class="p">,</span>
+        <span class="n">step_size</span><span class="o">=</span><span class="n">STEP_SIZE</span><span class="p">,</span>
+        <span class="n">charge_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps_per_sample</span> <span class="o">=</span> <span class="n">n_steps_per_sample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collision_rate</span> <span class="o">=</span> <span class="n">collision_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">step_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span> <span class="o">=</span> <span class="n">forcefield</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_conformers</span> <span class="o">=</span> <span class="n">n_conformers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge_method</span> <span class="o">=</span> <span class="n">charge_method</span></div>
+
+
+<div class="viewcode-block" id="MoleculeVacuumSimulation.simulation_from_graph"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation.simulation_from_graph">[docs]</a>    <span class="k">def</span> <span class="nf">simulation_from_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create simulation from moleucle &quot;&quot;&quot;</span>
+        <span class="c1"># assign partial charge</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">assign_partial_charges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charge_method</span><span class="p">)</span>
+
+        <span class="c1"># parameterize topology</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">()</span><span class="o">.</span><span class="n">to_openmm</span><span class="p">()</span>
+
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">SystemGenerator</span><span class="p">(</span>
+            <span class="n">small_molecule_forcefield</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span><span class="p">,</span>
+            <span class="n">molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># create openmm system</span>
+        <span class="n">system</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">create_system</span><span class="p">(</span>
+            <span class="n">topology</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># set epsilon minimum to 0.05 kJ/mol</span>
+        <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="n">system</span><span class="o">.</span><span class="n">getForces</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;Nonbonded&quot;</span> <span class="ow">in</span> <span class="n">force</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">particle_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumParticles</span><span class="p">()):</span>
+                    <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getParticleParameters</span><span class="p">(</span><span class="n">particle_index</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">epsilon</span> <span class="o">&lt;</span> <span class="n">EPSILON_MIN</span><span class="p">):</span>
+                        <span class="n">force</span><span class="o">.</span><span class="n">setParticleParameters</span><span class="p">(</span><span class="n">particle_index</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">EPSILON_MIN</span><span class="p">)</span>
+
+        <span class="c1"># use langevin integrator</span>
+        <span class="n">integrator</span> <span class="o">=</span> <span class="n">openmm</span><span class="o">.</span><span class="n">LangevinIntegrator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collision_rate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># initialize simulation</span>
+        <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
+            <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">,</span> <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span><span class="p">,</span>
+            <span class="n">platform</span><span class="o">=</span><span class="n">openmm</span><span class="o">.</span><span class="n">Platform</span><span class="o">.</span><span class="n">getPlatformByName</span><span class="p">(</span><span class="s2">&quot;Reference&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">simulation</span></div>
+
+<div class="viewcode-block" id="MoleculeVacuumSimulation.run"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Collect samples from simulation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g : `esp.Graph`</span>
+<span class="sd">            Input graph.</span>
+
+<span class="sd">        in_place : `bool`</span>
+<span class="sd">            If ture,</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        samples : `torch.Tensor`, `shape=(n_samples, n_nodes, 3)`</span>
+<span class="sd">            `in_place=True`</span>
+<span class="sd">            Sample.</span>
+
+<span class="sd">        graph : `esp.Graph`</span>
+<span class="sd">            Modified graph.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># build simulation</span>
+        <span class="n">simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_from_graph</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">openff.toolkit</span>
+
+        <span class="c1"># get conformer</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">generate_conformers</span><span class="p">(</span>
+            <span class="n">toolkit_registry</span><span class="o">=</span><span class="n">openff</span><span class="o">.</span><span class="n">toolkit</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RDKitToolkitWrapper</span><span class="p">(),</span>
+            <span class="n">n_conformers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_conformers</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># get number of actual conformers</span>
+        <span class="n">true_n_conformers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">conformers</span><span class="p">)</span>
+
+        <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">true_n_conformers</span><span class="p">):</span>
+            <span class="c1"># put conformer in simulation</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">conformers</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># set velocities</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setVelocitiesToTemperature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
+
+            <span class="c1"># minimize</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">minimizeEnergy</span><span class="p">()</span>
+
+            <span class="c1"># loop through number of samples</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_conformers</span><span class="p">):</span>
+
+                <span class="c1"># run MD for `self.n_steps_per_sample` steps</span>
+                <span class="n">simulation</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps_per_sample</span><span class="p">)</span>
+
+                <span class="c1"># append samples to `samples`</span>
+                <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span><span class="n">getPositions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">getPositions</span><span class="p">(</span><span class="n">asNumpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">DISTANCE_UNIT</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="c1"># if the `samples` array is not filled,</span>
+        <span class="c1"># pick a random conformer to do it again</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">:</span>
+            <span class="n">len_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">random</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">true_n_conformers</span><span class="p">)))</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">conformers</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+
+            <span class="c1"># set velocities</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setVelocitiesToTemperature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
+
+            <span class="c1"># minimize</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">minimizeEnergy</span><span class="p">()</span>
+
+            <span class="c1"># loop through number of samples</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">-</span> <span class="n">len_samples</span><span class="p">):</span>
+
+                <span class="c1"># run MD for `self.n_steps_per_sample` steps</span>
+                <span class="n">simulation</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps_per_sample</span><span class="p">)</span>
+
+                <span class="c1"># append samples to `samples`</span>
+                <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span><span class="n">getPositions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">getPositions</span><span class="p">(</span><span class="n">asNumpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">DISTANCE_UNIT</span><span class="p">)</span>
+                <span class="p">)</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+
+        <span class="c1"># put samples into an array</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+
+        <span class="c1"># put samples into tensor</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">in_place</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># require gradient for force matching</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="k">return</span> <span class="n">samples</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

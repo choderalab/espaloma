@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.data.normalize &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.data.normalize</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.data.normalize</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># BASE CLASSES</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="BaseNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.BaseNormalize.html#espaloma.data.normalize.BaseNormalize">[docs]</a><span class="k">class</span> <span class="nc">BaseNormalize</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for normalizing operation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.BaseNormalize.html#espaloma.data.normalize.BaseNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># NOTE:</span>
+        <span class="c1"># `_norm` and `_unnorm` are assigned here</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># MODULE CLASSES</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="DatasetNormalNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.DatasetNormalNormalize.html#espaloma.data.normalize.DatasetNormalNormalize">[docs]</a><span class="k">class</span> <span class="nc">DatasetNormalNormalize</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Normalizing operation based on a dataset of molecules,</span>
+<span class="sd">    assuming parameters having normal distribution.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : `espaloma.data.dataset.Dataset`</span>
+<span class="sd">        The dataset we base on to calculate the statistics of parameter</span>
+<span class="sd">        distributions.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    norm : normalize function</span>
+
+<span class="sd">    unnorm : unnormalize function</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DatasetNormalNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.DatasetNormalNormalize.html#espaloma.data.normalize.DatasetNormalNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DatasetNormalNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate the statistics from dataset &quot;&quot;&quot;</span>
+        <span class="c1"># grab the collection of graphs in the dataset, batched</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">graphs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]}</span>
+
+        <span class="c1"># calculate statistics</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">):</span>  <span class="c1"># pass non-parameters</span>
+                    <span class="k">continue</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span>
+                    <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
+
+        <span class="c1"># get normalize and unnormalize functions</span>
+        <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span>
+                    <span class="n">term</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">):</span>  <span class="c1"># pass non-parameters</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">)]</span>
+                    <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)]</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="k">def</span> <span class="nf">unnorm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span>
+                    <span class="n">term</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_mean&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">]:</span>
+
+                        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_std&quot;</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_mean&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># elif &#39;_ref&#39; in key \</span>
+                    <span class="c1">#     and key.replace(&#39;_ref&#39;, &#39;_mean&#39;)\</span>
+                    <span class="c1">#     in self.statistics[term]:</span>
+                    <span class="c1">#</span>
+                    <span class="c1">#     g.nodes[term].data[key]\</span>
+                    <span class="c1">#         = g.nodes[term].data[key]\</span>
+                    <span class="c1">#             * self.statistics[term][</span>
+                    <span class="c1">#                 key.replace(&#39;_ref&#39;, &#39;_std&#39;)]\</span>
+                    <span class="c1">#             + self.statistics[term][</span>
+                    <span class="c1">#                 key.replace(&#39;_ref&#39;, &#39;_mean&#39;)]</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="c1"># point normalize and unnormalize functions to `self`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unnorm</span> <span class="o">=</span> <span class="n">unnorm</span></div>
+
+
+<div class="viewcode-block" id="DatasetLogNormalNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.DatasetLogNormalNormalize.html#espaloma.data.normalize.DatasetLogNormalNormalize">[docs]</a><span class="k">class</span> <span class="nc">DatasetLogNormalNormalize</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Normalizing operation based on a dataset of molecules,</span>
+<span class="sd">    assuming parameters having log normal distribution.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : `espaloma.data.dataset.Dataset`</span>
+<span class="sd">        The dataset we base on to calculate the statistics of parameter</span>
+<span class="sd">        distributions.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    norm : normalize function</span>
+
+<span class="sd">    unnorm : unnormalize function</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DatasetLogNormalNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.DatasetLogNormalNormalize.html#espaloma.data.normalize.DatasetLogNormalNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DatasetLogNormalNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate the statistics from dataset &quot;&quot;&quot;</span>
+        <span class="c1"># grab the collection of graphs in the dataset, batched</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">graphs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]}</span>
+
+        <span class="c1"># calculate statistics</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">):</span>  <span class="c1"># pass non-parameters</span>
+                    <span class="k">continue</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span>
+                    <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
+
+        <span class="c1"># get normalize and unnormalize functions</span>
+        <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span>
+                    <span class="n">term</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">):</span>  <span class="c1"># pass non-parameters</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+                        <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">)]</span>
+                    <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)]</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="k">def</span> <span class="nf">unnorm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span>
+                    <span class="n">term</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_mean&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">]:</span>
+
+                        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_std&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                                <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">device</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_mean&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                                <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">device</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># elif &#39;_ref&#39; in key \</span>
+                    <span class="c1">#     and key.replace(&#39;_ref&#39;, &#39;_mean&#39;)\</span>
+                    <span class="c1">#     in self.statistics[term]:</span>
+                    <span class="c1">#</span>
+                    <span class="c1">#     g.nodes[term].data[key]\</span>
+                    <span class="c1">#         = torch.exp(</span>
+                    <span class="c1">#             g.nodes[term].data[key]\</span>
+                    <span class="c1">#                 * self.statistics[term][</span>
+                    <span class="c1">#                     key.replace(&#39;_ref&#39;, &#39;_std&#39;)]\</span>
+                    <span class="c1">#                 + self.statistics[term][</span>
+                    <span class="c1">#                     key.replace(&#39;_ref&#39;, &#39;_mean&#39;)])</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="c1"># point normalize and unnormalize functions to `self`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unnorm</span> <span class="o">=</span> <span class="n">unnorm</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># PRESETS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="ESOL100NormalNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.ESOL100NormalNormalize.html#espaloma.data.normalize.ESOL100NormalNormalize">[docs]</a><span class="k">class</span> <span class="nc">ESOL100NormalNormalize</span><span class="p">(</span><span class="n">DatasetNormalNormalize</span><span class="p">):</span>
+<div class="viewcode-block" id="ESOL100NormalNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.ESOL100NormalNormalize.html#espaloma.data.normalize.ESOL100NormalNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ESOL100NormalNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">esol</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">legacy_force_field</span><span class="o">.</span><span class="n">LegacyForceField</span><span class="p">(</span>
+                    <span class="s2">&quot;smirnoff99Frosst-1.1.0&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">parametrize</span><span class="p">,</span>
+                <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ESOL100LogNormalNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.ESOL100LogNormalNormalize.html#espaloma.data.normalize.ESOL100LogNormalNormalize">[docs]</a><span class="k">class</span> <span class="nc">ESOL100LogNormalNormalize</span><span class="p">(</span><span class="n">DatasetLogNormalNormalize</span><span class="p">):</span>
+<div class="viewcode-block" id="ESOL100LogNormalNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.ESOL100LogNormalNormalize.html#espaloma.data.normalize.ESOL100LogNormalNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ESOL100LogNormalNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">esol</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">legacy_force_field</span><span class="o">.</span><span class="n">LegacyForceField</span><span class="p">(</span>
+                    <span class="s2">&quot;smirnoff99Frosst-1.1.0&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">parametrize</span><span class="p">,</span>
+                <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="NotNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.NotNormalize.html#espaloma.data.normalize.NotNormalize">[docs]</a><span class="k">class</span> <span class="nc">NotNormalize</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">):</span>
+<div class="viewcode-block" id="NotNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.NotNormalize.html#espaloma.data.normalize.NotNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NotNormalize</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unnorm</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="PositiveNotNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.PositiveNotNormalize.html#espaloma.data.normalize.PositiveNotNormalize">[docs]</a><span class="k">class</span> <span class="nc">PositiveNotNormalize</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">):</span>
+<div class="viewcode-block" id="PositiveNotNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.PositiveNotNormalize.html#espaloma.data.normalize.PositiveNotNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PositiveNotNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># get normalize and unnormalize functions</span>
+        <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;n3&quot;</span><span class="p">,</span> <span class="s2">&quot;n4&quot;</span><span class="p">]:</span>  <span class="c1"># loop through terms</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span>
+                    <span class="n">term</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">):</span>  <span class="c1"># pass non-parameters</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="k">def</span> <span class="nf">unnorm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;n2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;n3&quot;</span><span class="p">,</span>
+            <span class="p">]:</span>  <span class="c1"># loop through terms</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span>
+                    <span class="n">term</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># loop through parameters</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;eq&quot;</span><span class="p">:</span>
+
+                        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">g</span>
+
+        <span class="c1"># point normalize and unnormalize functions to `self`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unnorm</span> <span class="o">=</span> <span class="n">unnorm</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.data.utils &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.data.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.data.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+<span class="n">OFFSETS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.500607632585</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="o">-</span><span class="mf">37.8302333826</span><span class="p">,</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="o">-</span><span class="mf">54.5680045287</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="o">-</span><span class="mf">75.0362229210</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># ==============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># ==============================================================================</span>
+
+<div class="viewcode-block" id="make_temp_directory"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.make_temp_directory.html#espaloma.data.utils.make_temp_directory">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">make_temp_directory</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">shutil</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">temp_dir</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="sum_offsets"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.sum_offsets.html#espaloma.data.utils.sum_offsets">[docs]</a><span class="k">def</span> <span class="nf">sum_offsets</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">OFFSETS</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="from_csv"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.from_csv.html#espaloma.data.utils.from_csv">[docs]</a><span class="k">def</span> <span class="nf">from_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">toolkit</span><span class="o">=</span><span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="n">smiles_col</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">y_cols</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2666</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Read csv from file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_from_csv</span><span class="p">():</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">df_smiles</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">smiles_col</span><span class="p">]</span>
+        <span class="n">df_y</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">y_cols</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">toolkit</span> <span class="o">==</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+
+            <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span> <span class="k">for</span> <span class="n">smiles</span> <span class="ow">in</span> <span class="n">df_smiles</span><span class="p">]</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="p">[</span><span class="n">esp</span><span class="o">.</span><span class="n">HomogeneousGraph</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">toolkit</span> <span class="o">==</span> <span class="s2">&quot;openeye&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">openeye</span> <span class="kn">import</span> <span class="n">oechem</span>
+
+            <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">oechem</span><span class="o">.</span><span class="n">OESmilesToMol</span><span class="p">(</span><span class="n">oechem</span><span class="o">.</span><span class="n">OEGraphMol</span><span class="p">(),</span> <span class="n">smiles</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">smiles</span> <span class="ow">in</span> <span class="n">df_smiles</span>
+            <span class="p">]</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="p">[</span><span class="n">esp</span><span class="o">.</span><span class="n">HomogeneousGraph</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">]</span>
+
+        <span class="n">ds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gs</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">df_y</span><span class="o">.</span><span class="n">values</span><span class="p">))))</span>
+
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ds</span>
+
+    <span class="k">return</span> <span class="n">_from_csv</span></div>
+
+
+<div class="viewcode-block" id="normalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.normalize.html#espaloma.data.utils.normalize">[docs]</a><span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get mean and std.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ds</span><span class="p">))</span>
+    <span class="n">y_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+    <span class="n">y_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_std</span>
+
+    <span class="k">def</span> <span class="nf">unnorm</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y_std</span> <span class="o">+</span> <span class="n">y_mean</span>
+
+    <span class="k">return</span> <span class="n">y_mean</span><span class="p">,</span> <span class="n">y_std</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">unnorm</span></div>
+
+
+<div class="viewcode-block" id="split"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.split.html#espaloma.data.utils.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">partition</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Split the dataset according to some partition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+
+    <span class="c1"># get the actual size of partition</span>
+    <span class="n">partition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">n_data</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partition</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">]</span>
+
+    <span class="n">ds_batched</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">p_size</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">:</span>
+        <span class="n">ds_batched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">p_size</span><span class="p">])</span>
+        <span class="n">idx</span> <span class="o">+=</span> <span class="n">p_size</span>
+
+    <span class="k">return</span> <span class="n">ds_batched</span></div>
+
+
+<div class="viewcode-block" id="batch"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.batch.html#espaloma.data.utils.batch">[docs]</a><span class="k">def</span> <span class="nf">batch</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2666</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Batch graphs and values after shuffling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get the numebr of data</span>
+    <span class="n">n_data_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+    <span class="n">n_batches</span> <span class="o">=</span> <span class="n">n_data_points</span> <span class="o">//</span> <span class="n">batch_size</span>  <span class="c1"># drop the rest</span>
+
+    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+    <span class="n">gs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ds</span><span class="p">))</span>
+
+    <span class="n">gs_batched</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">ys_batched</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gs_batched</span><span class="p">,</span> <span class="n">ys_batched</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="collate_fn"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.collate_fn.html#espaloma.data.utils.collate_fn">[docs]</a><span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="n">graphs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">HomogeneousGraph</span><span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="infer_mol_from_coordinates"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.infer_mol_from_coordinates.html#espaloma.data.utils.infer_mol_from_coordinates">[docs]</a><span class="k">def</span> <span class="nf">infer_mol_from_coordinates</span><span class="p">(</span>
+    <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">smiles_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coordinates_unit</span><span class="o">=</span><span class="s2">&quot;angstrom&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="c1"># local import</span>
+    <span class="kn">from</span> <span class="nn">openeye</span> <span class="kn">import</span> <span class="n">oechem</span>
+    <span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
+    <span class="kn">from</span> <span class="nn">simtk.unit</span> <span class="kn">import</span> <span class="n">Quantity</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coordinates_unit</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">coordinates_unit</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">coordinates_unit</span><span class="p">)</span>
+
+    <span class="c1"># make sure we have the coordinates</span>
+    <span class="c1"># in the unit system</span>
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span>
+        <span class="n">coordinates</span><span class="p">,</span>
+        <span class="n">coordinates_unit</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span> <span class="c1"># to make openeye happy</span>
+    <span class="p">)</span>
+
+    <span class="c1"># initialize molecule</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OEGraphMol</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">species</span><span class="p">):</span>
+        <span class="p">[</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">NewAtom</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">oechem</span><span class="p">,</span> <span class="s2">&quot;OEElemNo_&quot;</span> <span class="o">+</span> <span class="n">symbol</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">species</span>
+        <span class="p">]</span>
+
+    <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">species</span><span class="p">):</span>
+        <span class="p">[</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">NewAtom</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">oechem</span><span class="p">,</span> <span class="s2">&quot;OEElemNo_&quot;</span> <span class="o">+</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OEGetAtomicSymbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">species</span>
+        <span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;The species can only be all strings or all integers.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">mol</span><span class="o">.</span><span class="n">SetCoords</span><span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">SetDimension</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">oechem</span><span class="o">.</span><span class="n">OEDetermineConnectivity</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+    <span class="n">oechem</span><span class="o">.</span><span class="n">OEFindRingAtomsAndBonds</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+    <span class="n">oechem</span><span class="o">.</span><span class="n">OEPerceiveBondOrders</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">smiles_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">smiles_can</span> <span class="o">=</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OECreateCanSmiString</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="n">ims</span> <span class="o">=</span> <span class="n">oechem</span><span class="o">.</span><span class="n">oemolistream</span><span class="p">()</span>
+        <span class="n">ims</span><span class="o">.</span><span class="n">SetFormat</span><span class="p">(</span><span class="n">oechem</span><span class="o">.</span><span class="n">OEFormat_SMI</span><span class="p">)</span>
+        <span class="n">ims</span><span class="o">.</span><span class="n">openstring</span><span class="p">(</span><span class="n">smiles_ref</span><span class="p">)</span>
+        <span class="n">mol_ref</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">ims</span><span class="o">.</span><span class="n">GetOEMols</span><span class="p">())</span>
+        <span class="n">smiles_ref</span> <span class="o">=</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OECreateCanSmiString</span><span class="p">(</span><span class="n">mol_ref</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">smiles_ref</span> <span class="o">==</span> <span class="n">smiles_can</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;SMILES different. Input is </span><span class="si">%s</span><span class="s2">, ref is </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">smiles_can</span><span class="p">,</span>
+                <span class="n">smiles_ref</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+
+    <span class="n">_mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_openeye</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">allow_undefined_stereo</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">_mol</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

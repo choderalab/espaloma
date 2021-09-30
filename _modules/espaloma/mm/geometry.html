@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.mm.geometry &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.mm.geometry</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.mm.geometry</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="reduce_stack"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.reduce_stack.html#espaloma.mm.geometry.reduce_stack">[docs]</a><span class="k">def</span> <span class="nf">reduce_stack</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Copy massage and stack. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_reduce_stack</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">out</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">mailbox</span><span class="p">[</span><span class="n">msg</span><span class="p">]}</span>
+
+    <span class="k">return</span> <span class="n">_reduce_stack</span></div>
+
+
+<div class="viewcode-block" id="copy_src"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.copy_src.html#espaloma.mm.geometry.copy_src">[docs]</a><span class="k">def</span> <span class="nf">copy_src</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Copy source of an edge. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_copy_src</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">out</span><span class="p">:</span> <span class="n">edges</span><span class="o">.</span><span class="n">src</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()}</span>
+
+    <span class="k">return</span> <span class="n">_copy_src</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># SINGLE GEOMETRY ENTITY</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="distance"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.distance.html#espaloma.mm.geometry.distance">[docs]</a><span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Distance. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x0</span> <span class="o">-</span> <span class="n">x1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_angle</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Angle between vectors. &quot;&quot;&quot;</span>
+
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">),</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">angle</span>
+
+
+<div class="viewcode-block" id="angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.angle.html#espaloma.mm.geometry.angle">[docs]</a><span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Angle between three points. &quot;&quot;&quot;</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span>
+    <span class="k">return</span> <span class="n">_angle</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_dihedral</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Dihedral between normal vectors. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_angle</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="dihedral"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.dihedral.html#espaloma.mm.geometry.dihedral">[docs]</a><span class="k">def</span> <span class="nf">dihedral</span><span class="p">(</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x3</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Dihedral between four points.</span>
+
+<span class="sd">    Reference</span>
+<span class="sd">    ---------</span>
+<span class="sd">    Closely follows implementation in Yutong Zhao&#39;s timemachine:</span>
+<span class="sd">        https://github.com/proteneer/timemachine/blob/1a0ab45e605dc1e28c44ea90f38cb0dedce5c4db/timemachine/potentials/bonded.py#L152-L199</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check input shapes</span>
+
+    <span class="k">assert</span> <span class="n">x0</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">x1</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">x2</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">x3</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># compute displacements 0-&gt;1, 2-&gt;1, 2-&gt;3</span>
+    <span class="n">r01</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-5</span>
+    <span class="n">r21</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-5</span>
+    <span class="n">r23</span> <span class="o">=</span> <span class="n">x3</span> <span class="o">-</span> <span class="n">x2</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-5</span>
+
+    <span class="c1"># compute normal planes</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r01</span><span class="p">,</span> <span class="n">r21</span><span class="p">)</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r21</span><span class="p">,</span> <span class="n">r23</span><span class="p">)</span>
+
+    <span class="n">rkj_normed</span> <span class="o">=</span> <span class="n">r21</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r21</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">),</span> <span class="n">rkj_normed</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># choose quadrant correctly</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">theta</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># GEOMETRY IN HYPERNODES</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="apply_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.apply_bond.html#espaloma.mm.geometry.apply_bond">[docs]</a><span class="k">def</span> <span class="nf">apply_bond</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Bond length in nodes. &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">])}</span></div>
+
+
+<div class="viewcode-block" id="apply_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.apply_angle.html#espaloma.mm.geometry.apply_angle">[docs]</a><span class="k">def</span> <span class="nf">apply_angle</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Angle values in nodes. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">angle</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x2</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_left&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_right&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_between&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.apply_torsion.html#espaloma.mm.geometry.apply_torsion">[docs]</a><span class="k">def</span> <span class="nf">apply_torsion</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Torsion dihedrals in nodes. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">dihedral</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x2</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+            <span class="n">x3</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz3&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_bond_left&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_bond_center&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_bond_right&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz3&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_angle_left&quot;</span><span class="p">:</span> <span class="n">angle</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x2</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;x_angle_right&quot;</span><span class="p">:</span> <span class="n">angle</span><span class="p">(</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
+            <span class="n">x2</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz3&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># GEOMETRY IN GRAPH</span>
+<span class="c1"># =============================================================================</span>
+<span class="c1"># NOTE:</span>
+<span class="c1"># The following functions modify graphs in-place.</span>
+
+
+<div class="viewcode-block" id="geometry_in_graph"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.geometry_in_graph.html#espaloma.mm.geometry.geometry_in_graph">[docs]</a><span class="k">def</span> <span class="nf">geometry_in_graph</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Assign values to geometric entities in graphs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g : `dgl.DGLHeteroGraph`</span>
+<span class="sd">        Input graph.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    g : `dgl.DGLHeteroGraph`</span>
+<span class="sd">        Output graph.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function modifies graphs in-place.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Copy coordinates to higher-order nodes.</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_n</span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">big_idx</span><span class="p">):</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;m_xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;m_xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">big_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">big_idx</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;m_xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;m_xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span> <span class="s2">&quot;onefour&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span> <span class="p">(</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;m_xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span><span class="p">),</span>
+                    <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;m_xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;xyz</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pos_idx</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># apply geometry functions</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_bond</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n2&quot;</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_angle</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n3&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_torsion</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4&quot;</span><span class="p">)</span>
+
+    <span class="c1"># copy coordinates to nonbonded</span>
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_bond</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;onefour&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_bond</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;onefour&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_torsion</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="GeometryInGraph"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.GeometryInGraph.html#espaloma.mm.geometry.GeometryInGraph">[docs]</a><span class="k">class</span> <span class="nc">GeometryInGraph</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryInGraph.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.GeometryInGraph.html#espaloma.mm.geometry.GeometryInGraph.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeometryInGraph</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span></div>
+
+<div class="viewcode-block" id="GeometryInGraph.forward"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.GeometryInGraph.html#espaloma.mm.geometry.GeometryInGraph.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">geometry_in_graph</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

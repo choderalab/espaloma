@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>espaloma.data.qcarchive_utils &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>espaloma.data.qcarchive_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for espaloma.data.qcarchive_utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =============================================================================</span>
+<span class="c1"># IMPORTS</span>
+<span class="c1"># =============================================================================</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">qcportal</span> <span class="k">as</span> <span class="nn">ptl</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
+<span class="kn">from</span> <span class="nn">simtk.unit</span> <span class="kn">import</span> <span class="n">Quantity</span>
+
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># CONSTANTS</span>
+<span class="c1"># =============================================================================</span>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># UTILITY FUNCTIONS</span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="get_client"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.get_client.html#espaloma.data.qcarchive_utils.get_client">[docs]</a><span class="k">def</span> <span class="nf">get_client</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">ptl</span><span class="o">.</span><span class="n">FractalClient</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_collection"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.get_collection.html#espaloma.data.qcarchive_utils.get_collection">[docs]</a><span class="k">def</span> <span class="nf">get_collection</span><span class="p">(</span>
+        <span class="n">client</span><span class="p">,</span>
+        <span class="n">collection_type</span><span class="o">=</span><span class="s2">&quot;OptimizationDataset&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;OpenFF Full Optimization Benchmark 1&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span>
+        <span class="n">collection_type</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">record_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">collection</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">records</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">collection</span><span class="p">,</span> <span class="n">record_names</span></div>
+
+
+<div class="viewcode-block" id="get_graph"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.get_graph.html#espaloma.data.qcarchive_utils.get_graph">[docs]</a><span class="k">def</span> <span class="nf">get_graph</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">record_name</span><span class="p">):</span>
+    <span class="c1"># get record and trajectory</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="n">record_name</span><span class="p">,</span> <span class="n">specification</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">)</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">get_entry</span><span class="p">(</span><span class="n">record_name</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_qcschema</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">trajectory</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get_trajectory</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">trajectory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+
+    <span class="c1"># energy is already hartree</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">Quantity</span><span class="p">(</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">scf_total_energy</span><span class="p">,</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">HARTREE_PER_PARTICLE</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">trajectory</span>
+        <span class="p">],</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+    <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">Quantity</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">()</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+                    <span class="n">unit</span><span class="o">.</span><span class="n">bohr</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">trajectory</span>
+            <span class="p">],</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">),</span>
+        <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref_prime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="n">Quantity</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">dict</span><span class="p">()[</span><span class="s1">&#39;return_result&#39;</span><span class="p">],</span>
+                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">HARTREE_PER_PARTICLE</span> <span class="o">/</span> <span class="n">unit</span><span class="o">.</span><span class="n">bohr</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">FORCE_UNIT</span>
+                <span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">trajectory</span>
+        <span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="fetch_td_record"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.fetch_td_record.html#espaloma.data.qcarchive_utils.fetch_td_record">[docs]</a><span class="k">def</span> <span class="nf">fetch_td_record</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">ptl</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">torsiondrive</span><span class="o">.</span><span class="n">TorsionDriveRecord</span><span class="p">):</span>
+    <span class="n">final_molecules</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get_final_molecules</span><span class="p">()</span>
+    <span class="n">final_results</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get_final_results</span><span class="p">()</span>
+
+    <span class="n">angle_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">final_molecules</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="n">xyzs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gradients</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">angle_keys</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">final_results</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">final_molecules</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span>
+
+        <span class="n">e</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">get_energy_and_gradient</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="n">xyzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">gradients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+    <span class="c1"># to arrays</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyzs</span><span class="p">)</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
+    <span class="n">gradients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gradients</span><span class="p">)</span>
+
+    <span class="c1"># assume each angle key is a tuple -- sort by first angle in tuple</span>
+
+    <span class="c1"># NOTE: (for now making the assumption that these torsion drives are 1D)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">angle_keys</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">to_ordered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">([</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">angle_keys</span><span class="p">])</span>
+    <span class="n">angles_in_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">angle_keys</span><span class="p">[</span><span class="n">i_</span><span class="p">]</span> <span class="k">for</span> <span class="n">i_</span> <span class="ow">in</span> <span class="n">to_ordered</span><span class="p">]</span>
+    <span class="n">flat_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_in_order</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="c1"># put the xyz&#39;s, energies, and gradients in the same order as the angles</span>
+    <span class="n">xyz_in_order</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">to_ordered</span><span class="p">]</span>
+    <span class="n">energies_in_order</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[</span><span class="n">to_ordered</span><span class="p">]</span>
+    <span class="n">gradients_in_order</span> <span class="o">=</span> <span class="n">gradients</span><span class="p">[</span><span class="n">to_ordered</span><span class="p">]</span>
+
+    <span class="c1"># TODO: put this return blob into a better struct</span>
+    <span class="k">return</span> <span class="n">flat_angles</span><span class="p">,</span> <span class="n">xyz_in_order</span><span class="p">,</span> <span class="n">energies_in_order</span><span class="p">,</span> <span class="n">gradients_in_order</span></div>
+
+
+<div class="viewcode-block" id="get_energy_and_gradient"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.get_energy_and_gradient.html#espaloma.data.qcarchive_utils.get_energy_and_gradient">[docs]</a><span class="k">def</span> <span class="nf">get_energy_and_gradient</span><span class="p">(</span><span class="n">snapshot</span><span class="p">:</span> <span class="n">ptl</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">ResultRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Note: force = - gradient&quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: attach units here? or later?</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+    <span class="n">qcvars</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;extras&#39;</span><span class="p">][</span><span class="s1">&#39;qcvars&#39;</span><span class="p">]</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">qcvars</span><span class="p">[</span><span class="s1">&#39;CURRENT ENERGY&#39;</span><span class="p">]</span>
+    <span class="n">flat_gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">qcvars</span><span class="p">[</span><span class="s1">&#39;CURRENT GRADIENT&#39;</span><span class="p">])</span>
+    <span class="n">num_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_gradient</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span>
+    <span class="n">gradient</span> <span class="o">=</span> <span class="n">flat_gradient</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">energy</span><span class="p">,</span> <span class="n">gradient</span></div>
+
+
+
+
+<span class="n">MolWithTargets</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;MolWithTargets&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;offmol&#39;</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="s1">&#39;energies&#39;</span><span class="p">,</span> <span class="s1">&#39;gradients&#39;</span><span class="p">])</span>
+
+
+
+<div class="viewcode-block" id="h5_to_dataset"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.h5_to_dataset.html#espaloma.data.qcarchive_utils.h5_to_dataset">[docs]</a><span class="k">def</span> <span class="nf">h5_to_dataset</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_smiles</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;offmol&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_smiles</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;smiles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_smiles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;smiles&quot;</span><span class="p">)</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="n">mol_ref</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;offmol&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">mol_ref</span> <span class="o">==</span> <span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;offmol&#39;</span><span class="p">])</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">mol_ref</span><span class="p">)</span>
+
+        <span class="n">u_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">u_ref_prime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;gradients&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">u_ref_prime</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_ref</span><span class="o">.</span><span class="n">n_atoms</span>
+        <span class="k">assert</span> <span class="n">u_ref</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">u_ref_prime</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># energy is already hartree</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="n">Quantity</span><span class="p">(</span>
+                <span class="n">u_ref</span><span class="p">,</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">HARTREE_PER_PARTICLE</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="n">Quantity</span><span class="p">(</span>
+                <span class="n">xyz</span><span class="p">,</span>
+                <span class="n">unit</span><span class="o">.</span><span class="n">bohr</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span>
+            <span class="p">),</span>
+            <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref_prime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="n">Quantity</span><span class="p">(</span>
+                    <span class="n">u_ref_prime</span><span class="p">,</span>
+                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">HARTREE_PER_PARTICLE</span> <span class="o">/</span> <span class="n">unit</span><span class="o">.</span><span class="n">bohr</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">FORCE_UNIT</span>
+                <span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="n">gs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="p">(</span><span class="n">gs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="breakdown_along_time_axis"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.breakdown_along_time_axis.html#espaloma.data.qcarchive_utils.breakdown_along_time_axis">[docs]</a><span class="k">def</span> <span class="nf">breakdown_along_time_axis</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+    <span class="n">n_snapshots</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_snapshots</span><span class="p">))</span>
+    <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">shuffle</span>
+    <span class="n">shuffle</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">idxs</span><span class="p">[</span><span class="n">_idx</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_snapshots</span> <span class="o">//</span> <span class="n">batch_size</span><span class="p">)]</span>
+
+    <span class="n">_gs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+        <span class="n">_g</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
+        <span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref&#39;</span><span class="p">][:,</span> <span class="n">chunk</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">][:,</span> <span class="n">chunk</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref_prime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_ref_prime&#39;</span><span class="p">][:,</span> <span class="n">chunk</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+        <span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">_gs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_g</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_gs</span></div>
+
+<div class="viewcode-block" id="make_batch_size_consistent"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.make_batch_size_consistent.html#espaloma.data.qcarchive_utils.make_batch_size_consistent">[docs]</a><span class="k">def</span> <span class="nf">make_batch_size_consistent</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">itertools</span>
+    <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">breakdown_along_time_axis</span><span class="p">(</span>
+                        <span class="n">g</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">ds</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="weight_by_snapshots"><a class="viewcode-back" href="../../../autosummary/espaloma.data.qcarchive_utils.weight_by_snapshots.html#espaloma.data.qcarchive_utils.weight_by_snapshots">[docs]</a><span class="k">def</span> <span class="nf">weight_by_snapshots</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">):</span>
+    <span class="n">n_snapshots</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n_snapshots</span><span class="p">))[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
