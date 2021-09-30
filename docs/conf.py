@@ -51,7 +51,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
-    'numpydoc',
+    # 'numpydoc',
 ]
 
 autosummary_generate = True
