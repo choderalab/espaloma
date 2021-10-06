@@ -423,3 +423,32 @@ class JanossyPoolingNonbonded(torch.nn.Module):
             )
 
         return g
+
+
+class ExpCoefficients(torch.nn.Module):
+    def forward(self, g):
+        import math
+        g.nodes['n2'].data['coefficients'] = g.nodes['n2'].data['log_coefficients'].exp()
+        g.nodes['n3'].data['coefficients'] = g.nodes['n3'].data['log_coefficients'].exp()
+        return g
+
+class LinearMixtureToOriginal(torch.nn.Module):
+    def forward(self, g):
+        import math
+        g.nodes['n2'].data['k'], g.nodes['n2'].data['eq'] = esp.mm.functional.linear_mixture_to_original(
+            g.nodes['n2'].data['coefficients'][:, 0][:, None],
+            g.nodes['n2'].data['coefficients'][:, 1][:, None],
+            1.5, 6.0,
+        )
+
+        g.nodes['n3'].data['k'], g.nodes['n3'].data['eq'] = esp.mm.functional.linear_mixture_to_original(
+            g.nodes['n3'].data['coefficients'][:, 0][:, None],
+            g.nodes['n3'].data['coefficients'][:, 1][:, None],
+            0.0, math.pi
+        )
+
+        g.nodes['n3'].data.pop('coefficients')
+        g.nodes['n2'].data.pop('coefficients')
+        return g
+
+
