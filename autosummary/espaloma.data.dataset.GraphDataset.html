@@ -73,47 +73,6 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
 <p>Dataset with additional support for only viewing
 certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.apply" title="espaloma.data.dataset.GraphDataset.apply"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code></a>(fn[, in_place])</p></td>
-<td><p>Apply functions to the elements of the dataset.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.save" title="espaloma.data.dataset.GraphDataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
-<td><p>Save dataset to path.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.split" title="espaloma.data.dataset.GraphDataset.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>(partition)</p></td>
-<td><p>Split the dataset according to some partition.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.subsample" title="espaloma.data.dataset.GraphDataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
-<td><p>Subsample the dataset according to some ratio.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.view" title="espaloma.data.dataset.GraphDataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
-<td><p>Provide a data loader.</p></td>
-</tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 52%" />
-<col style="width: 48%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>batch</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>shuffle</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.__init__" title="Permalink to this definition"></a></dt>
