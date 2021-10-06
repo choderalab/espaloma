@@ -228,12 +228,12 @@
 
     <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">energy</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">cos_n_theta_minus_phases</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># energy = (k * (1.0 + cos_n_theta_minus_phases)).sum(dim=-1)</span>
 
-    <span class="c1"># energy = (</span>
-    <span class="c1">#     torch.nn.functional.relu(k) * (cos_n_theta_minus_phases + 1.0)</span>
-    <span class="c1">#    -torch.nn.functional.relu(0.0-k) * (cos_n_theta_minus_phases - 1.0)</span>
-    <span class="c1"># ).sum(dim=-1)</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos_n_theta_minus_phases</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+       <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="mf">0.0</span><span class="o">-</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos_n_theta_minus_phases</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
 
     <span class="k">return</span> <span class="n">energy</span></div>
