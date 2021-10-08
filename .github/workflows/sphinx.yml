@@ -3,7 +3,8 @@ on:
 - push
 
 jobs:
-  docs:
+  build:
+    name: "Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
