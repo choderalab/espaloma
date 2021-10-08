@@ -1,4 +1,4 @@
-espaloma.nn.readout.base\_readout.BaseReadout
+﻿espaloma.nn.readout.base\_readout.BaseReadout
 =============================================
 
 .. currentmodule:: espaloma.nn.readout.base_readout
@@ -29,6 +29,9 @@ espaloma.nn.readout.base\_readout.BaseReadout
       ~BaseReadout.extra_repr
       ~BaseReadout.float
       ~BaseReadout.forward
+      ~BaseReadout.get_buffer
+      ~BaseReadout.get_parameter
+      ~BaseReadout.get_submodule
       ~BaseReadout.half
       ~BaseReadout.load_state_dict
       ~BaseReadout.modules
@@ -41,13 +44,16 @@ espaloma.nn.readout.base\_readout.BaseReadout
       ~BaseReadout.register_buffer
       ~BaseReadout.register_forward_hook
       ~BaseReadout.register_forward_pre_hook
+      ~BaseReadout.register_full_backward_hook
       ~BaseReadout.register_parameter
       ~BaseReadout.requires_grad_
       ~BaseReadout.share_memory
       ~BaseReadout.state_dict
       ~BaseReadout.to
+      ~BaseReadout.to_empty
       ~BaseReadout.train
       ~BaseReadout.type
+      ~BaseReadout.xpu
       ~BaseReadout.zero_grad
    
    

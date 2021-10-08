@@ -29,6 +29,9 @@ espaloma.nn.readout.janossy.JanossyPooling
       ~JanossyPooling.extra_repr
       ~JanossyPooling.float
       ~JanossyPooling.forward
+      ~JanossyPooling.get_buffer
+      ~JanossyPooling.get_parameter
+      ~JanossyPooling.get_submodule
       ~JanossyPooling.half
       ~JanossyPooling.load_state_dict
       ~JanossyPooling.modules
@@ -41,13 +44,16 @@ espaloma.nn.readout.janossy.JanossyPooling
       ~JanossyPooling.register_buffer
       ~JanossyPooling.register_forward_hook
       ~JanossyPooling.register_forward_pre_hook
+      ~JanossyPooling.register_full_backward_hook
       ~JanossyPooling.register_parameter
       ~JanossyPooling.requires_grad_
       ~JanossyPooling.share_memory
       ~JanossyPooling.state_dict
       ~JanossyPooling.to
+      ~JanossyPooling.to_empty
       ~JanossyPooling.train
       ~JanossyPooling.type
+      ~JanossyPooling.xpu
       ~JanossyPooling.zero_grad
    
    

@@ -1,4 +1,4 @@
-espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
+﻿espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
 =========================================================
 
 .. currentmodule:: espaloma.nn.readout.charge_equilibrium
@@ -29,6 +29,9 @@ espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
       ~ChargeEquilibrium.extra_repr
       ~ChargeEquilibrium.float
       ~ChargeEquilibrium.forward
+      ~ChargeEquilibrium.get_buffer
+      ~ChargeEquilibrium.get_parameter
+      ~ChargeEquilibrium.get_submodule
       ~ChargeEquilibrium.half
       ~ChargeEquilibrium.load_state_dict
       ~ChargeEquilibrium.modules
@@ -41,13 +44,16 @@ espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
       ~ChargeEquilibrium.register_buffer
       ~ChargeEquilibrium.register_forward_hook
       ~ChargeEquilibrium.register_forward_pre_hook
+      ~ChargeEquilibrium.register_full_backward_hook
       ~ChargeEquilibrium.register_parameter
       ~ChargeEquilibrium.requires_grad_
       ~ChargeEquilibrium.share_memory
       ~ChargeEquilibrium.state_dict
       ~ChargeEquilibrium.to
+      ~ChargeEquilibrium.to_empty
       ~ChargeEquilibrium.train
       ~ChargeEquilibrium.type
+      ~ChargeEquilibrium.xpu
       ~ChargeEquilibrium.zero_grad
    
    

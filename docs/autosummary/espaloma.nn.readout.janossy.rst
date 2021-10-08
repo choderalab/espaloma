@@ -1,4 +1,4 @@
-espaloma.nn.readout.janossy
+﻿espaloma.nn.readout.janossy
 ===========================
 
 .. automodule:: espaloma.nn.readout.janossy
@@ -19,9 +19,11 @@ espaloma.nn.readout.janossy
       :toctree:
       :template: custom-class-template.rst
    
+      ExpCoefficients
       JanossyPooling
       JanossyPoolingImproper
       JanossyPoolingNonbonded
+      LinearMixtureToOriginal
    
    
 

@@ -1,4 +1,4 @@
-espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
+﻿espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
 ===========================================================
 
 .. currentmodule:: espaloma.nn.readout.graph_level_readout
@@ -29,6 +29,9 @@ espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
       ~GraphLevelReadout.extra_repr
       ~GraphLevelReadout.float
       ~GraphLevelReadout.forward
+      ~GraphLevelReadout.get_buffer
+      ~GraphLevelReadout.get_parameter
+      ~GraphLevelReadout.get_submodule
       ~GraphLevelReadout.half
       ~GraphLevelReadout.load_state_dict
       ~GraphLevelReadout.modules
@@ -41,13 +44,16 @@ espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
       ~GraphLevelReadout.register_buffer
       ~GraphLevelReadout.register_forward_hook
       ~GraphLevelReadout.register_forward_pre_hook
+      ~GraphLevelReadout.register_full_backward_hook
       ~GraphLevelReadout.register_parameter
       ~GraphLevelReadout.requires_grad_
       ~GraphLevelReadout.share_memory
       ~GraphLevelReadout.state_dict
       ~GraphLevelReadout.to
+      ~GraphLevelReadout.to_empty
       ~GraphLevelReadout.train
       ~GraphLevelReadout.type
+      ~GraphLevelReadout.xpu
       ~GraphLevelReadout.zero_grad
    
    

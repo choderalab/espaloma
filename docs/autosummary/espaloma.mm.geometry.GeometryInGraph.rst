@@ -1,4 +1,4 @@
-espaloma.mm.geometry.GeometryInGraph
+﻿espaloma.mm.geometry.GeometryInGraph
 ====================================
 
 .. currentmodule:: espaloma.mm.geometry
@@ -29,6 +29,9 @@ espaloma.mm.geometry.GeometryInGraph
       ~GeometryInGraph.extra_repr
       ~GeometryInGraph.float
       ~GeometryInGraph.forward
+      ~GeometryInGraph.get_buffer
+      ~GeometryInGraph.get_parameter
+      ~GeometryInGraph.get_submodule
       ~GeometryInGraph.half
       ~GeometryInGraph.load_state_dict
       ~GeometryInGraph.modules
@@ -41,13 +44,16 @@ espaloma.mm.geometry.GeometryInGraph
       ~GeometryInGraph.register_buffer
       ~GeometryInGraph.register_forward_hook
       ~GeometryInGraph.register_forward_pre_hook
+      ~GeometryInGraph.register_full_backward_hook
       ~GeometryInGraph.register_parameter
       ~GeometryInGraph.requires_grad_
       ~GeometryInGraph.share_memory
       ~GeometryInGraph.state_dict
       ~GeometryInGraph.to
+      ~GeometryInGraph.to_empty
       ~GeometryInGraph.train
       ~GeometryInGraph.type
+      ~GeometryInGraph.xpu
       ~GeometryInGraph.zero_grad
    
    

@@ -1,4 +1,4 @@
-espaloma.nn.readout.node\_typing.NodeTyping
+﻿espaloma.nn.readout.node\_typing.NodeTyping
 ===========================================
 
 .. currentmodule:: espaloma.nn.readout.node_typing
@@ -29,6 +29,9 @@ espaloma.nn.readout.node\_typing.NodeTyping
       ~NodeTyping.extra_repr
       ~NodeTyping.float
       ~NodeTyping.forward
+      ~NodeTyping.get_buffer
+      ~NodeTyping.get_parameter
+      ~NodeTyping.get_submodule
       ~NodeTyping.half
       ~NodeTyping.load_state_dict
       ~NodeTyping.modules
@@ -41,13 +44,16 @@ espaloma.nn.readout.node\_typing.NodeTyping
       ~NodeTyping.register_buffer
       ~NodeTyping.register_forward_hook
       ~NodeTyping.register_forward_pre_hook
+      ~NodeTyping.register_full_backward_hook
       ~NodeTyping.register_parameter
       ~NodeTyping.requires_grad_
       ~NodeTyping.share_memory
       ~NodeTyping.state_dict
       ~NodeTyping.to
+      ~NodeTyping.to_empty
       ~NodeTyping.train
       ~NodeTyping.type
+      ~NodeTyping.xpu
       ~NodeTyping.zero_grad
    
    

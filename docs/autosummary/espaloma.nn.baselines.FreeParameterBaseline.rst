@@ -1,4 +1,4 @@
-espaloma.nn.baselines.FreeParameterBaseline
+﻿espaloma.nn.baselines.FreeParameterBaseline
 ===========================================
 
 .. currentmodule:: espaloma.nn.baselines
@@ -29,6 +29,9 @@ espaloma.nn.baselines.FreeParameterBaseline
       ~FreeParameterBaseline.extra_repr
       ~FreeParameterBaseline.float
       ~FreeParameterBaseline.forward
+      ~FreeParameterBaseline.get_buffer
+      ~FreeParameterBaseline.get_parameter
+      ~FreeParameterBaseline.get_submodule
       ~FreeParameterBaseline.half
       ~FreeParameterBaseline.load_state_dict
       ~FreeParameterBaseline.modules
@@ -41,13 +44,16 @@ espaloma.nn.baselines.FreeParameterBaseline
       ~FreeParameterBaseline.register_buffer
       ~FreeParameterBaseline.register_forward_hook
       ~FreeParameterBaseline.register_forward_pre_hook
+      ~FreeParameterBaseline.register_full_backward_hook
       ~FreeParameterBaseline.register_parameter
       ~FreeParameterBaseline.requires_grad_
       ~FreeParameterBaseline.share_memory
       ~FreeParameterBaseline.state_dict
       ~FreeParameterBaseline.to
+      ~FreeParameterBaseline.to_empty
       ~FreeParameterBaseline.train
       ~FreeParameterBaseline.type
+      ~FreeParameterBaseline.xpu
       ~FreeParameterBaseline.zero_grad
    
    

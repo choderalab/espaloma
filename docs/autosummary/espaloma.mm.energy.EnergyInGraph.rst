@@ -1,4 +1,4 @@
-espaloma.mm.energy.EnergyInGraph
+﻿espaloma.mm.energy.EnergyInGraph
 ================================
 
 .. currentmodule:: espaloma.mm.energy
@@ -29,6 +29,9 @@ espaloma.mm.energy.EnergyInGraph
       ~EnergyInGraph.extra_repr
       ~EnergyInGraph.float
       ~EnergyInGraph.forward
+      ~EnergyInGraph.get_buffer
+      ~EnergyInGraph.get_parameter
+      ~EnergyInGraph.get_submodule
       ~EnergyInGraph.half
       ~EnergyInGraph.load_state_dict
       ~EnergyInGraph.modules
@@ -41,13 +44,16 @@ espaloma.mm.energy.EnergyInGraph
       ~EnergyInGraph.register_buffer
       ~EnergyInGraph.register_forward_hook
       ~EnergyInGraph.register_forward_pre_hook
+      ~EnergyInGraph.register_full_backward_hook
       ~EnergyInGraph.register_parameter
       ~EnergyInGraph.requires_grad_
       ~EnergyInGraph.share_memory
       ~EnergyInGraph.state_dict
       ~EnergyInGraph.to
+      ~EnergyInGraph.to_empty
       ~EnergyInGraph.train
       ~EnergyInGraph.type
+      ~EnergyInGraph.xpu
       ~EnergyInGraph.zero_grad
    
    

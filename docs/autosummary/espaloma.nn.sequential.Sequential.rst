@@ -1,4 +1,4 @@
-espaloma.nn.sequential.Sequential
+﻿espaloma.nn.sequential.Sequential
 =================================
 
 .. currentmodule:: espaloma.nn.sequential
@@ -29,6 +29,9 @@ espaloma.nn.sequential.Sequential
       ~Sequential.extra_repr
       ~Sequential.float
       ~Sequential.forward
+      ~Sequential.get_buffer
+      ~Sequential.get_parameter
+      ~Sequential.get_submodule
       ~Sequential.half
       ~Sequential.load_state_dict
       ~Sequential.modules
@@ -41,13 +44,16 @@ espaloma.nn.sequential.Sequential
       ~Sequential.register_buffer
       ~Sequential.register_forward_hook
       ~Sequential.register_forward_pre_hook
+      ~Sequential.register_full_backward_hook
       ~Sequential.register_parameter
       ~Sequential.requires_grad_
       ~Sequential.share_memory
       ~Sequential.state_dict
       ~Sequential.to
+      ~Sequential.to_empty
       ~Sequential.train
       ~Sequential.type
+      ~Sequential.xpu
       ~Sequential.zero_grad
    
    

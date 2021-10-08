@@ -29,6 +29,9 @@ espaloma.nn.readout.janossy.JanossyPoolingNonbonded
       ~JanossyPoolingNonbonded.extra_repr
       ~JanossyPoolingNonbonded.float
       ~JanossyPoolingNonbonded.forward
+      ~JanossyPoolingNonbonded.get_buffer
+      ~JanossyPoolingNonbonded.get_parameter
+      ~JanossyPoolingNonbonded.get_submodule
       ~JanossyPoolingNonbonded.half
       ~JanossyPoolingNonbonded.load_state_dict
       ~JanossyPoolingNonbonded.modules
@@ -41,13 +44,16 @@ espaloma.nn.readout.janossy.JanossyPoolingNonbonded
       ~JanossyPoolingNonbonded.register_buffer
       ~JanossyPoolingNonbonded.register_forward_hook
       ~JanossyPoolingNonbonded.register_forward_pre_hook
+      ~JanossyPoolingNonbonded.register_full_backward_hook
       ~JanossyPoolingNonbonded.register_parameter
       ~JanossyPoolingNonbonded.requires_grad_
       ~JanossyPoolingNonbonded.share_memory
       ~JanossyPoolingNonbonded.state_dict
       ~JanossyPoolingNonbonded.to
+      ~JanossyPoolingNonbonded.to_empty
       ~JanossyPoolingNonbonded.train
       ~JanossyPoolingNonbonded.type
+      ~JanossyPoolingNonbonded.xpu
       ~JanossyPoolingNonbonded.zero_grad
    
    

@@ -1,4 +1,4 @@
-espaloma.nn.baselines.FreeParameterBaselineInitMean
+﻿espaloma.nn.baselines.FreeParameterBaselineInitMean
 ===================================================
 
 .. currentmodule:: espaloma.nn.baselines
@@ -29,6 +29,9 @@ espaloma.nn.baselines.FreeParameterBaselineInitMean
       ~FreeParameterBaselineInitMean.extra_repr
       ~FreeParameterBaselineInitMean.float
       ~FreeParameterBaselineInitMean.forward
+      ~FreeParameterBaselineInitMean.get_buffer
+      ~FreeParameterBaselineInitMean.get_parameter
+      ~FreeParameterBaselineInitMean.get_submodule
       ~FreeParameterBaselineInitMean.half
       ~FreeParameterBaselineInitMean.load_state_dict
       ~FreeParameterBaselineInitMean.modules
@@ -41,13 +44,16 @@ espaloma.nn.baselines.FreeParameterBaselineInitMean
       ~FreeParameterBaselineInitMean.register_buffer
       ~FreeParameterBaselineInitMean.register_forward_hook
       ~FreeParameterBaselineInitMean.register_forward_pre_hook
+      ~FreeParameterBaselineInitMean.register_full_backward_hook
       ~FreeParameterBaselineInitMean.register_parameter
       ~FreeParameterBaselineInitMean.requires_grad_
       ~FreeParameterBaselineInitMean.share_memory
       ~FreeParameterBaselineInitMean.state_dict
       ~FreeParameterBaselineInitMean.to
+      ~FreeParameterBaselineInitMean.to_empty
       ~FreeParameterBaselineInitMean.train
       ~FreeParameterBaselineInitMean.type
+      ~FreeParameterBaselineInitMean.xpu
       ~FreeParameterBaselineInitMean.zero_grad
    
    

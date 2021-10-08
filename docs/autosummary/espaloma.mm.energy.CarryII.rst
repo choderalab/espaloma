@@ -1,4 +1,4 @@
-espaloma.mm.energy.CarryII
+﻿espaloma.mm.energy.CarryII
 ==========================
 
 .. currentmodule:: espaloma.mm.energy
@@ -29,6 +29,9 @@ espaloma.mm.energy.CarryII
       ~CarryII.extra_repr
       ~CarryII.float
       ~CarryII.forward
+      ~CarryII.get_buffer
+      ~CarryII.get_parameter
+      ~CarryII.get_submodule
       ~CarryII.half
       ~CarryII.load_state_dict
       ~CarryII.modules
@@ -41,13 +44,16 @@ espaloma.mm.energy.CarryII
       ~CarryII.register_buffer
       ~CarryII.register_forward_hook
       ~CarryII.register_forward_pre_hook
+      ~CarryII.register_full_backward_hook
       ~CarryII.register_parameter
       ~CarryII.requires_grad_
       ~CarryII.share_memory
       ~CarryII.state_dict
       ~CarryII.to
+      ~CarryII.to_empty
       ~CarryII.train
       ~CarryII.type
+      ~CarryII.xpu
       ~CarryII.zero_grad
    
    
