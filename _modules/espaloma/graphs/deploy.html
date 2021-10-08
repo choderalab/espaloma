@@ -75,6 +75,7 @@
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
 <span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
 <span class="kn">from</span> <span class="nn">simtk.unit</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">import</span> <span class="nn">math</span>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># CONSTANTS</span>
@@ -284,6 +285,10 @@
                             <span class="n">_periodicity</span> <span class="o">=</span> <span class="n">periodicities</span><span class="p">[</span><span class="n">sub_idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
                             <span class="n">_phase</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="n">sub_idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
+                            <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span>
+                                <span class="n">_phase</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">_phase</span>
+
                             <span class="n">k</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span>
                                 <span class="n">k</span><span class="p">,</span> <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">,</span>
                             <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">OPENMM_ENERGY_UNIT</span><span class="p">,)</span>
@@ -339,6 +344,10 @@
                         <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
                             <span class="n">_periodicity</span> <span class="o">=</span> <span class="n">periodicities</span><span class="p">[</span><span class="n">sub_idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
                             <span class="n">_phase</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="n">sub_idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+                            <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span>
+                                <span class="n">_phase</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">_phase</span>
 
                             <span class="n">k</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span>
                                 <span class="n">k</span><span class="p">,</span> <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">,</span>
