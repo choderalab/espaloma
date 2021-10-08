@@ -1,4 +1,4 @@
-name: "Continuous Integration tests"
+name: "Continuous integration tests"
 
 on:
   pull_request:

@@ -16,7 +16,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../espaloma'))
+sys.path.insert(0, os.path.abspath('..'))
 
 import espaloma
 from espaloma import mm, nn, data, graphs
@@ -51,7 +51,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
-    'numpydoc',
+    # 'numpydoc',
 ]
 
 autosummary_generate = True

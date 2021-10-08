@@ -4,6 +4,7 @@ channels:
   - dglteam
   - openeye
   - defaults
+  - anaconda
 dependencies:
   # Base dependencies
   - python
@@ -29,3 +30,5 @@ dependencies:
   - nose-timer
   - coverage
   - qcportal
+  - sphinx
+  - sphinx_rtd_theme

@@ -48,7 +48,7 @@ def _create_torsion_sim(
 # TODO: mark this properly: want to test periodicities 1..6, +ve, -ve k
 # @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * omm_energy_unit, +10 * omm_energy_unit])
 def test_periodic_torsion(
-    periodicity=4, k=-10 * omm_energy_unit, n_samples=100
+    periodicity=4, k=10 * omm_energy_unit, n_samples=100
 ):
     """ Using simulated torsion scan, test if espaloma torsion energies and
     OpenMM torsion energies agree.

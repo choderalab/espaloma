@@ -1,4 +1,4 @@
-name: "Build Sphinx docs and push to GitHub Pages"
+name: "Build Sphinx docs with sphinx-pages action"
 
 on:
   pull_request:
