@@ -8,6 +8,7 @@ from openff.toolkit.typing.engines.smirnoff import ForceField
 import espaloma as esp
 from simtk import unit
 from simtk.unit import Quantity
+import math
 
 # =============================================================================
 # CONSTANTS
@@ -217,6 +218,10 @@ def openmm_system_from_graph(
                             _periodicity = periodicities[sub_idx].item()
                             _phase = phases[sub_idx].item()
 
+                            if k < 0:
+                                k = -k
+                                _phase = math.pi - _phase
+
                             k = Quantity(
                                 k, esp.units.ENERGY_UNIT,
                             ).value_in_unit(OPENMM_ENERGY_UNIT,)
@@ -272,6 +277,10 @@ def openmm_system_from_graph(
                         if k != 0.0:
                             _periodicity = periodicities[sub_idx].item()
                             _phase = phases[sub_idx].item()
+
+                            if k < 0:
+                                k = -k
+                                _phase = math.pi - _phase
 
                             k = Quantity(
                                 k, esp.units.ENERGY_UNIT,
