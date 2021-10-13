@@ -40,6 +40,14 @@ class LegacyForceField:
     forcefield : string
         name and version of the forcefield.
 
+    Methods
+    -------
+    parametrize()
+        Parametrize a molecular system.
+
+    typing()
+        Provide legacy typing for a molecular system.
+
     """
 
     def __init__(self, forcefield="gaff-1.81"):

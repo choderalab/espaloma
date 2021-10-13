@@ -8,6 +8,14 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 def esol(*args, **kwargs):
+    """ ESOL collection.
+
+    ..[1] ESOL:  Estimating Aqueous Solubility Directly from Molecular Structure
+        John S. Delaney
+        Journal of Chemical Information and Computer Sciences
+        2004 44 (3), 1000-1005
+        DOI: 10.1021/ci034243x
+    """
     import os
 
     import pandas as pd
@@ -19,6 +27,16 @@ def esol(*args, **kwargs):
 
 
 def alkethoh(*args, **kwargs):
+    """ AlkEthOH collection.
+
+    ..[1] Open Force Field Consortium: Escaping atom types using direct chemical
+    perception with SMIRNOFF v0.1
+    David L. Mobley, Caitlin C. Bannan, Andrea Rizzi, Christopher I. Bayly,
+    John D. Chodera, Victoria T. Lim, Nathan M. Lim, Kyle A. Beauchamp,
+    Michael R. Shirts, Michael K. Gilson, Peter K. Eastman
+    bioRxiv 286542; doi: https://doi.org/10.1101/286542
+
+    """
     import os
 
     import pandas as pd
@@ -26,11 +44,15 @@ def alkethoh(*args, **kwargs):
     df = pd.concat(
         [
             pd.read_csv(
-                "https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi",
+                "https://raw.githubusercontent.com/openff.toolkit/"
+                "open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/"
+                "AlkEthOH_rings.smi",
                 header=None,
             ),
             pd.read_csv(
-                "https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi",
+                "https://raw.githubusercontent.com/openff.toolkit/"
+                "open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/"
+                "AlkEthOH_chain.smi",
                 header=None,
             ),
         ],
@@ -42,6 +64,14 @@ def alkethoh(*args, **kwargs):
 
 
 def zinc(first=-1, *args, **kwargs):
+    """ ZINC collection.
+
+    ..[1] Irwin, John J, and Brian K Shoichet.
+    “ZINC
+    --a free database of commercially available compounds for virtual screening.”
+    Journal of chemical information and modeling
+    vol. 45,1 (2005): 177-82. doi:10.1021/ci049714+
+    """
     import tarfile
     from os.path import exists
     from openff.toolkit.topology import Molecule

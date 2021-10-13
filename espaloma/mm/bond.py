@@ -42,7 +42,17 @@ def gaussian_bond(x, coefficients):
 
 
 def linear_mixture_bond(x, coefficients, phases):
-    """Bond energy with Linear basis function."""
+    """Bond energy with Linear basis function.
+
+    Parameters
+    ----------
+    coefficients : torch.Tensor
+        Coefficients of the linear mixuture.
+
+    phases : torch.Tensor
+        Phases of the linear mixture.
+        
+    """
     return 0.5 * esp.mm.functional.linear_mixture(
         x=x, coefficients=coefficients, phases=phases
     )
