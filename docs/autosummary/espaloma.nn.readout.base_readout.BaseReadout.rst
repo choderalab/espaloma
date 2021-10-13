@@ -1,4 +1,4 @@
-espaloma.nn.readout.base\_readout.BaseReadout
+﻿espaloma.nn.readout.base\_readout.BaseReadout
 =============================================
 
 .. currentmodule:: espaloma.nn.readout.base_readout
@@ -60,6 +60,5 @@ espaloma.nn.readout.base\_readout.BaseReadout
    
       ~BaseReadout.T_destination
       ~BaseReadout.dump_patches
-      ~BaseReadout.training
    
    

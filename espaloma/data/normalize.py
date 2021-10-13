@@ -12,9 +12,7 @@ import espaloma as esp
 # BASE CLASSES
 # =============================================================================
 class BaseNormalize(abc.ABC):
-    """ Base class for normalizing operation.
-
-    """
+    """Base class for normalizing operation."""
 
     def __init__(self):
         super(BaseNormalize, self).__init__()
@@ -30,7 +28,7 @@ class BaseNormalize(abc.ABC):
 # MODULE CLASSES
 # =============================================================================
 class DatasetNormalNormalize(BaseNormalize):
-    """ Normalizing operation based on a dataset of molecules,
+    """Normalizing operation based on a dataset of molecules,
     assuming parameters having normal distribution.
 
     Parameters
@@ -69,9 +67,9 @@ class DatasetNormalNormalize(BaseNormalize):
                     key.replace("_ref", "_mean")
                 ] = torch.mean(g.nodes[term].data[key], axis=0)
 
-                self.statistics[term][key.replace("_ref", "_std")] = torch.std(
-                    g.nodes[term].data[key], axis=0
-                )
+                self.statistics[term][
+                    key.replace("_ref", "_std")
+                ] = torch.std(g.nodes[term].data[key], axis=0)
 
         # get normalize and unnormalize functions
         def norm(g):
@@ -122,7 +120,7 @@ class DatasetNormalNormalize(BaseNormalize):
 
 
 class DatasetLogNormalNormalize(BaseNormalize):
-    """ Normalizing operation based on a dataset of molecules,
+    """Normalizing operation based on a dataset of molecules,
     assuming parameters having log normal distribution.
 
     Parameters
@@ -161,9 +159,9 @@ class DatasetLogNormalNormalize(BaseNormalize):
                     key.replace("_ref", "_mean")
                 ] = torch.mean(g.nodes[term].data[key].log(), axis=0)
 
-                self.statistics[term][key.replace("_ref", "_std")] = torch.std(
-                    g.nodes[term].data[key].log(), axis=0
-                )
+                self.statistics[term][
+                    key.replace("_ref", "_std")
+                ] = torch.std(g.nodes[term].data[key].log(), axis=0)
 
         # get normalize and unnormalize functions
         def norm(g):

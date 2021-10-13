@@ -8,7 +8,11 @@ from simtk import unit
 # =============================================================================
 
 # scaled units
-PARTICLE = unit.mole.create_unit(6.02214076e23 ** -1, "particle", "particle",)
+PARTICLE = unit.mole.create_unit(
+    6.02214076e23 ** -1,
+    "particle",
+    "particle",
+)
 
 HARTREE_PER_PARTICLE = unit.hartree / PARTICLE
 
@@ -28,11 +32,5 @@ ANGLE_FORCE_CONSTANT_UNIT = ENERGY_UNIT / (ANGLE_UNIT ** 2)
 #
 #
 GAS_CONSTANT = (
-        8.31446261815324 
-            * unit.joule 
-            * (unit.kelvin ** -1) 
-            * (unit.mole ** -1)
-).value_in_unit(
-        HARTREE_PER_PARTICLE
-        / unit.kelvin
-)
+    8.31446261815324 * unit.joule * (unit.kelvin ** -1) * (unit.mole ** -1)
+).value_in_unit(HARTREE_PER_PARTICLE / unit.kelvin)

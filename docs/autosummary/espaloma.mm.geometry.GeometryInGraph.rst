@@ -1,4 +1,4 @@
-espaloma.mm.geometry.GeometryInGraph
+﻿espaloma.mm.geometry.GeometryInGraph
 ====================================
 
 .. currentmodule:: espaloma.mm.geometry
@@ -60,6 +60,5 @@ espaloma.mm.geometry.GeometryInGraph
    
       ~GeometryInGraph.T_destination
       ~GeometryInGraph.dump_patches
-      ~GeometryInGraph.training
    
    

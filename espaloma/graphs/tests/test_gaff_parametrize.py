@@ -1,6 +1,7 @@
 import pytest
 import espaloma as esp
 
+
 def test_gaff_parametrize():
     ff = esp.graphs.legacy_force_field.LegacyForceField("gaff-1.81")
     g = esp.Graph(
@@ -8,7 +9,7 @@ def test_gaff_parametrize():
     )
     ff.parametrize(g)
 
-    print(g.nodes['n2'].data)
-    print(g.nodes['n3'].data)
-    print(g.nodes['n4'].data)
-    print(g.nodes['n4_improper'].data)
+    print(g.nodes["n2"].data)
+    print(g.nodes["n3"].data)
+    print(g.nodes["n4"].data)
+    print(g.nodes["n4_improper"].data)

@@ -10,9 +10,7 @@ import torch
 # BASE CLASSES
 # =============================================================================
 class BaseReadout(abc.ABC, torch.nn.Module):
-    """ Base class for readout function.
-
-    """
+    """Base class for readout function."""
 
     def __init__(self):
         super(BaseReadout, self).__init__()

@@ -22,7 +22,7 @@ class Experiment(abc.ABC):
 
 
 class Train(Experiment):
-    """ Training experiment.
+    """Training experiment.
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ class Train(Experiment):
             self.optimizer.step(closure)
 
     def train(self):
-        """ Train the model for multiple steps and
+        """Train the model for multiple steps and
         record the weights once every `record_interval`
 
         """
@@ -137,7 +137,7 @@ class Train(Experiment):
 
 
 class Test(Experiment):
-    """ Test experiment.
+    """Test experiment.
 
     Parameters
     ----------
@@ -215,10 +215,7 @@ class Test(Experiment):
 
                 # loop through the metrics
                 results[metric.__name__][state_name] = (
-                    metric.base_metric(inputs, targets)
-                    .detach()
-                    .cpu()
-                    .numpy()
+                    metric.base_metric(inputs, targets).detach().cpu().numpy()
                 )
 
         self.ref_g = self.normalize.unnorm(self.net(g))
@@ -286,9 +283,7 @@ class TrainAndTest(Experiment):
         return _str
 
     def run(self):
-        """ Run train and test.
-
-        """
+        """Run train and test."""
         train = Train(
             net=self.net,
             data=self.ds_tr,

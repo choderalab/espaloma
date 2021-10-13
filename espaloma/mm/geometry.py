@@ -59,7 +59,7 @@ def _dihedral(r0, r1):
 def dihedral(
     x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor
 ) -> torch.Tensor:
-    """ Dihedral between four points.
+    """Dihedral between four points.
 
     Reference
     ---------
@@ -118,7 +118,7 @@ def apply_angle(nodes):
         "x_between": distance(
             x0=nodes.data["xyz0"],
             x1=nodes.data["xyz2"],
-        )
+        ),
     }
 
 
@@ -152,9 +152,8 @@ def apply_torsion(nodes):
             x0=nodes.data["xyz1"],
             x1=nodes.data["xyz2"],
             x2=nodes.data["xyz3"],
-        )
+        ),
     }
-
 
 
 # =============================================================================
@@ -165,7 +164,7 @@ def apply_torsion(nodes):
 
 
 def geometry_in_graph(g):
-    """ Assign values to geometric entities in graphs.
+    """Assign values to geometric entities in graphs.
 
     Parameters
     ----------

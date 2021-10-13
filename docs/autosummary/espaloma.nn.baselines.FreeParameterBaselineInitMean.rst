@@ -1,4 +1,4 @@
-espaloma.nn.baselines.FreeParameterBaselineInitMean
+﻿espaloma.nn.baselines.FreeParameterBaselineInitMean
 ===================================================
 
 .. currentmodule:: espaloma.nn.baselines
@@ -60,6 +60,5 @@ espaloma.nn.baselines.FreeParameterBaselineInitMean
    
       ~FreeParameterBaselineInitMean.T_destination
       ~FreeParameterBaselineInitMean.dump_patches
-      ~FreeParameterBaselineInitMean.training
    
    

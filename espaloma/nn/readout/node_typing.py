@@ -10,9 +10,7 @@ from espaloma.nn.readout.base_readout import BaseReadout
 # MODULE CLASSES
 # =============================================================================
 class NodeTyping(BaseReadout):
-    """ Simple typing on homograph.
-
-    """
+    """Simple typing on homograph."""
 
     def __init__(self, in_features, n_classes=100):
         super(NodeTyping, self).__init__()

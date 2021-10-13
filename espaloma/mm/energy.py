@@ -70,8 +70,9 @@ def apply_angle_ii(nodes, suffix=""):
             u_right=nodes.data["u_right"],
             u_angle=nodes.data["u"],
             k_bond_angle=nodes.data["k_bond_angle"],
-        )
+        ),
     }
+
 
 def apply_bond_ii(nodes, suffix=""):
     return {
@@ -82,6 +83,7 @@ def apply_bond_ii(nodes, suffix=""):
             k4=nodes.data["k4"],
         )
     }
+
 
 def apply_torsion_ii(nodes, suffix=""):
     """ Torsion energy in nodes. """
@@ -114,8 +116,9 @@ def apply_torsion_ii(nodes, suffix=""):
             u_torsion=nodes.data["u"],
             k_side_torsion=nodes.data["k_side_torsion"],
             k_center_torsion=nodes.data["k_center_torsion"],
-        )
+        ),
     }
+
 
 def apply_torsion(nodes, suffix=""):
     """ Torsion energy in nodes. """
@@ -137,7 +140,8 @@ def apply_torsion(nodes, suffix=""):
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
-                x=nodes.data["x"], k=nodes.data["k%s" % suffix],
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
             )
         }
 
@@ -162,7 +166,8 @@ def apply_improper_torsion(nodes, suffix=""):
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
-                x=nodes.data["x"], k=nodes.data["k%s" % suffix],
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
             )
         }
 
@@ -204,6 +209,7 @@ def apply_angle_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
         )
     }
 
+
 # =============================================================================
 # ENERGY IN HYPERNODES---NONBONDED
 # =============================================================================
@@ -225,9 +231,11 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
 # ENERGY IN GRAPH
 # =============================================================================
 def energy_in_graph(
-    g, suffix="", terms=["n2", "n3", "n4"],
+    g,
+    suffix="",
+    terms=["n2", "n3", "n4"],
 ):  # "onefour", "nonbonded"]):
-    """ Calculate the energy of a small molecule given parameters and geometry.
+    """Calculate the energy of a small molecule given parameters and geometry.
 
     Parameters
     ----------
@@ -252,28 +260,37 @@ def energy_in_graph(
 
         if "coefficients%s" % suffix in g.nodes["n2"].data:
             g.apply_nodes(
-                lambda node: apply_bond_linear_mixture(node, suffix=suffix, phases=[1.5, 6.0]), ntype="n2",
+                lambda node: apply_bond_linear_mixture(
+                    node, suffix=suffix, phases=[1.5, 6.0]
+                ),
+                ntype="n2",
             )
         else:
             g.apply_nodes(
-                lambda node: apply_bond(node, suffix=suffix), ntype="n2",
+                lambda node: apply_bond(node, suffix=suffix),
+                ntype="n2",
             )
 
     if "n3" in terms:
         if "coefficients%s" % suffix in g.nodes["n3"].data:
             import math
+
             g.apply_nodes(
-                lambda node: apply_angle_linear_mixture(node, suffix=suffix, phases=[0.0, math.pi]), ntype="n3",
+                lambda node: apply_angle_linear_mixture(
+                    node, suffix=suffix, phases=[0.0, math.pi]
+                ),
+                ntype="n3",
             )
         else:
             g.apply_nodes(
-                lambda node: apply_angle(node, suffix=suffix), ntype="n3",
+                lambda node: apply_angle(node, suffix=suffix),
+                ntype="n3",
             )
-
 
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
-            lambda node: apply_torsion(node, suffix=suffix), ntype="n4",
+            lambda node: apply_torsion(node, suffix=suffix),
+            ntype="n4",
         )
 
     if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
@@ -290,7 +307,11 @@ def energy_in_graph(
 
     if g.number_of_nodes("onefour") > 0 and "onefour" in terms:
         g.apply_nodes(
-            lambda node: apply_nonbonded(node, suffix=suffix, scaling=0.5,),
+            lambda node: apply_nonbonded(
+                node,
+                suffix=suffix,
+                scaling=0.5,
+            ),
             ntype="onefour",
         )
 
@@ -305,7 +326,8 @@ def energy_in_graph(
                     msg="m_%s" % term, out="u_%s%s" % (term, suffix)
                 ),
             )
-            for term in terms if "u%s" % suffix in g.nodes[term].data
+            for term in terms
+            if "u%s" % suffix in g.nodes[term].data
         },
         cross_reducer="sum",
     )
@@ -314,7 +336,9 @@ def energy_in_graph(
         lambda node: {
             "u%s"
             % suffix: sum(
-                node.data["u_%s%s" % (term, suffix)] for term in terms if "u_%s%s" % (term, suffix) in node.data
+                node.data["u_%s%s" % (term, suffix)]
+                for term in terms
+                if "u_%s%s" % (term, suffix) in node.data
             )
         },
         ntype="g",
@@ -322,50 +346,53 @@ def energy_in_graph(
 
     if "u0" in g.nodes["g"].data:
         g.apply_nodes(
-            lambda node: {"u": node.data["u"] + node.data["u0"]}, ntype="g",
+            lambda node: {"u": node.data["u"] + node.data["u0"]},
+            ntype="g",
         )
 
     return g
 
 
 def energy_in_graph_ii(
-    g, suffix="",
+    g,
+    suffix="",
 ):
-    if g.number_of_nodes("n3") > 0: 
-       
+    if g.number_of_nodes("n3") > 0:
+
         g.apply_nodes(
-             lambda node: apply_angle_ii(node, suffix=suffix), ntype="n3",
+            lambda node: apply_angle_ii(node, suffix=suffix),
+            ntype="n3",
         )
 
         g.apply_nodes(
             lambda node: {
-                'u%s' % suffix:
-                node.data['u%s' % suffix] \
-                + node.data['u_urey_bradley%s' % suffix]\
-                + node.data['u_bond_bond%s' % suffix]\
-                + node.data['u_bond_angle%s' % suffix]
+                "u%s" % suffix: node.data["u%s" % suffix]
+                + node.data["u_urey_bradley%s" % suffix]
+                + node.data["u_bond_bond%s" % suffix]
+                + node.data["u_bond_angle%s" % suffix]
             },
-            ntype='n3'
+            ntype="n3",
         )
 
     if g.number_of_nodes("n4") > 0:
         g.apply_nodes(
-            lambda node: apply_torsion_ii(node, suffix=suffix), ntype="n4",
+            lambda node: apply_torsion_ii(node, suffix=suffix),
+            ntype="n4",
         )
 
         g.apply_nodes(
             lambda node: {
-                'u%s' % suffix:
-                node.data['u%s' % suffix]\
-                + node.data['u_angle_angle%s' % suffix]\
-                + node.data['u_angle_torsion%s' % suffix]\
-                + node.data['u_angle_angle_torsion%s' % suffix]\
-                + node.data['u_bond_torsion%s' % suffix]
+                "u%s" % suffix: node.data["u%s" % suffix]
+                + node.data["u_angle_angle%s" % suffix]
+                + node.data["u_angle_torsion%s" % suffix]
+                + node.data["u_angle_angle_torsion%s" % suffix]
+                + node.data["u_bond_torsion%s" % suffix]
             },
-            ntype='n4'
+            ntype="n4",
         )
 
     return g
+
 
 class EnergyInGraph(torch.nn.Module):
     def __init__(self, *args, **kwargs):
@@ -376,6 +403,7 @@ class EnergyInGraph(torch.nn.Module):
     def forward(self, g):
         return energy_in_graph(g, *self.args, **self.kwargs)
 
+
 class EnergyInGraphII(torch.nn.Module):
     def __init__(self, *args, **kwargs):
         super(EnergyInGraphII, self).__init__()
@@ -385,9 +413,11 @@ class EnergyInGraphII(torch.nn.Module):
     def forward(self, g):
         return energy_in_graph_ii(g, *self.args, **self.kwargs)
 
+
 class CarryII(torch.nn.Module):
     def forward(self, g):
         import math
+
         g.multi_update_all(
             {
                 "n2_as_0_in_n3": (
@@ -417,9 +447,9 @@ class CarryII(torch.nn.Module):
                 "n3_as_1_in_n4": (
                     dgl.function.copy_src("u", "m3_u_1"),
                     dgl.function.sum("m3_u_1", "u_angle_right"),
-                )
+                ),
             },
-            cross_reducer="sum"
+            cross_reducer="sum",
         )
 
         return g

@@ -12,7 +12,7 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 class Dataset(abc.ABC, torch.utils.data.Dataset):
-    """ The base class of map-style dataset.
+    """The base class of map-style dataset.
 
     Parameters
     ----------
@@ -95,7 +95,6 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
                 return self.__class__(graphs=graphs)
 
-
     def __iter__(self):
         if self.transforms is None:
             return iter(self.graphs)
@@ -120,7 +119,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         return self
 
     def apply(self, fn, in_place=False):
-        r""" Apply functions to the elements of the dataset.
+        r"""Apply functions to the elements of the dataset.
 
         Parameters
         ----------
@@ -154,7 +153,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         return self  # to allow grammar: ds = ds.apply(...)
 
     def split(self, partition):
-        """ Split the dataset according to some partition.
+        """Split the dataset according to some partition.
 
         Parameters
         ----------
@@ -172,7 +171,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         return ds
 
     def subsample(self, ratio, seed=None):
-        """ Subsample the dataset according to some ratio.
+        """Subsample the dataset according to some ratio.
 
         Parameters
         ----------
@@ -184,12 +183,13 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         n_data = len(self)
         idxs = list(range(n_data))
         import random
+
         random.seed(seed)
-        _idxs = random.choices(idxs, k=int(n_data*ratio))
+        _idxs = random.choices(idxs, k=int(n_data * ratio))
         return self[_idxs]
 
     def save(self, path):
-        """ Save dataset to path.
+        """Save dataset to path.
 
         Parameters
         ----------
@@ -202,7 +202,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
     @classmethod
     def load(cls, path):
-        """ Load path to dataset.
+        """Load path to dataset.
 
         Parameters
         ----------
@@ -215,13 +215,11 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         return cls(graphs)
 
     def __add__(self, x):
-        return self.__class__(
-            self.graphs + x.graphs
-        )
+        return self.__class__(self.graphs + x.graphs)
 
 
 class GraphDataset(Dataset):
-    """ Dataset with additional support for only viewing
+    """Dataset with additional support for only viewing
     certain attributes as `torch.utils.data.DataLoader`
 
 
@@ -264,7 +262,7 @@ class GraphDataset(Dataset):
             )
 
     def view(self, collate_fn="graph", *args, **kwargs):
-        """ Provide a data loader.
+        """Provide a data loader.
 
         Parameters
         ----------
@@ -306,6 +304,7 @@ class GraphDataset(Dataset):
 
     def save(self, path):
         import os
+
         os.mkdir(path)
         for idx, graph in enumerate(self.graphs):
             graph.save(path + "/" + str(idx))
@@ -313,14 +312,12 @@ class GraphDataset(Dataset):
     @classmethod
     def load(cls, path):
         import os
+
         paths = os.listdir(path)
         paths = [_path for _path in paths]
 
         graphs = []
         for _path in paths:
-                graphs.append(
-                    esp.Graph.load(path + "/" + _path)
-                )
+            graphs.append(esp.Graph.load(path + "/" + _path))
 
-        
         return cls(graphs)

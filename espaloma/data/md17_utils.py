@@ -45,28 +45,33 @@ def realize_molecule(
     offset = sum_offsets(elements)
 
     g = esp.data.utils.infer_mol_from_coordinates(
-        data["R"][0], elements, smiles,
+        data["R"][0],
+        elements,
+        smiles,
     )
 
     g.nodes["n1"].data["xyz"] = torch.tensor(
-        Quantity(data["R"].transpose(1, 0, 2), unit.angstrom,).value_in_unit(
-            esp.units.DISTANCE_UNIT
-        ),
+        Quantity(
+            data["R"].transpose(1, 0, 2),
+            unit.angstrom,
+        ).value_in_unit(esp.units.DISTANCE_UNIT),
         requires_grad=True,
     )[:, :first, :]
 
     g.nodes["g"].data["u_ref"] = (
         torch.tensor(
-            Quantity(data["E"], unit.kilocalorie_per_mole,).value_in_unit(
-                esp.units.ENERGY_UNIT
-            )
+            Quantity(
+                data["E"],
+                unit.kilocalorie_per_mole,
+            ).value_in_unit(esp.units.ENERGY_UNIT)
         ).transpose(1, 0)[:, :first]
         - offset
     )
 
     g.nodes["n1"].data["u_ref_prime"] = torch.tensor(
         Quantity(
-            data["F"], unit.kilocalorie_per_mole / unit.angstrom,
+            data["F"],
+            unit.kilocalorie_per_mole / unit.angstrom,
         ).value_in_unit(esp.units.FORCE_UNIT)
     ).transpose(1, 0)[:, :first, :]
 

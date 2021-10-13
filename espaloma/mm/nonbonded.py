@@ -79,7 +79,7 @@ def lorentz_berthelot(g, suffix=""):
 # ENERGY FUNCTIONS
 # =============================================================================
 def lj_12_6(x, sigma, epsilon):
-    """ Lennard-Jones 12-6.
+    """Lennard-Jones 12-6.
 
     Parameters
     ----------
@@ -100,7 +100,7 @@ def lj_12_6(x, sigma, epsilon):
 
 
 def lj_9_6(x, sigma, epsilon):
-    """ Lennard-Jones 9-6.
+    """Lennard-Jones 9-6.
 
     Parameters
     ----------

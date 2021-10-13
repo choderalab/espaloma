@@ -65,22 +65,28 @@ def fp_rdkit(atom):
 
     HYBRIDIZATION_RDKIT = {
         Chem.rdchem.HybridizationType.SP: torch.tensor(
-            [1, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
+            [1, 0, 0, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP2: torch.tensor(
-            [0, 1, 0, 0, 0], dtype=torch.get_default_dtype(),
+            [0, 1, 0, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3: torch.tensor(
-            [0, 0, 1, 0, 0], dtype=torch.get_default_dtype(),
+            [0, 0, 1, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3D: torch.tensor(
-            [0, 0, 0, 1, 0], dtype=torch.get_default_dtype(),
+            [0, 0, 0, 1, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3D2: torch.tensor(
-            [0, 0, 0, 0, 1], dtype=torch.get_default_dtype(),
+            [0, 0, 0, 0, 1],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.S: torch.tensor(
-            [0, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
+            [0, 0, 0, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
     }
     return torch.cat(

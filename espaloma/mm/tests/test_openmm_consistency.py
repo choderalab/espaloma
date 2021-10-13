@@ -50,11 +50,11 @@ def _create_torsion_sim(
 def test_periodic_torsion(
     periodicity=4, k=10 * omm_energy_unit, n_samples=100
 ):
-    """ Using simulated torsion scan, test if espaloma torsion energies and
+    """Using simulated torsion scan, test if espaloma torsion energies and
     OpenMM torsion energies agree.
 
     """
-    phase = 0 * omm_angle_unit # all zero phases
+    phase = 0 * omm_angle_unit  # all zero phases
 
     # create torsion simulation
     sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
@@ -95,7 +95,8 @@ def test_periodic_torsion(
 
 # TODO: parameterize on the individual energy terms also
 @pytest.mark.parametrize(
-    "g", esp.data.esol(first=10),
+    "g",
+    esp.data.esol(first=10),
 )
 def test_energy_angle_and_bond(g):
     # make simulation
@@ -103,7 +104,9 @@ def test_energy_angle_and_bond(g):
 
     # get simulation
     esp_simulation = MoleculeVacuumSimulation(
-        n_samples=1, n_steps_per_sample=1000, forcefield="gaff-1.81",
+        n_samples=1,
+        n_steps_per_sample=1000,
+        forcefield="gaff-1.81",
         charge_method="gasteiger",
     )
 
@@ -112,7 +115,7 @@ def test_energy_angle_and_bond(g):
     esp_simulation.run(g, in_place=True)
 
     # if MD blows up, forget about it
-    if g.nodes['n1'].data['xyz'].abs().max() > 100:
+    if g.nodes["n1"].data["xyz"].abs().max() > 100:
         return True
 
     forces = list(system.getForces())
@@ -161,18 +164,22 @@ def test_energy_angle_and_bond(g):
 
     # create new simulation
     _simulation = openmm.app.Simulation(
-        simulation.topology, system, openmm.VerletIntegrator(0.0),
+        simulation.topology,
+        system,
+        openmm.VerletIntegrator(0.0),
     )
 
     _simulation.context.setPositions(
-        g.nodes['n1'].data['xyz'][:, 0, :].detach().numpy() * unit.bohr
+        g.nodes["n1"].data["xyz"][:, 0, :].detach().numpy() * unit.bohr
     )
 
     for idx, force in enumerate(forces):
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
-            getEnergy=True, getParameters=True, groups=2 ** idx,
+            getEnergy=True,
+            getParameters=True,
+            groups=2 ** idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(
@@ -191,12 +198,12 @@ def test_energy_angle_and_bond(g):
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
         g.nodes[term].data["eq"] = g.nodes[term].data["eq_ref"]
 
-    '''
+    """
     for term in ["n1"]:
         g.nodes[term].data["sigma"] = g.nodes[term].data["sigma_ref"]
         g.nodes[term].data["epsilon"] = g.nodes[term].data["epsilon_ref"]
         # g.nodes[term].data['q'] = g.nodes[term].data['q_ref']
-    '''
+    """
 
     for term in ["n4"]:
         g.nodes[term].data["phases"] = g.nodes[term].data["phases_ref"]

@@ -28,13 +28,14 @@ def center(metric, dim=1, reduction="none"):
 
     return _centered
 
+
 def boltzmann_weighted(metric, reduction="mean", temperature=300.0):
     def _weighted(input, target, metric=metric, reduction=reduction):
         _loss = metric(input, target)
 
         min_target, _ = torch.min(target, dim=-1, keepdims=True)
         delta_target = target - min_target
-        
+
         weight_target = torch.softmax(
             -delta_target / (GAS_CONSTANT * temperature),
             dim=-1,
@@ -43,7 +44,9 @@ def boltzmann_weighted(metric, reduction="mean", temperature=300.0):
         _loss = _loss * weight_target
 
         return getattr(torch, reduction)(_loss)
+
     return _weighted
+
 
 def std(metric, weight=1.0, dim=1):
     def _std(input, target, metric=metric, weight=weight, dim=dim):
@@ -51,24 +54,29 @@ def std(metric, weight=1.0, dim=1):
 
     return _std
 
+
 def weighted(metric, weight, reduction="mean"):
     def _weighted(
-            input, target, metric=metric, weight=weight, reduction=reduction
-        ):
+        input, target, metric=metric, weight=weight, reduction=reduction
+    ):
         _loss = metric(input, target)
-        for _ in range(_loss.dims()-1):
+        for _ in range(_loss.dims() - 1):
             weight = weight.unsqueeze(-1)
         return getattr(torch, reduction)(weight)
+
     return _weighted
+
 
 def weighted_with_key(metric, key="weight", reduction="mean"):
     def _weighted(input, target, metric=metric, key=key, reduction=reduction):
         weight = target.nodes["g"].data[key].flatten()
         _loss = metric(input, target)
-        for _ in range(_loss.dims()-1):
+        for _ in range(_loss.dims() - 1):
             weight = weight.unsqueeze(-1)
         return getattr(torch, reduction)(weight)
+
     return _weighted
+
 
 def bootstrap(metric, n_samples=100, ci=0.95):
     def _bootstrap(input, target, metric=metric, n_samples=n_samples, ci=ci):
@@ -77,7 +85,11 @@ def bootstrap(metric, n_samples=100, ci=0.95):
         idxs_all = np.arange(input.shape[0])
         results = []
         for _ in range(n_samples):
-            idxs = np.random.choice(idxs_all, len(idxs_all), replace=True,)
+            idxs = np.random.choice(
+                idxs_all,
+                len(idxs_all),
+                replace=True,
+            )
 
             _metric = (
                 metric(input=input[idxs], target=target[idxs])
@@ -87,7 +99,9 @@ def bootstrap(metric, n_samples=100, ci=0.95):
                 .item()
             )
 
-            results.append(_metric,)
+            results.append(
+                _metric,
+            )
 
         results = np.array(results)
 
@@ -147,9 +161,7 @@ def accuracy(input, target):
 # MODULE CLASSES
 # =============================================================================
 class Metric(torch.nn.modules.loss._Loss):
-    """ Base function for loss.
-
-    """
+    """Base function for loss."""
 
     def __init__(self, size_average=None, reduce=None, reduction="mean"):
         super(Metric, self).__init__(size_average, reduce, reduction)
@@ -160,19 +172,19 @@ class Metric(torch.nn.modules.loss._Loss):
 
 
 class GraphMetric(Metric):
-    """ Loss between nodes attributes of graph or graphs.
+    """Loss between nodes attributes of graph or graphs.
 
     Parameters
     ----------
     base_metric : callable
         Metric on fixed dimensional space.
-        
+
     between : List[str]
         Names of quantities to compare.
-        
+
     level : str
         Level of nodes to compare with.
-    
+
     Returns
     -------
     torch.Tensor
@@ -209,9 +221,7 @@ class GraphMetric(Metric):
         return lambda g: g.nodes[level].data[string]
 
     def forward(self, g_input, g_target=None):
-        """ Forward function of loss.
-
-        """
+        """Forward function of loss."""
         # allow loss within self
         if g_target is None:
             g_target = g_input
@@ -228,9 +238,7 @@ class GraphMetric(Metric):
 
 
 class GraphDerivativeMetric(Metric):
-    """ Loss between nodes attributes of graph or graphs.
-
-    """
+    """Loss between nodes attributes of graph or graphs."""
 
     def __init__(
         self,
@@ -277,9 +285,7 @@ class GraphDerivativeMetric(Metric):
         return lambda g: g.nodes[level].data[string]
 
     def forward(self, g_input, g_target=None):
-        """ Forward function of loss.
-
-        """
+        """Forward function of loss."""
         # allow loss within self
         if g_target is None:
             g_target = g_input
@@ -312,14 +318,13 @@ class GraphDerivativeMetric(Metric):
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
         return self.weight * self.base_metric(
-            input=input_prime, target=target_prime,
+            input=input_prime,
+            target=target_prime,
         )
 
 
 class GraphHalfDerivativeMetric(Metric):
-    """ Loss between nodes attributes of graph or graphs.
-
-    """
+    """Loss between nodes attributes of graph or graphs."""
 
     def __init__(
         self,
@@ -365,9 +370,7 @@ class GraphHalfDerivativeMetric(Metric):
         return lambda g: g.nodes[level].data[string]
 
     def forward(self, g_input, g_target=None):
-        """ Forward function of loss.
-
-        """
+        """Forward function of loss."""
         # allow loss within self
         if g_target is None:
             g_target = g_input
@@ -386,7 +389,8 @@ class GraphHalfDerivativeMetric(Metric):
         # NOTE:
         # use keyward argument here since torch is bad with the order with args
         return self.weight * self.base_metric(
-            input=input_prime, target=target_prime,
+            input=input_prime,
+            target=target_prime,
         )
 
 

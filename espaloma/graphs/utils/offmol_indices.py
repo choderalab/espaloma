@@ -46,7 +46,7 @@ def _all_improper_torsion_indices(offmol: Molecule) -> np.ndarray:
 
 
 def improper_torsion_indices(offmol: Molecule) -> np.ndarray:
-    """"[*:1]~[X3:2](~[*:3])~[*:4]" matches (_all_improper_torsion_indices returns "[*:1]~[*:2](~[*:3])~[*:4]" matches)
+    """ "[*:1]~[X3:2](~[*:3])~[*:4]" matches (_all_improper_torsion_indices returns "[*:1]~[*:2](~[*:3])~[*:4]" matches)
 
     Notes
     -----

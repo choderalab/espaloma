@@ -40,7 +40,9 @@ def _create_impropers_only_system(
     indices = set(
         map(
             tuple,
-            esp.graphs.utils.offmol_indices.improper_torsion_indices(molecule),
+            esp.graphs.utils.offmol_indices.improper_torsion_indices(
+                molecule
+            ),
         )
     )
     num_impropers_retained = 0
@@ -149,7 +151,11 @@ def test_improper_recover():
     net = torch.nn.Sequential(
         esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
         esp.nn.readout.janossy.JanossyPoolingImproper(
-            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
+            in_features=32,
+            config=[32, "tanh"],
+            out_features={
+                "k": 6,
+            },
         ),
         esp.mm.geometry.GeometryInGraph(),
         esp.mm.energy.EnergyInGraph(terms=["n4_improper"]),

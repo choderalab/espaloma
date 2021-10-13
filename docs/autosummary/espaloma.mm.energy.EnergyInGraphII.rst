@@ -1,4 +1,4 @@
-espaloma.mm.energy.EnergyInGraphII
+﻿espaloma.mm.energy.EnergyInGraphII
 ==================================
 
 .. currentmodule:: espaloma.mm.energy
@@ -60,6 +60,5 @@ espaloma.mm.energy.EnergyInGraphII
    
       ~EnergyInGraphII.T_destination
       ~EnergyInGraphII.dump_patches
-      ~EnergyInGraphII.training
    
    

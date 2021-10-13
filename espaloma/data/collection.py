@@ -23,11 +23,16 @@ def alkethoh(*args, **kwargs):
 
     import pandas as pd
 
-
     df = pd.concat(
         [
-            pd.read_csv("https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi", header=None),
-            pd.read_csv("https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi", header=None),
+            pd.read_csv(
+                "https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi",
+                header=None,
+            ),
+            pd.read_csv(
+                "https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi",
+                header=None,
+            ),
         ],
         axis=0,
     )
@@ -36,22 +41,22 @@ def alkethoh(*args, **kwargs):
     return esp.data.dataset.GraphDataset(smiles, *args, **kwargs)
 
 
-
 def zinc(first=-1, *args, **kwargs):
     import tarfile
     from os.path import exists
     from openff.toolkit.topology import Molecule
     from rdkit import Chem
 
-    fname = 'parm_at_Frosst.tgz'
-    url = 'http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz'
+    fname = "parm_at_Frosst.tgz"
+    url = "http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz"
 
     if not exists(fname):
         import urllib.request
+
         urllib.request.urlretrieve(url, fname)
 
     archive = tarfile.open(fname)
-    zinc_file = archive.extractfile('parm_at_Frosst/zinc.sdf')
+    zinc_file = archive.extractfile("parm_at_Frosst/zinc.sdf")
     _mols = Chem.ForwardSDMolSupplier(zinc_file, removeHs=False)
 
     count = 0
@@ -75,45 +80,64 @@ def zinc(first=-1, *args, **kwargs):
 
     return esp.data.dataset.GraphDataset(gs, *args, **kwargs)
 
+
 def md17_old(*args, **kwargs):
     return [
-        esp.data.md17_utils.get_molecule(
-            name, *args, **kwargs
-        ) for name in [
-            'benzene',
-            'uracil',
-            'naphthalene',
-            'aspirin', 'salicylic',
-            'malonaldehyde',
-            'ethanol',
-            'toluene',
-   'paracetamol', 'azobenzene'
-        ]]
+        esp.data.md17_utils.get_molecule(name, *args, **kwargs)
+        for name in [
+            "benzene",
+            "uracil",
+            "naphthalene",
+            "aspirin",
+            "salicylic",
+            "malonaldehyde",
+            "ethanol",
+            "toluene",
+            "paracetamol",
+            "azobenzene",
+        ]
+    ]
+
 
 def md17_new(*args, **kwargs):
     return [
-        esp.data.md17_utils.get_molecule(
-            name, *args, **kwargs
-        ).heterograph for name in [
-            'paracetamol', 'azobenzene',
-            'benzene', 'ethanol',
-        ]]
+        esp.data.md17_utils.get_molecule(name, *args, **kwargs).heterograph
+        for name in [
+            "paracetamol",
+            "azobenzene",
+            "benzene",
+            "ethanol",
+        ]
+    ]
 
 
 class qca(object):
     pass
 
-df_names = ['Bayer', 'Coverage', 'eMolecules', 'Pfizer', 'Roche', "Benchmark", "fda"]
+
+df_names = [
+    "Bayer",
+    "Coverage",
+    "eMolecules",
+    "Pfizer",
+    "Roche",
+    "Benchmark",
+    "fda",
+]
+
 
 def _get_ds(cls, df_name):
     import os
     import pandas as pd
+
     path = os.path.dirname(esp.__file__) + "/../data/qca/%s.h5" % df_name
     df = pd.read_hdf(path)
     ds = esp.data.qcarchive_utils.h5_to_dataset(df)
     return ds
 
+
 from functools import partial
+
 for df_name in df_names:
     setattr(
         qca,

@@ -1,4 +1,4 @@
-espaloma.mm.energy.CarryII
+﻿espaloma.mm.energy.CarryII
 ==========================
 
 .. currentmodule:: espaloma.mm.energy
@@ -60,6 +60,5 @@ espaloma.mm.energy.CarryII
    
       ~CarryII.T_destination
       ~CarryII.dump_patches
-      ~CarryII.training
    
    

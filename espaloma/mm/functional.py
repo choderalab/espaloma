@@ -11,13 +11,15 @@ import espaloma as esp
 from simtk import unit
 from simtk.unit import Quantity
 
-LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(esp.units.DISTANCE_UNIT)
+LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(
+    esp.units.DISTANCE_UNIT
+)
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
 def linear_mixture_to_original(k1, k2, b1, b2):
-    """ Translating linear mixture coefficients back to original
+    """Translating linear mixture coefficients back to original
     parameterization.
     """
     # (batch_size, )
@@ -28,11 +30,12 @@ def linear_mixture_to_original(k1, k2, b1, b2):
 
     return k, b
 
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 def harmonic(x, k, eq, order=[2]):
-    """ Harmonic term.
+    """Harmonic term.
 
     Parameters
     ----------
@@ -49,8 +52,10 @@ def harmonic(x, k, eq, order=[2]):
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 
-    return 0.5 * k * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(
-        dim=-1
+    return (
+        0.5
+        * k
+        * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
     )
 
 
@@ -119,7 +124,7 @@ def periodic_fixed_phases(
 def periodic(
     x, k, periodicity=list(range(1, 7)), phases=[0.0 for _ in range(6)]
 ):
-    """ Periodic term.
+    """Periodic term.
 
     Parameters
     ----------
@@ -136,7 +141,9 @@ def periodic(
 
     if isinstance(periodicity, list):
         periodicity = torch.tensor(
-            periodicity, device=x.device, dtype=torch.get_default_dtype(),
+            periodicity,
+            device=x.device,
+            dtype=torch.get_default_dtype(),
         )
 
     if periodicity.ndim == 1:
@@ -148,10 +155,18 @@ def periodic(
         periodicity = periodicity[:, None, :].repeat(1, x.shape[1], 1)
 
     if phases.ndim == 1:
-        phases = phases[None, None, :].repeat(x.shape[0], x.shape[1], 1,)
+        phases = phases[None, None, :].repeat(
+            x.shape[0],
+            x.shape[1],
+            1,
+        )
 
     elif phases.ndim == 2:
-        phases = phases[:, None, :].repeat(1, x.shape[1], 1,)
+        phases = phases[:, None, :].repeat(
+            1,
+            x.shape[1],
+            1,
+        )
 
     n_theta = periodicity * x[:, :, None]
 
@@ -165,9 +180,8 @@ def periodic(
 
     energy = (
         torch.nn.functional.relu(k) * (cos_n_theta_minus_phases + 1.0)
-       -torch.nn.functional.relu(0.0-k) * (cos_n_theta_minus_phases - 1.0)
+        - torch.nn.functional.relu(0.0 - k) * (cos_n_theta_minus_phases - 1.0)
     ).sum(dim=-1)
-
 
     return energy
 
@@ -187,9 +201,14 @@ def periodic(
 
 
 def lj(
-    x, epsilon, sigma, order=[12, 6], coefficients=[1.0, 1.0], switch=LJ_SWITCH
+    x,
+    epsilon,
+    sigma,
+    order=[12, 6],
+    coefficients=[1.0, 1.0],
+    switch=LJ_SWITCH,
 ):
-    r""" Lennard-Jones term.
+    r"""Lennard-Jones term.
 
     Notes
     -----
@@ -227,7 +246,9 @@ def lj(
 
     # erase values under switch
     sigma_over_x = torch.where(
-        torch.lt(x, switch), torch.zeros_like(sigma_over_x), sigma_over_x,
+        torch.lt(x, switch),
+        torch.zeros_like(sigma_over_x),
+        sigma_over_x,
     )
 
     return epsilon * (
@@ -237,7 +258,7 @@ def lj(
 
 
 def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
-    r""" Gaussian basis function.
+    r"""Gaussian basis function.
 
     Parameters
     ----------
@@ -260,7 +281,7 @@ def gaussian(x, coefficients, phases=[idx * 0.001 for idx in range(200)]):
 
 
 def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
-    r""" Linear mixture basis function.
+    r"""Linear mixture basis function.
 
     x : torch.Tensor
     coefficients : list or torch.Tensor of length 2
@@ -287,18 +308,18 @@ def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
     u1 = k1 * (x - b1) ** 2
     u2 = k2 * (x - b2) ** 2
 
-    u = 0.5 * (u1 + u2) # - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
+    u = 0.5 * (u1 + u2)  # - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
 
     return u
 
 
 def harmonic_periodic_coupled(
-        x_harmonic,
-        x_periodic,
-        k,
-        eq,
-        periodicity=list(range(1, 3)),
-    ):
+    x_harmonic,
+    x_periodic,
+    k,
+    eq,
+    periodicity=list(range(1, 3)),
+):
 
     if isinstance(periodicity, list):
         periodicity = torch.tensor(
@@ -307,17 +328,16 @@ def harmonic_periodic_coupled(
             dtype=torch.get_default_dtype(),
         )
 
-    n_theta = periodicity[None, None, :].repeat(
-        x_periodic.shape[0],
-        x_periodic.shape[1],
-        1
-    ) * x_periodic[:, :, None]
+    n_theta = (
+        periodicity[None, None, :].repeat(
+            x_periodic.shape[0], x_periodic.shape[1], 1
+        )
+        * x_periodic[:, :, None]
+    )
 
     cos_n_theta = n_theta.cos()
 
-    k = k[:, None, :].repeat(
-        1, x_periodic.shape[1], 1
-    )
+    k = k[:, None, :].repeat(1, x_periodic.shape[1], 1)
 
     sum_k_cos_n_theta = (k * cos_n_theta).sum(dim=-1)
 
@@ -327,23 +347,25 @@ def harmonic_periodic_coupled(
 
     return energy
 
+
 def harmonic_harmonic_coupled(
-        x0,
-        x1,
-        eq0,
-        eq1,
-        k,
-    ):
+    x0,
+    x1,
+    eq0,
+    eq1,
+    k,
+):
     energy = k * (x0 - eq0) * (x1 - eq1)
     return energy
 
+
 def harmonic_harmonic_periodic_coupled(
-        theta0,
-        theta1,
-        eq0,
-        eq1,
-        phi,
-        k,
-    ):
+    theta0,
+    theta1,
+    eq0,
+    eq1,
+    phi,
+    k,
+):
     energy = k * (theta0 - eq0) * (theta1 - eq1) * phi.cos()
     return energy

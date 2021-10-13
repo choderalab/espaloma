@@ -20,7 +20,7 @@ class BaseGraph(abc.ABC):
 
 
 class Graph(BaseGraph):
-    """ A unified graph object that support translation to and from
+    """A unified graph object that support translation to and from
     message-passing graphs and MM factor graph.
 
     Note
@@ -54,22 +54,26 @@ class Graph(BaseGraph):
         self.heterograph = heterograph
 
     def save(self, path):
-        import os; import json
+        import os
+        import json
+
         os.mkdir(path)
-        dgl.save_graphs(path+"/homograph.bin", [self.homograph])
-        dgl.save_graphs(path+"/heterograph.bin", [self.heterograph])
-        with open(path+"/mol.json", "w") as f_handle:
+        dgl.save_graphs(path + "/homograph.bin", [self.homograph])
+        dgl.save_graphs(path + "/heterograph.bin", [self.heterograph])
+        with open(path + "/mol.json", "w") as f_handle:
             json.dump(self.mol.to_json(), f_handle)
 
     @classmethod
     def load(cls, path):
         import json
-        homograph = dgl.load_graphs(path+"/homograph.bin")[0][0]
-        heterograph = dgl.load_graphs(path+"/heterograph.bin")[0][0]
 
-        with open(path+"/mol.json", "r") as f_handle:
+        homograph = dgl.load_graphs(path + "/homograph.bin")[0][0]
+        heterograph = dgl.load_graphs(path + "/heterograph.bin")[0][0]
+
+        with open(path + "/mol.json", "r") as f_handle:
             mol = json.load(f_handle)
         from openff.toolkit.topology import Molecule
+
         try:
             mol = Molecule.from_json(mol)
         except:
@@ -88,8 +92,10 @@ class Graph(BaseGraph):
         #     mol.to_rdkit()
         # )
 
-        graph = esp.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol(
-            mol
+        graph = (
+            esp.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol(
+                mol
+            )
         )
         return graph
 

@@ -38,7 +38,11 @@ def test_energy():
             },
         ),
         esp.nn.readout.janossy.JanossyPoolingImproper(
-            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
+            in_features=32,
+            config=[32, "tanh"],
+            out_features={
+                "k": 6,
+            },
         ),
     )
 

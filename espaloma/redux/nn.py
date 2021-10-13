@@ -33,7 +33,9 @@ class TAG(nn.Module):
     ):
         super(TAG, self).__init__()
         self.layer1 = TAGConv(in_dim, hidden_dim, k, activation=activation)
-        self.layer2 = TAGConv(hidden_dim, hidden_dim, k, activation=activation)
+        self.layer2 = TAGConv(
+            hidden_dim, hidden_dim, k, activation=activation
+        )
         self.layer3 = TAGConv(hidden_dim, out_dim, k, activation=activation)
         self.activation = activation
 

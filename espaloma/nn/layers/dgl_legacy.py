@@ -28,7 +28,11 @@ DEFAULT_MODEL_KWARGS = {
 # =============================================================================
 class GN(torch.nn.Module):
     def __init__(
-        self, in_features, out_features, model_name="GraphConv", kwargs={},
+        self,
+        in_features,
+        out_features,
+        model_name="GraphConv",
+        kwargs={},
     ):
         super(GN, self).__init__()
 

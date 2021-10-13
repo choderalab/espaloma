@@ -1,4 +1,4 @@
-espaloma.nn.readout.node\_typing.NodeTyping
+﻿espaloma.nn.readout.node\_typing.NodeTyping
 ===========================================
 
 .. currentmodule:: espaloma.nn.readout.node_typing
@@ -60,6 +60,5 @@ espaloma.nn.readout.node\_typing.NodeTyping
    
       ~NodeTyping.T_destination
       ~NodeTyping.dump_patches
-      ~NodeTyping.training
    
    
