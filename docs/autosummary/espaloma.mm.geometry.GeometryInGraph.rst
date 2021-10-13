@@ -1,4 +1,4 @@
-﻿espaloma.mm.geometry.GeometryInGraph
+espaloma.mm.geometry.GeometryInGraph
 ====================================
 
 .. currentmodule:: espaloma.mm.geometry

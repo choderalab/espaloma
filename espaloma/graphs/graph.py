@@ -20,8 +20,12 @@ class BaseGraph(abc.ABC):
 
 
 class Graph(BaseGraph):
-    """A unified graph object that support translation to and from
+    """ A unified graph object that support translation to and from
     message-passing graphs and MM factor graph.
+
+    Methods
+    -------
+    save(path) : Save graph to file.
 
     Note
     ----

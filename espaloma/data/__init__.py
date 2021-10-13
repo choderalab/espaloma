@@ -1,13 +1,2 @@
-import os
-
-import espaloma
-import espaloma.data
-import espaloma.data.dataset
-import espaloma.data.md
-import espaloma.data.normalize
-import espaloma.data.utils
-import espaloma.data.qcarchive_utils
-import espaloma.data.md17_utils
-from espaloma.data.collection import *
-
-# esol = utils.from_csv(os.path.dirname(utils.__file__) + "/esol.csv")
+from . import dataset, md, normalize, utils, qcarchive_utils, md17_utils
+from .collection import *

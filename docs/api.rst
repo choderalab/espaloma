@@ -9,4 +9,4 @@ API Documentation
    espaloma.mm
    espaloma.nn
    espaloma.graphs
-   espaloma.data
+   espaloma.data 

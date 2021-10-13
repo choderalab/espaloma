@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
+espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
 ===========================================================
 
 .. currentmodule:: espaloma.nn.readout.graph_level_readout

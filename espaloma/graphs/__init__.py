@@ -1,4 +1,2 @@
-import espaloma.graphs
-import espaloma.graphs.utils
-from . import deploy
-from espaloma.graphs.legacy_force_field import *
+from . import deploy, utils
+from .legacy_force_field import *

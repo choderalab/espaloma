@@ -1,4 +1,4 @@
-﻿espaloma.nn.baselines.FreeParameterBaseline
+espaloma.nn.baselines.FreeParameterBaseline
 ===========================================
 
 .. currentmodule:: espaloma.nn.baselines

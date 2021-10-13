@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.node\_typing.NodeTyping
+espaloma.nn.readout.node\_typing.NodeTyping
 ===========================================
 
 .. currentmodule:: espaloma.nn.readout.node_typing

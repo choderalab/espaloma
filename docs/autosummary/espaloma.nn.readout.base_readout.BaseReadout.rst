@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.base\_readout.BaseReadout
+espaloma.nn.readout.base\_readout.BaseReadout
 =============================================
 
 .. currentmodule:: espaloma.nn.readout.base_readout

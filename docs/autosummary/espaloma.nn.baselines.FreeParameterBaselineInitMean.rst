@@ -1,4 +1,4 @@
-﻿espaloma.nn.baselines.FreeParameterBaselineInitMean
+espaloma.nn.baselines.FreeParameterBaselineInitMean
 ===================================================
 
 .. currentmodule:: espaloma.nn.baselines

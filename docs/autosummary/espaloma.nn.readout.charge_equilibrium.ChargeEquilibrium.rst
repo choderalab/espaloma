@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
+espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
 =========================================================
 
 .. currentmodule:: espaloma.nn.readout.charge_equilibrium

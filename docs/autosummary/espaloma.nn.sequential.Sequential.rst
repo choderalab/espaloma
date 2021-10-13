@@ -1,4 +1,4 @@
-﻿espaloma.nn.sequential.Sequential
+espaloma.nn.sequential.Sequential
 =================================
 
 .. currentmodule:: espaloma.nn.sequential

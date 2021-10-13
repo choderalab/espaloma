@@ -1,7 +1,1 @@
-import espaloma
-import espaloma.nn
-import espaloma.nn.readout
-import espaloma.nn.readout.janossy
-import espaloma.nn.readout.graph_level_readout
-import espaloma.nn.readout.node_typing
-import espaloma.nn.readout.charge_equilibrium
+from . import janossy, graph_level_readout, node_typing, charge_equilibrium
