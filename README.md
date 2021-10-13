@@ -43,7 +43,32 @@ We show that this approach is not only sufficiently expressive to reproduce lega
             * `polynomial.py` higher order polynomials.
 
 
+# Example: Deploy espaloma 0.2.0 pretrained force field to arbitrary MM system
 
+```  
+# imports
+import os
+import torch
+import espaloma as esp
+
+# grab espaloma
+if not os.exists("espaloma_model.pt"):
+    os.system("wget http://data.wangyq.net/espaloma_model.pt")
+
+# define or load a molecule of interest via the Open Force Field toolkit
+from openff.toolkit.topology import Molecule
+molecule = Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+
+# create an Espaloma Graph object to represent the molecule of interest
+molecule_graph = esp.Graph(molecule)
+
+# apply a trained espaloma model to assign parameters
+espaloma_model = torch.load("espaloma_model.pt")
+espaloma_model(molecule_graph.heterograph)
+
+# create an OpenMM System for the specified molecule
+openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
+```
 
 # License
 
