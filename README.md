@@ -51,7 +51,7 @@ import os
 import torch
 import espaloma as esp
 
-# grab espaloma
+# grab pretrained model
 if not os.exists("espaloma_model.pt"):
     os.system("wget http://data.wangyq.net/espaloma_model.pt")
 
