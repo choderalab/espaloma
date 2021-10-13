@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy
+espaloma.nn.readout.janossy
 ===========================
 
 .. automodule:: espaloma.nn.readout.janossy
