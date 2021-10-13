@@ -98,6 +98,17 @@
 <p>Dataset with additional support for only viewing
 certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.view">
+<span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">collate_fn</span></em>, <em class="sig-param"><span class="pre">\*args</span></em>, <em class="sig-param"><span class="pre">\*\*kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.view" title="Permalink to this definition"></a></dt>
+<dd><p>Provide a <cite>torch.utils.data.DataLoader</cite> view of the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.Note">
+<span class="sig-name descname"><span class="pre">Note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.Note" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -133,7 +144,7 @@ certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.subsample" title="espaloma.data.dataset.GraphDataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
 <td><p>Subsample the dataset according to some ratio.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.view" title="espaloma.data.dataset.GraphDataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="espaloma.data.dataset.GraphDataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
 <td><p>Provide a data loader.</p></td>
 </tr>
 </tbody>
@@ -189,8 +200,8 @@ original dataset.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.view">
-<span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collate_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'graph'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.view" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collate_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'graph'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
 <dd><p>Provide a data loader.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

@@ -98,9 +98,46 @@
 <p>The base class of map-style dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>graphs</strong> (<em>list</em>) – objects in the dataset</p>
+<dd class="field-odd"><p><strong>graphs</strong> (<em>List</em>) – objects in the dataset</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.shuffle">
+<span class="sig-name descname"><span class="pre">shuffle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.shuffle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.shuffle" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly shuffle the graphs in the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.apply" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a function to every graph in the dataset.
+If <cite>in_place=True</cite>, modify the graph in-place.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partitions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.split" title="Permalink to this definition"></a></dt>
+<dd><p>Split the dataset into partitions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.subsample">
+<span class="sig-name descname"><span class="pre">subsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.subsample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.subsample" title="Permalink to this definition"></a></dt>
+<dd><p>Subsample the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save the dataset to a local path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.load" title="Permalink to this definition"></a></dt>
+<dd><p>Load a dataset from local path.</p>
+</dd></dl>
+
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This also supports iterative-style dataset by deleting <cite>__getitem__</cite>
@@ -111,6 +148,10 @@ and <cite>__len__</cite> function.</p>
 <dd class="field-odd"><p><strong>transforms</strong> (<em>an iterable of callables that transforms the input.</em>) – the <cite>__getiem__</cite> method applies these transforms later.</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">([</span><span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)])</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.__init__" title="Permalink to this definition"></a></dt>
@@ -126,29 +167,29 @@ and <cite>__len__</cite> function.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.__init__" title="espaloma.data.dataset.Dataset.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([graphs])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.apply" title="espaloma.data.dataset.Dataset.apply"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code></a>(fn[, in_place])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="espaloma.data.dataset.Dataset.apply"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code></a>(fn[, in_place])</p></td>
 <td><p>Apply functions to the elements of the dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.load" title="espaloma.data.dataset.Dataset.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="espaloma.data.dataset.Dataset.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
 <td><p>Load path to dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.save" title="espaloma.data.dataset.Dataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="espaloma.data.dataset.Dataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p>Save dataset to path.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle</span></code>([seed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.shuffle" title="espaloma.data.dataset.Dataset.shuffle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle</span></code></a>([seed])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.split" title="espaloma.data.dataset.Dataset.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>(partition)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="espaloma.data.dataset.Dataset.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>(partition)</p></td>
 <td><p>Split the dataset according to some partition.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.Dataset.subsample" title="espaloma.data.dataset.Dataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id4" title="espaloma.data.dataset.Dataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
 <td><p>Subsample the dataset according to some ratio.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.apply">
-<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.apply" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
 <dd><p>Apply functions to the elements of the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -163,14 +204,14 @@ to elements and modifies them.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.load">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.load" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
 <dd><p>Load path to dataset.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.save" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition"></a></dt>
 <dd><p>Save dataset to path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -180,8 +221,8 @@ to elements and modifies them.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.split">
-<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.split" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition"></a></dt>
 <dd><p>Split the dataset according to some partition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -191,8 +232,8 @@ to elements and modifies them.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.data.dataset.Dataset.subsample">
-<span class="sig-name descname"><span class="pre">subsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.subsample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.Dataset.subsample" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">subsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#Dataset.subsample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition"></a></dt>
 <dd><p>Subsample the dataset according to some ratio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

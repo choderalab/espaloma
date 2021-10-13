@@ -75,6 +75,14 @@
 <span class="c1"># MODULE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="esol"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.esol.html#espaloma.data.collection.esol">[docs]</a><span class="k">def</span> <span class="nf">esol</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ESOL collection.</span>
+
+<span class="sd">    ..[1] ESOL:  Estimating Aqueous Solubility Directly from Molecular Structure</span>
+<span class="sd">        John S. Delaney</span>
+<span class="sd">        Journal of Chemical Information and Computer Sciences</span>
+<span class="sd">        2004 44 (3), 1000-1005</span>
+<span class="sd">        DOI: 10.1021/ci034243x</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
 
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -86,6 +94,16 @@
 
 
 <div class="viewcode-block" id="alkethoh"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.alkethoh.html#espaloma.data.collection.alkethoh">[docs]</a><span class="k">def</span> <span class="nf">alkethoh</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; AlkEthOH collection.</span>
+
+<span class="sd">    ..[1] Open Force Field Consortium: Escaping atom types using direct chemical</span>
+<span class="sd">    perception with SMIRNOFF v0.1</span>
+<span class="sd">    David L. Mobley, Caitlin C. Bannan, Andrea Rizzi, Christopher I. Bayly,</span>
+<span class="sd">    John D. Chodera, Victoria T. Lim, Nathan M. Lim, Kyle A. Beauchamp,</span>
+<span class="sd">    Michael R. Shirts, Michael K. Gilson, Peter K. Eastman</span>
+<span class="sd">    bioRxiv 286542; doi: https://doi.org/10.1101/286542</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
 
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -93,11 +111,15 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                <span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/&quot;</span>
+                <span class="s2">&quot;open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/&quot;</span>
+                <span class="s2">&quot;AlkEthOH_rings.smi&quot;</span><span class="p">,</span>
                 <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">),</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                <span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/&quot;</span>
+                <span class="s2">&quot;open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/&quot;</span>
+                <span class="s2">&quot;AlkEthOH_chain.smi&quot;</span><span class="p">,</span>
                 <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">],</span>
@@ -109,6 +131,14 @@
 
 
 <div class="viewcode-block" id="zinc"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.zinc.html#espaloma.data.collection.zinc">[docs]</a><span class="k">def</span> <span class="nf">zinc</span><span class="p">(</span><span class="n">first</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ZINC collection.</span>
+
+<span class="sd">    ..[1] Irwin, John J, and Brian K Shoichet.</span>
+<span class="sd">    “ZINC</span>
+<span class="sd">    --a free database of commercially available compounds for virtual screening.”</span>
+<span class="sd">    Journal of chemical information and modeling</span>
+<span class="sd">    vol. 45,1 (2005): 177-82. doi:10.1021/ci049714+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">tarfile</span>
     <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
     <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>

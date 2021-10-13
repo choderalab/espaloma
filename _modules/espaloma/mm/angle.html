@@ -101,7 +101,17 @@
 
 
 <div class="viewcode-block" id="linear_mixture_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.linear_mixture_angle.html#espaloma.mm.angle.linear_mixture_angle">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture_angle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Angle energy with Linear basis function.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Angle energy with Linear basis function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coefficients : torch.Tensor</span>
+<span class="sd">        Coefficients of the linear mixuture.</span>
+
+<span class="sd">    phases : torch.Tensor</span>
+<span class="sd">        Phases of the linear mixture.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture</span><span class="p">(</span>
         <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="n">phases</span>

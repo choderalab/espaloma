@@ -83,8 +83,29 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    graphs : list</span>
+<span class="sd">    graphs : List</span>
 <span class="sd">        objects in the dataset</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    shuffle</span>
+<span class="sd">        Randomly shuffle the graphs in the dataset.</span>
+
+<span class="sd">    apply(fn, in_place=True)</span>
+<span class="sd">        Apply a function to every graph in the dataset.</span>
+<span class="sd">        If `in_place=True`, modify the graph in-place.</span>
+
+<span class="sd">    split(partitions)</span>
+<span class="sd">        Split the dataset into partitions</span>
+
+<span class="sd">    subsample(ratio, seed=None)</span>
+<span class="sd">        Subsample the dataset.</span>
+
+<span class="sd">    save(path)</span>
+<span class="sd">        Save the dataset to a local path.</span>
+
+<span class="sd">    load(path)</span>
+<span class="sd">        Load a dataset from local path.</span>
 
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
@@ -95,6 +116,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    transforms : an iterable of callables that transforms the input.</span>
 <span class="sd">        the `__getiem__` method applies these transforms later.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; data = Dataset([esp.Graph(&quot;C&quot;)])</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -175,7 +200,7 @@
 
             <span class="k">return</span> <span class="n">graphs</span>
 
-    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Dataset.shuffle"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">random</span>
         <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">shuffle</span>
 
@@ -183,7 +208,7 @@
             <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Dataset.apply"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply functions to the elements of the dataset.</span>
@@ -289,7 +314,12 @@
     <span class="sd">&quot;&quot;&quot;Dataset with additional support for only viewing</span>
 <span class="sd">    certain attributes as `torch.utils.data.DataLoader`</span>
 
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    view(collate_fn, *args, **kwargs)</span>
+<span class="sd">        Provide a `torch.utils.data.DataLoader` view of the dataset.</span>
 
+<span class="sd">    Note</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="GraphDataset.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.GraphDataset.html#espaloma.data.dataset.GraphDataset.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graphs</span><span class="o">=</span><span class="p">[],</span> <span class="n">first</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
