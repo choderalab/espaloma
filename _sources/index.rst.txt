@@ -25,9 +25,7 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 
    install
    deploy
-   typing
-   mm-fitting
-   qm-fitting
+   experiments/index
    api
 
 

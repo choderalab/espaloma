@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deployment &mdash; espaloma  documentation</title>
+  <title>Deploy espaloma 0.2.0 force field to parametrize your MM system &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="typing.html" />
+    <link rel="next" title="&lt;no title&gt;" href="experiments/index.html" />
     <link rel="prev" title="Installation" href="install.html" /> 
 </head>
 
@@ -40,7 +40,9 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Deployment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
@@ -58,7 +60,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Deployment</li>
+      <li>Deploy espaloma 0.2.0 force field to parametrize your MM system</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/deploy.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -68,8 +70,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="deployment">
-<h1>Deployment<a class="headerlink" href="#deployment" title="Permalink to this headline"></a></h1>
+  <section id="deploy-espaloma-0-2-0-force-field-to-parametrize-your-mm-system">
+<h1>Deploy espaloma 0.2.0 force field to parametrize your MM system<a class="headerlink" href="#deploy-espaloma-0-2-0-force-field-to-parametrize-your-mm-system" title="Permalink to this headline"></a></h1>
+<p>Pretrained espaloma force field could be deployed on arbitrary small molecule
+systems in a few lines:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+
+<span class="c1"># grab espaloma</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;espaloma_model.pt&quot;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;wget http://data.wangyq.net/espaloma_model.pt&quot;</span><span class="p">)</span>
+
+<span class="c1"># define or load a molecule of interest via the Open Force Field toolkit</span>
+<span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+<span class="n">molecule</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_smiles</span><span class="p">(</span><span class="s2">&quot;CN1C=NC2=C1C(=O)N(C(=O)N2C)C&quot;</span><span class="p">)</span>
+
+<span class="c1"># create an Espaloma Graph object to represent the molecule of interest</span>
+<span class="n">molecule_graph</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+
+<span class="c1"># apply a trained espaloma model to assign parameters</span>
+<span class="n">espaloma_model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;espaloma_model.pt&quot;</span><span class="p">)</span>
+<span class="n">espaloma_model</span><span class="p">(</span><span class="n">molecule_graph</span><span class="o">.</span><span class="n">heterograph</span><span class="p">)</span>
+
+<span class="c1"># create an OpenMM System for the specified molecule</span>
+<span class="n">openmm_system</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">deploy</span><span class="o">.</span><span class="n">openmm_system_from_graph</span><span class="p">(</span><span class="n">molecule_graph</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 
 
@@ -77,7 +105,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="typing.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="experiments/index.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
