@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MALT: Molecular Active Learning Testbed &mdash; espaloma  documentation</title>
+  <title>espaloma: Extensible Surrogate Potential Optimized by Message-passing Algorithms &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting Started" href="getting_started.html" /> 
+    <link rel="next" title="Installation" href="install.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,7 +38,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
@@ -56,7 +57,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>MALT: Molecular Active Learning Testbed</li>
+      <li>espaloma: Extensible Surrogate Potential Optimized by Message-passing Algorithms</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -66,16 +67,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="malt-molecular-active-learning-testbed">
-<h1>MALT: Molecular Active Learning Testbed<a class="headerlink" href="#malt-molecular-active-learning-testbed" title="Permalink to this headline"></a></h1>
+  <section id="espaloma-extensible-surrogate-potential-optimized-by-message-passing-algorithms">
+<h1>espaloma: Extensible Surrogate Potential Optimized by Message-passing Algorithms<a class="headerlink" href="#espaloma-extensible-surrogate-potential-optimized-by-message-passing-algorithms" title="Permalink to this headline"></a></h1>
+<p>Source code for Wang Y, Fass J, and Chodera JD “End-to-End Differentiable Construction of Molecular Mechanics Force Fields. <a class="reference external" href="https://arxiv.org/abs/2010.01196">https://arxiv.org/abs/2010.01196</a></p>
+<img alt="_images/espaloma_abstract_v2-2.png" src="_images/espaloma_abstract_v2-2.png" />
+<section id="paper-abstract">
+<h2>Paper Abstract<a class="headerlink" href="#paper-abstract" title="Permalink to this headline"></a></h2>
+<p>Molecular mechanics (MM) potentials have long been a workhorse of computational chemistry.
+Leveraging accuracy and speed, these functional forms find use in a wide variety of applications in biomolecular modeling and drug discovery, from rapid virtual screening to detailed free energy calculations.
+Traditionally, MM potentials have relied on human-curated, inflexible, and poorly extensible discrete chemical perception rules <em>atom types</em> for applying parameters to small molecules or biopolymers, making it difficult to optimize both types and parameters to fit quantum chemical or physical property data.
+Here, we propose an alternative approach that uses <em>graph neural networks</em> to perceive chemical environments, producing continuous atom embeddings from which valence and nonbonded parameters can be predicted using invariance-preserving layers.
+Since all stages are built from smooth neural functions, the entire process—spanning chemical perception to parameter assignment—is modular and end-to-end differentiable with respect to model parameters, allowing new force fields to be easily constructed, extended, and applied to arbitrary molecules.
+We show that this approach is not only sufficiently expressive to reproduce legacy atom types, but that it can learn and extend existing molecular mechanics force fields, construct entirely new force fields applicable to both biopolymers and small molecules from quantum chemical calculations, and even learn to accurately predict free energies from experimental observables.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#paper-abstract">Paper Abstract</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#minimal-example">Minimal Example</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="autosummary/espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autosummary/espaloma.nn.html">espaloma.nn</a></li>
@@ -85,6 +93,7 @@
 </li>
 </ul>
 </div>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
@@ -99,7 +108,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
