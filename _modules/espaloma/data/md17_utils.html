@@ -112,28 +112,33 @@
     <span class="n">offset</span> <span class="o">=</span> <span class="n">sum_offsets</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
 
     <span class="n">g</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">infer_mol_from_coordinates</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">elements</span><span class="p">,</span> <span class="n">smiles</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">elements</span><span class="p">,</span>
+        <span class="n">smiles</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="n">Quantity</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
-            <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span>
-        <span class="p">),</span>
+        <span class="n">Quantity</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span><span class="p">),</span>
         <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)[:,</span> <span class="p">:</span><span class="n">first</span><span class="p">,</span> <span class="p">:]</span>
 
     <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;g&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-            <span class="n">Quantity</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">],</span> <span class="n">unit</span><span class="o">.</span><span class="n">kilocalorie_per_mole</span><span class="p">,)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
-                <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span>
-            <span class="p">)</span>
+            <span class="n">Quantity</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">],</span>
+                <span class="n">unit</span><span class="o">.</span><span class="n">kilocalorie_per_mole</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">)</span>
         <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">first</span><span class="p">]</span>
         <span class="o">-</span> <span class="n">offset</span>
     <span class="p">)</span>
 
     <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
         <span class="n">Quantity</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;F&quot;</span><span class="p">],</span> <span class="n">unit</span><span class="o">.</span><span class="n">kilocalorie_per_mole</span> <span class="o">/</span> <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;F&quot;</span><span class="p">],</span>
+            <span class="n">unit</span><span class="o">.</span><span class="n">kilocalorie_per_mole</span> <span class="o">/</span> <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">FORCE_UNIT</span><span class="p">)</span>
     <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">first</span><span class="p">,</span> <span class="p">:]</span>
 

@@ -87,7 +87,7 @@
 
 
 <div class="viewcode-block" id="Graph"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph">[docs]</a><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">BaseGraph</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; A unified graph object that support translation to and from</span>
+    <span class="sd">&quot;&quot;&quot;A unified graph object that support translation to and from</span>
 <span class="sd">    message-passing graphs and MM factor graph.</span>
 
 <span class="sd">    Note</span>
@@ -121,22 +121,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span> <span class="o">=</span> <span class="n">heterograph</span></div>
 
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">os</span><span class="p">;</span> <span class="kn">import</span> <span class="nn">json</span>
+        <span class="kn">import</span> <span class="nn">os</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/homograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">homograph</span><span class="p">])</span>
-        <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span><span class="p">])</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/mol.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_handle</span><span class="p">:</span>
+        <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/homograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">homograph</span><span class="p">])</span>
+        <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span><span class="p">])</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/mol.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_handle</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">f_handle</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">json</span>
-        <span class="n">homograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/homograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">heterograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/mol.json&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_handle</span><span class="p">:</span>
+        <span class="n">homograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/homograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">heterograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/mol.json&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_handle</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f_handle</span><span class="p">)</span>
         <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
@@ -155,8 +159,10 @@
         <span class="c1">#     mol.to_rdkit()</span>
         <span class="c1"># )</span>
 
-        <span class="n">graph</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">read_homogeneous_graph</span><span class="o">.</span><span class="n">from_openff_toolkit_mol</span><span class="p">(</span>
-            <span class="n">mol</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">read_homogeneous_graph</span><span class="o">.</span><span class="n">from_openff_toolkit_mol</span><span class="p">(</span>
+                <span class="n">mol</span>
+            <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">graph</span>
 

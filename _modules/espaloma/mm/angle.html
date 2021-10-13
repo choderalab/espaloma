@@ -75,7 +75,7 @@
 <span class="c1"># MODULE FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="harmonic_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.harmonic_angle.html#espaloma.mm.angle.harmonic_angle">[docs]</a><span class="k">def</span> <span class="nf">harmonic_angle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">eq</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Harmonic angle energy.</span>
+    <span class="sd">&quot;&quot;&quot;Harmonic angle energy.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -101,11 +101,12 @@
 
 
 <div class="viewcode-block" id="linear_mixture_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.linear_mixture_angle.html#espaloma.mm.angle.linear_mixture_angle">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture_angle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Angle energy with Linear basis function.</span>
+    <span class="sd">&quot;&quot;&quot;Angle energy with Linear basis function.&quot;&quot;&quot;</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="n">phases</span>
+    <span class="p">)</span></div>
 
-    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="urey_bradley"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.urey_bradley.html#espaloma.mm.angle.urey_bradley">[docs]</a><span class="k">def</span> <span class="nf">urey_bradley</span><span class="p">(</span><span class="n">x_between</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture</span><span class="p">(</span>
@@ -114,22 +115,32 @@
         <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
     <span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="bond_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.bond_bond.html#espaloma.mm.angle.bond_bond">[docs]</a><span class="k">def</span> <span class="nf">bond_bond</span><span class="p">(</span><span class="n">u_left</span><span class="p">,</span> <span class="n">u_right</span><span class="p">,</span> <span class="n">k_bond_bond</span><span class="p">):</span>
     <span class="n">u_left</span> <span class="o">=</span> <span class="n">u_left</span> <span class="o">-</span> <span class="n">u_left</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">u_right</span> <span class="o">=</span> <span class="n">u_right</span> <span class="o">-</span> <span class="n">u_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">k_bond_bond</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="bond_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.bond_angle.html#espaloma.mm.angle.bond_angle">[docs]</a><span class="k">def</span> <span class="nf">bond_angle</span><span class="p">(</span>
-        <span class="n">u_left</span><span class="p">,</span> <span class="n">u_right</span><span class="p">,</span> <span class="n">u_angle</span><span class="p">,</span> <span class="n">k_bond_angle</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">u_left</span><span class="p">,</span>
+    <span class="n">u_right</span><span class="p">,</span>
+    <span class="n">u_angle</span><span class="p">,</span>
+    <span class="n">k_bond_angle</span><span class="p">,</span>
+<span class="p">):</span>
 
     <span class="n">u_left</span> <span class="o">=</span> <span class="n">u_left</span> <span class="o">-</span> <span class="n">u_left</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">u_right</span> <span class="o">=</span> <span class="n">u_right</span> <span class="o">-</span> <span class="n">u_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">u_angle</span> <span class="o">=</span> <span class="n">u_angle</span> <span class="o">-</span> <span class="n">u_angle</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">k_bond_angle</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">k_bond_angle</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">k_bond_angle</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">u_angle</span> <span class="o">**</span> <span class="mf">0.5</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="n">k_bond_angle</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="angle_high"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.angle.angle_high.html#espaloma.mm.angle.angle_high">[docs]</a><span class="k">def</span> <span class="nf">angle_high</span><span class="p">(</span>
-    <span class="n">u_angle</span><span class="p">,</span> <span class="n">k3</span><span class="p">,</span> <span class="n">k4</span><span class="p">,</span>
+    <span class="n">u_angle</span><span class="p">,</span>
+    <span class="n">k3</span><span class="p">,</span>
+    <span class="n">k4</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="n">u_angle</span> <span class="o">=</span> <span class="n">u_angle</span> <span class="o">-</span> <span class="n">u_angle</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">k3</span> <span class="o">*</span> <span class="n">u_angle</span> <span class="o">**</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="n">k4</span> <span class="o">*</span> <span class="n">u_angle</span> <span class="o">**</span> <span class="mi">2</span></div>

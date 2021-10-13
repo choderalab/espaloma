@@ -78,13 +78,15 @@
 <span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
 <span class="kn">from</span> <span class="nn">simtk.unit</span> <span class="kn">import</span> <span class="n">Quantity</span>
 
-<span class="n">LJ_SWITCH</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span><span class="p">)</span>
+<span class="n">LJ_SWITCH</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">DISTANCE_UNIT</span>
+<span class="p">)</span>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># UTILITY FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="linear_mixture_to_original"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.linear_mixture_to_original.html#espaloma.mm.functional.linear_mixture_to_original">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture_to_original</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Translating linear mixture coefficients back to original</span>
+    <span class="sd">&quot;&quot;&quot;Translating linear mixture coefficients back to original</span>
 <span class="sd">    parameterization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># (batch_size, )</span>
@@ -95,11 +97,12 @@
 
     <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span></div>
 
+
 <span class="c1"># =============================================================================</span>
 <span class="c1"># MODULE FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="harmonic"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic.html#espaloma.mm.functional.harmonic">[docs]</a><span class="k">def</span> <span class="nf">harmonic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">eq</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot; Harmonic term.</span>
+    <span class="sd">&quot;&quot;&quot;Harmonic term.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -116,8 +119,10 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">eq</span><span class="p">))</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">order</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-        <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="mf">0.5</span>
+        <span class="o">*</span> <span class="n">k</span>
+        <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">eq</span><span class="p">))</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">order</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
@@ -186,7 +191,7 @@
 <div class="viewcode-block" id="periodic"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.periodic.html#espaloma.mm.functional.periodic">[docs]</a><span class="k">def</span> <span class="nf">periodic</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">periodicity</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)),</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Periodic term.</span>
+    <span class="sd">&quot;&quot;&quot;Periodic term.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -203,7 +208,9 @@
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">periodicity</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-            <span class="n">periodicity</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+            <span class="n">periodicity</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">periodicity</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -215,10 +222,18 @@
         <span class="n">periodicity</span> <span class="o">=</span> <span class="n">periodicity</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">phases</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,)</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">phases</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,)</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="n">n_theta</span> <span class="o">=</span> <span class="n">periodicity</span> <span class="o">*</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
 
@@ -232,9 +247,8 @@
 
     <span class="n">energy</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos_n_theta_minus_phases</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
-       <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="mf">0.0</span><span class="o">-</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos_n_theta_minus_phases</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="mf">0.0</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos_n_theta_minus_phases</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
     <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
 
     <span class="k">return</span> <span class="n">energy</span></div>
 
@@ -254,9 +268,14 @@
 
 
 <div class="viewcode-block" id="lj"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.lj.html#espaloma.mm.functional.lj">[docs]</a><span class="k">def</span> <span class="nf">lj</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">switch</span><span class="o">=</span><span class="n">LJ_SWITCH</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">epsilon</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">,</span>
+    <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+    <span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+    <span class="n">switch</span><span class="o">=</span><span class="n">LJ_SWITCH</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Lennard-Jones term.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Lennard-Jones term.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -294,7 +313,9 @@
 
     <span class="c1"># erase values under switch</span>
     <span class="n">sigma_over_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">lt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">switch</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">sigma_over_x</span><span class="p">),</span> <span class="n">sigma_over_x</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">lt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">switch</span><span class="p">),</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">sigma_over_x</span><span class="p">),</span>
+        <span class="n">sigma_over_x</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span>
@@ -304,7 +325,7 @@
 
 
 <div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.gaussian.html#espaloma.mm.functional.gaussian">[docs]</a><span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">)]):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Gaussian basis function.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian basis function.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -327,7 +348,7 @@
 
 
 <div class="viewcode-block" id="linear_mixture"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.linear_mixture.html#espaloma.mm.functional.linear_mixture">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Linear mixture basis function.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear mixture basis function.</span>
 
 <span class="sd">    x : torch.Tensor</span>
 <span class="sd">    coefficients : list or torch.Tensor of length 2</span>
@@ -354,18 +375,18 @@
     <span class="n">u1</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="n">u2</span> <span class="o">=</span> <span class="n">k2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 
-    <span class="n">u</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">u1</span> <span class="o">+</span> <span class="n">u2</span><span class="p">)</span> <span class="c1"># - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">u1</span> <span class="o">+</span> <span class="n">u2</span><span class="p">)</span>  <span class="c1"># - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2</span>
 
     <span class="k">return</span> <span class="n">u</span></div>
 
 
 <div class="viewcode-block" id="harmonic_periodic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_periodic_coupled.html#espaloma.mm.functional.harmonic_periodic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_periodic_coupled</span><span class="p">(</span>
-        <span class="n">x_harmonic</span><span class="p">,</span>
-        <span class="n">x_periodic</span><span class="p">,</span>
-        <span class="n">k</span><span class="p">,</span>
-        <span class="n">eq</span><span class="p">,</span>
-        <span class="n">periodicity</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
-    <span class="p">):</span>
+    <span class="n">x_harmonic</span><span class="p">,</span>
+    <span class="n">x_periodic</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">,</span>
+    <span class="n">eq</span><span class="p">,</span>
+    <span class="n">periodicity</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+<span class="p">):</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">periodicity</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
@@ -374,17 +395,16 @@
             <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
         <span class="p">)</span>
 
-    <span class="n">n_theta</span> <span class="o">=</span> <span class="n">periodicity</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
-        <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="mi">1</span>
-    <span class="p">)</span> <span class="o">*</span> <span class="n">x_periodic</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">n_theta</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">periodicity</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">x_periodic</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="p">)</span>
 
     <span class="n">cos_n_theta</span> <span class="o">=</span> <span class="n">n_theta</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
 
-    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
-        <span class="mi">1</span><span class="p">,</span> <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span>
-    <span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x_periodic</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="n">sum_k_cos_n_theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">cos_n_theta</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -394,24 +414,26 @@
 
     <span class="k">return</span> <span class="n">energy</span></div>
 
+
 <div class="viewcode-block" id="harmonic_harmonic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_harmonic_coupled.html#espaloma.mm.functional.harmonic_harmonic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_harmonic_coupled</span><span class="p">(</span>
-        <span class="n">x0</span><span class="p">,</span>
-        <span class="n">x1</span><span class="p">,</span>
-        <span class="n">eq0</span><span class="p">,</span>
-        <span class="n">eq1</span><span class="p">,</span>
-        <span class="n">k</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">x0</span><span class="p">,</span>
+    <span class="n">x1</span><span class="p">,</span>
+    <span class="n">eq0</span><span class="p">,</span>
+    <span class="n">eq1</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="n">x0</span> <span class="o">-</span> <span class="n">eq0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">eq1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">energy</span></div>
 
+
 <div class="viewcode-block" id="harmonic_harmonic_periodic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_harmonic_periodic_coupled.html#espaloma.mm.functional.harmonic_harmonic_periodic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_harmonic_periodic_coupled</span><span class="p">(</span>
-        <span class="n">theta0</span><span class="p">,</span>
-        <span class="n">theta1</span><span class="p">,</span>
-        <span class="n">eq0</span><span class="p">,</span>
-        <span class="n">eq1</span><span class="p">,</span>
-        <span class="n">phi</span><span class="p">,</span>
-        <span class="n">k</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">theta0</span><span class="p">,</span>
+    <span class="n">theta1</span><span class="p">,</span>
+    <span class="n">eq0</span><span class="p">,</span>
+    <span class="n">eq1</span><span class="p">,</span>
+    <span class="n">phi</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta0</span> <span class="o">-</span> <span class="n">eq0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta1</span> <span class="o">-</span> <span class="n">eq1</span><span class="p">)</span> <span class="o">*</span> <span class="n">phi</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">energy</span></div>
 </pre></div>

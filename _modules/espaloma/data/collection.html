@@ -90,11 +90,16 @@
 
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_rings.smi&quot;</span><span class="p">,</span>
+                <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="s2">&quot;https://raw.githubusercontent.com/openff.toolkit/open-forcefield-data/master/Model-Systems/AlkEthOH_distrib/AlkEthOH_chain.smi&quot;</span><span class="p">,</span>
+                <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
         <span class="p">],</span>
         <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
@@ -103,22 +108,22 @@
     <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-
 <div class="viewcode-block" id="zinc"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.zinc.html#espaloma.data.collection.zinc">[docs]</a><span class="k">def</span> <span class="nf">zinc</span><span class="p">(</span><span class="n">first</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">tarfile</span>
     <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
     <span class="kn">from</span> <span class="nn">openff.toolkit.topology</span> <span class="kn">import</span> <span class="n">Molecule</span>
     <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
 
-    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;parm_at_Frosst.tgz&#39;</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;parm_at_Frosst.tgz&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://www.ccl.net/cca/data/parm_at_Frosst/parm_at_Frosst.tgz&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">urllib.request</span>
+
         <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
 
     <span class="n">archive</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-    <span class="n">zinc_file</span> <span class="o">=</span> <span class="n">archive</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;parm_at_Frosst/zinc.sdf&#39;</span><span class="p">)</span>
+    <span class="n">zinc_file</span> <span class="o">=</span> <span class="n">archive</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s2">&quot;parm_at_Frosst/zinc.sdf&quot;</span><span class="p">)</span>
     <span class="n">_mols</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">ForwardSDMolSupplier</span><span class="p">(</span><span class="n">zinc_file</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -142,45 +147,64 @@
 
     <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="p">(</span><span class="n">gs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="md17_old"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.md17_old.html#espaloma.data.collection.md17_old">[docs]</a><span class="k">def</span> <span class="nf">md17_old</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span>
-        <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">md17_utils</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">(</span>
-            <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s1">&#39;benzene&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;uracil&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;naphthalene&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;aspirin&#39;</span><span class="p">,</span> <span class="s1">&#39;salicylic&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;malonaldehyde&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;ethanol&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;toluene&#39;</span><span class="p">,</span>
-   <span class="s1">&#39;paracetamol&#39;</span><span class="p">,</span> <span class="s1">&#39;azobenzene&#39;</span>
-        <span class="p">]]</span></div>
+        <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">md17_utils</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;benzene&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uracil&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;naphthalene&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;aspirin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;salicylic&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;malonaldehyde&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ethanol&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;toluene&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;paracetamol&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;azobenzene&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">]</span></div>
+
 
 <div class="viewcode-block" id="md17_new"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.md17_new.html#espaloma.data.collection.md17_new">[docs]</a><span class="k">def</span> <span class="nf">md17_new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span>
-        <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">md17_utils</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">(</span>
-            <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">heterograph</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s1">&#39;paracetamol&#39;</span><span class="p">,</span> <span class="s1">&#39;azobenzene&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;benzene&#39;</span><span class="p">,</span> <span class="s1">&#39;ethanol&#39;</span><span class="p">,</span>
-        <span class="p">]]</span></div>
+        <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">md17_utils</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">heterograph</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;paracetamol&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;azobenzene&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;benzene&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ethanol&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="qca"><a class="viewcode-back" href="../../../autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca">[docs]</a><span class="k">class</span> <span class="nc">qca</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
-<span class="n">df_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Bayer&#39;</span><span class="p">,</span> <span class="s1">&#39;Coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;eMolecules&#39;</span><span class="p">,</span> <span class="s1">&#39;Pfizer&#39;</span><span class="p">,</span> <span class="s1">&#39;Roche&#39;</span><span class="p">,</span> <span class="s2">&quot;Benchmark&quot;</span><span class="p">,</span> <span class="s2">&quot;fda&quot;</span><span class="p">]</span>
+
+<span class="n">df_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;Bayer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Coverage&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eMolecules&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Pfizer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Roche&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Benchmark&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;fda&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
 
 <span class="k">def</span> <span class="nf">_get_ds</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df_name</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">os</span>
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/../data/qca/</span><span class="si">%s</span><span class="s2">.h5&quot;</span> <span class="o">%</span> <span class="n">df_name</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="n">ds</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">qcarchive_utils</span><span class="o">.</span><span class="n">h5_to_dataset</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ds</span>
 
+
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
 <span class="k">for</span> <span class="n">df_name</span> <span class="ow">in</span> <span class="n">df_names</span><span class="p">:</span>
     <span class="nb">setattr</span><span class="p">(</span>
         <span class="n">qca</span><span class="p">,</span>

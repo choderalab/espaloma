@@ -92,7 +92,8 @@
 <span class="c1"># MODULE FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="subtract_nonbonded_force"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.subtract_nonbonded_force.html#espaloma.data.md.subtract_nonbonded_force">[docs]</a><span class="k">def</span> <span class="nf">subtract_nonbonded_force</span><span class="p">(</span>
-    <span class="n">g</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
+    <span class="n">g</span><span class="p">,</span>
+    <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 
     <span class="c1"># parameterize topology</span>
@@ -101,7 +102,7 @@
     <span class="n">generator</span> <span class="o">=</span> <span class="n">SystemGenerator</span><span class="p">(</span>
         <span class="n">small_molecule_forcefield</span><span class="o">=</span><span class="n">forcefield</span><span class="p">,</span>
         <span class="n">molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">],</span>
-        <span class="n">forcefield_kwargs</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;constraints&#39;</span> <span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;removeCMMotion&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+        <span class="n">forcefield_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;constraints&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;removeCMMotion&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="p">)</span>
 
     <span class="c1"># create openmm system</span>
@@ -134,16 +135,18 @@
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
 
-
         <span class="k">elif</span> <span class="s2">&quot;Bond&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumBonds</span><span class="p">()):</span>
                 <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getBondParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
                 <span class="n">force</span><span class="o">.</span><span class="n">setBondParameters</span><span class="p">(</span>
-                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                    <span class="n">id1</span><span class="p">,</span>
+                    <span class="n">id2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="p">,</span>
+                    <span class="mf">0.0</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-
 
         <span class="k">elif</span> <span class="s2">&quot;Torsion&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumTorsions</span><span class="p">()):</span>
@@ -157,11 +160,17 @@
                     <span class="n">k</span><span class="p">,</span>
                 <span class="p">)</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getTorsionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
                 <span class="n">force</span><span class="o">.</span><span class="n">setTorsionParameters</span><span class="p">(</span>
-                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">id4</span><span class="p">,</span> <span class="n">periodicity</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                    <span class="n">id1</span><span class="p">,</span>
+                    <span class="n">id2</span><span class="p">,</span>
+                    <span class="n">id3</span><span class="p">,</span>
+                    <span class="n">id4</span><span class="p">,</span>
+                    <span class="n">periodicity</span><span class="p">,</span>
+                    <span class="n">phase</span><span class="p">,</span>
+                    <span class="mf">0.0</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-
 
     <span class="c1"># the snapshots</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="p">(</span>
@@ -181,7 +190,9 @@
         <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="n">state</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span>
-            <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getParameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getForces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">getParameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">getForces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">getPotentialEnergy</span><span class="p">()</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
@@ -197,27 +208,34 @@
 
     <span class="c1"># put energies to a tensor</span>
     <span class="n">energies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="n">energies</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="n">energies</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
     <span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
     <span class="n">derivatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
     <span class="p">)</span>
 
     <span class="c1"># subtract the energies</span>
     <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">},</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">},</span>
+        <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="s2">&quot;u_ref_prime&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="s2">&quot;u_ref_prime&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">derivatives</span><span class="p">},</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;u_ref_prime&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">derivatives</span>
+            <span class="p">},</span>
             <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">g</span></div>
 
+
 <div class="viewcode-block" id="subtract_nonbonded_force_except_14"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.subtract_nonbonded_force_except_14.html#espaloma.data.md.subtract_nonbonded_force_except_14">[docs]</a><span class="k">def</span> <span class="nf">subtract_nonbonded_force_except_14</span><span class="p">(</span>
-    <span class="n">g</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
+    <span class="n">g</span><span class="p">,</span>
+    <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 
     <span class="c1"># parameterize topology</span>
@@ -258,16 +276,18 @@
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
 
-
         <span class="k">elif</span> <span class="s2">&quot;Bond&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumBonds</span><span class="p">()):</span>
                 <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getBondParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
                 <span class="n">force</span><span class="o">.</span><span class="n">setBondParameters</span><span class="p">(</span>
-                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                    <span class="n">id1</span><span class="p">,</span>
+                    <span class="n">id2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="p">,</span>
+                    <span class="mf">0.0</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-
 
         <span class="k">elif</span> <span class="s2">&quot;Torsion&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumTorsions</span><span class="p">()):</span>
@@ -281,21 +301,32 @@
                     <span class="n">k</span><span class="p">,</span>
                 <span class="p">)</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getTorsionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
                 <span class="n">force</span><span class="o">.</span><span class="n">setTorsionParameters</span><span class="p">(</span>
-                    <span class="n">idx</span><span class="p">,</span> <span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">,</span> <span class="n">id4</span><span class="p">,</span> <span class="n">periodicity</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                    <span class="n">id1</span><span class="p">,</span>
+                    <span class="n">id2</span><span class="p">,</span>
+                    <span class="n">id3</span><span class="p">,</span>
+                    <span class="n">id4</span><span class="p">,</span>
+                    <span class="n">periodicity</span><span class="p">,</span>
+                    <span class="n">phase</span><span class="p">,</span>
+                    <span class="mf">0.0</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-
 
         <span class="k">elif</span> <span class="s2">&quot;Nonbonded&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">exception_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumExceptions</span><span class="p">()):</span>
-                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">chargeprod</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getExceptionParameters</span><span class="p">(</span><span class="n">exception_index</span><span class="p">)</span>
-                <span class="n">force</span><span class="o">.</span><span class="n">setExceptionParameters</span><span class="p">(</span><span class="n">exception_index</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">chargeprod</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mf">1e-8</span><span class="o">*</span><span class="n">epsilon</span><span class="p">)</span>
-
+                <span class="p">(</span>
+                    <span class="n">p1</span><span class="p">,</span>
+                    <span class="n">p2</span><span class="p">,</span>
+                    <span class="n">chargeprod</span><span class="p">,</span>
+                    <span class="n">sigma</span><span class="p">,</span>
+                    <span class="n">epsilon</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getExceptionParameters</span><span class="p">(</span><span class="n">exception_index</span><span class="p">)</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">setExceptionParameters</span><span class="p">(</span>
+                    <span class="n">exception_index</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">chargeprod</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mf">1e-8</span> <span class="o">*</span> <span class="n">epsilon</span>
+                <span class="p">)</span>
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-
-
 
     <span class="c1"># the snapshots</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="p">(</span>
@@ -315,7 +346,9 @@
         <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="n">state</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span>
-            <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getParameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">getForces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">getParameters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">getForces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">getPotentialEnergy</span><span class="p">()</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
@@ -331,33 +364,37 @@
 
     <span class="c1"># put energies to a tensor</span>
     <span class="n">energies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="n">energies</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="n">energies</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
     <span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
     <span class="n">derivatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">(),</span>
     <span class="p">)</span>
 
     <span class="c1"># subtract the energies</span>
     <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">},</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energies</span><span class="p">},</span>
+        <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="s2">&quot;u_ref_prime&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;u_ref_prime&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
 
         <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">derivatives</span><span class="p">},</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;u_ref_prime&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u_ref_prime&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">derivatives</span>
+            <span class="p">},</span>
             <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">g</span></div>
-
 
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># MODULE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="MoleculeVacuumSimulation"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation">[docs]</a><span class="k">class</span> <span class="nc">MoleculeVacuumSimulation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Simluate a single molecule system in vaccum.</span>
+    <span class="sd">&quot;&quot;&quot;Simluate a single molecule system in vaccum.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -408,7 +445,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_conformers</span> <span class="o">=</span> <span class="n">n_conformers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">charge_method</span> <span class="o">=</span> <span class="n">charge_method</span></div>
 
-
 <div class="viewcode-block" id="MoleculeVacuumSimulation.simulation_from_graph"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation.simulation_from_graph">[docs]</a>    <span class="k">def</span> <span class="nf">simulation_from_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create simulation from moleucle &quot;&quot;&quot;</span>
         <span class="c1"># assign partial charge</span>
@@ -432,9 +468,13 @@
         <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="n">system</span><span class="o">.</span><span class="n">getForces</span><span class="p">():</span>
             <span class="k">if</span> <span class="s2">&quot;Nonbonded&quot;</span> <span class="ow">in</span> <span class="n">force</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">particle_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumParticles</span><span class="p">()):</span>
-                    <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getParticleParameters</span><span class="p">(</span><span class="n">particle_index</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">epsilon</span> <span class="o">&lt;</span> <span class="n">EPSILON_MIN</span><span class="p">):</span>
-                        <span class="n">force</span><span class="o">.</span><span class="n">setParticleParameters</span><span class="p">(</span><span class="n">particle_index</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">EPSILON_MIN</span><span class="p">)</span>
+                    <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getParticleParameters</span><span class="p">(</span>
+                        <span class="n">particle_index</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">epsilon</span> <span class="o">&lt;</span> <span class="n">EPSILON_MIN</span><span class="p">:</span>
+                        <span class="n">force</span><span class="o">.</span><span class="n">setParticleParameters</span><span class="p">(</span>
+                            <span class="n">particle_index</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">EPSILON_MIN</span>
+                        <span class="p">)</span>
 
         <span class="c1"># use langevin integrator</span>
         <span class="n">integrator</span> <span class="o">=</span> <span class="n">openmm</span><span class="o">.</span><span class="n">LangevinIntegrator</span><span class="p">(</span>
@@ -443,14 +483,16 @@
 
         <span class="c1"># initialize simulation</span>
         <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
-            <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">,</span> <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span><span class="p">,</span>
+            <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span>
+            <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">,</span>
+            <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span><span class="p">,</span>
             <span class="n">platform</span><span class="o">=</span><span class="n">openmm</span><span class="o">.</span><span class="n">Platform</span><span class="o">.</span><span class="n">getPlatformByName</span><span class="p">(</span><span class="s2">&quot;Reference&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">simulation</span></div>
 
 <div class="viewcode-block" id="MoleculeVacuumSimulation.run"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Collect samples from simulation.</span>
+        <span class="sd">&quot;&quot;&quot;Collect samples from simulation.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -487,9 +529,7 @@
         <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">true_n_conformers</span><span class="p">):</span>
             <span class="c1"># put conformer in simulation</span>
-            <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">conformers</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">conformers</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
 
             <span class="c1"># set velocities</span>
             <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setVelocitiesToTemperature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
@@ -515,6 +555,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">:</span>
             <span class="n">len_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
             <span class="kn">import</span> <span class="nn">random</span>
+
             <span class="n">idx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">true_n_conformers</span><span class="p">)))</span>
             <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">conformers</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
 
@@ -536,7 +577,6 @@
                     <span class="o">.</span><span class="n">getPositions</span><span class="p">(</span><span class="n">asNumpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">DISTANCE_UNIT</span><span class="p">)</span>
                 <span class="p">)</span>
-
 
         <span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>

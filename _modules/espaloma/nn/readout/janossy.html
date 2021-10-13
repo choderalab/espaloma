@@ -78,7 +78,7 @@
 <span class="c1"># MODULE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="JanossyPooling"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.JanossyPooling.html#espaloma.nn.readout.janossy.JanossyPooling">[docs]</a><span class="k">class</span> <span class="nc">JanossyPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Janossy pooling (arXiv:1811.01900) to average node representation</span>
+    <span class="sd">&quot;&quot;&quot;Janossy pooling (arXiv:1811.01900) to average node representation</span>
 <span class="sd">    for higher-order nodes.</span>
 
 
@@ -123,7 +123,7 @@
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">level</span><span class="p">,</span>
                 <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sequential</span><span class="o">.</span><span class="n">_Sequential</span><span class="p">(</span>
-                    <span class="n">in_features</span><span class="o">=</span><span class="n">in_features</span><span class="o">*</span><span class="n">level</span><span class="p">,</span>
+                    <span class="n">in_features</span><span class="o">=</span><span class="n">in_features</span> <span class="o">*</span> <span class="n">level</span><span class="p">,</span>
                     <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
                     <span class="n">layer</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">,</span>
                 <span class="p">),</span>
@@ -133,7 +133,10 @@
                 <span class="nb">setattr</span><span class="p">(</span>
                     <span class="bp">self</span><span class="p">,</span>
                     <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">feature</span><span class="p">),</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">mid_features</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,),</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+                        <span class="n">mid_features</span><span class="p">,</span>
+                        <span class="n">dimension</span><span class="p">,</span>
+                    <span class="p">),</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span><span class="p">:</span>
@@ -148,18 +151,21 @@
             <span class="nb">setattr</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="s2">&quot;f_out_1_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">feature</span><span class="p">,</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">mid_features</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,),</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+                    <span class="n">mid_features</span><span class="p">,</span>
+                    <span class="n">dimension</span><span class="p">,</span>
+                <span class="p">),</span>
             <span class="p">)</span></div>
 
 <div class="viewcode-block" id="JanossyPooling.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.JanossyPooling.html#espaloma.nn.readout.janossy.JanossyPooling.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Forward pass.</span>
+        <span class="sd">&quot;&quot;&quot;Forward pass.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        g : dgl.DGLHeteroGraph,</span>
 <span class="sd">            input graph.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># copy</span>
         <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
             <span class="p">{</span>
@@ -178,7 +184,7 @@
 
         <span class="c1"># pool</span>
         <span class="k">for</span> <span class="n">big_idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">:</span>
-            
+
             <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
 
@@ -235,7 +241,7 @@
 
 
 <div class="viewcode-block" id="JanossyPoolingImproper"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.JanossyPoolingImproper.html#espaloma.nn.readout.janossy.JanossyPoolingImproper">[docs]</a><span class="k">class</span> <span class="nc">JanossyPoolingImproper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Janossy pooling (arXiv:1811.01900) to average node representation</span>
+    <span class="sd">&quot;&quot;&quot;Janossy pooling (arXiv:1811.01900) to average node representation</span>
 <span class="sd">    for improper torsions.</span>
 
 
@@ -245,7 +251,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">config</span><span class="p">,</span>
         <span class="n">in_features</span><span class="p">,</span>
-        <span class="n">out_features</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,},</span>
+        <span class="n">out_features</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="n">out_features_dimensions</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">JanossyPoolingImproper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -278,11 +286,14 @@
                 <span class="nb">setattr</span><span class="p">(</span>
                     <span class="bp">self</span><span class="p">,</span>
                     <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">feature</span><span class="p">),</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">mid_features</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,),</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+                        <span class="n">mid_features</span><span class="p">,</span>
+                        <span class="n">dimension</span><span class="p">,</span>
+                    <span class="p">),</span>
                 <span class="p">)</span></div>
 
 <div class="viewcode-block" id="JanossyPoolingImproper.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.JanossyPoolingImproper.html#espaloma.nn.readout.janossy.JanossyPoolingImproper.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Forward pass.</span>
+        <span class="sd">&quot;&quot;&quot;Forward pass.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -306,7 +317,6 @@
             <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-
         <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">g</span>
 
@@ -318,54 +328,54 @@
 
             <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
                 <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">nodes</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="n">feature</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">big_idx</span><span class="p">,</span> <span class="n">feature</span><span class="p">))(</span>
+                    <span class="n">feature</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">big_idx</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
+                    <span class="p">)(</span>
                         <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                                <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-                                    <span class="p">[</span>
-                                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
-                                            <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                                            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                                                <span class="p">[</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h2&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h3&quot;</span><span class="p">],</span>
-                                                <span class="p">],</span>
-                                                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                            <span class="p">)</span>
+                            <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
+                                        <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">x</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                                            <span class="p">[</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h2&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h3&quot;</span><span class="p">],</span>
+                                            <span class="p">],</span>
+                                            <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                         <span class="p">),</span>
-
-                                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
-                                            <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                                            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                                                <span class="p">[</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h2&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h3&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
-                                                <span class="p">],</span>
-                                                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                            <span class="p">)</span>
+                                    <span class="p">),</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
+                                        <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">x</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                                            <span class="p">[</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h2&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h3&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
+                                            <span class="p">],</span>
+                                            <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                         <span class="p">),</span>
-
-                                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
-                                            <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                                            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                                                <span class="p">[</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h3&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h2&quot;</span><span class="p">],</span>
-                                                <span class="p">],</span>
-                                                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                            <span class="p">)</span>
+                                    <span class="p">),</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
+                                        <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">x</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                                            <span class="p">[</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h3&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h2&quot;</span><span class="p">],</span>
+                                            <span class="p">],</span>
+                                            <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                         <span class="p">),</span>
- 
-                                    <span class="p">],</span>
-                                    <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                <span class="p">),</span>
+                                    <span class="p">),</span>
+                                <span class="p">],</span>
                                 <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                    <span class="p">))</span>
+                            <span class="p">),</span>
+                            <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
                     <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
                 <span class="p">},</span>
                 <span class="n">ntype</span><span class="o">=</span><span class="n">big_idx</span><span class="p">,</span>
@@ -374,11 +384,8 @@
         <span class="k">return</span> <span class="n">g</span></div></div>
 
 
-
-
-
 <div class="viewcode-block" id="JanossyPoolingNonbonded"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.JanossyPoolingNonbonded.html#espaloma.nn.readout.janossy.JanossyPoolingNonbonded">[docs]</a><span class="k">class</span> <span class="nc">JanossyPoolingNonbonded</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Janossy pooling (arXiv:1811.01900) to average node representation</span>
+    <span class="sd">&quot;&quot;&quot;Janossy pooling (arXiv:1811.01900) to average node representation</span>
 <span class="sd">    for improper torsions.</span>
 
 
@@ -421,11 +428,14 @@
                 <span class="nb">setattr</span><span class="p">(</span>
                     <span class="bp">self</span><span class="p">,</span>
                     <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">feature</span><span class="p">),</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">mid_features</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,),</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+                        <span class="n">mid_features</span><span class="p">,</span>
+                        <span class="n">dimension</span><span class="p">,</span>
+                    <span class="p">),</span>
                 <span class="p">)</span></div>
 
 <div class="viewcode-block" id="JanossyPoolingNonbonded.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.JanossyPoolingNonbonded.html#espaloma.nn.readout.janossy.JanossyPoolingNonbonded.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Forward pass.</span>
+        <span class="sd">&quot;&quot;&quot;Forward pass.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -453,37 +463,38 @@
 
             <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
                 <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">nodes</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="n">feature</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">big_idx</span><span class="p">,</span> <span class="n">feature</span><span class="p">))(</span>
+                    <span class="n">feature</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;f_out_</span><span class="si">%s</span><span class="s2">_to_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">big_idx</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
+                    <span class="p">)(</span>
                         <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                                <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-                                    <span class="p">[</span>
-                                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
-                                            <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                                            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                                                <span class="p">[</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
-                                                <span class="p">],</span>
-                                                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                            <span class="p">)</span>
+                            <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
+                                        <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">x</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                                            <span class="p">[</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
+                                            <span class="p">],</span>
+                                            <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                         <span class="p">),</span>
-
-                                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
-                                            <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                                            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                                                <span class="p">[</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
-                                                    <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
-                                                <span class="p">],</span>
-                                                <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                            <span class="p">)</span>
+                                    <span class="p">),</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sequential_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">big_idx</span><span class="p">)(</span>
+                                        <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">x</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                                            <span class="p">[</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">],</span>
+                                                <span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">],</span>
+                                            <span class="p">],</span>
+                                            <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                         <span class="p">),</span>
-
-                                    <span class="p">],</span>
-                                    <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                <span class="p">),</span>
+                                    <span class="p">),</span>
+                                <span class="p">],</span>
                                 <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                    <span class="p">))</span>
+                            <span class="p">),</span>
+                            <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
                     <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
                 <span class="p">},</span>
                 <span class="n">ntype</span><span class="o">=</span><span class="n">big_idx</span><span class="p">,</span>
@@ -495,30 +506,43 @@
 <div class="viewcode-block" id="ExpCoefficients"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.ExpCoefficients.html#espaloma.nn.readout.janossy.ExpCoefficients">[docs]</a><span class="k">class</span> <span class="nc">ExpCoefficients</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="ExpCoefficients.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.ExpCoefficients.html#espaloma.nn.readout.janossy.ExpCoefficients.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">math</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;coefficients&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;log_coefficients&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;coefficients&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;log_coefficients&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;log_coefficients&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;log_coefficients&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">g</span></div></div>
+
 
 <div class="viewcode-block" id="LinearMixtureToOriginal"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.LinearMixtureToOriginal.html#espaloma.nn.readout.janossy.LinearMixtureToOriginal">[docs]</a><span class="k">class</span> <span class="nc">LinearMixtureToOriginal</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="LinearMixtureToOriginal.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.janossy.LinearMixtureToOriginal.html#espaloma.nn.readout.janossy.LinearMixtureToOriginal.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">math</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">],</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;eq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture_to_original</span><span class="p">(</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;coefficients&#39;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;coefficients&#39;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
-            <span class="mf">1.5</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span>
+
+        <span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eq&quot;</span><span class="p">],</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture_to_original</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
+            <span class="mf">1.5</span><span class="p">,</span>
+            <span class="mf">6.0</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">],</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;eq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture_to_original</span><span class="p">(</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;coefficients&#39;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;coefficients&#39;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
-            <span class="mf">0.0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+        <span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eq&quot;</span><span class="p">],</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture_to_original</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;coefficients&#39;</span><span class="p">)</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;n2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;coefficients&#39;</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;coefficients&quot;</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;coefficients&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">g</span></div></div>
-
-
 </pre></div>
 
            </div>

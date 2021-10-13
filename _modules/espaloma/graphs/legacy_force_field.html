@@ -100,7 +100,7 @@
 <span class="c1"># MODULE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="LegacyForceField"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.legacy_force_field.LegacyForceField.html#espaloma.graphs.legacy_force_field.LegacyForceField">[docs]</a><span class="k">class</span> <span class="nc">LegacyForceField</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Class to hold legacy forcefield for typing and parameter assignment.</span>
+    <span class="sd">&quot;&quot;&quot;Class to hold legacy forcefield for typing and parameter assignment.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -195,9 +195,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_idx_2_str</span> <span class="o">=</span> <span class="n">idx_2_str</span>
 
     <span class="k">def</span> <span class="nf">_type_gaff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Type a molecular graph using gaff force fields.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Type a molecular graph using gaff force fields.&quot;&quot;&quot;</span>
         <span class="c1"># assert the forcefield is indeed of gaff family</span>
         <span class="k">assert</span> <span class="s2">&quot;gaff&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span>
 
@@ -207,7 +205,9 @@
         <span class="c1"># import template generator</span>
         <span class="kn">from</span> <span class="nn">openmmforcefields.generators</span> <span class="kn">import</span> <span class="n">GAFFTemplateGenerator</span>
 
-        <span class="n">gaff</span> <span class="o">=</span> <span class="n">GAFFTemplateGenerator</span><span class="p">(</span><span class="n">molecules</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span><span class="p">)</span>
+        <span class="n">gaff</span> <span class="o">=</span> <span class="n">GAFFTemplateGenerator</span><span class="p">(</span>
+            <span class="n">molecules</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span>
+        <span class="p">)</span>
 
         <span class="c1"># create temporary directory for running antechamber</span>
         <span class="kn">import</span> <span class="nn">os</span>
@@ -278,35 +278,47 @@
 
         <span class="n">improper_lookup</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nb">tuple</span><span class="p">(</span><span class="n">idxs</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()):</span> <span class="n">position</span>
-            <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;idxs&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;idxs&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="p">}</span>
 
         <span class="n">torsion_phases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+            <span class="n">n_max_phases</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">torsion_periodicities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+            <span class="n">n_max_phases</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">torsion_ks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,)</span>
-
+        <span class="n">torsion_ks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+            <span class="n">n_max_phases</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="n">improper_phases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+            <span class="n">n_max_phases</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">improper_periodicities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+            <span class="n">n_max_phases</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">improper_ks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,)</span>
+        <span class="n">improper_ks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+            <span class="n">n_max_phases</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">getForces</span><span class="p">():</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
             <span class="k">if</span> <span class="s2">&quot;HarmonicBondForce&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">force</span><span class="o">.</span><span class="n">getNumBonds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">==</span> <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span>
-                    <span class="s2">&quot;n2&quot;</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="n">force</span><span class="o">.</span><span class="n">getNumBonds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span>
+                    <span class="o">==</span> <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n2&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
 
                 <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eq_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
@@ -337,8 +349,9 @@
                     <span class="p">)</span>
 
             <span class="k">if</span> <span class="s2">&quot;HarmonicAngleForce&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">force</span><span class="o">.</span><span class="n">getNumAngles</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">==</span> <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span>
-                    <span class="s2">&quot;n3&quot;</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="n">force</span><span class="o">.</span><span class="n">getNumAngles</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span>
+                    <span class="o">==</span> <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n3&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
 
                 <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eq_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
@@ -348,7 +361,6 @@
                 <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;k_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
                     <span class="n">force</span><span class="o">.</span><span class="n">getNumAngles</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span>
                 <span class="p">)</span>
-
 
                 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumAngles</span><span class="p">()):</span>
                     <span class="n">idx0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">eq</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getAngleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
@@ -371,34 +383,58 @@
 
             <span class="k">if</span> <span class="s2">&quot;PeriodicTorsionForce&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumTorsions</span><span class="p">()):</span>
-                    <span class="n">idx0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">idx3</span><span class="p">,</span> <span class="n">periodicity</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getTorsionParameters</span><span class="p">(</span>
-                            <span class="n">idx</span>
-                    <span class="p">)</span>
+                    <span class="p">(</span>
+                        <span class="n">idx0</span><span class="p">,</span>
+                        <span class="n">idx1</span><span class="p">,</span>
+                        <span class="n">idx2</span><span class="p">,</span>
+                        <span class="n">idx3</span><span class="p">,</span>
+                        <span class="n">periodicity</span><span class="p">,</span>
+                        <span class="n">phase</span><span class="p">,</span>
+                        <span class="n">k</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getTorsionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="p">(</span><span class="n">idx0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">idx3</span><span class="p">)</span> <span class="ow">in</span> <span class="n">torsion_lookup</span><span class="p">:</span>
                         <span class="n">position</span> <span class="o">=</span> <span class="n">torsion_lookup</span><span class="p">[(</span><span class="n">idx0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">idx3</span><span class="p">)]</span>
                         <span class="k">for</span> <span class="n">sub_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_max_phases</span><span class="p">):</span>
                             <span class="k">if</span> <span class="n">torsion_ks</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                                <span class="n">torsion_ks</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">)</span>
-                                <span class="n">torsion_phases</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ANGLE_UNIT</span><span class="p">)</span>
-                                <span class="n">torsion_periodicities</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">periodicity</span>
+                                <span class="n">torsion_ks</span><span class="p">[</span>
+                                    <span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span>
+                                <span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span>
+                                <span class="p">)</span>
+                                <span class="n">torsion_phases</span><span class="p">[</span>
+                                    <span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span>
+                                <span class="p">]</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ANGLE_UNIT</span><span class="p">)</span>
+                                <span class="n">torsion_periodicities</span><span class="p">[</span>
+                                    <span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span>
+                                <span class="p">]</span> <span class="o">=</span> <span class="n">periodicity</span>
 
-                                <span class="n">position</span> <span class="o">=</span> <span class="n">torsion_lookup</span><span class="p">[(</span><span class="n">idx3</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx0</span><span class="p">)]</span>
-                                <span class="n">torsion_ks</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">)</span>
-                                <span class="n">torsion_phases</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ANGLE_UNIT</span><span class="p">)</span>
-                                <span class="n">torsion_periodicities</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">periodicity</span>
+                                <span class="n">position</span> <span class="o">=</span> <span class="n">torsion_lookup</span><span class="p">[</span>
+                                    <span class="p">(</span><span class="n">idx3</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx0</span><span class="p">)</span>
+                                <span class="p">]</span>
+                                <span class="n">torsion_ks</span><span class="p">[</span>
+                                    <span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span>
+                                <span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
+                                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span>
+                                <span class="p">)</span>
+                                <span class="n">torsion_phases</span><span class="p">[</span>
+                                    <span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span>
+                                <span class="p">]</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ANGLE_UNIT</span><span class="p">)</span>
+                                <span class="n">torsion_periodicities</span><span class="p">[</span>
+                                    <span class="n">position</span><span class="p">,</span> <span class="n">sub_idx</span>
+                                <span class="p">]</span> <span class="o">=</span> <span class="n">periodicity</span>
                                 <span class="k">break</span>
 
             <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">nodes</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="n">torsion_ks</span><span class="p">,</span>
-                        <span class="s2">&quot;periodicity_ref&quot;</span><span class="p">:</span> <span class="n">torsion_periodicities</span><span class="p">,</span>
-                        <span class="s2">&quot;phases_ref&quot;</span><span class="p">:</span> <span class="n">torsion_phases</span><span class="p">,</span>
-                    <span class="p">},</span>
-                    <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4&quot;</span>
+                <span class="k">lambda</span> <span class="n">nodes</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="n">torsion_ks</span><span class="p">,</span>
+                    <span class="s2">&quot;periodicity_ref&quot;</span><span class="p">:</span> <span class="n">torsion_periodicities</span><span class="p">,</span>
+                    <span class="s2">&quot;phases_ref&quot;</span><span class="p">:</span> <span class="n">torsion_phases</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="sd">&#39;&#39;&#39;</span>
+            <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            g.heterograph.apply_nodes(</span>
 <span class="sd">                    lambda nodes: {</span>
 <span class="sd">                        &quot;k_ref&quot;: improper_ks,</span>
@@ -408,9 +444,9 @@
 <span class="sd">                    ntype=&quot;n4_improper&quot;</span>
 <span class="sd">            )</span>
 
-<span class="sd">            &#39;&#39;&#39;</span>
+<span class="sd">            &quot;&quot;&quot;</span>
 
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        def apply_torsion(node, n_max_phases=6):</span>
 <span class="sd">            phases = torch.zeros(</span>
 <span class="sd">                g.heterograph.number_of_nodes(&quot;n4&quot;), n_max_phases,</span>
@@ -447,7 +483,7 @@
 <span class="sd">            }</span>
 
 <span class="sd">        g.heterograph.apply_nodes(apply_torsion, ntype=&quot;n4&quot;)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">g</span>
 
@@ -457,7 +493,8 @@
 
         <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
+                <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="mf">2.0</span>
+                <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
                     <span class="p">[</span>
                         <span class="n">forces</span><span class="p">[</span><span class="s2">&quot;Bonds&quot;</span><span class="p">][</span>
                             <span class="nb">tuple</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;idxs&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
@@ -485,7 +522,8 @@
 
         <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span> <span class="c1"># OpenFF records 1/2k as param</span>
+                <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="mf">2.0</span>
+                <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>  <span class="c1"># OpenFF records 1/2k as param</span>
                     <span class="p">[</span>
                         <span class="n">forces</span><span class="p">[</span><span class="s2">&quot;Angles&quot;</span><span class="p">][</span>
                             <span class="nb">tuple</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;idxs&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
@@ -541,14 +579,19 @@
 
         <span class="k">def</span> <span class="nf">apply_torsion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">n_max_phases</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
             <span class="n">phases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+                <span class="n">n_max_phases</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+                <span class="n">n_max_phases</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,)</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4&quot;</span><span class="p">),</span>
+                <span class="n">n_max_phases</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="n">force</span> <span class="o">=</span> <span class="n">forces</span><span class="p">[</span><span class="s2">&quot;ProperTorsions&quot;</span><span class="p">]</span>
 
@@ -576,17 +619,21 @@
                 <span class="s2">&quot;phases_ref&quot;</span><span class="p">:</span> <span class="n">phases</span><span class="p">,</span>
             <span class="p">}</span>
 
-
         <span class="k">def</span> <span class="nf">apply_improper_torsion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">n_max_phases</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
             <span class="n">phases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">),</span>
+                <span class="n">n_max_phases</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">periodicity</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">),</span>
+                <span class="n">n_max_phases</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">),</span> <span class="n">n_max_phases</span><span class="p">,)</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">),</span>
+                <span class="n">n_max_phases</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="n">force</span> <span class="o">=</span> <span class="n">forces</span><span class="p">[</span><span class="s2">&quot;ImproperTorsions&quot;</span><span class="p">]</span>
 
@@ -609,13 +656,11 @@
                                 <span class="n">_force</span><span class="p">,</span> <span class="s2">&quot;periodicity</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sub_idx</span>
                             <span class="p">)</span>
 
-
             <span class="k">return</span> <span class="p">{</span>
                 <span class="s2">&quot;k_ref&quot;</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
                 <span class="s2">&quot;periodicity_ref&quot;</span><span class="p">:</span> <span class="n">periodicity</span><span class="p">,</span>
                 <span class="s2">&quot;phases_ref&quot;</span><span class="p">:</span> <span class="n">phases</span><span class="p">,</span>
             <span class="p">}</span>
-
 
         <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_torsion</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span><span class="n">apply_improper_torsion</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">)</span>
@@ -667,14 +712,12 @@
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
             <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">setPositions</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">us</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span>
-                    <span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">getPotentialEnergy</span><span class="p">()</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span>
-                    <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span>
-                <span class="p">)</span>
+                <span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">getState</span><span class="p">(</span><span class="n">getEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">getPotentialEnergy</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_UNIT</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;u</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span> <span class="o">=</span> <span class="n">us</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;g&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">]</span> <span class="o">=</span> <span class="n">us</span>
 
         <span class="k">return</span> <span class="n">g</span>
 
@@ -730,9 +773,7 @@
         <span class="k">return</span> <span class="n">g</span>
 
 <div class="viewcode-block" id="LegacyForceField.parametrize"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.legacy_force_field.LegacyForceField.html#espaloma.graphs.legacy_force_field.LegacyForceField.parametrize">[docs]</a>    <span class="k">def</span> <span class="nf">parametrize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Parametrize a molecular graph.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Parametrize a molecular graph.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;smirnoff&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span> <span class="ow">or</span> <span class="s2">&quot;openff&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametrize_smirnoff</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
 
@@ -743,9 +784,7 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="LegacyForceField.typing"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.legacy_force_field.LegacyForceField.html#espaloma.graphs.legacy_force_field.LegacyForceField.typing">[docs]</a>    <span class="k">def</span> <span class="nf">typing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Type a molecular graph.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Type a molecular graph.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;gaff&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forcefield</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_gaff</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
 

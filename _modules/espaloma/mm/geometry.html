@@ -126,7 +126,7 @@
 <div class="viewcode-block" id="dihedral"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.dihedral.html#espaloma.mm.geometry.dihedral">[docs]</a><span class="k">def</span> <span class="nf">dihedral</span><span class="p">(</span>
     <span class="n">x0</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x3</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Dihedral between four points.</span>
+    <span class="sd">&quot;&quot;&quot;Dihedral between four points.</span>
 
 <span class="sd">    Reference</span>
 <span class="sd">    ---------</span>
@@ -185,7 +185,7 @@
         <span class="s2">&quot;x_between&quot;</span><span class="p">:</span> <span class="n">distance</span><span class="p">(</span>
             <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz0&quot;</span><span class="p">],</span>
             <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
-        <span class="p">)</span>
+        <span class="p">),</span>
     <span class="p">}</span></div>
 
 
@@ -219,9 +219,8 @@
             <span class="n">x0</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz1&quot;</span><span class="p">],</span>
             <span class="n">x1</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz2&quot;</span><span class="p">],</span>
             <span class="n">x2</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;xyz3&quot;</span><span class="p">],</span>
-        <span class="p">)</span>
+        <span class="p">),</span>
     <span class="p">}</span></div>
-
 
 
 <span class="c1"># =============================================================================</span>
@@ -232,7 +231,7 @@
 
 
 <div class="viewcode-block" id="geometry_in_graph"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.geometry.geometry_in_graph.html#espaloma.mm.geometry.geometry_in_graph">[docs]</a><span class="k">def</span> <span class="nf">geometry_in_graph</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Assign values to geometric entities in graphs.</span>
+    <span class="sd">&quot;&quot;&quot;Assign values to geometric entities in graphs.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

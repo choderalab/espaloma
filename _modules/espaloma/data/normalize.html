@@ -79,9 +79,7 @@
 <span class="c1"># BASE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="BaseNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.BaseNormalize.html#espaloma.data.normalize.BaseNormalize">[docs]</a><span class="k">class</span> <span class="nc">BaseNormalize</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Base class for normalizing operation.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Base class for normalizing operation.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseNormalize.__init__"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.BaseNormalize.html#espaloma.data.normalize.BaseNormalize.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
@@ -97,7 +95,7 @@
 <span class="c1"># MODULE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="DatasetNormalNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.DatasetNormalNormalize.html#espaloma.data.normalize.DatasetNormalNormalize">[docs]</a><span class="k">class</span> <span class="nc">DatasetNormalNormalize</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Normalizing operation based on a dataset of molecules,</span>
+    <span class="sd">&quot;&quot;&quot;Normalizing operation based on a dataset of molecules,</span>
 <span class="sd">    assuming parameters having normal distribution.</span>
 
 <span class="sd">    Parameters</span>
@@ -136,9 +134,9 @@
                     <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">)</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
-                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span>
+                    <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># get normalize and unnormalize functions</span>
         <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
@@ -189,7 +187,7 @@
 
 
 <div class="viewcode-block" id="DatasetLogNormalNormalize"><a class="viewcode-back" href="../../../autosummary/espaloma.data.normalize.DatasetLogNormalNormalize.html#espaloma.data.normalize.DatasetLogNormalNormalize">[docs]</a><span class="k">class</span> <span class="nc">DatasetLogNormalNormalize</span><span class="p">(</span><span class="n">BaseNormalize</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Normalizing operation based on a dataset of molecules,</span>
+    <span class="sd">&quot;&quot;&quot;Normalizing operation based on a dataset of molecules,</span>
 <span class="sd">    assuming parameters having log normal distribution.</span>
 
 <span class="sd">    Parameters</span>
@@ -228,9 +226,9 @@
                     <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">)</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
-                    <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="n">term</span><span class="p">][</span>
+                    <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_ref&quot;</span><span class="p">,</span> <span class="s2">&quot;_std&quot;</span><span class="p">)</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># get normalize and unnormalize functions</span>
         <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>

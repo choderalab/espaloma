@@ -77,7 +77,7 @@
 <div class="viewcode-block" id="periodic_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.torsion.periodic_torsion.html#espaloma.mm.torsion.periodic_torsion">[docs]</a><span class="k">def</span> <span class="nf">periodic_torsion</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">periodicity</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)),</span> <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Periodic torsion potential</span>
+    <span class="sd">&quot;&quot;&quot;Periodic torsion potential</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -100,60 +100,81 @@
     <span class="c1"># NOTE:</span>
     <span class="c1"># 0.5 because all torsions are calculated twice</span>
     <span class="n">out</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">periodic</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">periodicity</span><span class="o">=</span><span class="n">periodicity</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+        <span class="n">periodicity</span><span class="o">=</span><span class="n">periodicity</span><span class="p">,</span>
+        <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># assert(out.shape == (len(x), 1))</span>
     <span class="k">return</span> <span class="n">out</span></div>
 
 
 <div class="viewcode-block" id="angle_angle"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.torsion.angle_angle.html#espaloma.mm.torsion.angle_angle">[docs]</a><span class="k">def</span> <span class="nf">angle_angle</span><span class="p">(</span>
-        <span class="n">u_angle_left</span><span class="p">,</span>
-        <span class="n">u_angle_right</span><span class="p">,</span>
-        <span class="n">k_angle_angle</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">u_angle_left</span><span class="p">,</span>
+    <span class="n">u_angle_right</span><span class="p">,</span>
+    <span class="n">k_angle_angle</span><span class="p">,</span>
+<span class="p">):</span>
 
     <span class="n">u_angle_left</span> <span class="o">=</span> <span class="n">u_angle_left</span> <span class="o">-</span> <span class="n">u_angle_left</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">u_angle_right</span> <span class="o">=</span> <span class="n">u_angle_right</span> <span class="o">-</span> <span class="n">u_angle_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">u_angle_right</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">u_angle_right</span> <span class="o">-</span> <span class="n">u_angle_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">k_angle_angle</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="angle_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.torsion.angle_torsion.html#espaloma.mm.torsion.angle_torsion">[docs]</a><span class="k">def</span> <span class="nf">angle_torsion</span><span class="p">(</span>
-        <span class="n">u_angle_left</span><span class="p">,</span>
-        <span class="n">u_angle_right</span><span class="p">,</span>
-        <span class="n">u_torsion</span><span class="p">,</span>
-        <span class="n">k_angle_torsion</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">u_angle_left</span><span class="p">,</span>
+    <span class="n">u_angle_right</span><span class="p">,</span>
+    <span class="n">u_torsion</span><span class="p">,</span>
+    <span class="n">k_angle_torsion</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="n">u_angle_left</span> <span class="o">=</span> <span class="n">u_angle_left</span> <span class="o">-</span> <span class="n">u_angle_left</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">u_angle_right</span> <span class="o">=</span> <span class="n">u_angle_right</span> <span class="o">-</span> <span class="n">u_angle_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">k_angle_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">u_torsion</span>\
-     <span class="o">+</span> <span class="n">k_angle_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">u_torsion</span></div>
+    <span class="n">u_angle_right</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">u_angle_right</span> <span class="o">-</span> <span class="n">u_angle_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">k_angle_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">u_torsion</span>
+        <span class="o">+</span> <span class="n">k_angle_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">u_torsion</span>
+    <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="angle_angle_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.torsion.angle_angle_torsion.html#espaloma.mm.torsion.angle_angle_torsion">[docs]</a><span class="k">def</span> <span class="nf">angle_angle_torsion</span><span class="p">(</span>
-        <span class="n">u_angle_left</span><span class="p">,</span>
-        <span class="n">u_angle_right</span><span class="p">,</span>
-        <span class="n">u_torsion</span><span class="p">,</span>
-        <span class="n">k_angle_angle_torsion</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">u_angle_left</span><span class="p">,</span>
+    <span class="n">u_angle_right</span><span class="p">,</span>
+    <span class="n">u_torsion</span><span class="p">,</span>
+    <span class="n">k_angle_angle_torsion</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="n">u_angle_left</span> <span class="o">=</span> <span class="n">u_angle_left</span> <span class="o">-</span> <span class="n">u_angle_left</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">u_angle_right</span> <span class="o">=</span> <span class="n">u_angle_right</span> <span class="o">-</span> <span class="n">u_angle_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">k_angle_angle_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>\
-        <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>\
-        <span class="o">*</span> <span class="n">u_torsion</span></div>
+    <span class="n">u_angle_right</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">u_angle_right</span> <span class="o">-</span> <span class="n">u_angle_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">k_angle_angle_torsion</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">u_angle_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">u_torsion</span>
+    <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="bond_torsion"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.torsion.bond_torsion.html#espaloma.mm.torsion.bond_torsion">[docs]</a><span class="k">def</span> <span class="nf">bond_torsion</span><span class="p">(</span>
-        <span class="n">u_bond_left</span><span class="p">,</span>
-        <span class="n">u_bond_right</span><span class="p">,</span>
-        <span class="n">u_bond_center</span><span class="p">,</span>
-        <span class="n">u_torsion</span><span class="p">,</span>
-        <span class="n">k_side_torsion</span><span class="p">,</span>
-        <span class="n">k_center_torsion</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="n">u_bond_left</span><span class="p">,</span>
+    <span class="n">u_bond_right</span><span class="p">,</span>
+    <span class="n">u_bond_center</span><span class="p">,</span>
+    <span class="n">u_torsion</span><span class="p">,</span>
+    <span class="n">k_side_torsion</span><span class="p">,</span>
+    <span class="n">k_center_torsion</span><span class="p">,</span>
+<span class="p">):</span>
 
     <span class="n">u_bond_left</span> <span class="o">=</span> <span class="n">u_bond_left</span> <span class="o">-</span> <span class="n">u_bond_left</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">u_bond_right</span> <span class="o">=</span> <span class="n">u_bond_right</span> <span class="o">-</span> <span class="n">u_bond_right</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">u_bond_center</span> <span class="o">=</span> <span class="n">u_bond_center</span> <span class="o">-</span> <span class="n">u_bond_center</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">k_side_torsion</span> <span class="o">*</span> <span class="n">u_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_bond_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>\
-     <span class="o">+</span> <span class="n">k_side_torsion</span> <span class="o">*</span> <span class="n">u_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_bond_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>\
-     <span class="o">+</span> <span class="n">k_center_torsion</span> <span class="o">*</span> <span class="n">u_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_bond_center</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span></div>
+    <span class="n">u_bond_center</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">u_bond_center</span> <span class="o">-</span> <span class="n">u_bond_center</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">k_side_torsion</span> <span class="o">*</span> <span class="n">u_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_bond_left</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">k_side_torsion</span> <span class="o">*</span> <span class="n">u_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_bond_right</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">k_center_torsion</span> <span class="o">*</span> <span class="n">u_torsion</span> <span class="o">*</span> <span class="p">(</span><span class="n">u_bond_center</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="p">)</span></div>
 </pre></div>
 
            </div>

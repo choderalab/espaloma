@@ -92,7 +92,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">config_local</span> <span class="o">=</span> <span class="n">config_local</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config_global</span> <span class="o">=</span> <span class="n">config_global</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d_local</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sequential</span><span class="o">.</span><span class="n">_Sequential</span><span class="p">(</span>
-            <span class="n">in_features</span><span class="o">=</span><span class="n">in_features</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config_local</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span>
+            <span class="n">in_features</span><span class="o">=</span><span class="n">in_features</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config_local</span><span class="p">,</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">mid_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">config_local</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>

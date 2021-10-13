@@ -79,7 +79,7 @@
 <span class="c1"># MODULE CLASSES</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; The base class of map-style dataset.</span>
+    <span class="sd">&quot;&quot;&quot;The base class of map-style dataset.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -162,7 +162,6 @@
 
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">graphs</span><span class="o">=</span><span class="n">graphs</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">)</span>
@@ -187,7 +186,7 @@
         <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="Dataset.apply"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Apply functions to the elements of the dataset.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply functions to the elements of the dataset.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -221,7 +220,7 @@
         <span class="k">return</span> <span class="bp">self</span>  <span class="c1"># to allow grammar: ds = ds.apply(...)</span></div>
 
 <div class="viewcode-block" id="Dataset.split"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partition</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Split the dataset according to some partition.</span>
+        <span class="sd">&quot;&quot;&quot;Split the dataset according to some partition.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -239,7 +238,7 @@
         <span class="k">return</span> <span class="n">ds</span></div>
 
 <div class="viewcode-block" id="Dataset.subsample"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.subsample">[docs]</a>    <span class="k">def</span> <span class="nf">subsample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Subsample the dataset according to some ratio.</span>
+        <span class="sd">&quot;&quot;&quot;Subsample the dataset according to some ratio.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -251,12 +250,13 @@
         <span class="n">n_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">idxs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_data</span><span class="p">))</span>
         <span class="kn">import</span> <span class="nn">random</span>
+
         <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-        <span class="n">_idxs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n_data</span><span class="o">*</span><span class="n">ratio</span><span class="p">))</span>
+        <span class="n">_idxs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n_data</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">_idxs</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Dataset.save"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Save dataset to path.</span>
+        <span class="sd">&quot;&quot;&quot;Save dataset to path.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -269,7 +269,7 @@
 
 <div class="viewcode-block" id="Dataset.load"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Load path to dataset.</span>
+        <span class="sd">&quot;&quot;&quot;Load path to dataset.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -282,13 +282,11 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">graphs</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span> <span class="o">+</span> <span class="n">x</span><span class="o">.</span><span class="n">graphs</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphs</span> <span class="o">+</span> <span class="n">x</span><span class="o">.</span><span class="n">graphs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GraphDataset"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.GraphDataset.html#espaloma.data.dataset.GraphDataset">[docs]</a><span class="k">class</span> <span class="nc">GraphDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Dataset with additional support for only viewing</span>
+    <span class="sd">&quot;&quot;&quot;Dataset with additional support for only viewing</span>
 <span class="sd">    certain attributes as `torch.utils.data.DataLoader`</span>
 
 
@@ -331,7 +329,7 @@
             <span class="p">)</span>
 
 <div class="viewcode-block" id="GraphDataset.view"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.GraphDataset.html#espaloma.data.dataset.GraphDataset.view">[docs]</a>    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collate_fn</span><span class="o">=</span><span class="s2">&quot;graph&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Provide a data loader.</span>
+        <span class="sd">&quot;&quot;&quot;Provide a data loader.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -373,6 +371,7 @@
 
 <div class="viewcode-block" id="GraphDataset.save"><a class="viewcode-back" href="../../../autosummary/espaloma.data.dataset.GraphDataset.html#espaloma.data.dataset.GraphDataset.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">os</span>
+
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">graph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">):</span>
             <span class="n">graph</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span></div>
@@ -380,16 +379,14 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">os</span>
+
         <span class="n">paths</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">_path</span> <span class="k">for</span> <span class="n">_path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
 
         <span class="n">graphs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-                <span class="n">graphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">_path</span><span class="p">)</span>
-                <span class="p">)</span>
+            <span class="n">graphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">Graph</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">_path</span><span class="p">))</span>
 
-        
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">graphs</span><span class="p">)</span></div>
 </pre></div>
 

@@ -75,7 +75,7 @@
 <span class="c1"># MODULE FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="harmonic_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.bond.harmonic_bond.html#espaloma.mm.bond.harmonic_bond">[docs]</a><span class="k">def</span> <span class="nf">harmonic_bond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">eq</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Harmonic bond energy.</span>
+    <span class="sd">&quot;&quot;&quot;Harmonic bond energy.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -99,18 +99,21 @@
     <span class="c1"># 0.25 because all bonds are calculated twice</span>
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">harmonic</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="n">eq</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="gaussian_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.bond.gaussian_bond.html#espaloma.mm.bond.gaussian_bond">[docs]</a><span class="k">def</span> <span class="nf">gaussian_bond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Bond energy with Gaussian basis function.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,)</span></div>
+<div class="viewcode-block" id="gaussian_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.bond.gaussian_bond.html#espaloma.mm.bond.gaussian_bond">[docs]</a><span class="k">def</span> <span class="nf">gaussian_bond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Bond energy with Gaussian basis function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="linear_mixture_bond"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.bond.linear_mixture_bond.html#espaloma.mm.bond.linear_mixture_bond">[docs]</a><span class="k">def</span> <span class="nf">linear_mixture_bond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Bond energy with Linear basis function.</span>
+    <span class="sd">&quot;&quot;&quot;Bond energy with Linear basis function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="n">phases</span>
+    <span class="p">)</span></div>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">linear_mixture</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="bond_high"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.bond.bond_high.html#espaloma.mm.bond.bond_high">[docs]</a><span class="k">def</span> <span class="nf">bond_high</span><span class="p">(</span><span class="n">u_bond</span><span class="p">,</span> <span class="n">k3</span><span class="p">,</span> <span class="n">k4</span><span class="p">):</span>
     <span class="n">u_bond</span> <span class="o">=</span> <span class="n">u_bond</span> <span class="o">-</span> <span class="n">u_bond</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
