@@ -5,11 +5,13 @@ from simtk import openmm
 from simtk import openmm as mm
 from simtk import unit
 import pytest
+
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
 from simtk.unit import Quantity
 
 from simtk.openmm import app
+
 
 def test_butane():
     """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane"""
@@ -18,11 +20,13 @@ def test_butane():
     g = ff.parametrize(g)
     esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
 
+
 def test_caffeine():
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
     g = ff.parametrize(g)
     esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
+
 
 def test_parameter_consistent_caffeine():
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
@@ -46,8 +50,9 @@ def test_parameter_consistent_caffeine():
                     decimal=3,
                 )
 
+
 def test_energy_consistent_caffeine():
-    """ Deploy a caffeine molecule parametrized by a traditional force field
+    """Deploy a caffeine molecule parametrized by a traditional force field
     and deployed by espaloma, make sure the energies computed using espaloma
     and OpenMM are same or close.
 
@@ -62,11 +67,14 @@ def test_energy_consistent_caffeine():
 
     # compute energies using espaloma
     import torch
-    g.nodes['n1'].data['xyz'] = torch.randn(
-        g.heterograph.number_of_nodes('n1'), 1, 3
+
+    g.nodes["n1"].data["xyz"] = torch.randn(
+        g.heterograph.number_of_nodes("n1"), 1, 3
     )
     esp.mm.geometry.geometry_in_graph(g.heterograph)
-    esp.mm.energy.energy_in_graph(g.heterograph, terms=["n2", "n3", "n4", "n4_improper"], suffix="_ref")
+    esp.mm.energy.energy_in_graph(
+        g.heterograph, terms=["n2", "n3", "n4", "n4_improper"], suffix="_ref"
+    )
 
     # compute energies using OpenMM with bond, angle, and torsion breakdown
     forces = list(system.getForces())
@@ -115,12 +123,14 @@ def test_energy_consistent_caffeine():
 
     # create new simulation
     _simulation = openmm.app.Simulation(
-        g.mol.to_topology().to_openmm(), system, openmm.VerletIntegrator(0.0),
+        g.mol.to_topology().to_openmm(),
+        system,
+        openmm.VerletIntegrator(0.0),
     )
 
     _simulation.context.setPositions(
         Quantity(
-            g.nodes['n1'].data['xyz'][:, 0, :].numpy(),
+            g.nodes["n1"].data["xyz"][:, 0, :].numpy(),
             unit=esp.units.DISTANCE_UNIT,
         ).value_in_unit(unit.nanometer)
     )
@@ -129,7 +139,9 @@ def test_energy_consistent_caffeine():
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
-            getEnergy=True, getParameters=True, groups=2 ** idx,
+            getEnergy=True,
+            getParameters=True,
+            groups=2 ** idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(
@@ -154,11 +166,11 @@ def test_energy_consistent_caffeine():
 
     # test if torsion energies are equal
     npt.assert_almost_equal(
-        g.nodes["g"].data["u_n4_ref"].numpy() + g.nodes["g"].data["u_n4_improper_ref"].numpy(),
+        g.nodes["g"].data["u_n4_ref"].numpy()
+        + g.nodes["g"].data["u_n4_improper_ref"].numpy(),
         energies["PeriodicTorsionForce"],
         decimal=3,
     )
-
 
 
 # TODO: test that desired parameters are assigned

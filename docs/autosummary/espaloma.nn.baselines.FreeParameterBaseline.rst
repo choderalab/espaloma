@@ -60,6 +60,5 @@ espaloma.nn.baselines.FreeParameterBaseline
    
       ~FreeParameterBaseline.T_destination
       ~FreeParameterBaseline.dump_patches
-      ~FreeParameterBaseline.training
    
    

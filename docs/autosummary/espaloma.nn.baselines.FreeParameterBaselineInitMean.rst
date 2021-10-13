@@ -60,6 +60,5 @@ espaloma.nn.baselines.FreeParameterBaselineInitMean
    
       ~FreeParameterBaselineInitMean.T_destination
       ~FreeParameterBaselineInitMean.dump_patches
-      ~FreeParameterBaselineInitMean.training
    
    

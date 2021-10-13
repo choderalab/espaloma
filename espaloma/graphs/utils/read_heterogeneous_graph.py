@@ -69,7 +69,7 @@ def relationship_indices_from_offmol(
 
 
 def from_homogeneous_and_mol(g, offmol):
-    r""" Build heterogeneous graph from homogeneous ones.
+    r"""Build heterogeneous graph from homogeneous ones.
 
 
     Note
@@ -197,7 +197,13 @@ def from_homogeneous_and_mol(g, offmol):
     )
 
     # onefour is the two ends of torsion
-    idxs["onefour"] = np.stack([idxs["n4"][:, 0], idxs["n4"][:, 3],], axis=1)
+    idxs["onefour"] = np.stack(
+        [
+            idxs["n4"][:, 0],
+            idxs["n4"][:, 3],
+        ],
+        axis=1,
+    )
 
     # membership
     for term in ["nonbonded", "onefour"]:
@@ -208,7 +214,10 @@ def from_homogeneous_and_mol(g, offmol):
             )
 
             hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
-                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                [
+                    idxs[term][:, pos_idx],
+                    np.arange(idxs[term].shape[0]),
+                ],
                 axis=-1,
             )
 
@@ -221,7 +230,10 @@ def from_homogeneous_and_mol(g, offmol):
             )
 
             hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
-                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                [
+                    idxs[term][:, pos_idx],
+                    np.arange(idxs[term].shape[0]),
+                ],
                 axis=-1,
             )
 
@@ -238,11 +250,16 @@ def from_homogeneous_and_mol(g, offmol):
         "onefour",
     ]:
         hg[(term, "%s_in_g" % term, "g",)] = np.stack(
-            [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
+            [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))],
+            axis=1,
         )
 
         hg[("g", "g_has_%s" % term, term)] = np.stack(
-            [np.zeros(len(idxs[term])), np.arange(len(idxs[term])),], axis=1,
+            [
+                np.zeros(len(idxs[term])),
+                np.arange(len(idxs[term])),
+            ],
+            axis=1,
         )
 
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})

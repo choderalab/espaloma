@@ -8,7 +8,7 @@ import torch
 # MODULE CLASSES
 # =============================================================================
 class FreeParameterBaseline(torch.nn.Module):
-    """ Parametrize a graph by populating the parameters with free
+    """Parametrize a graph by populating the parameters with free
     `torch.nn.Parameter`.
 
 
@@ -27,7 +27,9 @@ class FreeParameterBaseline(torch.nn.Module):
                         self,
                         "%s_%s" % (term, param.replace("_ref", "")),
                         torch.nn.Parameter(
-                            torch.zeros_like(param_value.clone().detach(),)
+                            torch.zeros_like(
+                                param_value.clone().detach(),
+                            )
                         ),
                     )
 
@@ -44,7 +46,8 @@ class FreeParameterBaseline(torch.nn.Module):
                         update_dicts[term][
                             param.replace("_ref", "")
                         ] = getattr(
-                            self, "%s_%s" % (term, param.replace("_ref", "")),
+                            self,
+                            "%s_%s" % (term, param.replace("_ref", "")),
                         )
 
         for node, update_dict in update_dicts.items():
@@ -53,8 +56,9 @@ class FreeParameterBaseline(torch.nn.Module):
 
         return g
 
+
 class FreeParameterBaselineInitMean(torch.nn.Module):
-    """ Parametrize a graph by populating the parameters with free
+    """Parametrize a graph by populating the parameters with free
     `torch.nn.Parameter`.
 
     """
@@ -72,7 +76,9 @@ class FreeParameterBaselineInitMean(torch.nn.Module):
                         self,
                         "%s_%s" % (term, param.replace("_ref", "")),
                         torch.nn.Parameter(
-                            torch.ones_like(param_value.clone().detach(),)
+                            torch.ones_like(
+                                param_value.clone().detach(),
+                            )
                             * param_value.clone().detach().mean()
                         ),
                     )
@@ -90,7 +96,8 @@ class FreeParameterBaselineInitMean(torch.nn.Module):
                         update_dicts[term][
                             param.replace("_ref", "")
                         ] = getattr(
-                            self, "%s_%s" % (term, param.replace("_ref", "")),
+                            self,
+                            "%s_%s" % (term, param.replace("_ref", "")),
                         )
 
         for node, update_dict in update_dicts.items():

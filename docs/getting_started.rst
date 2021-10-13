@@ -27,7 +27,7 @@ Minimal Example
         config=[128, "relu", 128, "relu", 128, "relu"], # 3 layers, 128 units, ReLU activation
     )
 
-    # define Espaloma stage II and III: 
+    # define Espaloma stage II and III:
     # atom latent representation -> bond, angle, and torsion representation and parameters
     readout = esp.nn.readout.janossy.JanossyPooling(
         in_features=128,
@@ -42,7 +42,7 @@ Minimal Example
 
     # compose all three Espaloma stages into an end-to-end model
     espaloma_model = torch.nn.Sequential(
-                     representation, 
+                     representation,
                      readout,
                      esp.mm.geometry.GeometryInGraph(),
                      esp.mm.energy.EnergyInGraph(),
@@ -69,8 +69,3 @@ Minimal Example
         device=torch.device('cuda:0'), n_epochs=5000,
         optimizer=lambda net: torch.optim.Adam(net.parameters(), 1e-3), # use Adam optimizer
     ).run()
-
-
-
-
- 

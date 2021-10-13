@@ -60,6 +60,5 @@ espaloma.mm.geometry.GeometryInGraph
    
       ~GeometryInGraph.T_destination
       ~GeometryInGraph.dump_patches
-      ~GeometryInGraph.training
    
    

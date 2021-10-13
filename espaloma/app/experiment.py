@@ -22,7 +22,7 @@ class Experiment(abc.ABC):
 
 
 class Train(Experiment):
-    """ Training experiment.
+    """Training experiment.
 
     Parameters
     ----------
@@ -110,7 +110,7 @@ class Train(Experiment):
             if isinstance(self.optimizer, torch.optim.LBFGS):
                 retain_graph = True
             else:
-                retain_graph=False
+                retain_graph = False
 
             g = g.to(self.device)
             self.net.train()
@@ -129,12 +129,12 @@ class Train(Experiment):
 
             loss = closure()
             self.optimizer.step()
-            
+
             if self.scheduler is not None:
                 self.scheduler.step(loss)
 
     def train(self):
-        """ Train the model for multiple steps and
+        """Train the model for multiple steps and
         record the weights once every `record_interval`
 
         """
@@ -154,7 +154,7 @@ class Train(Experiment):
 
 
 class Test(Experiment):
-    """ Test experiment.
+    """Test experiment.
 
     Parameters
     ----------
@@ -208,14 +208,14 @@ class Test(Experiment):
         # g = g.to(self.device)
 
         if self.states is None:
-            self.states = {'final': None}
+            self.states = {"final": None}
 
         for state_name, state in self.states.items():  # loop through states
             if state is not None:
                 # load the state dict
                 self.net.load_state_dict(state)
 
-            self.net.eval() 
+            self.net.eval()
 
             for metric in self.metrics:
                 assert isinstance(metric, esp.metrics.Metric)
@@ -236,19 +236,16 @@ class Test(Experiment):
 
                 # loop through the metrics
                 results[metric.__name__][state_name] = (
-                    metric.base_metric(inputs, targets)
-                    .detach()
-                    .cpu()
-                    .numpy()
+                    metric.base_metric(inputs, targets).detach().cpu().numpy()
                 )
 
-        self.ref_g = self.normalize.unnorm(self.net(g)).to(torch.device('cpu'))
+        self.ref_g = self.normalize.unnorm(self.net(g)).to(
+            torch.device("cpu")
+        )
 
         for term in self.ref_g.ntypes:
             for param in self.ref_g.nodes[term].data.keys():
-                g.nodes[term].data[param] = (
-                    g.nodes[term].data[param].detach()
-                )
+                g.nodes[term].data[param] = g.nodes[term].data[param].detach()
 
         # point this to self
         self.results = results
@@ -309,9 +306,7 @@ class TrainAndTest(Experiment):
         return _str
 
     def run(self):
-        """ Run train and test.
-
-        """
+        """Run train and test."""
         train = Train(
             net=self.net,
             data=self.ds_tr,

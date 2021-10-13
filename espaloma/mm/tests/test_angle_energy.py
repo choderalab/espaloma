@@ -15,6 +15,7 @@ from simtk.openmm import app
 
 import espaloma as esp
 
+
 def test_energy_angle_and_bond():
     g = esp.Graph("C")
     # make simulation
@@ -41,21 +42,24 @@ def test_energy_angle_and_bond():
         if "Nonbonded" in name:
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
 
-
     # create new simulation
     _simulation = openmm.app.Simulation(
-        simulation.topology, system, openmm.VerletIntegrator(0.0),
+        simulation.topology,
+        system,
+        openmm.VerletIntegrator(0.0),
     )
 
     _simulation.context.setPositions(
-        g.nodes['n1'].data['xyz'][:, 0, :].detach().numpy() * unit.nanometer
+        g.nodes["n1"].data["xyz"][:, 0, :].detach().numpy() * unit.nanometer
     )
 
     for idx, force in enumerate(forces):
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
-            getEnergy=True, getParameters=True, groups=2 ** idx,
+            getEnergy=True,
+            getParameters=True,
+            groups=2 ** idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(
@@ -85,10 +89,12 @@ def test_energy_angle_and_bond():
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
         g.nodes[term].data["eq"] = g.nodes[term].data["eq_ref"]
 
-    print("espaloma thinks there are %s angles" % g.heterograph.number_of_nodes("n3"))
-    print(g.nodes['n3'].data['k'])
-    print(g.nodes['n3'].data['eq'])
-
+    print(
+        "espaloma thinks there are %s angles"
+        % g.heterograph.number_of_nodes("n3")
+    )
+    print(g.nodes["n3"].data["k"])
+    print(g.nodes["n3"].data["eq"])
 
     # for each atom, store n_snapshots x 3
     # g.nodes["n1"].data["xyz"] = torch.tensor(
@@ -110,6 +116,7 @@ def test_energy_angle_and_bond():
         energies["HarmonicAngleForce"],
         decimal=n_decimals,
     )
+
 
 if __name__ == "__main__":
     test_energy_angle_and_bond()

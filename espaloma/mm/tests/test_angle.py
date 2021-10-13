@@ -8,7 +8,12 @@ def test_angle_random_vectors():
     import espaloma as esp
 
     distribution = torch.distributions.normal.Normal(
-        loc=torch.zeros(3,), scale=torch.ones(3,)
+        loc=torch.zeros(
+            3,
+        ),
+        scale=torch.ones(
+            3,
+        ),
     )
 
     left = distribution.sample()

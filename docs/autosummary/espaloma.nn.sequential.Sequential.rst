@@ -60,6 +60,5 @@ espaloma.nn.sequential.Sequential
    
       ~Sequential.T_destination
       ~Sequential.dump_patches
-      ~Sequential.training
    
    

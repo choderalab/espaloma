@@ -3,16 +3,11 @@ espaloma
 Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm
 """
 
-import espaloma.data
-from . import metrics, units
-import espaloma.app
-import espaloma.graphs
-import espaloma.mm
-import espaloma.nn
-from espaloma.app.experiment import *
-from espaloma.graphs.graph import Graph
-from espaloma.metrics import GraphMetric
-from espaloma.mm.geometry import *
+from . import metrics, units, data, app, graphs, mm, nn
+from .app.experiment import *
+from .graphs.graph import Graph
+from .metrics import GraphMetric
+from .mm.geometry import *
 
 # Add imports here
 # import espaloma

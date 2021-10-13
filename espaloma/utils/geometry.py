@@ -66,7 +66,8 @@ def _timemachine_signed_torsion_angle(ci, cj, ck, cl):
 
     y = np.sum(
         np.multiply(
-            np.cross(n1, n2), rkj / np.linalg.norm(rkj, axis=-1, keepdims=True)
+            np.cross(n1, n2),
+            rkj / np.linalg.norm(rkj, axis=-1, keepdims=True),
         ),
         axis=-1,
     )

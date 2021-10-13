@@ -25,7 +25,9 @@ class GraphLevelReadout(torch.nn.Module):
         self.config_local = config_local
         self.config_global = config_global
         self.d_local = esp.nn.sequential._Sequential(
-            in_features=in_features, config=config_local, layer=torch.nn.Linear
+            in_features=in_features,
+            config=config_local,
+            layer=torch.nn.Linear,
         )
 
         mid_features = [x for x in config_local if isinstance(x, int)][-1]

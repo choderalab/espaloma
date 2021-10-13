@@ -60,6 +60,5 @@ espaloma.nn.readout.janossy.JanossyPoolingNonbonded
    
       ~JanossyPoolingNonbonded.T_destination
       ~JanossyPoolingNonbonded.dump_patches
-      ~JanossyPoolingNonbonded.training
    
    

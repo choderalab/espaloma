@@ -60,6 +60,5 @@ espaloma.nn.readout.graph\_level\_readout.GraphLevelReadout
    
       ~GraphLevelReadout.T_destination
       ~GraphLevelReadout.dump_patches
-      ~GraphLevelReadout.training
    
    

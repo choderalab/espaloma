@@ -19,13 +19,13 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import espaloma
-from espaloma import mm, nn, data, graphs
+from espaloma import mm, nn, graphs, data
 
 # -- Project information -----------------------------------------------------
 
 project = 'espaloma'
-copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC")
-author = 'Yuanqing Wang @ choderalab // MSKCC'
+copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC.")
+author = 'Yuanqing Wang'
 
 # The short X.Y version
 version = ''

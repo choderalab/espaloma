@@ -19,9 +19,11 @@ espaloma.nn.readout.janossy
       :toctree:
       :template: custom-class-template.rst
    
+      ExpCoefficients
       JanossyPooling
       JanossyPoolingImproper
       JanossyPoolingNonbonded
+      LinearMixtureToOriginal
    
    
 

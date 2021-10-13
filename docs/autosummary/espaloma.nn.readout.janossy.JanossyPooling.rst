@@ -60,6 +60,5 @@ espaloma.nn.readout.janossy.JanossyPooling
    
       ~JanossyPooling.T_destination
       ~JanossyPooling.dump_patches
-      ~JanossyPooling.training
    
    

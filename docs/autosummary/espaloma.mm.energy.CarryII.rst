@@ -60,6 +60,5 @@ espaloma.mm.energy.CarryII
    
       ~CarryII.T_destination
       ~CarryII.dump_patches
-      ~CarryII.training
    
    

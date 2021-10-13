@@ -60,6 +60,5 @@ espaloma.nn.readout.node\_typing.NodeTyping
    
       ~NodeTyping.T_destination
       ~NodeTyping.dump_patches
-      ~NodeTyping.training
    
    

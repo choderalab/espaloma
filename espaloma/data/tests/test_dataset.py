@@ -79,6 +79,7 @@ def test_no_return(ds):
     ds.apply(fn).apply(fn)
     assert all(x == x_ + 2 for (x, x_) in zip(ds, range(5)))
 
+
 def test_subsample(ds):
     _ds = ds.subsample(0.2)
     assert len(_ds) == 1

@@ -25,7 +25,8 @@ EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 # MODULE FUNCTIONS
 # =============================================================================
 def subtract_nonbonded_force(
-    g, forcefield="gaff-1.81",
+    g,
+    forcefield="gaff-1.81",
 ):
 
     # parameterize topology
@@ -34,7 +35,7 @@ def subtract_nonbonded_force(
     generator = SystemGenerator(
         small_molecule_forcefield=forcefield,
         molecules=[g.mol],
-        forcefield_kwargs={ 'constraints' : None, 'removeCMMotion' : False},
+        forcefield_kwargs={"constraints": None, "removeCMMotion": False},
     )
 
     # create openmm system
@@ -67,16 +68,18 @@ def subtract_nonbonded_force(
 
             force.updateParametersInContext(simulation.context)
 
-
         elif "Bond" in name:
             for idx in range(force.getNumBonds()):
                 id1, id2, length, k = force.getBondParameters(idx)
                 force.setBondParameters(
-                    idx, id1, id2, length, 0.0,
+                    idx,
+                    id1,
+                    id2,
+                    length,
+                    0.0,
                 )
 
             force.updateParametersInContext(simulation.context)
-
 
         elif "Torsion" in name:
             for idx in range(force.getNumTorsions()):
@@ -90,11 +93,17 @@ def subtract_nonbonded_force(
                     k,
                 ) = force.getTorsionParameters(idx)
                 force.setTorsionParameters(
-                    idx, id1, id2, id3, id4, periodicity, phase, 0.0,
+                    idx,
+                    id1,
+                    id2,
+                    id3,
+                    id4,
+                    periodicity,
+                    phase,
+                    0.0,
                 )
 
             force.updateParametersInContext(simulation.context)
-
 
     # the snapshots
     xs = (
@@ -114,7 +123,9 @@ def subtract_nonbonded_force(
         simulation.context.setPositions(x)
 
         state = simulation.context.getState(
-            getEnergy=True, getParameters=True, getForces=True,
+            getEnergy=True,
+            getParameters=True,
+            getForces=True,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(
@@ -130,27 +141,34 @@ def subtract_nonbonded_force(
 
     # put energies to a tensor
     energies = torch.tensor(
-        energies, dtype=torch.get_default_dtype(),
+        energies,
+        dtype=torch.get_default_dtype(),
     ).flatten()[None, :]
     derivatives = torch.tensor(
-        np.stack(derivatives, axis=1), dtype=torch.get_default_dtype(),
+        np.stack(derivatives, axis=1),
+        dtype=torch.get_default_dtype(),
     )
 
     # subtract the energies
     g.heterograph.apply_nodes(
-        lambda node: {"u_ref": node.data["u_ref"] - energies}, ntype="g",
+        lambda node: {"u_ref": node.data["u_ref"] - energies},
+        ntype="g",
     )
 
-    if "u_ref_prime" in g.nodes['n1']:
+    if "u_ref_prime" in g.nodes["n1"]:
         g.heterograph.apply_nodes(
-            lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
+            lambda node: {
+                "u_ref_prime": node.data["u_ref_prime"] - derivatives
+            },
             ntype="n1",
         )
 
     return g
 
+
 def subtract_nonbonded_force_except_14(
-    g, forcefield="gaff-1.81",
+    g,
+    forcefield="gaff-1.81",
 ):
 
     # parameterize topology
@@ -191,16 +209,18 @@ def subtract_nonbonded_force_except_14(
 
             force.updateParametersInContext(simulation.context)
 
-
         elif "Bond" in name:
             for idx in range(force.getNumBonds()):
                 id1, id2, length, k = force.getBondParameters(idx)
                 force.setBondParameters(
-                    idx, id1, id2, length, 0.0,
+                    idx,
+                    id1,
+                    id2,
+                    length,
+                    0.0,
                 )
 
             force.updateParametersInContext(simulation.context)
-
 
         elif "Torsion" in name:
             for idx in range(force.getNumTorsions()):
@@ -214,21 +234,32 @@ def subtract_nonbonded_force_except_14(
                     k,
                 ) = force.getTorsionParameters(idx)
                 force.setTorsionParameters(
-                    idx, id1, id2, id3, id4, periodicity, phase, 0.0,
+                    idx,
+                    id1,
+                    id2,
+                    id3,
+                    id4,
+                    periodicity,
+                    phase,
+                    0.0,
                 )
 
             force.updateParametersInContext(simulation.context)
-
 
         elif "Nonbonded" in name:
             for exception_index in range(force.getNumExceptions()):
-                p1, p2, chargeprod, sigma, epsilon = force.getExceptionParameters(exception_index)
-                force.setExceptionParameters(exception_index, p1, p2, chargeprod, sigma, 1e-8*epsilon)
-
+                (
+                    p1,
+                    p2,
+                    chargeprod,
+                    sigma,
+                    epsilon,
+                ) = force.getExceptionParameters(exception_index)
+                force.setExceptionParameters(
+                    exception_index, p1, p2, chargeprod, sigma, 1e-8 * epsilon
+                )
 
             force.updateParametersInContext(simulation.context)
-
-
 
     # the snapshots
     xs = (
@@ -248,7 +279,9 @@ def subtract_nonbonded_force_except_14(
         simulation.context.setPositions(x)
 
         state = simulation.context.getState(
-            getEnergy=True, getParameters=True, getForces=True,
+            getEnergy=True,
+            getParameters=True,
+            getForces=True,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(
@@ -264,33 +297,37 @@ def subtract_nonbonded_force_except_14(
 
     # put energies to a tensor
     energies = torch.tensor(
-        energies, dtype=torch.get_default_dtype(),
+        energies,
+        dtype=torch.get_default_dtype(),
     ).flatten()[None, :]
     derivatives = torch.tensor(
-        np.stack(derivatives, axis=1), dtype=torch.get_default_dtype(),
+        np.stack(derivatives, axis=1),
+        dtype=torch.get_default_dtype(),
     )
 
     # subtract the energies
     g.heterograph.apply_nodes(
-        lambda node: {"u_ref": node.data["u_ref"] - energies}, ntype="g",
+        lambda node: {"u_ref": node.data["u_ref"] - energies},
+        ntype="g",
     )
 
-    if "u_ref_prime" in g.nodes['n1'].data:
+    if "u_ref_prime" in g.nodes["n1"].data:
 
         g.heterograph.apply_nodes(
-            lambda node: {"u_ref_prime": node.data["u_ref_prime"] - derivatives},
+            lambda node: {
+                "u_ref_prime": node.data["u_ref_prime"] - derivatives
+            },
             ntype="n1",
         )
 
     return g
-
 
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class MoleculeVacuumSimulation(object):
-    """ Simluate a single molecule system in vaccum.
+    """Simluate a single molecule system in vaccum.
 
     Parameters
     ----------
@@ -341,7 +378,6 @@ class MoleculeVacuumSimulation(object):
         self.n_conformers = n_conformers
         self.charge_method = charge_method
 
-
     def simulation_from_graph(self, g):
         """ Create simulation from moleucle """
         # assign partial charge
@@ -365,9 +401,13 @@ class MoleculeVacuumSimulation(object):
         for force in system.getForces():
             if "Nonbonded" in force.__class__.__name__:
                 for particle_index in range(force.getNumParticles()):
-                    charge, sigma, epsilon = force.getParticleParameters(particle_index)
-                    if (epsilon < EPSILON_MIN):
-                        force.setParticleParameters(particle_index, charge, sigma, EPSILON_MIN)
+                    charge, sigma, epsilon = force.getParticleParameters(
+                        particle_index
+                    )
+                    if epsilon < EPSILON_MIN:
+                        force.setParticleParameters(
+                            particle_index, charge, sigma, EPSILON_MIN
+                        )
 
         # use langevin integrator
         integrator = openmm.LangevinIntegrator(
@@ -376,14 +416,16 @@ class MoleculeVacuumSimulation(object):
 
         # initialize simulation
         simulation = Simulation(
-            topology=topology, system=system, integrator=integrator,
+            topology=topology,
+            system=system,
+            integrator=integrator,
             platform=openmm.Platform.getPlatformByName("Reference"),
         )
 
         return simulation
 
     def run(self, g, in_place=True):
-        """ Collect samples from simulation.
+        """Collect samples from simulation.
 
         Parameters
         ----------
@@ -420,9 +462,7 @@ class MoleculeVacuumSimulation(object):
         samples = []
         for idx in range(true_n_conformers):
             # put conformer in simulation
-            simulation.context.setPositions(
-                g.mol.conformers[idx]
-            )
+            simulation.context.setPositions(g.mol.conformers[idx])
 
             # set velocities
             simulation.context.setVelocitiesToTemperature(self.temperature)
@@ -448,6 +488,7 @@ class MoleculeVacuumSimulation(object):
         if len(samples) < self.n_samples:
             len_samples = len(samples)
             import random
+
             idx = random.choice(list(range(true_n_conformers)))
             simulation.context.setPositions(g.mol.conformers[idx])
 
@@ -469,7 +510,6 @@ class MoleculeVacuumSimulation(object):
                     .getPositions(asNumpy=True)
                     .value_in_unit(DISTANCE_UNIT)
                 )
-
 
         print(samples)
         assert len(samples) == self.n_samples

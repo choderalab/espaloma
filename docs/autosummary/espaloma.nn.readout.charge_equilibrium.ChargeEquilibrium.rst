@@ -60,6 +60,5 @@ espaloma.nn.readout.charge\_equilibrium.ChargeEquilibrium
    
       ~ChargeEquilibrium.T_destination
       ~ChargeEquilibrium.dump_patches
-      ~ChargeEquilibrium.training
    
    

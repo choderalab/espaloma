@@ -60,6 +60,5 @@ espaloma.mm.energy.EnergyInGraph
    
       ~EnergyInGraph.T_destination
       ~EnergyInGraph.dump_patches
-      ~EnergyInGraph.training
    
    
