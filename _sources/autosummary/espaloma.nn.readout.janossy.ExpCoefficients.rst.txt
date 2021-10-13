@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy.ExpCoefficients
+espaloma.nn.readout.janossy.ExpCoefficients
 ===========================================
 
 .. currentmodule:: espaloma.nn.readout.janossy

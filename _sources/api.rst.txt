@@ -5,7 +5,7 @@ API Documentation
    :toctree: autosummary
    :template: custom-module-template.rst
    :recursive:
-   
+
    espaloma.mm
    espaloma.nn
    espaloma.graphs
