@@ -16,8 +16,29 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
     Parameters
     ----------
-    graphs : list
+    graphs : List
         objects in the dataset
+
+    Methods
+    -------
+    shuffle
+        Randomly shuffle the graphs in the dataset.
+
+    apply(fn, in_place=True)
+        Apply a function to every graph in the dataset.
+        If `in_place=True`, modify the graph in-place.
+
+    split(partitions)
+        Split the dataset into partitions
+
+    subsample(ratio, seed=None)
+        Subsample the dataset.
+
+    save(path)
+        Save the dataset to a local path.
+
+    load(path)
+        Load a dataset from local path.
 
     Note
     ----
@@ -28,6 +49,10 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     ----------
     transforms : an iterable of callables that transforms the input.
         the `__getiem__` method applies these transforms later.
+
+    Examples
+    --------
+    >>> data = Dataset([esp.Graph("C")])
 
     """
 
@@ -222,7 +247,12 @@ class GraphDataset(Dataset):
     """Dataset with additional support for only viewing
     certain attributes as `torch.utils.data.DataLoader`
 
+    Methods
+    -------
+    view(collate_fn, *args, **kwargs)
+        Provide a `torch.utils.data.DataLoader` view of the dataset.
 
+    Note
     """
 
     def __init__(self, graphs=[], first=None):

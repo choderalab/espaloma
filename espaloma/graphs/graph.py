@@ -25,12 +25,24 @@ class Graph(BaseGraph):
 
     Methods
     -------
-    save(path) : Save graph to file.
+    save(path)
+        Save graph to file.
+
+    load(path)
+        Load a graph from path.
 
     Note
     ----
     This object provides access to popular attributes of homograph and
     heterograph.
+
+    This object also provides access to `ndata` and `edata` from the heterograph.
+
+    Examples
+    --------
+    >>> g0 = esp.Graph("C")
+    >>> g1 = esp.Graph(Molecule.from_smiles("C"))
+    >>> assert g0 == g1
 
     """
 

@@ -34,7 +34,17 @@ def harmonic_angle(x, k, eq):
 
 
 def linear_mixture_angle(x, coefficients, phases):
-    """Angle energy with Linear basis function."""
+    """Angle energy with Linear basis function.
+
+    Parameters
+    ----------
+    coefficients : torch.Tensor
+        Coefficients of the linear mixuture.
+
+    phases : torch.Tensor
+        Phases of the linear mixture.
+
+    """
 
     return 0.5 * esp.mm.functional.linear_mixture(
         x=x, coefficients=coefficients, phases=phases
