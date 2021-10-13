@@ -30,7 +30,7 @@ jobs:
       shell: bash -l {0}
       run: |
         python -m pip install sphinx sphinx-rtd-theme numpydoc
-        cd docs && make html && cd _build/html && cat espaloma.wangyq.net > CNAME
+        cd docs && make html && cd _build/html && echo 'espaloma.wangyq.net' > CNAME
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
