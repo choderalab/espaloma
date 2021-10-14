@@ -94,6 +94,22 @@
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">espaloma.nn.sequential.</span></span><span class="sig-name descname"><span class="pre">Sequential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">117</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/nn/sequential.html#Sequential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.nn.sequential.Sequential" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>Sequential neural network with input layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer</strong> (<em>torch.nn.Module</em>) – DGL graph convolution layers.</p></li>
+<li><p><strong>config</strong> (<em>List</em>) – A sequence of numbers (for units) and strings (for activation functions)
+denoting the configuration of the sequential model.</p></li>
+<li><p><strong>feature_units</strong> (<em>int(default=117)</em>) – The number of input channels.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.nn.sequential.Sequential.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/nn/sequential.html#Sequential.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.nn.sequential.Sequential.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Forward pass.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="espaloma.nn.sequential.Sequential.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">117</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/nn/sequential.html#Sequential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.nn.sequential.Sequential.__init__" title="Permalink to this definition"></a></dt>
@@ -143,7 +159,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#espaloma.nn.sequential.Sequential.float" title="espaloma.nn.sequential.Sequential.float"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>()</p></td>
 <td><p>Casts all floating point parameters and buffers to <code class="docutils literal notranslate"><span class="pre">float</span></code> datatype.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.nn.sequential.Sequential.forward" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward</span></code></a>(g[, x])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward</span></code></a>(g[, x])</p></td>
 <td><p>Forward pass.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#espaloma.nn.sequential.Sequential.get_buffer" title="espaloma.nn.sequential.Sequential.get_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_buffer</span></code></a>(target)</p></td>
@@ -206,7 +222,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.nn.sequential.Sequential.state_dict" title="espaloma.nn.sequential.Sequential.state_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_dict</span></code></a>([destination, prefix, keep_vars])</p></td>
 <td><p>Returns a dictionary containing a whole state of the module.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="espaloma.nn.sequential.Sequential.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id4" title="espaloma.nn.sequential.Sequential.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Moves and/or casts the parameters and buffers.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.nn.sequential.Sequential.to_empty" title="espaloma.nn.sequential.Sequential.to_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_empty</span></code></a>(*, device)</p></td>
@@ -435,8 +451,8 @@ strings are acceptable.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="espaloma.nn.sequential.Sequential.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/nn/sequential.html#Sequential.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.nn.sequential.Sequential.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/nn/sequential.html#Sequential.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
 <dd><p>Forward pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -780,7 +796,7 @@ persistent (bool): whether the buffer is part of this module’s</p>
 <dt class="sig sig-object py" id="espaloma.nn.sequential.Sequential.register_forward_hook">
 <span class="sig-name descname"><span class="pre">register_forward_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hook</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.utils.hooks.RemovableHandle</span></span></span><a class="headerlink" href="#espaloma.nn.sequential.Sequential.register_forward_hook" title="Permalink to this definition"></a></dt>
 <dd><p>Registers a forward hook on the module.</p>
-<p>The hook will be called every time after <a class="reference internal" href="#espaloma.nn.sequential.Sequential.forward" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> has computed an output.
+<p>The hook will be called every time after <a class="reference internal" href="#id0" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> has computed an output.
 It should have the following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">modified</span> <span class="n">output</span>
 </pre></div>
@@ -789,7 +805,7 @@ It should have the following signature:</p>
 Keyword arguments won’t be passed to the hooks and only to the <code class="docutils literal notranslate"><span class="pre">forward</span></code>.
 The hook can modify the output. It can modify the input inplace but
 it will not have effect on forward since this is called after
-<a class="reference internal" href="#espaloma.nn.sequential.Sequential.forward" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> is called.</p>
+<a class="reference internal" href="#id0" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> is called.</p>
 <dl class="simple">
 <dt>Returns:</dt><dd><dl class="simple">
 <dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.hooks.RemovableHandle</span></code>:</dt><dd><p>a handle that can be used to remove the added hook by calling
@@ -804,7 +820,7 @@ it will not have effect on forward since this is called after
 <dt class="sig sig-object py" id="espaloma.nn.sequential.Sequential.register_forward_pre_hook">
 <span class="sig-name descname"><span class="pre">register_forward_pre_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hook</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.utils.hooks.RemovableHandle</span></span></span><a class="headerlink" href="#espaloma.nn.sequential.Sequential.register_forward_pre_hook" title="Permalink to this definition"></a></dt>
 <dd><p>Registers a forward pre-hook on the module.</p>
-<p>The hook will be called every time before <a class="reference internal" href="#espaloma.nn.sequential.Sequential.forward" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> is invoked.
+<p>The hook will be called every time before <a class="reference internal" href="#id0" title="espaloma.nn.sequential.Sequential.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> is invoked.
 It should have the following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">modified</span> <span class="nb">input</span>
 </pre></div>
@@ -925,23 +941,23 @@ included. Keys are corresponding parameter and buffer names.</p>
 <dd><p>Moves and/or casts the parameters and buffers.</p>
 <p>This can be called as</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">memory_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.channels_last</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">memory_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.channels_last</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p>Its signature is similar to <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.to()</span></code>, but only accepts
