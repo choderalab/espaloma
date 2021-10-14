@@ -5,7 +5,7 @@ import torch
 
 
 class _Sequential(torch.nn.Module):
-    """Sequentially staggered neural networks."""
+    """Sequentially staggered neural networks. """
 
     def __init__(
         self,
@@ -71,7 +71,25 @@ class _Sequential(torch.nn.Module):
 
 
 class Sequential(torch.nn.Module):
-    """Sequential neural network with input layers."""
+    """Sequential neural network with input layers.
+
+    Parameters
+    ----------
+    layer : torch.nn.Module
+        DGL graph convolution layers.
+
+    config : List
+        A sequence of numbers (for units) and strings (for activation functions)
+        denoting the configuration of the sequential model.
+
+    feature_units : int(default=117)
+        The number of input channels.
+
+    Methods
+    -------
+    forward(g, x)
+        Forward pass.
+    """
 
     def __init__(
         self,
