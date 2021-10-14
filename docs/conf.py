@@ -21,6 +21,10 @@ sys.path.insert(0, os.path.abspath('..'))
 import espaloma
 from espaloma import mm, nn, graphs, data
 
+# download experiments
+import os
+os.system("bash download_experiments.sh")
+
 # -- Project information -----------------------------------------------------
 
 project = 'espaloma'
