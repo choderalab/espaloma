@@ -1,4 +1,4 @@
-espaloma: **E**xtensible **S**urrogate **P**otenti**al** **O**ptimized by **M**essage-passing **A**lgorithms
+espaloma 🍹: **E**xtensible **S**urrogate **P**otenti**al** **O**ptimized by **M**essage-passing **A**lgorithms
 ==============================
 [//]: # (Badges)
 [![CI](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml/badge.svg?branch=master)](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml)
