@@ -30,6 +30,7 @@
       ~EnergyInGraph.float
       ~EnergyInGraph.forward
       ~EnergyInGraph.get_buffer
+      ~EnergyInGraph.get_extra_state
       ~EnergyInGraph.get_parameter
       ~EnergyInGraph.get_submodule
       ~EnergyInGraph.half
@@ -47,6 +48,7 @@
       ~EnergyInGraph.register_full_backward_hook
       ~EnergyInGraph.register_parameter
       ~EnergyInGraph.requires_grad_
+      ~EnergyInGraph.set_extra_state
       ~EnergyInGraph.share_memory
       ~EnergyInGraph.state_dict
       ~EnergyInGraph.to

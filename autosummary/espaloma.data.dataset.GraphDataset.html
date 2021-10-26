@@ -41,7 +41,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Atom typing recovery experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="espaloma.nn.html">espaloma.nn</a></li>
@@ -134,6 +135,12 @@ certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path)</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_datapipe_as_function</span></code>(function_name, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_function</span></code>(function_name, function)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.save" title="espaloma.data.dataset.GraphDataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p>Save dataset to path.</p></td>
 </tr>
@@ -148,6 +155,18 @@ certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="espaloma.data.dataset.GraphDataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
 <td><p>Provide a data loader.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">functions</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>

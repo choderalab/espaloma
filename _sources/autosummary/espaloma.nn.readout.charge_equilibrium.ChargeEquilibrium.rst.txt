@@ -30,6 +30,7 @@
       ~ChargeEquilibrium.float
       ~ChargeEquilibrium.forward
       ~ChargeEquilibrium.get_buffer
+      ~ChargeEquilibrium.get_extra_state
       ~ChargeEquilibrium.get_parameter
       ~ChargeEquilibrium.get_submodule
       ~ChargeEquilibrium.half
@@ -47,6 +48,7 @@
       ~ChargeEquilibrium.register_full_backward_hook
       ~ChargeEquilibrium.register_parameter
       ~ChargeEquilibrium.requires_grad_
+      ~ChargeEquilibrium.set_extra_state
       ~ChargeEquilibrium.share_memory
       ~ChargeEquilibrium.state_dict
       ~ChargeEquilibrium.to

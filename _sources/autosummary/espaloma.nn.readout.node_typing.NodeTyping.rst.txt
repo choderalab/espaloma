@@ -30,6 +30,7 @@
       ~NodeTyping.float
       ~NodeTyping.forward
       ~NodeTyping.get_buffer
+      ~NodeTyping.get_extra_state
       ~NodeTyping.get_parameter
       ~NodeTyping.get_submodule
       ~NodeTyping.half
@@ -47,6 +48,7 @@
       ~NodeTyping.register_full_backward_hook
       ~NodeTyping.register_parameter
       ~NodeTyping.requires_grad_
+      ~NodeTyping.set_extra_state
       ~NodeTyping.share_memory
       ~NodeTyping.state_dict
       ~NodeTyping.to

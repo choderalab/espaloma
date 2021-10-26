@@ -30,6 +30,7 @@
       ~FreeParameterBaseline.float
       ~FreeParameterBaseline.forward
       ~FreeParameterBaseline.get_buffer
+      ~FreeParameterBaseline.get_extra_state
       ~FreeParameterBaseline.get_parameter
       ~FreeParameterBaseline.get_submodule
       ~FreeParameterBaseline.half
@@ -47,6 +48,7 @@
       ~FreeParameterBaseline.register_full_backward_hook
       ~FreeParameterBaseline.register_parameter
       ~FreeParameterBaseline.requires_grad_
+      ~FreeParameterBaseline.set_extra_state
       ~FreeParameterBaseline.share_memory
       ~FreeParameterBaseline.state_dict
       ~FreeParameterBaseline.to

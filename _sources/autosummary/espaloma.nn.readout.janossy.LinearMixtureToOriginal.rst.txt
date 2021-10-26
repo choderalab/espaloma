@@ -30,6 +30,7 @@
       ~LinearMixtureToOriginal.float
       ~LinearMixtureToOriginal.forward
       ~LinearMixtureToOriginal.get_buffer
+      ~LinearMixtureToOriginal.get_extra_state
       ~LinearMixtureToOriginal.get_parameter
       ~LinearMixtureToOriginal.get_submodule
       ~LinearMixtureToOriginal.half
@@ -47,6 +48,7 @@
       ~LinearMixtureToOriginal.register_full_backward_hook
       ~LinearMixtureToOriginal.register_parameter
       ~LinearMixtureToOriginal.requires_grad_
+      ~LinearMixtureToOriginal.set_extra_state
       ~LinearMixtureToOriginal.share_memory
       ~LinearMixtureToOriginal.state_dict
       ~LinearMixtureToOriginal.to

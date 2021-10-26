@@ -30,6 +30,7 @@
       ~GeometryInGraph.float
       ~GeometryInGraph.forward
       ~GeometryInGraph.get_buffer
+      ~GeometryInGraph.get_extra_state
       ~GeometryInGraph.get_parameter
       ~GeometryInGraph.get_submodule
       ~GeometryInGraph.half
@@ -47,6 +48,7 @@
       ~GeometryInGraph.register_full_backward_hook
       ~GeometryInGraph.register_parameter
       ~GeometryInGraph.requires_grad_
+      ~GeometryInGraph.set_extra_state
       ~GeometryInGraph.share_memory
       ~GeometryInGraph.state_dict
       ~GeometryInGraph.to

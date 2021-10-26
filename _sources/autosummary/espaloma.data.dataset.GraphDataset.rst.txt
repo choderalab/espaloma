@@ -1,4 +1,4 @@
-espaloma.data.dataset.GraphDataset
+﻿espaloma.data.dataset.GraphDataset
 ==================================
 
 .. currentmodule:: espaloma.data.dataset
@@ -20,6 +20,8 @@ espaloma.data.dataset.GraphDataset
       ~GraphDataset.apply
       ~GraphDataset.batch
       ~GraphDataset.load
+      ~GraphDataset.register_datapipe_as_function
+      ~GraphDataset.register_function
       ~GraphDataset.save
       ~GraphDataset.shuffle
       ~GraphDataset.split
@@ -29,5 +31,11 @@ espaloma.data.dataset.GraphDataset
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphDataset.functions
    
    

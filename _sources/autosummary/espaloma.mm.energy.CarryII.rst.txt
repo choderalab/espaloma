@@ -30,6 +30,7 @@
       ~CarryII.float
       ~CarryII.forward
       ~CarryII.get_buffer
+      ~CarryII.get_extra_state
       ~CarryII.get_parameter
       ~CarryII.get_submodule
       ~CarryII.half
@@ -47,6 +48,7 @@
       ~CarryII.register_full_backward_hook
       ~CarryII.register_parameter
       ~CarryII.requires_grad_
+      ~CarryII.set_extra_state
       ~CarryII.share_memory
       ~CarryII.state_dict
       ~CarryII.to

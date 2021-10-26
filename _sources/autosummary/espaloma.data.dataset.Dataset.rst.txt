@@ -1,4 +1,4 @@
-espaloma.data.dataset.Dataset
+﻿espaloma.data.dataset.Dataset
 =============================
 
 .. currentmodule:: espaloma.data.dataset
@@ -19,6 +19,8 @@ espaloma.data.dataset.Dataset
       ~Dataset.__init__
       ~Dataset.apply
       ~Dataset.load
+      ~Dataset.register_datapipe_as_function
+      ~Dataset.register_function
       ~Dataset.save
       ~Dataset.shuffle
       ~Dataset.split
@@ -27,5 +29,11 @@ espaloma.data.dataset.Dataset
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Dataset.functions
    
    

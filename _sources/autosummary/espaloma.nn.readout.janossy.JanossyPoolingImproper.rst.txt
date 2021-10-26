@@ -30,6 +30,7 @@
       ~JanossyPoolingImproper.float
       ~JanossyPoolingImproper.forward
       ~JanossyPoolingImproper.get_buffer
+      ~JanossyPoolingImproper.get_extra_state
       ~JanossyPoolingImproper.get_parameter
       ~JanossyPoolingImproper.get_submodule
       ~JanossyPoolingImproper.half
@@ -47,6 +48,7 @@
       ~JanossyPoolingImproper.register_full_backward_hook
       ~JanossyPoolingImproper.register_parameter
       ~JanossyPoolingImproper.requires_grad_
+      ~JanossyPoolingImproper.set_extra_state
       ~JanossyPoolingImproper.share_memory
       ~JanossyPoolingImproper.state_dict
       ~JanossyPoolingImproper.to

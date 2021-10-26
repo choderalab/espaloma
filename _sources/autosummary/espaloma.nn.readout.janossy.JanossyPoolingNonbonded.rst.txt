@@ -30,6 +30,7 @@
       ~JanossyPoolingNonbonded.float
       ~JanossyPoolingNonbonded.forward
       ~JanossyPoolingNonbonded.get_buffer
+      ~JanossyPoolingNonbonded.get_extra_state
       ~JanossyPoolingNonbonded.get_parameter
       ~JanossyPoolingNonbonded.get_submodule
       ~JanossyPoolingNonbonded.half
@@ -47,6 +48,7 @@
       ~JanossyPoolingNonbonded.register_full_backward_hook
       ~JanossyPoolingNonbonded.register_parameter
       ~JanossyPoolingNonbonded.requires_grad_
+      ~JanossyPoolingNonbonded.set_extra_state
       ~JanossyPoolingNonbonded.share_memory
       ~JanossyPoolingNonbonded.state_dict
       ~JanossyPoolingNonbonded.to

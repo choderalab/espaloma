@@ -30,6 +30,7 @@
       ~GraphLevelReadout.float
       ~GraphLevelReadout.forward
       ~GraphLevelReadout.get_buffer
+      ~GraphLevelReadout.get_extra_state
       ~GraphLevelReadout.get_parameter
       ~GraphLevelReadout.get_submodule
       ~GraphLevelReadout.half
@@ -47,6 +48,7 @@
       ~GraphLevelReadout.register_full_backward_hook
       ~GraphLevelReadout.register_parameter
       ~GraphLevelReadout.requires_grad_
+      ~GraphLevelReadout.set_extra_state
       ~GraphLevelReadout.share_memory
       ~GraphLevelReadout.state_dict
       ~GraphLevelReadout.to

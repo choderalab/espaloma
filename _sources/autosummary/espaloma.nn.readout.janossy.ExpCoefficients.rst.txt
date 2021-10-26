@@ -30,6 +30,7 @@
       ~ExpCoefficients.float
       ~ExpCoefficients.forward
       ~ExpCoefficients.get_buffer
+      ~ExpCoefficients.get_extra_state
       ~ExpCoefficients.get_parameter
       ~ExpCoefficients.get_submodule
       ~ExpCoefficients.half
@@ -47,6 +48,7 @@
       ~ExpCoefficients.register_full_backward_hook
       ~ExpCoefficients.register_parameter
       ~ExpCoefficients.requires_grad_
+      ~ExpCoefficients.set_extra_state
       ~ExpCoefficients.share_memory
       ~ExpCoefficients.state_dict
       ~ExpCoefficients.to

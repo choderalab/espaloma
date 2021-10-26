@@ -41,7 +41,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Atom typing recovery experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="espaloma.nn.html">espaloma.nn</a></li>
@@ -175,6 +176,12 @@ and <cite>__len__</cite> function.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="espaloma.data.dataset.Dataset.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
 <td><p>Load path to dataset.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_datapipe_as_function</span></code>(function_name, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_function</span></code>(function_name, function)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#id2" title="espaloma.data.dataset.Dataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p>Save dataset to path.</p></td>
 </tr>
@@ -186,6 +193,18 @@ and <cite>__len__</cite> function.</p>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id4" title="espaloma.data.dataset.Dataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
 <td><p>Subsample the dataset according to some ratio.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">functions</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>

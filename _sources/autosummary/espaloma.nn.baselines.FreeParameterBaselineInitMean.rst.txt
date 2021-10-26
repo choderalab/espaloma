@@ -30,6 +30,7 @@
       ~FreeParameterBaselineInitMean.float
       ~FreeParameterBaselineInitMean.forward
       ~FreeParameterBaselineInitMean.get_buffer
+      ~FreeParameterBaselineInitMean.get_extra_state
       ~FreeParameterBaselineInitMean.get_parameter
       ~FreeParameterBaselineInitMean.get_submodule
       ~FreeParameterBaselineInitMean.half
@@ -47,6 +48,7 @@
       ~FreeParameterBaselineInitMean.register_full_backward_hook
       ~FreeParameterBaselineInitMean.register_parameter
       ~FreeParameterBaselineInitMean.requires_grad_
+      ~FreeParameterBaselineInitMean.set_extra_state
       ~FreeParameterBaselineInitMean.share_memory
       ~FreeParameterBaselineInitMean.state_dict
       ~FreeParameterBaselineInitMean.to

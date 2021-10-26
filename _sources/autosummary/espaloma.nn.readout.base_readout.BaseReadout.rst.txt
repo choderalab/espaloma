@@ -30,6 +30,7 @@
       ~BaseReadout.float
       ~BaseReadout.forward
       ~BaseReadout.get_buffer
+      ~BaseReadout.get_extra_state
       ~BaseReadout.get_parameter
       ~BaseReadout.get_submodule
       ~BaseReadout.half
@@ -47,6 +48,7 @@
       ~BaseReadout.register_full_backward_hook
       ~BaseReadout.register_parameter
       ~BaseReadout.requires_grad_
+      ~BaseReadout.set_extra_state
       ~BaseReadout.share_memory
       ~BaseReadout.state_dict
       ~BaseReadout.to

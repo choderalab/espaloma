@@ -30,6 +30,7 @@
       ~GN.float
       ~GN.forward
       ~GN.get_buffer
+      ~GN.get_extra_state
       ~GN.get_parameter
       ~GN.get_submodule
       ~GN.half
@@ -47,6 +48,7 @@
       ~GN.register_full_backward_hook
       ~GN.register_parameter
       ~GN.requires_grad_
+      ~GN.set_extra_state
       ~GN.share_memory
       ~GN.state_dict
       ~GN.to
