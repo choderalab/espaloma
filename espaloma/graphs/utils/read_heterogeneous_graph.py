@@ -4,7 +4,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import numpy as np
 import torch
 from espaloma.graphs.utils import offmol_indices
@@ -262,6 +261,7 @@ def from_homogeneous_and_mol(g, offmol):
             axis=1,
         )
 
+    import dgl
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]

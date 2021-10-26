@@ -2,8 +2,6 @@
 # IMPORTS
 # =============================================================================
 import abc
-
-import dgl
 import openff.toolkit
 
 import espaloma as esp
@@ -72,7 +70,7 @@ class Graph(BaseGraph):
     def save(self, path):
         import os
         import json
-
+        import dgl
         os.mkdir(path)
         dgl.save_graphs(path + "/homograph.bin", [self.homograph])
         dgl.save_graphs(path + "/heterograph.bin", [self.heterograph])
@@ -82,6 +80,7 @@ class Graph(BaseGraph):
     @classmethod
     def load(cls, path):
         import json
+        import dgl
 
         homograph = dgl.load_graphs(path + "/homograph.bin")[0][0]
         heterograph = dgl.load_graphs(path + "/heterograph.bin")[0][0]
@@ -117,6 +116,7 @@ class Graph(BaseGraph):
 
     @staticmethod
     def get_heterograph_from_graph_and_mol(graph, mol):
+        import dgl
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."

@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 
 # =============================================================================
@@ -181,7 +180,7 @@ def geometry_in_graph(g):
     This function modifies graphs in-place.
 
     """
-
+    import dgl
     # Copy coordinates to higher-order nodes.
     g.multi_update_all(
         {

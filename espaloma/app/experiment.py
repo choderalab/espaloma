@@ -3,9 +3,6 @@
 # =============================================================================
 import abc
 import copy
-
-import numpy as np
-import dgl
 import torch
 
 import espaloma as esp

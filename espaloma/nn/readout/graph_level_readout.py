@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 import espaloma as esp
 
@@ -17,10 +16,13 @@ class GraphLevelReadout(torch.nn.Module):
         config_local,
         config_global,
         out_name,
-        pool=dgl.function.sum,
+        pool=None,
     ):
 
         super(GraphLevelReadout, self).__init__()
+        import dgl
+        if pool is None:
+            pool = dgl.function.sum
         self.in_features = in_features
         self.config_local = config_local
         self.config_global = config_global
@@ -42,6 +44,7 @@ class GraphLevelReadout(torch.nn.Module):
         self.out_name = out_name
 
     def forward(self, g):
+        import dgl
         g.apply_nodes(
             lambda node: {"h_global": self.d_local(None, node.data["h"])},
             ntype="n1",

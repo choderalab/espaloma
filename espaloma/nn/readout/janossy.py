@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 
 import espaloma as esp
@@ -98,6 +97,7 @@ class JanossyPooling(torch.nn.Module):
         g : dgl.DGLHeteroGraph,
             input graph.
         """
+        import dgl
 
         # copy
         g.multi_update_all(
@@ -233,7 +233,8 @@ class JanossyPoolingImproper(torch.nn.Module):
         g : dgl.DGLHeteroGraph,
             input graph.
         """
-
+        import dgl
+        
         # copy
         g.multi_update_all(
             {
