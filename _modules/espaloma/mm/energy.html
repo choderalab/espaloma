@@ -38,7 +38,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../experiments/typing.html">Atom typing recovery experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
 </ul>
 
@@ -70,7 +71,6 @@
 <span></span><span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
-<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
@@ -323,7 +323,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># TODO: this is all very restricted for now</span>
     <span class="c1"># we need to make this better</span>
-
+    <span class="kn">import</span> <span class="nn">dgl</span>
     <span class="k">if</span> <span class="s2">&quot;n2&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
         <span class="c1"># apply energy function</span>
 
@@ -486,6 +486,7 @@
 <div class="viewcode-block" id="CarryII"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII">[docs]</a><span class="k">class</span> <span class="nc">CarryII</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="CarryII.forward"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">math</span>
+        <span class="kn">import</span> <span class="nn">dgl</span>
 
         <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
             <span class="p">{</span>
