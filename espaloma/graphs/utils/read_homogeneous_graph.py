@@ -4,7 +4,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 
 # =============================================================================
@@ -118,6 +117,7 @@ def fp_rdkit(atom):
 # MODULE FUNCTIONS
 # =============================================================================
 def from_openff_toolkit_mol(mol, use_fp=True):
+    import dgl
     # initialize graph
     from rdkit import Chem
 
@@ -207,6 +207,7 @@ def from_oemol(mol, use_fp=True):
 
 
 def from_rdkit_mol(mol, use_fp=True):
+    import dgl
     from rdkit import Chem
 
     # initialize graph

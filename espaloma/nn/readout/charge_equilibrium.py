@@ -5,8 +5,6 @@
 # IMPORTS
 # =============================================================================
 import torch
-import dgl
-import math
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -67,6 +65,7 @@ class ChargeEquilibrium(torch.nn.Module):
     def forward(self, g, total_charge=0.0):
         """ apply charge equilibrium to all molecules in batch """
         # calculate $s ^ {-1}$ and $ es ^ {-1}$
+        import dgl
         g.apply_nodes(
             lambda node: {"s_inv": node.data["s"] ** -1}, ntype="n1"
         )

@@ -1,7 +1,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 
 import espaloma as esp
@@ -254,7 +253,7 @@ def energy_in_graph(
     """
     # TODO: this is all very restricted for now
     # we need to make this better
-
+    import dgl
     if "n2" in terms:
         # apply energy function
 
@@ -417,6 +416,7 @@ class EnergyInGraphII(torch.nn.Module):
 class CarryII(torch.nn.Module):
     def forward(self, g):
         import math
+        import dgl
 
         g.multi_update_all(
             {
