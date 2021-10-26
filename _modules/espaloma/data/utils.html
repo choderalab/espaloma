@@ -38,8 +38,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/typing.html">Atom typing recovery experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
 </ul>
 
@@ -73,6 +72,7 @@
 <span class="c1"># =============================================================================</span>
 <span class="kn">import</span> <span class="nn">random</span>
 
+<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -174,7 +174,6 @@
 
 <div class="viewcode-block" id="batch"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.batch.html#espaloma.data.utils.batch">[docs]</a><span class="k">def</span> <span class="nf">batch</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2666</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Batch graphs and values after shuffling.&quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">dgl</span>
     <span class="c1"># get the numebr of data</span>
     <span class="n">n_data_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
     <span class="n">n_batches</span> <span class="o">=</span> <span class="n">n_data_points</span> <span class="o">//</span> <span class="n">batch_size</span>  <span class="c1"># drop the rest</span>
@@ -197,7 +196,6 @@
 
 
 <div class="viewcode-block" id="collate_fn"><a class="viewcode-back" href="../../../autosummary/espaloma.data.utils.collate_fn.html#espaloma.data.utils.collate_fn">[docs]</a><span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="n">graphs</span><span class="p">):</span>
-    <span class="kn">import</span> <span class="nn">dgl</span>
     <span class="k">return</span> <span class="n">esp</span><span class="o">.</span><span class="n">HomogeneousGraph</span><span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">))</span></div>
 
 
