@@ -74,7 +74,6 @@
 <span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
-<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="c1"># =============================================================================</span>
@@ -188,6 +187,7 @@
 <span class="c1"># MODULE FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="from_openff_toolkit_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol.html#espaloma.graphs.utils.read_homogeneous_graph.from_openff_toolkit_mol">[docs]</a><span class="k">def</span> <span class="nf">from_openff_toolkit_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">use_fp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">dgl</span>
     <span class="c1"># initialize graph</span>
     <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
 
@@ -277,6 +277,7 @@
 
 
 <div class="viewcode-block" id="from_rdkit_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_homogeneous_graph.from_rdkit_mol.html#espaloma.graphs.utils.read_homogeneous_graph.from_rdkit_mol">[docs]</a><span class="k">def</span> <span class="nf">from_rdkit_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">use_fp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">dgl</span>
     <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
 
     <span class="c1"># initialize graph</span>
