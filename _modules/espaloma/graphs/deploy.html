@@ -158,6 +158,12 @@
         <span class="n">sys</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_openmm_system</span><span class="p">(</span>
             <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">(),</span> <span class="n">charge_from_molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">]</span>
         <span class="p">)</span>
+        
+    <span class="k">elif</span> <span class="n">charge_method</span> <span class="o">==</span> <span class="s2">&quot;am1-bcc&quot;</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">assign_partial_charges</span><span class="p">()</span>
+        <span class="n">sys</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_openmm_system</span><span class="p">(</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">(),</span> <span class="n">charge_from_molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">]</span>
+        <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">charge_method</span> <span class="o">==</span> <span class="s2">&quot;nn&quot;</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">partial_charges</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">elementary_charge</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span>
