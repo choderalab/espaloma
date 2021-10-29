@@ -94,6 +94,11 @@ def openmm_system_from_graph(
         sys = ff.create_openmm_system(
             g.mol.to_topology(), charge_from_molecules=[g.mol]
         )
+        
+    elif charge_method == "keep":
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol]
+        )
 
     elif charge_method == "nn":
         g.mol.partial_charges = unit.elementary_charge * g.nodes["n1"].data[
