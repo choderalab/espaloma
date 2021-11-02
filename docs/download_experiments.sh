@@ -3,5 +3,9 @@ wget -O typing.ipynb 'https://docs.google.com/uc?export=download&id='$fileid
 ipython nbconvert typing.ipynb --to rst
 mv typing.rst experiments/typing.rst
 
+export fileid=1krhwGHKoqL5-_P0G89fDB7Iw3ENHW2G_
+wget -O mm_fitting_small.ipynb 'https://docs.google.com/uc?export=download&id='$fileid
+ipython nbconvert mm_fitting_small.ipynb --to rst
+mv mm_fitting_small.rst experiments/mm_fitting_small.rst
 
 rm *.ipynb
