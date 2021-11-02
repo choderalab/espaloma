@@ -129,6 +129,13 @@
 <span class="sd">    suffix : `str`</span>
 <span class="sd">        Suffix for the force terms.</span>
 
+<span class="sd">    charge_method : str, optional, default=&#39;nn&#39;</span>
+<span class="sd">        Method to use for assigning partial charges:</span>
+<span class="sd">        &#39;nn&#39; : Assign partial charges from the espaloma graph net model</span>
+<span class="sd">        &#39;am1-bcc&#39; : Allow the OpenFF toolkit to assign AM1-BCC charges using default backend</span>
+<span class="sd">        &#39;gasteiger&#39; : Assign Gasteiger partial charges (not recommended)</span>
+<span class="sd">        &#39;from-molecule&#39; : Use partial charges provided in the original `Molecule` object</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    sys : `openmm.System`</span>
@@ -158,14 +165,14 @@
         <span class="n">sys</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_openmm_system</span><span class="p">(</span>
             <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">(),</span> <span class="n">charge_from_molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">]</span>
         <span class="p">)</span>
-        
+
     <span class="k">elif</span> <span class="n">charge_method</span> <span class="o">==</span> <span class="s2">&quot;am1-bcc&quot;</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">assign_partial_charges</span><span class="p">()</span>
         <span class="n">sys</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_openmm_system</span><span class="p">(</span>
             <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">(),</span> <span class="n">charge_from_molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">]</span>
         <span class="p">)</span>
-        
-    <span class="k">elif</span> <span class="n">charge_method</span> <span class="o">==</span> <span class="s2">&quot;keep&quot;</span><span class="p">:</span>
+
+    <span class="k">elif</span> <span class="n">charge_method</span> <span class="o">==</span> <span class="s2">&quot;from-molecule&quot;</span><span class="p">:</span>
         <span class="n">sys</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_openmm_system</span><span class="p">(</span>
             <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">to_topology</span><span class="p">(),</span> <span class="n">charge_from_molecules</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="p">]</span>
         <span class="p">)</span>

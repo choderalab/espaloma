@@ -102,6 +102,11 @@
 <li><p><strong>forcefield</strong> (<cite>str</cite>) – Name of the force field. Have to be Open Force Field.
 (this forcefield will be used to assign nonbonded parameters, but all of its valence parameters will be overwritten)</p></li>
 <li><p><strong>suffix</strong> (<cite>str</cite>) – Suffix for the force terms.</p></li>
+<li><p><strong>charge_method</strong> (<em>str, optional, default=’nn’</em>) – Method to use for assigning partial charges:
+‘nn’ : Assign partial charges from the espaloma graph net model
+‘am1-bcc’ : Allow the OpenFF toolkit to assign AM1-BCC charges using default backend
+‘gasteiger’ : Assign Gasteiger partial charges (not recommended)
+‘from-molecule’ : Use partial charges provided in the original <cite>Molecule</cite> object</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
