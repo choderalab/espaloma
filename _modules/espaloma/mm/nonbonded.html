@@ -38,8 +38,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html#load-dataset">Load dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html#define-model">Define model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html#train-it">Train it!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/mm_fitting_small.html#inspect">Inspect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments/typing.html">Atom typing recovery experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a></li>
 </ul>
 
@@ -71,11 +77,14 @@
 <span></span><span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># CONSTANTS</span>
 <span class="c1"># =============================================================================</span>
+<span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
+
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
 
 <span class="c1"># CODATA 2018</span>
@@ -110,7 +119,7 @@
 <span class="c1"># COMBINATION RULES FOR NONBONDED</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="lorentz_berthelot"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.nonbonded.lorentz_berthelot.html#espaloma.mm.nonbonded.lorentz_berthelot">[docs]</a><span class="k">def</span> <span class="nf">lorentz_berthelot</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-    <span class="kn">import</span> <span class="nn">dgl</span>
+
     <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span>

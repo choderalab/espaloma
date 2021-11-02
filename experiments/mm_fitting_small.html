@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset. &mdash; espaloma  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Atom typing recovery experiment." href="typing.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> espaloma
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#load-dataset">Load dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#define-model">Define model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#train-it">Train it!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#inspect">Inspect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="typing.html">Atom typing recovery experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">espaloma</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">&lt;no title&gt;</a> &raquo;</li>
+      <li>Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/experiments/mm_fitting_small.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="toy-experiment-molecular-mechanics-mm-fitting-on-subsampled-phalkethoh-dataset">
+<h1>Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.<a class="headerlink" href="#toy-experiment-molecular-mechanics-mm-fitting-on-subsampled-phalkethoh-dataset" title="Permalink to this headline"></a></h1>
+<p>This notebook is intended to recover the MM fitting behavior in
+<a class="reference external" href="https://arxiv.org/abs/2010.01196">https://arxiv.org/abs/2010.01196</a></p>
+<p>To assess how well Espaloma can learn to reproduce an MM force field
+from a limited amount of data, we selected a chemical dataset of limited
+complexity—PhAlkEthOH—which consists of linear and cyclic molecules
+containing phenyl rings, small alkanes, ethers, and alcohols composed of
+only the elements carbon, oxygen, and hydrogen. We generated a set of
+conformational snapshots for each molecule using short high-temperature
+molecular dynamics simulations at 300~K initiated from multiple
+conformations to ensure adequate sampling of conformers. The AlkEthOH
+dataset was randomly partitioned (by molecules) into 80% training, 10%
+validation, and 10% test molecules, with 100 snapshots/molecule, and an
+Espaloma model was trained with early stopping via monitoring for a
+decrease in accuracy in the validation set.</p>
+<img alt="https://pbs.twimg.com/media/FBL0qACXIBkJLQZ?format=png&amp;name=4096x4096" src="https://pbs.twimg.com/media/FBL0qACXIBkJLQZ?format=png&amp;name=4096x4096" />
+</section>
+<section id="installation-and-imports">
+<h1>Installation and imports<a class="headerlink" href="#installation-and-imports" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span># install conda
+! pip install -q condacolab
+import condacolab
+condacolab.install()
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>⏬ Downloading https://github.com/jaimergp/miniforge/releases/latest/download/Mambaforge-colab-Linux-x86_64.sh...
+📦 Installing...
+📌 Adjusting configuration...
+🩹 Patching environment...
+⏲ Done in 0:00:22
+🔁 Restarting kernel...
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
+! wget http://data.wangyq.net/esp_dataset/phalkethoh_mm_small.zip
+! unzip phalkethoh_mm_small.zip
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
+! mamba install --yes --strict-channel-priority --channel jaimergp/label/unsupported-cudatoolkit-shim --channel omnia --channel omnia/label/cuda100 --channel dglteam --channel numpy openmm openmmtools openmmforcefields rdkit openff-toolkit dgl-cuda10.0 qcportal
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>! git clone https://github.com/choderalab/espaloma.git
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Cloning into &#39;espaloma&#39;...
+remote: Enumerating objects: 7298, done.[K
+remote: Counting objects: 100% (3120/3120), done.[K
+remote: Compressing objects: 100% (1540/1540), done.[K
+remote: Total 7298 (delta 2249), reused 2190 (delta 1499), pack-reused 4178[K
+Receiving objects: 100% (7298/7298), 13.31 MiB | 24.64 MiB/s, done.
+Resolving deltas: 100% (5073/5073), done.
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;/content/espaloma&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">importing</span> <span class="s1">&#39;simtk.openmm&#39;</span> <span class="ow">is</span> <span class="n">deprecated</span><span class="o">.</span>  <span class="n">Import</span> <span class="s1">&#39;openmm&#39;</span> <span class="n">instead</span><span class="o">.</span>
+<span class="ne">Warning</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">load</span> <span class="n">toolkit</span> <span class="s1">&#39;OpenEye Toolkit&#39;</span><span class="o">.</span> <span class="n">The</span> <span class="n">Open</span> <span class="n">Force</span> <span class="n">Field</span> <span class="n">Toolkit</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">require</span> <span class="n">the</span> <span class="n">OpenEye</span> <span class="n">Toolkits</span><span class="p">,</span> <span class="ow">and</span> <span class="n">can</span> <span class="n">use</span> <span class="n">RDKit</span><span class="o">/</span><span class="n">AmberTools</span> <span class="n">instead</span><span class="o">.</span> <span class="n">However</span><span class="p">,</span> <span class="k">if</span> <span class="n">you</span> <span class="n">have</span> <span class="n">a</span> <span class="n">valid</span> <span class="n">license</span> <span class="k">for</span> <span class="n">the</span> <span class="n">OpenEye</span> <span class="n">Toolkits</span><span class="p">,</span> <span class="n">consider</span> <span class="n">installing</span> <span class="n">them</span> <span class="k">for</span> <span class="n">faster</span> <span class="n">performance</span> <span class="ow">and</span> <span class="n">additional</span> <span class="n">file</span> <span class="nb">format</span> <span class="n">support</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">eyesopen</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">toolkits</span><span class="o">/</span><span class="n">python</span><span class="o">/</span><span class="n">quickstart</span><span class="o">-</span><span class="n">python</span><span class="o">/</span><span class="n">linuxosx</span><span class="o">.</span><span class="n">html</span> <span class="n">OpenEye</span> <span class="n">offers</span> <span class="n">free</span> <span class="n">Toolkit</span> <span class="n">licenses</span> <span class="k">for</span> <span class="n">academics</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">eyesopen</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">academic</span><span class="o">-</span><span class="n">licensing</span>
+</pre></div>
+</div>
+</section>
+<section id="load-dataset">
+<h1>Load dataset<a class="headerlink" href="#load-dataset" title="Permalink to this headline"></a></h1>
+<p>Here we load the PhAlKeThoh dataset and shuffle before splitting into
+training, validation, and test (80%:10%:10%)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;phalkethoh&quot;</span><span class="p">)</span>
+<span class="n">ds</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">2666</span><span class="p">)</span>
+<span class="n">ds_tr</span><span class="p">,</span> <span class="n">ds_vl</span><span class="p">,</span> <span class="n">ds_te</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>A training dataloader is constructed with <code class="docutils literal notranslate"><span class="pre">batch_size=100</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds_tr_loader</span> <span class="o">=</span> <span class="n">ds_tr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g_tr</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">ds_tr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_tr</span><span class="p">))))</span>
+<span class="n">g_vl</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">ds_vl</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_vl</span><span class="p">))))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dgl</span><span class="o">/</span><span class="n">base</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span> <span class="n">DGLWarning</span><span class="p">:</span> <span class="n">From</span> <span class="n">v0</span><span class="mf">.5</span><span class="p">,</span> <span class="n">DGLHeteroGraph</span> <span class="ow">is</span> <span class="n">merged</span> <span class="n">into</span> <span class="n">DGLGraph</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="n">safely</span> <span class="n">replace</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch_hetero</span> <span class="k">with</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span>
+  <span class="k">return</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="define-model">
+<h1>Define model<a class="headerlink" href="#define-model" title="Permalink to this headline"></a></h1>
+<p>Define Espaloma stage I: graph -&gt; atom latent representation</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">representation</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">layer</span><span class="o">=</span><span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dgl_legacy</span><span class="o">.</span><span class="n">gn</span><span class="p">(</span><span class="s2">&quot;SAGEConv&quot;</span><span class="p">),</span> <span class="c1"># use SAGEConv implementation in DGL</span>
+    <span class="n">config</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">],</span> <span class="c1"># 3 layers, 128 units, ReLU activation</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Define Espaloma stage II and III: atom latent representation -&gt; bond,
+angle, and torsion representation and parameters. And compose all three
+Espaloma stages into an end-to-end model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">readout</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">readout</span><span class="o">.</span><span class="n">janossy</span><span class="o">.</span><span class="n">JanossyPooling</span><span class="p">(</span>
+    <span class="n">in_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">],</span>
+    <span class="n">out_features</span><span class="o">=</span><span class="p">{</span>              <span class="c1"># define modular MM parameters Espaloma will assign</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="c1"># atom hardness and electronegativity</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;log_coefficients&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="c1"># bond linear combination, enforce positive</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;log_coefficients&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="c1"># angle linear combination, enforce positive</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span> <span class="c1"># torsion barrier heights (can be positive or negative)</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">espaloma_model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+                 <span class="n">representation</span><span class="p">,</span> <span class="n">readout</span><span class="p">,</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">readout</span><span class="o">.</span><span class="n">janossy</span><span class="o">.</span><span class="n">ExpCoefficients</span><span class="p">(),</span>
+                 <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">GeometryInGraph</span><span class="p">(),</span>
+                 <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">EnergyInGraph</span><span class="p">(),</span>
+                 <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">EnergyInGraph</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_ref&quot;</span><span class="p">),</span>
+                 <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">readout</span><span class="o">.</span><span class="n">charge_equilibrium</span><span class="o">.</span><span class="n">ChargeEquilibrium</span><span class="p">(),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="n">espaloma_model</span> <span class="o">=</span> <span class="n">espaloma_model</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Loss function is specified as the MSE between predicted and reference
+energy.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">GraphMetric</span><span class="p">(</span>
+        <span class="n">base_metric</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">(),</span> <span class="c1"># use mean-squared error loss</span>
+        <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s2">&quot;u_ref&quot;</span><span class="p">],</span>         <span class="c1"># between predicted and QM energies</span>
+        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="c1"># compare on graph level</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="define-optimizer">
+<h1>Define optimizer<a class="headerlink" href="#define-optimizer" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">espaloma_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="mf">1e-3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="train-it">
+<h1>Train it!<a class="headerlink" href="#train-it" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">idx_epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">ds_tr_loader</span><span class="p">:</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">espaloma_model</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">espaloma_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.th&quot;</span> <span class="o">%</span> <span class="n">idx_epoch</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dgl</span><span class="o">/</span><span class="n">base</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span> <span class="n">DGLWarning</span><span class="p">:</span> <span class="n">From</span> <span class="n">v0</span><span class="mf">.5</span><span class="p">,</span> <span class="n">DGLHeteroGraph</span> <span class="ow">is</span> <span class="n">merged</span> <span class="n">into</span> <span class="n">DGLGraph</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="n">safely</span> <span class="n">replace</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch_hetero</span> <span class="k">with</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span>
+  <span class="k">return</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dgl</span><span class="o">/</span><span class="n">base</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span> <span class="n">DGLWarning</span><span class="p">:</span> <span class="n">dgl</span><span class="o">.</span><span class="n">to_homo</span> <span class="ow">is</span> <span class="n">deprecated</span><span class="o">.</span> <span class="n">Please</span> <span class="n">use</span> <span class="n">dgl</span><span class="o">.</span><span class="n">to_homogeneous</span>
+  <span class="k">return</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="inspect">
+<h1>Inspect<a class="headerlink" href="#inspect" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inspect_metric</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">GraphMetric</span><span class="p">(</span>
+        <span class="n">base_metric</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">(),</span> <span class="c1"># use mean-squared error loss</span>
+        <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s2">&quot;u_ref&quot;</span><span class="p">],</span>         <span class="c1"># between predicted and QM energies</span>
+        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="c1"># compare on graph level</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="n">g_vl</span> <span class="o">=</span> <span class="n">g_vl</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+    <span class="n">g_tr</span> <span class="o">=</span> <span class="n">g_tr</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loss_tr</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">loss_vl</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">idx_epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="n">espaloma_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.th&quot;</span> <span class="o">%</span> <span class="n">idx_epoch</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">espaloma_model</span><span class="p">(</span><span class="n">g_tr</span><span class="p">)</span>
+    <span class="n">loss_tr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inspect_metric</span><span class="p">(</span><span class="n">g_tr</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+
+    <span class="n">espaloma_model</span><span class="p">(</span><span class="n">g_vl</span><span class="p">)</span>
+    <span class="n">loss_vl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inspect_metric</span><span class="p">(</span><span class="n">g_vl</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dgl</span><span class="o">/</span><span class="n">base</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span> <span class="n">DGLWarning</span><span class="p">:</span> <span class="n">dgl</span><span class="o">.</span><span class="n">to_homo</span> <span class="ow">is</span> <span class="n">deprecated</span><span class="o">.</span> <span class="n">Please</span> <span class="n">use</span> <span class="n">dgl</span><span class="o">.</span><span class="n">to_homogeneous</span>
+  <span class="k">return</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">loss_tr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">loss_tr</span><span class="p">)</span> <span class="o">*</span> <span class="mf">627.5</span>
+<span class="n">loss_vl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">loss_vl</span><span class="p">)</span> <span class="o">*</span> <span class="mf">627.5</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">loss_tr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">loss_vl</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;valid&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">Legend</span> <span class="n">at</span> <span class="mh">0x7fd8f0eebd90</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="experiments/mm_fitting_small_files/mm_fitting_small_32_1.png" src="experiments/mm_fitting_small_files/mm_fitting_small_32_1.png" />
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="typing.html" class="btn btn-neutral float-right" title="Atom typing recovery experiment." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

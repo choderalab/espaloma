@@ -38,8 +38,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html#load-dataset">Load dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html#define-model">Define model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html#train-it">Train it!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/mm_fitting_small.html#inspect">Inspect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments/typing.html">Atom typing recovery experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Documentation</a></li>
 </ul>
 
@@ -74,6 +80,7 @@
 <span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">espaloma.graphs.utils</span> <span class="kn">import</span> <span class="n">offmol_indices</span>
@@ -331,7 +338,6 @@
             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="kn">import</span> <span class="nn">dgl</span>
     <span class="n">hg</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">heterograph</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">hg</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
     <span class="n">hg</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s2">&quot;h0&quot;</span><span class="p">]</span>

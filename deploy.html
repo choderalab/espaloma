@@ -41,8 +41,14 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html#load-dataset">Load dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html#define-model">Define model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html#train-it">Train it!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html#inspect">Inspect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Atom typing recovery experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
@@ -79,7 +85,7 @@ systems in a few lines:</p>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
 
-<span class="c1"># grab espaloma</span>
+<span class="c1"># grab pretrained model</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;espaloma_model.pt&quot;</span><span class="p">):</span>
     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;wget http://data.wangyq.net/espaloma_model.pt&quot;</span><span class="p">)</span>
 
