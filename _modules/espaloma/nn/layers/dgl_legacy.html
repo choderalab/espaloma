@@ -78,16 +78,10 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-
-<span class="kn">import</span> <span class="nn">dgl</span>
-
 <span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">dgl.nn</span> <span class="kn">import</span> <span class="n">pytorch</span> <span class="k">as</span> <span class="n">dgl_pytorch</span>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># CONSTANT</span>
@@ -111,7 +105,7 @@
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
+        <span class="kn">from</span> <span class="nn">dgl.nn</span> <span class="kn">import</span> <span class="n">pytorch</span> <span class="k">as</span> <span class="n">dgl_pytorch</span>
         <span class="k">if</span> <span class="n">kwargs</span> <span class="o">==</span> <span class="p">{}:</span>
             <span class="k">if</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">DEFAULT_MODEL_KWARGS</span><span class="p">:</span>
                 <span class="n">kwargs</span> <span class="o">=</span> <span class="n">DEFAULT_MODEL_KWARGS</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span>
@@ -134,6 +128,7 @@
 
 
 <div class="viewcode-block" id="gn"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.layers.dgl_legacy.gn.html#espaloma.nn.layers.dgl_legacy.gn">[docs]</a><span class="k">def</span> <span class="nf">gn</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;GraphConv&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="kn">from</span> <span class="nn">dgl.nn</span> <span class="kn">import</span> <span class="n">pytorch</span> <span class="k">as</span> <span class="n">dgl_pytorch</span>
     <span class="k">if</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s2">&quot;GINConv&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">:</span> <span class="n">dgl_pytorch</span><span class="o">.</span><span class="n">conv</span><span class="o">.</span><span class="n">GINConv</span><span class="p">(</span>
             <span class="n">apply_func</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">),</span>

@@ -77,7 +77,6 @@
 <span></span><span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
-<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
@@ -174,6 +173,7 @@
 <span class="sd">        g : dgl.DGLHeteroGraph,</span>
 <span class="sd">            input graph.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">dgl</span>
 
         <span class="c1"># copy</span>
         <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
@@ -309,7 +309,8 @@
 <span class="sd">        g : dgl.DGLHeteroGraph,</span>
 <span class="sd">            input graph.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="kn">import</span> <span class="nn">dgl</span>
+        
         <span class="c1"># copy</span>
         <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
             <span class="p">{</span>
