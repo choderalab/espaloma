@@ -59,6 +59,13 @@ def openmm_system_from_graph(
     suffix : `str`
         Suffix for the force terms.
 
+    charge_method : str, optional, default='nn'
+        Method to use for assigning partial charges:
+        'nn' : Assign partial charges from the espaloma graph net model
+        'am1-bcc' : Allow the OpenFF toolkit to assign AM1-BCC charges using default backend
+        'gasteiger' : Assign Gasteiger partial charges (not recommended)
+        'from-molecule' : Use partial charges provided in the original `Molecule` object
+
     Returns
     -------
     sys : `openmm.System`
@@ -88,14 +95,14 @@ def openmm_system_from_graph(
         sys = ff.create_openmm_system(
             g.mol.to_topology(), charge_from_molecules=[g.mol]
         )
-        
+
     elif charge_method == "am1-bcc":
         g.mol.assign_partial_charges()
         sys = ff.create_openmm_system(
             g.mol.to_topology(), charge_from_molecules=[g.mol]
         )
-        
-    elif charge_method == "keep":
+
+    elif charge_method == "from-molecule":
         sys = ff.create_openmm_system(
             g.mol.to_topology(), charge_from_molecules=[g.mol]
         )
