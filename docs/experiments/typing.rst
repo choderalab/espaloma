@@ -1,8 +1,8 @@
 Atom typing recovery experiment.
 ================================
 
-**Open in Google Colab:
-http://data.wangyq.net/esp_notebooks/typing.ipynb**
+**Open in Google Colab**:
+http://data.wangyq.net/esp_notebooks/typing.ipynb
 
 (GPU preferred)
 
