@@ -1,5 +1,8 @@
 Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.
-----------------------------------------------------------------------------------
+==================================================================================
+
+**Open in Google Colab**:
+http://data.wangyq.net/esp_notebooks/phalkethoh_mm_small.ipynb
 
 This notebook is intended to recover the MM fitting behavior in
 https://arxiv.org/abs/2010.01196

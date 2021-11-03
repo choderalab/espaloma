@@ -41,13 +41,15 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#installation-and-imports">Installation and imports</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#load-dataset">Load dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#define-model">Define model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#define-optimizer">Define optimizer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#train-it">Train it!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#inspect">Inspect</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-dataset">Load dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#define-model">Define model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train-it">Train it!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inspect">Inspect</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="typing.html">Atom typing recovery experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 </ul>
@@ -79,6 +81,8 @@
              
   <section id="toy-experiment-molecular-mechanics-mm-fitting-on-subsampled-phalkethoh-dataset">
 <h1>Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.<a class="headerlink" href="#toy-experiment-molecular-mechanics-mm-fitting-on-subsampled-phalkethoh-dataset" title="Permalink to this headline"></a></h1>
+<p><strong>Open in Google Colab</strong>:
+<a class="reference external" href="http://data.wangyq.net/esp_notebooks/phalkethoh_mm_small.ipynb">http://data.wangyq.net/esp_notebooks/phalkethoh_mm_small.ipynb</a></p>
 <p>This notebook is intended to recover the MM fitting behavior in
 <a class="reference external" href="https://arxiv.org/abs/2010.01196">https://arxiv.org/abs/2010.01196</a></p>
 <p>To assess how well Espaloma can learn to reproduce an MM force field
@@ -94,9 +98,8 @@ validation, and 10% test molecules, with 100 snapshots/molecule, and an
 Espaloma model was trained with early stopping via monitoring for a
 decrease in accuracy in the validation set.</p>
 <img alt="https://pbs.twimg.com/media/FBL0qACXIBkJLQZ?format=png&amp;name=4096x4096" src="https://pbs.twimg.com/media/FBL0qACXIBkJLQZ?format=png&amp;name=4096x4096" />
-</section>
 <section id="installation-and-imports">
-<h1>Installation and imports<a class="headerlink" href="#installation-and-imports" title="Permalink to this headline"></a></h1>
+<h2>Installation and imports<a class="headerlink" href="#installation-and-imports" title="Permalink to this headline"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span># install conda
 ! pip install -q condacolab
 import condacolab
@@ -146,7 +149,7 @@ Resolving deltas: 100% (5073/5073), done.
 </div>
 </section>
 <section id="load-dataset">
-<h1>Load dataset<a class="headerlink" href="#load-dataset" title="Permalink to this headline"></a></h1>
+<h2>Load dataset<a class="headerlink" href="#load-dataset" title="Permalink to this headline"></a></h2>
 <p>Here we load the PhAlKeThoh dataset and shuffle before splitting into
 training, validation, and test (80%:10%:10%)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;phalkethoh&quot;</span><span class="p">)</span>
@@ -168,7 +171,7 @@ training, validation, and test (80%:10%:10%)</p>
 </div>
 </section>
 <section id="define-model">
-<h1>Define model<a class="headerlink" href="#define-model" title="Permalink to this headline"></a></h1>
+<h2>Define model<a class="headerlink" href="#define-model" title="Permalink to this headline"></a></h2>
 <p>Define Espaloma stage I: graph -&gt; atom latent representation</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">representation</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dgl_legacy</span><span class="o">.</span><span class="n">gn</span><span class="p">(</span><span class="s2">&quot;SAGEConv&quot;</span><span class="p">),</span> <span class="c1"># use SAGEConv implementation in DGL</span>
@@ -213,13 +216,13 @@ energy.</p>
 </div>
 </section>
 <section id="define-optimizer">
-<h1>Define optimizer<a class="headerlink" href="#define-optimizer" title="Permalink to this headline"></a></h1>
+<h2>Define optimizer<a class="headerlink" href="#define-optimizer" title="Permalink to this headline"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">espaloma_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="mf">1e-3</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="train-it">
-<h1>Train it!<a class="headerlink" href="#train-it" title="Permalink to this headline"></a></h1>
+<h2>Train it!<a class="headerlink" href="#train-it" title="Permalink to this headline"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">idx_epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">ds_tr_loader</span><span class="p">:</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
@@ -240,7 +243,7 @@ energy.</p>
 </div>
 </section>
 <section id="inspect">
-<h1>Inspect<a class="headerlink" href="#inspect" title="Permalink to this headline"></a></h1>
+<h2>Inspect<a class="headerlink" href="#inspect" title="Permalink to this headline"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inspect_metric</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">GraphMetric</span><span class="p">(</span>
         <span class="n">base_metric</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">(),</span> <span class="c1"># use mean-squared error loss</span>
         <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s2">&quot;u_ref&quot;</span><span class="p">],</span>         <span class="c1"># between predicted and QM energies</span>
@@ -289,6 +292,7 @@ energy.</p>
 </pre></div>
 </div>
 <img alt="experiments/mm_fitting_small_files/mm_fitting_small_32_1.png" src="experiments/mm_fitting_small_files/mm_fitting_small_32_1.png" />
+</section>
 </section>
 
 
