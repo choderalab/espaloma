@@ -121,7 +121,9 @@ def openmm_system_from_graph(
 
     else:
         # create openmm system
-        sys = ff.create_openmm_system(g.mol.to_topology())
+        raise RuntimeError(
+            "Charge method %s is not supported. " % charge_method
+        )
 
     for force in sys.getForces():
         name = force.__class__.__name__
