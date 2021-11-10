@@ -9,11 +9,9 @@ espaloma: **E**xtensible **S**urrogate **P**otenti**al** **O**ptimized by **M**e
 
 Source code for [Wang Y, Fass J, and Chodera JD "End-to-End Differentiable Construction of Molecular Mechanics Force Fields."](https://arxiv.org/abs/2010.01196)
 
-For (somewhat simplified) scripts to reproduce the experiments in the manuscript, please see our project website (https://espaloma.wangyq.net).
-
 ![abstract](docs/_static/espaloma_abstract_v2-2.png)
 
-
+For (somewhat simplified) scripts to reproduce the experiments in the manuscript, please see our project website (https://espaloma.wangyq.net).
 
 # Paper Abstract
 Molecular mechanics (MM) potentials have long been a workhorse of computational chemistry.
