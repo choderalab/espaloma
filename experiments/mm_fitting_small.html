@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Atom typing recovery experiment." href="typing.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="index.html" /> 
+    <link rel="next" title="Quantum mechanics (QM) fitting experiment." href="qm_fitting.html" />
+    <link rel="prev" title="Atom typing recovery experiment." href="typing.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,6 +41,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="typing.html">Atom typing recovery experiment.</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation-and-imports">Installation and imports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#load-dataset">Load dataset</a></li>
@@ -50,7 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#inspect">Inspect</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="typing.html">Atom typing recovery experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 </ul>
 
@@ -115,11 +116,6 @@ condacolab.install()
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
-! wget http://data.wangyq.net/esp_dataset/phalkethoh_mm_small.zip
-! unzip phalkethoh_mm_small.zip
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
 ! mamba install --yes --strict-channel-priority --channel jaimergp/label/unsupported-cudatoolkit-shim --channel omnia --channel omnia/label/cuda100 --channel dglteam --channel numpy openmm openmmtools openmmforcefields rdkit openff-toolkit dgl-cuda10.0 qcportal
 </pre></div>
 </div>
@@ -136,9 +132,7 @@ Resolving deltas: 100% (5538/5538), done.
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;/content/espaloma&quot;</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
 </pre></div>
@@ -147,285 +141,16 @@ Resolving deltas: 100% (5538/5538), done.
 <span class="ne">Warning</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">load</span> <span class="n">toolkit</span> <span class="s1">&#39;OpenEye Toolkit&#39;</span><span class="o">.</span> <span class="n">The</span> <span class="n">Open</span> <span class="n">Force</span> <span class="n">Field</span> <span class="n">Toolkit</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">require</span> <span class="n">the</span> <span class="n">OpenEye</span> <span class="n">Toolkits</span><span class="p">,</span> <span class="ow">and</span> <span class="n">can</span> <span class="n">use</span> <span class="n">RDKit</span><span class="o">/</span><span class="n">AmberTools</span> <span class="n">instead</span><span class="o">.</span> <span class="n">However</span><span class="p">,</span> <span class="k">if</span> <span class="n">you</span> <span class="n">have</span> <span class="n">a</span> <span class="n">valid</span> <span class="n">license</span> <span class="k">for</span> <span class="n">the</span> <span class="n">OpenEye</span> <span class="n">Toolkits</span><span class="p">,</span> <span class="n">consider</span> <span class="n">installing</span> <span class="n">them</span> <span class="k">for</span> <span class="n">faster</span> <span class="n">performance</span> <span class="ow">and</span> <span class="n">additional</span> <span class="n">file</span> <span class="nb">format</span> <span class="n">support</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">eyesopen</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">toolkits</span><span class="o">/</span><span class="n">python</span><span class="o">/</span><span class="n">quickstart</span><span class="o">-</span><span class="n">python</span><span class="o">/</span><span class="n">linuxosx</span><span class="o">.</span><span class="n">html</span> <span class="n">OpenEye</span> <span class="n">offers</span> <span class="n">free</span> <span class="n">Toolkit</span> <span class="n">licenses</span> <span class="k">for</span> <span class="n">academics</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">eyesopen</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">academic</span><span class="o">-</span><span class="n">licensing</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>! conda list
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># packages in environment at /usr/local:</span>
-<span class="c1">#</span>
-<span class="c1"># Name                    Version                   Build  Channel</span>
-<span class="n">_libgcc_mutex</span>             <span class="mf">0.1</span>                 <span class="n">conda_forge</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">_openmp_mutex</span>             <span class="mf">4.5</span>                       <span class="mi">1</span><span class="n">_gnu</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">abseil</span><span class="o">-</span><span class="n">cpp</span>                <span class="mf">20210324.0</span>           <span class="n">h9c3ff4c_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">alabaster</span>                 <span class="mf">0.7.12</span>                     <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">amberlite</span>                 <span class="mf">16.0</span>                     <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">ambertools</span>                <span class="mf">20.15</span>                    <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">argcomplete</span>               <span class="mf">1.12.3</span>             <span class="n">pyhd8ed1ab_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">argon2</span><span class="o">-</span><span class="n">cffi</span>               <span class="mf">21.1.0</span>           <span class="n">py37h5e8e339_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">arpack</span>                    <span class="mf">3.7.0</span>                <span class="n">hdefa2d7_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">arrow</span><span class="o">-</span><span class="n">cpp</span>                 <span class="mf">4.0.0</span>           <span class="n">py37he4eac6b_0_cpu</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">astunparse</span>                <span class="mf">1.6.3</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">async_generator</span>           <span class="mf">1.10</span>                       <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">attrs</span>                     <span class="mf">21.2.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">aws</span><span class="o">-</span><span class="n">c</span><span class="o">-</span><span class="n">cal</span>                 <span class="mf">0.4.5</span>                <span class="n">h76129ab_8</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">aws</span><span class="o">-</span><span class="n">c</span><span class="o">-</span><span class="n">common</span>              <span class="mf">0.5.2</span>                <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">aws</span><span class="o">-</span><span class="n">c</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">stream</span>        <span class="mf">0.2.7</span>                <span class="n">h6bac3ce_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">aws</span><span class="o">-</span><span class="n">c</span><span class="o">-</span><span class="n">io</span>                  <span class="mf">0.9.1</span>                <span class="n">ha5b09cb_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">aws</span><span class="o">-</span><span class="n">checksums</span>             <span class="mf">0.1.11</span>               <span class="n">h99e32c3_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">aws</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">cpp</span>               <span class="mf">1.8.151</span>              <span class="n">hceb1b1e_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">babel</span>                     <span class="mf">2.9.1</span>              <span class="n">pyh44b312d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">backcall</span>                  <span class="mf">0.2.0</span>              <span class="n">pyh9f0ad1d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">backports</span>                 <span class="mf">1.0</span>                        <span class="n">py_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">backports</span><span class="o">.</span><span class="n">functools_lru_cache</span> <span class="mf">1.6.4</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">bleach</span>                    <span class="mf">4.1.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">blosc</span>                     <span class="mf">1.21.0</span>               <span class="n">h9c3ff4c_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">boost</span>                     <span class="mf">1.74.0</span>           <span class="n">py37h6dcda5c_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">boost</span><span class="o">-</span><span class="n">cpp</span>                 <span class="mf">1.74.0</span>               <span class="n">hc6e9bd1_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">brotli</span>                    <span class="mf">1.0.9</span>                <span class="n">h7f98852_6</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">brotli</span><span class="o">-</span><span class="nb">bin</span>                <span class="mf">1.0.9</span>                <span class="n">h7f98852_6</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">brotlipy</span>                  <span class="mf">0.7.0</span>           <span class="n">py37h5e8e339_1001</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">bzip2</span>                     <span class="mf">1.0.8</span>                <span class="n">h7f98852_4</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">c</span><span class="o">-</span><span class="n">ares</span>                    <span class="mf">1.17.1</span>               <span class="n">h7f98852_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ca</span><span class="o">-</span><span class="n">certificates</span>           <span class="mf">2021.10.8</span>            <span class="n">ha878542_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cached</span><span class="o">-</span><span class="nb">property</span>           <span class="mf">1.5.2</span>                <span class="n">hd8ed1ab_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cached_property</span>           <span class="mf">1.5.2</span>              <span class="n">pyha770c72_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cairo</span>                     <span class="mf">1.16.0</span>            <span class="n">h6cf1ce9_1008</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">certifi</span>                   <span class="mf">2021.10.8</span>        <span class="n">py37h89c1867_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cffi</span>                      <span class="mf">1.14.5</span>           <span class="n">py37hc58025e_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cftime</span>                    <span class="mf">1.5.1.1</span>          <span class="n">py37hb1e94ed_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">chardet</span>                   <span class="mf">4.0.0</span>            <span class="n">py37h89c1867_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">colorama</span>                  <span class="mf">0.4.4</span>              <span class="n">pyh9f0ad1d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">conda</span>                     <span class="mf">4.9.2</span>            <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">conda</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="n">handling</span>    <span class="mf">1.7.2</span>            <span class="n">py37hb5d75c8_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cryptography</span>              <span class="mf">3.4.5</span>            <span class="n">py37h5d9358c_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cudatoolkit</span>               <span class="mf">11.1.1</span>               <span class="n">hffbb1f5_8</span>    <span class="n">jaimergp</span><span class="o">/</span><span class="n">label</span><span class="o">/</span><span class="n">unsupported</span><span class="o">-</span><span class="n">cudatoolkit</span><span class="o">-</span><span class="n">shim</span>
-<span class="n">curl</span>                      <span class="mf">7.75.0</span>               <span class="n">h979ede3_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cycler</span>                    <span class="mf">0.11.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">cython</span>                    <span class="mf">0.29.24</span>          <span class="n">py37hcd2ae1e_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">dataclasses</span>               <span class="mf">0.8</span>                <span class="n">pyhc8e2a94_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">debugpy</span>                   <span class="mf">1.5.1</span>            <span class="n">py37hcd2ae1e_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">decorator</span>                 <span class="mf">5.1.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">defusedxml</span>                <span class="mf">0.7.1</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">dgl</span><span class="o">-</span><span class="n">cuda10</span><span class="mf">.0</span>              <span class="mf">0.5.3</span>                    <span class="n">py37_0</span>    <span class="n">dglteam</span>
-<span class="n">docutils</span>                  <span class="mf">0.18</span>             <span class="n">py37h89c1867_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">entrypoints</span>               <span class="mf">0.3</span>             <span class="n">py37hc8dfbb8_1002</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">fftw</span>                      <span class="mf">3.3.10</span>          <span class="n">nompi_hcdd671c_101</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">fontconfig</span>                <span class="mf">2.13.1</span>            <span class="n">hba837de_1005</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">freetype</span>                  <span class="mf">2.10.4</span>               <span class="n">h0708190_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">gettext</span>                   <span class="mf">0.19.8.1</span>          <span class="n">h0b5b191_1005</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">gflags</span>                    <span class="mf">2.2.2</span>             <span class="n">he1b5a44_1004</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">glog</span>                      <span class="mf">0.4.0</span>                <span class="n">h49b9bf7_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">greenlet</span>                  <span class="mf">1.1.2</span>            <span class="n">py37hcd2ae1e_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">grpc</span><span class="o">-</span><span class="n">cpp</span>                  <span class="mf">1.37.1</span>               <span class="n">h36de60a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">h5py</span>                      <span class="mf">3.3.0</span>           <span class="n">nompi_py37ha3df211_100</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">hdf4</span>                      <span class="mf">4.2.15</span>               <span class="n">h10796ff_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">hdf5</span>                      <span class="mf">1.10.6</span>          <span class="n">nompi_h6a2412b_1114</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">icu</span>                       <span class="mf">68.1</span>                 <span class="n">h58526e2_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">idna</span>                      <span class="mf">2.10</span>               <span class="n">pyh9f0ad1d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">imagesize</span>                 <span class="mf">1.2.0</span>                      <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">importlib</span><span class="o">-</span><span class="n">metadata</span>        <span class="mf">4.8.1</span>            <span class="n">py37h89c1867_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">importlib_metadata</span>        <span class="mf">4.8.1</span>                <span class="n">hd8ed1ab_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ipykernel</span>                 <span class="mf">6.4.2</span>            <span class="n">py37h6531663_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ipython</span>                   <span class="mf">7.29.0</span>           <span class="n">py37h6531663_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ipython_genutils</span>          <span class="mf">0.2.0</span>                      <span class="n">py_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ipywidgets</span>                <span class="mf">7.6.5</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jedi</span>                      <span class="mf">0.18.0</span>           <span class="n">py37h89c1867_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jinja2</span>                    <span class="mf">3.0.2</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jpeg</span>                      <span class="mi">9</span><span class="n">d</span>                   <span class="n">h516909a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jsonschema</span>                <span class="mf">4.1.2</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jupyter_client</span>            <span class="mf">7.0.6</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jupyter_core</span>              <span class="mf">4.9.1</span>            <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jupyterlab_pygments</span>       <span class="mf">0.1.2</span>              <span class="n">pyh9f0ad1d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">jupyterlab_widgets</span>        <span class="mf">1.0.2</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">kiwisolver</span>                <span class="mf">1.3.2</span>            <span class="n">py37h2527ec5_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">krb5</span>                      <span class="mf">1.17.2</span>               <span class="n">h926e7f8_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">latexcodec</span>                <span class="mf">2.0.1</span>              <span class="n">pyh9f0ad1d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">lcms2</span>                     <span class="mf">2.12</span>                 <span class="n">hddcbb42_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ld_impl_linux</span><span class="o">-</span><span class="mi">64</span>          <span class="mf">2.35.1</span>               <span class="n">hea4e1c9_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libarchive</span>                <span class="mf">3.5.1</span>                <span class="n">h3f442fb_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libblas</span>                   <span class="mf">3.9.0</span>           <span class="mi">12</span><span class="n">_linux64_openblas</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libbrotlicommon</span>           <span class="mf">1.0.9</span>                <span class="n">h7f98852_6</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libbrotlidec</span>              <span class="mf">1.0.9</span>                <span class="n">h7f98852_6</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libbrotlienc</span>              <span class="mf">1.0.9</span>                <span class="n">h7f98852_6</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libcblas</span>                  <span class="mf">3.9.0</span>           <span class="mi">12</span><span class="n">_linux64_openblas</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libcurl</span>                   <span class="mf">7.75.0</span>               <span class="n">hc4aaa36_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libedit</span>                   <span class="mf">3.1.20191231</span>         <span class="n">he28a2e2_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libev</span>                     <span class="mf">4.33</span>                 <span class="n">h516909a_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libevent</span>                  <span class="mf">2.1.10</span>               <span class="n">h9b69904_4</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libffi</span>                    <span class="mf">3.3</span>                  <span class="n">h58526e2_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libgcc</span><span class="o">-</span><span class="n">ng</span>                 <span class="mf">11.2.0</span>              <span class="n">h1d223b6_11</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libgfortran</span><span class="o">-</span><span class="n">ng</span>            <span class="mf">11.2.0</span>              <span class="n">h69a702a_11</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libgfortran5</span>              <span class="mf">11.2.0</span>              <span class="n">h5c6108e_11</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libglib</span>                   <span class="mf">2.68.4</span>               <span class="n">h3e27bee_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libgomp</span>                   <span class="mf">11.2.0</span>              <span class="n">h1d223b6_11</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libiconv</span>                  <span class="mf">1.16</span>                 <span class="n">h516909a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">liblapack</span>                 <span class="mf">3.9.0</span>           <span class="mi">12</span><span class="n">_linux64_openblas</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libnetcdf</span>                 <span class="mf">4.7.4</span>           <span class="n">nompi_h56d31a8_107</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libnghttp2</span>                <span class="mf">1.43.0</span>               <span class="n">h812cca2_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libopenblas</span>               <span class="mf">0.3.18</span>          <span class="n">pthreads_h8fe5266_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libpng</span>                    <span class="mf">1.6.37</span>               <span class="n">hed695b0_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libprotobuf</span>               <span class="mf">3.15.8</span>               <span class="n">h780b84a_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libsodium</span>                 <span class="mf">1.0.18</span>               <span class="n">h516909a_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libsolv</span>                   <span class="mf">0.7.17</span>               <span class="n">h780b84a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libssh2</span>                   <span class="mf">1.9.0</span>                <span class="n">ha56f1ee_6</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libstdcxx</span><span class="o">-</span><span class="n">ng</span>              <span class="mf">11.2.0</span>              <span class="n">he4da1e4_11</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libthrift</span>                 <span class="mf">0.14.1</span>               <span class="n">he6d91bd_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libtiff</span>                   <span class="mf">4.2.0</span>                <span class="n">hbd63e13_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libutf8proc</span>               <span class="mf">2.6.1</span>                <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libuuid</span>                   <span class="mf">2.32.1</span>            <span class="n">h14c3975_1000</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libwebp</span><span class="o">-</span><span class="n">base</span>              <span class="mf">1.2.1</span>                <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libxcb</span>                    <span class="mf">1.13</span>              <span class="n">h7f98852_1003</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libxml2</span>                   <span class="mf">2.9.10</span>               <span class="n">h72842e0_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">libxslt</span>                   <span class="mf">1.1.33</span>               <span class="n">h15afd5d_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">lxml</span>                      <span class="mf">4.6.3</span>            <span class="n">py37h77fd288_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">lz4</span><span class="o">-</span><span class="n">c</span>                     <span class="mf">1.9.3</span>                <span class="n">h9c3ff4c_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">lzo</span>                       <span class="mf">2.10</span>              <span class="n">h516909a_1000</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">mamba</span>                     <span class="mf">0.8.0</span>            <span class="n">py37h7f483ca_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">markupsafe</span>                <span class="mf">2.0.1</span>            <span class="n">py37h5e8e339_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">matplotlib</span><span class="o">-</span><span class="n">base</span>           <span class="mf">3.4.3</span>            <span class="n">py37h1058ff1_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">matplotlib</span><span class="o">-</span><span class="n">inline</span>         <span class="mf">0.1.3</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">mdtraj</span>                    <span class="mf">1.9.6</span>            <span class="n">py37hc53b9d0_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">mistune</span>                   <span class="mf">0.8.4</span>           <span class="n">py37h5e8e339_1005</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">mmpbsa</span><span class="o">-</span><span class="n">py</span>                 <span class="mf">16.0</span>                     <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">mock</span>                      <span class="mf">4.0.3</span>            <span class="n">py37h89c1867_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">mpiplus</span>                   <span class="n">v0</span><span class="mf">.0.1</span>          <span class="n">py37hc8dfbb8_1002</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">msgpack</span><span class="o">-</span><span class="n">python</span>            <span class="mf">1.0.2</span>            <span class="n">py37h2527ec5_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">nbclient</span>                  <span class="mf">0.5.4</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">nbconvert</span>                 <span class="mf">6.2.0</span>            <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">nbformat</span>                  <span class="mf">5.1.3</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ncurses</span>                   <span class="mf">6.2</span>                  <span class="n">h58526e2_4</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">nest</span><span class="o">-</span><span class="n">asyncio</span>              <span class="mf">1.5.1</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">netcdf</span><span class="o">-</span><span class="n">fortran</span>            <span class="mf">4.5.3</span>           <span class="n">nompi_h996563d_103</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">netcdf4</span>                   <span class="mf">1.5.6</span>           <span class="n">nompi_py37hf7b6e46_102</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">networkx</span>                  <span class="mf">2.6.3</span>              <span class="n">pyhd8ed1ab_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">nglview</span>                   <span class="mf">3.0.3</span>              <span class="n">pyh8a188c0_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">notebook</span>                  <span class="mf">6.4.5</span>              <span class="n">pyha770c72_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">numexpr</span>                   <span class="mf">2.7.3</span>            <span class="n">py37he8f5f7f_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">numpy</span>                     <span class="mf">1.21.3</span>           <span class="n">py37h31617e3_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ocl</span><span class="o">-</span><span class="n">icd</span>                   <span class="mf">2.3.1</span>                <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ocl</span><span class="o">-</span><span class="n">icd</span><span class="o">-</span><span class="n">system</span>            <span class="mf">1.0.0</span>                         <span class="mi">1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">olefile</span>                   <span class="mf">0.46</span>               <span class="n">pyh9f0ad1d_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openff</span><span class="o">-</span><span class="n">forcefields</span>        <span class="mf">2.0.0</span>              <span class="n">pyh6c4a22f_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openff</span><span class="o">-</span><span class="n">toolkit</span>            <span class="mf">0.10.1</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openff</span><span class="o">-</span><span class="n">toolkit</span><span class="o">-</span><span class="n">base</span>       <span class="mf">0.10.1</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openjpeg</span>                  <span class="mf">2.4.0</span>                <span class="n">hb52868f_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openmm</span>                    <span class="mf">7.6.0</span>            <span class="n">py37he27d83c_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openmmforcefields</span>         <span class="mf">0.10.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">openmmtools</span>               <span class="mf">0.20.0</span>                   <span class="n">py37_0</span>    <span class="n">omnia</span>
-<span class="n">openssl</span>                   <span class="mf">1.1.1</span><span class="n">l</span>               <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">orc</span>                       <span class="mf">1.6.7</span>                <span class="n">heec2584_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">packaging</span>                 <span class="mf">21.2</span>               <span class="n">pyhd8ed1ab_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">packmol</span><span class="o">-</span><span class="n">memgen</span>            <span class="mf">1.1.0</span><span class="n">rc0</span>                 <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">pandas</span>                    <span class="mf">1.3.4</span>            <span class="n">py37he8f5f7f_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pandoc</span>                    <span class="mf">2.16.1</span>               <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pandocfilters</span>             <span class="mf">1.5.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">parmed</span>                    <span class="mf">3.4.3</span>            <span class="n">py37hcd2ae1e_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">parquet</span><span class="o">-</span><span class="n">cpp</span>               <span class="mf">1.5.1</span>                         <span class="mi">1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">parso</span>                     <span class="mf">0.8.2</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pcre</span>                      <span class="mf">8.45</span>                 <span class="n">h9c3ff4c_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pdb4amber</span>                 <span class="mf">1.7</span><span class="o">.</span><span class="n">dev0</span>                 <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">perl</span>                      <span class="mf">5.32.1</span>          <span class="mi">1</span><span class="n">_h7f98852_perl5</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pexpect</span>                   <span class="mf">4.8.0</span>            <span class="n">py37hc8dfbb8_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pickleshare</span>               <span class="mf">0.7.5</span>           <span class="n">py37hc8dfbb8_1002</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pillow</span>                    <span class="mf">8.2.0</span>            <span class="n">py37h4600e1f_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pint</span>                      <span class="mf">0.18</span>               <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pip</span>                       <span class="mf">21.0.1</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pixman</span>                    <span class="mf">0.40.0</span>               <span class="n">h36c2ea0_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">plotly</span>                    <span class="mf">5.3.1</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">prometheus_client</span>         <span class="mf">0.12.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">prompt</span><span class="o">-</span><span class="n">toolkit</span>            <span class="mf">3.0.21</span>             <span class="n">pyha770c72_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pthread</span><span class="o">-</span><span class="n">stubs</span>             <span class="mf">0.4</span>               <span class="n">h36c2ea0_1001</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ptyprocess</span>                <span class="mf">0.7.0</span>              <span class="n">pyhd3deb0d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pyarrow</span>                   <span class="mf">4.0.0</span>           <span class="n">py37he2832ee_0_cpu</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pybtex</span>                    <span class="mf">0.24.0</span>           <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pybtex</span><span class="o">-</span><span class="n">docutils</span>           <span class="mf">1.0.1</span>            <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pycairo</span>                   <span class="mf">1.20.1</span>           <span class="n">py37hfff247e_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pycosat</span>                   <span class="mf">0.6.3</span>           <span class="n">py37h5e8e339_1006</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pycparser</span>                 <span class="mf">2.20</span>               <span class="n">pyh9f0ad1d_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pydantic</span>                  <span class="mf">1.8.2</span>            <span class="n">py37h5e8e339_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pygments</span>                  <span class="mf">2.10.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pymbar</span>                    <span class="mf">3.0.5</span>            <span class="n">py37h902c9e0_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pyopenssl</span>                 <span class="mf">20.0.1</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pyparsing</span>                 <span class="mf">2.4.7</span>              <span class="n">pyhd8ed1ab_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pyrsistent</span>                <span class="mf">0.17.3</span>           <span class="n">py37h5e8e339_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pysocks</span>                   <span class="mf">1.7.1</span>            <span class="n">py37h89c1867_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pytables</span>                  <span class="mf">3.6.1</span>            <span class="n">py37he17a9a8_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">python</span>                    <span class="mf">3.7.10</span>          <span class="n">hffdb5ce_100_cpython</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">python</span><span class="o">-</span><span class="n">dateutil</span>           <span class="mf">2.8.2</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">python_abi</span>                <span class="mf">3.7</span>                     <span class="mi">1</span><span class="n">_cp37m</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pytraj</span>                    <span class="mf">2.0.5</span>                    <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">pytz</span>                      <span class="mf">2021.3</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pyyaml</span>                    <span class="mf">6.0</span>              <span class="n">py37h5e8e339_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">pyzmq</span>                     <span class="mf">22.3.0</span>           <span class="n">py37h336d617_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">qcelemental</span>               <span class="mf">0.23.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">qcportal</span>                  <span class="mf">0.15.6</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">rdkit</span>                     <span class="mf">2021.09.2</span>        <span class="n">py37h13c2175_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">re2</span>                       <span class="mf">2021.04.01</span>           <span class="n">h9c3ff4c_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">readline</span>                  <span class="mf">8.0</span>                  <span class="n">he28a2e2_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">reportlab</span>                 <span class="mf">3.5.68</span>           <span class="n">py37h69800bb_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">reproc</span>                    <span class="mf">14.2.1</span>               <span class="n">h36c2ea0_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">reproc</span><span class="o">-</span><span class="n">cpp</span>                <span class="mf">14.2.1</span>               <span class="n">h58526e2_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">requests</span>                  <span class="mf">2.25.1</span>             <span class="n">pyhd3deb0d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">ruamel_yaml</span>               <span class="mf">0.15.80</span>         <span class="n">py37h5e8e339_1004</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">s2n</span>                       <span class="mf">1.0.0</span>                <span class="n">h9b69904_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sander</span>                    <span class="mf">16.0</span>                     <span class="n">pypi_0</span>    <span class="n">pypi</span>
-<span class="n">scipy</span>                     <span class="mf">1.7.1</span>            <span class="n">py37hf2a6cf1_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">send2trash</span>                <span class="mf">1.8.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">setuptools</span>                <span class="mf">49.6.0</span>           <span class="n">py37h89c1867_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">six</span>                       <span class="mf">1.15.0</span>             <span class="n">pyh9f0ad1d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">smirnoff99frosst</span>          <span class="mf">1.1.0</span>                    <span class="n">py37_1</span>    <span class="n">omnia</span>
-<span class="n">snappy</span>                    <span class="mf">1.1.8</span>                <span class="n">he1b5a44_3</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">snowballstemmer</span>           <span class="mf">2.1.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinx</span>                    <span class="mf">3.5.3</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">applehelp</span>   <span class="mf">1.0.2</span>                      <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">bibtex</span>      <span class="mf">2.4.1</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">devhelp</span>     <span class="mf">1.0.2</span>                      <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">htmlhelp</span>    <span class="mf">2.0.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">jsmath</span>      <span class="mf">1.0.1</span>                      <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">qthelp</span>      <span class="mf">1.0.3</span>                      <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sphinxcontrib</span><span class="o">-</span><span class="n">serializinghtml</span> <span class="mf">1.1.5</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sqlalchemy</span>                <span class="mf">1.4.26</span>           <span class="n">py37h5e8e339_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">sqlite</span>                    <span class="mf">3.34.0</span>               <span class="n">h74cdb3f_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">tenacity</span>                  <span class="mf">8.0.1</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">terminado</span>                 <span class="mf">0.12.1</span>           <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">testpath</span>                  <span class="mf">0.5.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">tinydb</span>                    <span class="mf">4.5.2</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">tk</span>                        <span class="mf">8.6.10</span>               <span class="n">h21135ba_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">tornado</span>                   <span class="mf">6.1</span>              <span class="n">py37h5e8e339_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">tqdm</span>                      <span class="mf">4.59.0</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">traitlets</span>                 <span class="mf">5.1.1</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">typing</span><span class="o">-</span><span class="n">extensions</span>         <span class="mf">3.10.0.2</span>             <span class="n">hd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">typing_extensions</span>         <span class="mf">3.10.0.2</span>           <span class="n">pyha770c72_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">urllib3</span>                   <span class="mf">1.26.3</span>             <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">wcwidth</span>                   <span class="mf">0.2.5</span>              <span class="n">pyh9f0ad1d_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">webencodings</span>              <span class="mf">0.5.1</span>                      <span class="n">py_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">wheel</span>                     <span class="mf">0.36.2</span>             <span class="n">pyhd3deb0d_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">widgetsnbextension</span>        <span class="mf">3.5.2</span>            <span class="n">py37h89c1867_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xmltodict</span>                 <span class="mf">0.12.0</span>                     <span class="n">py_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">kbproto</span>              <span class="mf">1.0.7</span>             <span class="n">h14c3975_1002</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libice</span>               <span class="mf">1.0.10</span>               <span class="n">h516909a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libsm</span>                <span class="mf">1.2.3</span>             <span class="n">hd9c2040_1000</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libx11</span>               <span class="mf">1.7.2</span>                <span class="n">h7f98852_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libxau</span>               <span class="mf">1.0.9</span>                <span class="n">h14c3975_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libxdmcp</span>             <span class="mf">1.1.3</span>                <span class="n">h516909a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libxext</span>              <span class="mf">1.3.4</span>                <span class="n">h7f98852_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libxrender</span>           <span class="mf">0.9.10</span>            <span class="n">h7f98852_1003</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">libxt</span>                <span class="mf">1.2.1</span>                <span class="n">h7f98852_2</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">renderproto</span>          <span class="mf">0.11.1</span>            <span class="n">h14c3975_1002</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">xextproto</span>            <span class="mf">7.3.0</span>             <span class="n">h14c3975_1002</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xorg</span><span class="o">-</span><span class="n">xproto</span>               <span class="mf">7.0.31</span>            <span class="n">h14c3975_1007</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">xz</span>                        <span class="mf">5.2.5</span>                <span class="n">h516909a_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">yaml</span>                      <span class="mf">0.2.5</span>                <span class="n">h516909a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">zeromq</span>                    <span class="mf">4.3.4</span>                <span class="n">h9c3ff4c_1</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">zipp</span>                      <span class="mf">3.6.0</span>              <span class="n">pyhd8ed1ab_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">zlib</span>                      <span class="mf">1.2.11</span>            <span class="n">h516909a_1010</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">zstd</span>                      <span class="mf">1.4.9</span>                <span class="n">ha95c52a_0</span>    <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-</pre></div>
-</div>
 </section>
 <section id="load-dataset">
 <h2>Load dataset<a class="headerlink" href="#load-dataset" title="Permalink to this headline"></a></h2>
 <p>Here we load the PhAlKeThoh dataset and shuffle before splitting into
 training, validation, and test (80%:10%:10%)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
+! wget http://data.wangyq.net/esp_dataset/phalkethoh_mm_small.zip
+! unzip phalkethoh_mm_small.zip
+</pre></div>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;phalkethoh&quot;</span><span class="p">)</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">2666</span><span class="p">)</span>
 <span class="n">ds_tr</span><span class="p">,</span> <span class="n">ds_vl</span><span class="p">,</span> <span class="n">ds_te</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
@@ -572,7 +297,7 @@ energy.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">Legend</span> <span class="n">at</span> <span class="mh">0x7fd8f0eebd90</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<img alt="experiments/mm_fitting_small_files/mm_fitting_small_33_1.png" src="experiments/mm_fitting_small_files/mm_fitting_small_33_1.png" />
+<img alt="../_images/mm_fitting_small_31_1.png" src="../_images/mm_fitting_small_31_1.png" />
 </section>
 </section>
 
@@ -580,8 +305,8 @@ energy.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="typing.html" class="btn btn-neutral float-right" title="Atom typing recovery experiment." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="typing.html" class="btn btn-neutral float-left" title="Atom typing recovery experiment." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qm_fitting.html" class="btn btn-neutral float-right" title="Quantum mechanics (QM) fitting experiment." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
