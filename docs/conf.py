@@ -30,6 +30,7 @@ os.system("bash download_experiments.sh")
 project = 'espaloma'
 copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC.")
 author = 'Yuanqing Wang'
+github_url = "https://github.com/choderalab/espaloma"
 
 # The short X.Y version
 version = ''
