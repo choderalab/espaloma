@@ -39,15 +39,9 @@ Installation and imports
     📦 Installing...
     📌 Adjusting configuration...
     🩹 Patching environment...
-    ⏲ Done in 0:00:22
+    ⏲ Done in 0:00:34
     🔁 Restarting kernel...
 
-
-.. code:: python
-
-    %%capture
-    ! wget http://data.wangyq.net/esp_dataset/phalkethoh_mm_small.zip
-    ! unzip phalkethoh_mm_small.zip
 
 .. code:: python
 
@@ -62,20 +56,17 @@ Installation and imports
 .. parsed-literal::
 
     Cloning into 'espaloma'...
-    remote: Enumerating objects: 7298, done.[K
-    remote: Counting objects: 100% (3120/3120), done.[K
-    remote: Compressing objects: 100% (1540/1540), done.[K
-    remote: Total 7298 (delta 2249), reused 2190 (delta 1499), pack-reused 4178[K
-    Receiving objects: 100% (7298/7298), 13.31 MiB | 24.64 MiB/s, done.
-    Resolving deltas: 100% (5073/5073), done.
+    remote: Enumerating objects: 7812, done.[K
+    remote: Counting objects: 100% (3634/3634), done.[K
+    remote: Compressing objects: 100% (1649/1649), done.[K
+    remote: Total 7812 (delta 2714), reused 2639 (delta 1900), pack-reused 4178[K
+    Receiving objects: 100% (7812/7812), 13.50 MiB | 11.77 MiB/s, done.
+    Resolving deltas: 100% (5538/5538), done.
 
 
 .. code:: python
 
     import torch
-
-.. code:: python
-
     import sys
     sys.path.append("/content/espaloma")
     import espaloma as esp
@@ -95,9 +86,27 @@ training, validation, and test (80%:10%:10%)
 
 .. code:: python
 
+    %%capture
+    ! wget http://data.wangyq.net/esp_dataset/phalkethoh_mm_small.zip
+    ! unzip phalkethoh_mm_small.zip
+
+.. code:: python
+
     ds = esp.data.dataset.GraphDataset.load("phalkethoh")
     ds.shuffle(seed=2666)
     ds_tr, ds_vl, ds_te = ds.split([8, 1, 1])
+
+
+.. parsed-literal::
+
+    DGL backend not selected or invalid.  Assuming PyTorch for now.
+    Using backend: pytorch
+
+
+.. parsed-literal::
+
+    Setting the default backend to "pytorch". You can change it in the ~/.dgl/config.json file or export the DGLBACKEND environment variable.  Valid options are: pytorch, mxnet, tensorflow (all lowercase)
+
 
 A training dataloader is constructed with ``batch_size=100``
 
@@ -175,7 +184,7 @@ Define optimizer
 
 .. code:: python
 
-    optimizer = torch.optim.Adam(espaloma_model.parameters(), 1e-3)
+    optimizer = torch.optim.Adam(espaloma_model.parameters(), 1e-4)
 
 Train it!
 ---------
@@ -269,6 +278,6 @@ Inspect
 
 
 
-.. image:: mm_fitting_small_files/mm_fitting_small_32_1.png
+.. image:: mm_fitting_small_files/mm_fitting_small_31_1.png
 
 
