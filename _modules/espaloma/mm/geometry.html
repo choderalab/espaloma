@@ -72,6 +72,7 @@
 <span></span><span class="c1"># =============================================================================</span>
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="c1"># =============================================================================</span>
@@ -251,7 +252,7 @@
 <span class="sd">    This function modifies graphs in-place.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">dgl</span>
+
     <span class="c1"># Copy coordinates to higher-order nodes.</span>
     <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
         <span class="p">{</span>
