@@ -52,7 +52,7 @@ import torch
 import espaloma as esp
 
 # grab pretrained model
-if not os.exists("espaloma_model.pt"):
+if not os.path.exists("espaloma_model.pt"):
     os.system("wget http://data.wangyq.net/espaloma_model.pt")
 
 # define or load a molecule of interest via the Open Force Field toolkit
