@@ -76,8 +76,6 @@
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">dgl</span>
-<span class="kn">import</span> <span class="nn">math</span>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># UTILITY FUNCTIONS</span>
@@ -138,6 +136,7 @@
 <div class="viewcode-block" id="ChargeEquilibrium.forward"><a class="viewcode-back" href="../../../../autosummary/espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.html#espaloma.nn.readout.charge_equilibrium.ChargeEquilibrium.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">total_charge</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; apply charge equilibrium to all molecules in batch &quot;&quot;&quot;</span>
         <span class="c1"># calculate $s ^ {-1}$ and $ es ^ {-1}$</span>
+        <span class="kn">import</span> <span class="nn">dgl</span>
         <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;s_inv&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;n1&quot;</span>
         <span class="p">)</span>

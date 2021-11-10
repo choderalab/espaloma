@@ -73,8 +73,6 @@
 <span class="c1"># IMPORTS</span>
 <span class="c1"># =============================================================================</span>
 <span class="kn">import</span> <span class="nn">abc</span>
-
-<span class="kn">import</span> <span class="nn">dgl</span>
 <span class="kn">import</span> <span class="nn">openff.toolkit</span>
 
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
@@ -143,7 +141,7 @@
 <div class="viewcode-block" id="Graph.save"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">os</span>
         <span class="kn">import</span> <span class="nn">json</span>
-
+        <span class="kn">import</span> <span class="nn">dgl</span>
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/homograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">homograph</span><span class="p">])</span>
         <span class="n">dgl</span><span class="o">.</span><span class="n">save_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heterograph</span><span class="p">])</span>
@@ -153,6 +151,7 @@
 <div class="viewcode-block" id="Graph.load"><a class="viewcode-back" href="../../../autosummary/espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">json</span>
+        <span class="kn">import</span> <span class="nn">dgl</span>
 
         <span class="n">homograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/homograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">heterograph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">load_graphs</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/heterograph.bin&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -188,6 +187,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_heterograph_from_graph_and_mol</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">dgl</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">graph</span><span class="p">,</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span>
         <span class="p">),</span> <span class="s2">&quot;graph can only be dgl Graph object.&quot;</span>
