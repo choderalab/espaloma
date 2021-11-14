@@ -97,7 +97,7 @@ def openmm_system_from_graph(
         )
 
     elif charge_method == "am1-bcc":
-        g.mol.assign_partial_charges()
+        g.mol.assign_partial_charges("am1-bcc")
         sys = ff.create_openmm_system(
             g.mol.to_topology(), charge_from_molecules=[g.mol]
         )
