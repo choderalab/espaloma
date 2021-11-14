@@ -41,9 +41,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Atom typing recovery experiment.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="espaloma.nn.html">espaloma.nn</a></li>
@@ -101,7 +100,7 @@
 <h1>espaloma.data.collection.qca<a class="headerlink" href="#espaloma-data-collection-qca" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="espaloma.data.collection.qca">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">espaloma.data.collection.</span></span><span class="sig-name descname"><span class="pre">qca</span></span><a class="reference internal" href="../_modules/espaloma/data/collection.html#qca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.collection.qca" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">espaloma.data.collection.</span></span><span class="sig-name descname"><span class="pre">qca</span></span><a class="reference internal" href="../_modules/espaloma/data/collection.html#qca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.collection.qca" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="espaloma.data.collection.qca.__init__">
@@ -118,29 +117,78 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.__init__" title="espaloma.data.collection.qca.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayer</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.bayer" title="espaloma.data.collection.qca.bayer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayer</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id1"><span class="problematic" id="id2">*</span></a>args, <a href="#id3"><span class="problematic" id="id4">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.benchmark" title="espaloma.data.collection.qca.benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">benchmark</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id5"><span class="problematic" id="id6">*</span></a>args, <a href="#id7"><span class="problematic" id="id8">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">coverage</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.coverage" title="espaloma.data.collection.qca.coverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coverage</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id9"><span class="problematic" id="id10">*</span></a>args, <a href="#id11"><span class="problematic" id="id12">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">emolecules</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.emolecules" title="espaloma.data.collection.qca.emolecules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">emolecules</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id13"><span class="problematic" id="id14">*</span></a>args, <a href="#id15"><span class="problematic" id="id16">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fda</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.fda" title="espaloma.data.collection.qca.fda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fda</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id17"><span class="problematic" id="id18">*</span></a>args, <a href="#id19"><span class="problematic" id="id20">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pfizer</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.pfizer" title="espaloma.data.collection.qca.pfizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pfizer</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id21"><span class="problematic" id="id22">*</span></a>args, <a href="#id23"><span class="problematic" id="id24">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">roche</span></code>(*[, df_name])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.collection.qca.roche" title="espaloma.data.collection.qca.roche"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roche</span></code></a>(*[, df_name])</p></td>
+<td><p>partial(func, <a href="#id25"><span class="problematic" id="id26">*</span></a>args, <a href="#id27"><span class="problematic" id="id28">**</span></a>keywords) - new function with partial application of the given arguments and keywords.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.bayer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bayer'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.bayer" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id29"><span class="problematic" id="id30">*</span></a>args, <a href="#id31"><span class="problematic" id="id32">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.benchmark">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Benchmark'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.benchmark" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id33"><span class="problematic" id="id34">*</span></a>args, <a href="#id35"><span class="problematic" id="id36">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.coverage">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Coverage'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.coverage" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id37"><span class="problematic" id="id38">*</span></a>args, <a href="#id39"><span class="problematic" id="id40">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.emolecules">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emolecules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eMolecules'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.emolecules" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id41"><span class="problematic" id="id42">*</span></a>args, <a href="#id43"><span class="problematic" id="id44">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.fda">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fda'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.fda" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id45"><span class="problematic" id="id46">*</span></a>args, <a href="#id47"><span class="problematic" id="id48">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.pfizer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pfizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pfizer'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.pfizer" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id49"><span class="problematic" id="id50">*</span></a>args, <a href="#id51"><span class="problematic" id="id52">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.collection.qca.roche">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">roche</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Roche'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.collection.qca.roche" title="Permalink to this definition"></a></dt>
+<dd><p>partial(func, <a href="#id53"><span class="problematic" id="id54">*</span></a>args, <a href="#id55"><span class="problematic" id="id56">**</span></a>keywords) - new function with partial application
+of the given arguments and keywords.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

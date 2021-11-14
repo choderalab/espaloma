@@ -41,9 +41,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Atom typing recovery experiment.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="espaloma.nn.html">espaloma.nn</a></li>
@@ -94,7 +93,7 @@
 <h1>espaloma.graphs.deploy.openmm_system_from_graph<a class="headerlink" href="#espaloma-graphs-deploy-openmm-system-from-graph" title="Permalink to this headline"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="espaloma.graphs.deploy.openmm_system_from_graph">
-<span class="sig-prename descclassname"><span class="pre">espaloma.graphs.deploy.</span></span><span class="sig-name descname"><span class="pre">openmm_system_from_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forcefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openff_unconstrained-1.2.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'am1bcc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_system_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/graphs/deploy.html#openmm_system_from_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.graphs.deploy.openmm_system_from_graph" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">espaloma.graphs.deploy.</span></span><span class="sig-name descname"><span class="pre">openmm_system_from_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forcefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openff_unconstrained-1.2.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'am1-bcc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_system_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/graphs/deploy.html#openmm_system_from_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.graphs.deploy.openmm_system_from_graph" title="Permalink to this definition"></a></dt>
 <dd><p>Construct an openmm system from <cite>espaloma.Graph</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -103,6 +102,11 @@
 <li><p><strong>forcefield</strong> (<cite>str</cite>) – Name of the force field. Have to be Open Force Field.
 (this forcefield will be used to assign nonbonded parameters, but all of its valence parameters will be overwritten)</p></li>
 <li><p><strong>suffix</strong> (<cite>str</cite>) – Suffix for the force terms.</p></li>
+<li><p><strong>charge_method</strong> (<em>str, optional, default=’nn’</em>) – Method to use for assigning partial charges:
+‘nn’ : Assign partial charges from the espaloma graph net model
+‘am1-bcc’ : Allow the OpenFF toolkit to assign AM1-BCC charges using default backend
+‘gasteiger’ : Assign Gasteiger partial charges (not recommended)
+‘from-molecule’ : Use partial charges provided in the original <cite>Molecule</cite> object</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

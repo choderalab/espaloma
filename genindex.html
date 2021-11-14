@@ -38,9 +38,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Atom typing recovery experiment.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
@@ -317,6 +316,10 @@
 </li>
       <li><a href="autosummary/espaloma.data.utils.batch.html#espaloma.data.utils.batch">batch() (in module espaloma.data.utils)</a>
 </li>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.bayer">bayer() (espaloma.data.collection.qca class method)</a>
+</li>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.benchmark">benchmark() (espaloma.data.collection.qca class method)</a>
+</li>
       <li><a href="autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII.bfloat16">bfloat16() (espaloma.mm.energy.CarryII method)</a>
 
       <ul>
@@ -353,10 +356,10 @@
         <li><a href="autosummary/espaloma.nn.sequential.Sequential.html#espaloma.nn.sequential.Sequential.bfloat16">(espaloma.nn.sequential.Sequential method)</a>
 </li>
       </ul></li>
-      <li><a href="autosummary/espaloma.mm.angle.bond_angle.html#espaloma.mm.angle.bond_angle">bond_angle() (in module espaloma.mm.angle)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autosummary/espaloma.mm.angle.bond_angle.html#espaloma.mm.angle.bond_angle">bond_angle() (in module espaloma.mm.angle)</a>
+</li>
       <li><a href="autosummary/espaloma.mm.angle.bond_bond.html#espaloma.mm.angle.bond_bond">bond_bond() (in module espaloma.mm.angle)</a>
 </li>
       <li><a href="autosummary/espaloma.mm.bond.bond_high.html#espaloma.mm.bond.bond_high">bond_high() (in module espaloma.mm.bond)</a>
@@ -454,6 +457,8 @@
       <li><a href="autosummary/espaloma.mm.geometry.copy_src.html#espaloma.mm.geometry.copy_src">copy_src() (in module espaloma.mm.geometry)</a>
 </li>
       <li><a href="autosummary/espaloma.data.qcarchive_utils.MolWithTargets.html#espaloma.data.qcarchive_utils.MolWithTargets.count">count() (espaloma.data.qcarchive_utils.MolWithTargets method)</a>
+</li>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.coverage">coverage() (espaloma.data.collection.qca class method)</a>
 </li>
       <li><a href="autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII.cpu">cpu() (espaloma.mm.energy.CarryII method)</a>
 
@@ -591,6 +596,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.emolecules">emolecules() (espaloma.data.collection.qca class method)</a>
+</li>
       <li><a href="autosummary/espaloma.data.qcarchive_utils.MolWithTargets.html#espaloma.data.qcarchive_utils.MolWithTargets.energies">energies (espaloma.data.qcarchive_utils.MolWithTargets attribute)</a>
 </li>
       <li><a href="autosummary/espaloma.mm.energy.energy_in_graph.html#espaloma.mm.energy.energy_in_graph">energy_in_graph() (in module espaloma.mm.energy)</a>
@@ -934,6 +941,8 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.fda">fda() (espaloma.data.collection.qca class method)</a>
+</li>
       <li><a href="autosummary/espaloma.data.qcarchive_utils.fetch_td_record.html#espaloma.data.qcarchive_utils.fetch_td_record">fetch_td_record() (in module espaloma.data.qcarchive_utils)</a>
 </li>
       <li><a href="autosummary/espaloma.mm.energy.CarryII.html#espaloma.mm.energy.CarryII.float">float() (espaloma.mm.energy.CarryII method)</a>
@@ -1005,7 +1014,7 @@
 </li>
         <li><a href="autosummary/espaloma.nn.readout.node_typing.NodeTyping.html#espaloma.nn.readout.node_typing.NodeTyping.forward">(espaloma.nn.readout.node_typing.NodeTyping method)</a>
 </li>
-        <li><a href="autosummary/espaloma.nn.sequential.Sequential.html#espaloma.nn.sequential.Sequential.forward">(espaloma.nn.sequential.Sequential method)</a>, <a href="autosummary/espaloma.nn.sequential.Sequential.html#id0">[1]</a>
+        <li><a href="autosummary/espaloma.nn.sequential.Sequential.html#espaloma.nn.sequential.Sequential.forward">(espaloma.nn.sequential.Sequential method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1328,6 +1337,8 @@
 
       <ul>
         <li><a href="autosummary/espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset.load">(espaloma.data.dataset.Dataset method)</a>
+</li>
+        <li><a href="autosummary/espaloma.data.dataset.GraphDataset.html#espaloma.data.dataset.GraphDataset.load">(espaloma.data.dataset.GraphDataset class method)</a>
 </li>
         <li><a href="autosummary/espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph.load">(espaloma.graphs.graph.Graph method)</a>
 </li>
@@ -1731,6 +1742,8 @@
 </li>
       <li><a href="autosummary/espaloma.mm.torsion.periodic_torsion.html#espaloma.mm.torsion.periodic_torsion">periodic_torsion() (in module espaloma.mm.torsion)</a>
 </li>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.pfizer">pfizer() (espaloma.data.collection.qca class method)</a>
+</li>
       <li><a href="autosummary/espaloma.data.normalize.PositiveNotNormalize.html#espaloma.data.normalize.PositiveNotNormalize">PositiveNotNormalize (class in espaloma.data.normalize)</a>
 </li>
       <li><a href="autosummary/espaloma.graphs.utils.offmol_indices.proper_torsion_indices.html#espaloma.graphs.utils.offmol_indices.proper_torsion_indices">proper_torsion_indices() (in module espaloma.graphs.utils.offmol_indices)</a>
@@ -2009,6 +2022,8 @@
         <li><a href="autosummary/espaloma.nn.sequential.Sequential.html#espaloma.nn.sequential.Sequential.requires_grad_">(espaloma.nn.sequential.Sequential method)</a>
 </li>
       </ul></li>
+      <li><a href="autosummary/espaloma.data.collection.qca.html#espaloma.data.collection.qca.roche">roche() (espaloma.data.collection.qca class method)</a>
+</li>
       <li><a href="autosummary/espaloma.data.md.MoleculeVacuumSimulation.html#espaloma.data.md.MoleculeVacuumSimulation.run">run() (espaloma.data.md.MoleculeVacuumSimulation method)</a>
 </li>
   </ul></td>

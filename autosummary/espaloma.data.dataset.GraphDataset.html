@@ -41,9 +41,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Atom typing recovery experiment.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../experiments/qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/mm-fitting.html">MM Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="espaloma.nn.html">espaloma.nn</a></li>
@@ -97,13 +96,13 @@
 <h1>espaloma.data.dataset.GraphDataset<a class="headerlink" href="#espaloma-data-dataset-graphdataset" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">espaloma.data.dataset.</span></span><span class="sig-name descname"><span class="pre">GraphDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">espaloma.data.dataset.</span></span><span class="sig-name descname"><span class="pre">GraphDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="espaloma.data.dataset.Dataset.html#espaloma.data.dataset.Dataset" title="espaloma.data.dataset.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">espaloma.data.dataset.Dataset</span></code></a></p>
 <p>Dataset with additional support for only viewing
 certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.view">
-<span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">collate_fn</span></em>, <em class="sig-param"><span class="pre">\*args</span></em>, <em class="sig-param"><span class="pre">\*\*kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.view" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collate_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">\*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">\*\*kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.view" title="Permalink to this definition"></a></dt>
 <dd><p>Provide a <cite>torch.utils.data.DataLoader</cite> view of the dataset.</p>
 </dd></dl>
 
@@ -133,8 +132,8 @@ certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch</span></code>(graphs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(path)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.load" title="espaloma.data.dataset.GraphDataset.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
+<td><p>Load path to dataset.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_datapipe_as_function</span></code>(function_name, ...)</p></td>
 <td><p></p></td>
@@ -185,6 +184,12 @@ certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <p>If in_place is False, <cite>fn</cite> is added to the <cite>transforms</cite> else it is applied
 to elements and modifies them.</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.load" title="Permalink to this definition"></a></dt>
+<dd><p>Load path to dataset.</p>
 </dd></dl>
 
 <dl class="py method">
