@@ -42,7 +42,7 @@ def openmm_system_from_graph(
     g,
     forcefield="openff_unconstrained-1.2.0",
     suffix="",
-    charge_method="am1bcc",
+    charge_method="am1-bcc",
     create_system_kwargs={},
 ):
     """Construct an openmm system from `espaloma.Graph`.
@@ -58,6 +58,13 @@ def openmm_system_from_graph(
 
     suffix : `str`
         Suffix for the force terms.
+
+    charge_method : str, optional, default='nn'
+        Method to use for assigning partial charges:
+        'nn' : Assign partial charges from the espaloma graph net model
+        'am1-bcc' : Allow the OpenFF toolkit to assign AM1-BCC charges using default backend
+        'gasteiger' : Assign Gasteiger partial charges (not recommended)
+        'from-molecule' : Use partial charges provided in the original `Molecule` object
 
     Returns
     -------
@@ -89,6 +96,17 @@ def openmm_system_from_graph(
             g.mol.to_topology(), charge_from_molecules=[g.mol]
         )
 
+    elif charge_method == "am1-bcc":
+        g.mol.assign_partial_charges("am1bcc")
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol]
+        )
+
+    elif charge_method == "from-molecule":
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol]
+        )
+
     elif charge_method == "nn":
         g.mol.partial_charges = unit.elementary_charge * g.nodes["n1"].data[
             "q_hat"
@@ -103,7 +121,9 @@ def openmm_system_from_graph(
 
     else:
         # create openmm system
-        sys = ff.create_openmm_system(g.mol.to_topology())
+        raise RuntimeError(
+            "Charge method %s is not supported. " % charge_method
+        )
 
     for force in sys.getForces():
         name = force.__class__.__name__
