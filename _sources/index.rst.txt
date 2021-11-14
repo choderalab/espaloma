@@ -19,6 +19,16 @@ Here, we propose an alternative approach that uses *graph neural networks* to pe
 Since all stages are built from smooth neural functions, the entire process---spanning chemical perception to parameter assignment---is modular and end-to-end differentiable with respect to model parameters, allowing new force fields to be easily constructed, extended, and applied to arbitrary molecules.
 We show that this approach is not only sufficiently expressive to reproduce legacy atom types, but that it can learn and extend existing molecular mechanics force fields, construct entirely new force fields applicable to both biopolymers and small molecules from quantum chemical calculations, and even learn to accurately predict free energies from experimental observables.
 
+
+Lab Meeting
+-----------
+.. raw:: html
+
+    <iframe width="600" height="450" src="https://www.youtube.com/embed/OC210nUuXHk"></iframe>
+
+Full video: https://youtu.be/OC210nUuXHk
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -30,7 +40,7 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
