@@ -21,11 +21,16 @@ sys.path.insert(0, os.path.abspath('..'))
 import espaloma
 from espaloma import mm, nn, graphs, data
 
+# download experiments
+import os
+os.system("bash download_experiments.sh")
+
 # -- Project information -----------------------------------------------------
 
 project = 'espaloma'
 copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC.")
 author = 'Yuanqing Wang'
+github_url = "https://github.com/choderalab/espaloma"
 
 # The short X.Y version
 version = ''
