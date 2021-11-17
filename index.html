@@ -40,8 +40,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Atom typing recovery experiment.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
@@ -81,13 +82,43 @@ Traditionally, MM potentials have relied on human-curated, inflexible, and poorl
 Here, we propose an alternative approach that uses <em>graph neural networks</em> to perceive chemical environments, producing continuous atom embeddings from which valence and nonbonded parameters can be predicted using invariance-preserving layers.
 Since all stages are built from smooth neural functions, the entire process—spanning chemical perception to parameter assignment—is modular and end-to-end differentiable with respect to model parameters, allowing new force fields to be easily constructed, extended, and applied to arbitrary molecules.
 We show that this approach is not only sufficiently expressive to reproduce legacy atom types, but that it can learn and extend existing molecular mechanics force fields, construct entirely new force fields applicable to both biopolymers and small molecules from quantum chemical calculations, and even learn to accurately predict free energies from experimental observables.</p>
+</section>
+<section id="lab-meeting">
+<h2>Lab Meeting<a class="headerlink" href="#lab-meeting" title="Permalink to this headline"></a></h2>
+<iframe width="600" height="450" src="https://www.youtube.com/embed/OC210nUuXHk"></iframe><p>Full video: <a class="reference external" href="https://youtu.be/OC210nUuXHk">https://youtu.be/OC210nUuXHk</a></p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/typing.html">Atom typing recovery experiment.</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#installation-and-imports">Installation and Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#get-dataset">Get dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#assign-legacy-typing">Assign legacy typing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#data-massaging">Data massaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#defining-model">Defining model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#define-graph-level-loss-function">Define graph-level loss function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/typing.html#train-the-model">Train the model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="experiments/mm_fitting_small.html#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/mm_fitting_small.html#load-dataset">Load dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/mm_fitting_small.html#define-model">Define model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/mm_fitting_small.html#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/mm_fitting_small.html#train-it">Train it!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/mm_fitting_small.html#inspect">Inspect</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experiments/qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="experiments/qm_fitting.html#installation-and-imports">Installation and imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/qm_fitting.html#load-dataset">Load dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/qm_fitting.html#define-model">Define model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/qm_fitting.html#define-optimizer">Define optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/qm_fitting.html#train-it">Train it!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments/qm_fitting.html#inspect">Inspect</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="autosummary/espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autosummary/espaloma.nn.html">espaloma.nn</a></li>
@@ -98,14 +129,14 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 </ul>
 </div>
 </section>
-</section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+</section>
 </section>
 
 

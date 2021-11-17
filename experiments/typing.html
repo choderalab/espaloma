@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legacy atom typing recover Fitting experiment &mdash; espaloma  documentation</title>
+  <title>Atom typing recovery experiment. &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -15,11 +15,12 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="API Documentation" href="../api.html" />
-    <link rel="prev" title="MM Fitting experiment" href="mm-fitting.html" /> 
+    <link rel="next" title="Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset." href="mm_fitting_small.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,8 +42,18 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy.html">Deploy espaloma 0.2.0 force field to parametrize your MM system</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mm-fitting.html">MM Fitting experiment</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Legacy atom typing recover Fitting experiment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Atom typing recovery experiment.</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-and-imports">Installation and Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-dataset">Get dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assign-legacy-typing">Assign legacy typing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-massaging">Data massaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defining-model">Defining model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#define-graph-level-loss-function">Define graph-level loss function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train-the-model">Train the model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mm_fitting_small.html">Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qm_fitting.html">Quantum mechanics (QM) fitting experiment.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
 </ul>
 
@@ -61,7 +72,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="index.html">&lt;no title&gt;</a> &raquo;</li>
-      <li>Legacy atom typing recover Fitting experiment</li>
+      <li>Atom typing recovery experiment.</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/experiments/typing.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -71,16 +82,146 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="legacy-atom-typing-recover-fitting-experiment">
-<h1>Legacy atom typing recover Fitting experiment<a class="headerlink" href="#legacy-atom-typing-recover-fitting-experiment" title="Permalink to this headline"></a></h1>
+  <section id="atom-typing-recovery-experiment">
+<h1>Atom typing recovery experiment.<a class="headerlink" href="#atom-typing-recovery-experiment" title="Permalink to this headline"></a></h1>
+<p><strong>Open in Google Colab</strong>:
+<a class="reference external" href="http://data.wangyq.net/esp_notebooks/typing.ipynb">http://data.wangyq.net/esp_notebooks/typing.ipynb</a></p>
+<p>(GPU preferred)</p>
+<p>In this notebook, we reproduce the atom typing recovery experiment in
+<a class="reference external" href="https://arxiv.org/abs/2010.01196">Wang Y, Fass J, and Chodera JD “End-to-End Differentiable Construction
+of Molecular Mechanics Force
+Fields</a></p>
+<p>(Section 3: Graph neural networks can learn to reproduce human-defined
+legacy atom types with high accuracy; Figure 3. Graph neural networks
+can reproduce legacy atom types with high accuracy.)</p>
+<img alt="https://pbs.twimg.com/media/FBLz_6sWUAM2iHa?format=jpg&amp;name=4096x4096" src="https://pbs.twimg.com/media/FBLz_6sWUAM2iHa?format=jpg&amp;name=4096x4096" />
+<p>Graph neural networks can reproduce legacy atom types with high
+accuracy.</p>
+<p>The Stage 1 graph neural network of Espaloma chained to a discrete atom
+type readout was fit to GAFF 1.81 atom types on a subset of ZINC
+distributed with parm Frosst as a validation set .</p>
+<p>The 7529 molecules in this set were partitioned 80:10:10 into
+training:test:validation sets for this experiment. The overall test set
+accuracy was <span class="math notranslate nohighlight">\(99.07\%_{98.93\%}^{99.22\%}\)</span>, with 1000 bootstrap
+replicates used to estimate the confidence intervals arising from finite
+test set size effects. (a) The distribution of the number of atom type
+discrepancies on the test set demonstrates that only a minority of atoms
+are incorrectly typed. (b) The error rate per element is primarily
+concentrated within carbon, nitrogen, and sulfur types. (c) Examining
+atom type failures in detail on molecules with the largest numbers of
+discrepancies shows that the atom types are easily confused by a human,
+since they represent qualities that are difficult to precisely define.
+(d) The distribution of predicted atom types for each reference atom
+type for carbon types are shown; on-diagonal values indicate agreement.
+The percentages annotated under x-axis denote the relative abundance
+within the test set.</p>
+<section id="installation-and-imports">
+<h2>Installation and Imports<a class="headerlink" href="#installation-and-imports" title="Permalink to this headline"></a></h2>
+<p>First, we install espaloma after all of its dependencies. Note that this
+is going to be significantly simplified.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
+! wget -c https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+! bash Miniconda3-latest-Linux-x86_64.sh -b -f -p /usr/local
+! conda config --add channels conda-forge --add channels omnia --add channels omnia/label/cuda100 --add channels dglteam
+! conda update --yes --all
+! conda create --yes -n openmm python=3.6 numpy openmm openmmtools rdkit openforcefield==0.7.0 dgl-cuda10.0 qcportal
+! git clone https://github.com/choderalab/espaloma.git
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">dgl</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</section>
+<section id="get-dataset">
+<h2>Get dataset<a class="headerlink" href="#get-dataset" title="Permalink to this headline"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;zinc&quot;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;wget data.wangyq.net/esp_datasets/zinc&quot;</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">GraphDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;zinc&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="assign-legacy-typing">
+<h2>Assign legacy typing<a class="headerlink" href="#assign-legacy-typing" title="Permalink to this headline"></a></h2>
+<p>Next, we assign legacy typings using <a class="reference external" href="https://github.com/openmm/openmmforcefields/blob/master/amber/gaff/dat/gaff-1.81.dat#L20-L32">GAFF-1.81 force
+field.</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">typing</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">legacy_force_field</span><span class="o">.</span><span class="n">LegacyForceField</span><span class="p">(</span><span class="s1">&#39;gaff-1.81&#39;</span><span class="p">)</span>
+<span class="n">ds</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># this modify the original data</span>
+</pre></div>
+</div>
+</section>
+<section id="data-massaging">
+<h2>Data massaging<a class="headerlink" href="#data-massaging" title="Permalink to this headline"></a></h2>
+<p>We then split the data into training, test, and validatoin (80:10:10)
+and batch the the datasets.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds_tr</span><span class="p">,</span> <span class="n">ds_te</span><span class="p">,</span> <span class="n">ds_vl</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds_tr</span> <span class="o">=</span> <span class="n">ds_tr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ds_te</span> <span class="o">=</span> <span class="n">ds_te</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">ds_vl</span> <span class="o">=</span> <span class="n">ds_vl</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="defining-model">
+<h2>Defining model<a class="headerlink" href="#defining-model" title="Permalink to this headline"></a></h2>
+<p>We define a graph neural network (GNN) model with
+<a class="reference external" href="https://arxiv.org/abs/1706.02216">SAGEConv</a> with 128 units, three
+layers, and ReLU activation functions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># define a layer</span>
+<span class="n">layer</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dgl_legacy</span><span class="o">.</span><span class="n">gn</span><span class="p">(</span><span class="s2">&quot;SAGEConv&quot;</span><span class="p">)</span>
+
+<span class="c1"># define a representation</span>
+<span class="n">representation</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+        <span class="n">layer</span><span class="p">,</span>
+        <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;relu&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># define a readout</span>
+<span class="n">readout</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">readout</span><span class="o">.</span><span class="n">node_typing</span><span class="o">.</span><span class="n">NodeTyping</span><span class="p">(</span>
+        <span class="n">in_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+        <span class="n">n_classes</span><span class="o">=</span><span class="mi">100</span>
+<span class="p">)</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">representation</span><span class="p">,</span>
+    <span class="n">readout</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="define-graph-level-loss-function">
+<h2>Define graph-level loss function<a class="headerlink" href="#define-graph-level-loss-function" title="Permalink to this headline"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">esp</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">TypingAccuracy</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="train-the-model">
+<h2>Train the model<a class="headerlink" href="#train-the-model" title="Permalink to this headline"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># define optimizer</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="mf">1e-5</span><span class="p">)</span>
+
+<span class="c1"># train the model</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3000</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">ds_tr</span><span class="p">:</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">net</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">heterograph</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mm-fitting.html" class="btn btn-neutral float-left" title="MM Fitting experiment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mm_fitting_small.html" class="btn btn-neutral float-right" title="Toy experiment: Molecular mechanics (MM) fitting on subsampled PhAlkEthOH dataset." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
