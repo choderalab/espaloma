@@ -134,3 +134,6 @@ dmypy.json
 
 # Parm@Frosst download
 parm_at_Frosst.tgz
+
+# misc
+.DS_Store
