@@ -303,7 +303,7 @@ def openmm_system_from_graph(
                     idx2 = g.nodes["n4_improper"].data["idxs"][idx, 2].item()
                     idx3 = g.nodes["n4_improper"].data["idxs"][idx, 3].item()
 
-                    periodicities = g.nodes["n4"].data[
+                    periodicities = g.nodes["n4_improper"].data[
                         "periodicity%s" % suffix
                     ][idx]
                     phases = g.nodes["n4_improper"].data["phases%s" % suffix][
