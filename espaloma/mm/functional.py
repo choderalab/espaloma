@@ -284,34 +284,11 @@ def linear_mixture(x, coefficients, phases=[0.0, 1.0]):
     r"""Linear mixture basis function.
 
     x : torch.Tensor
-    coefficients : list or torch.Tensor of length 2
-    phases : list of length 2
+    coefficients : list or torch.Tensor
+    phases : list or torch.Tensor
     """
 
-    assert len(phases) == 2, "Only two phases now."
-    assert coefficients.shape[-1] == 2
-
-    # partition the dimensions
-    # (, )
-    b1 = phases[0]
-    b2 = phases[1]
-
-    # (batch_size, 1)
-    k1 = coefficients[:, 0][:, None]
-    k2 = coefficients[:, 1][:, None]
-
-    # get the original parameters
-    # (batch_size, )
-    # k, b = linear_mixture_to_original(k1, k2, b1, b2)
-
-    # (batch_size, 1)
-    u1 = k1 * (x - b1) ** 2
-    u2 = k2 * (x - b2) ** 2
-
-    u = 0.5 * (u1 + u2)  # - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2
-
-    return u
-
+    return (0.5 * coefficients * (x.unsqueeze(-1) - phases) ** 2).sum(dim=-1)
 
 def harmonic_periodic_coupled(
     x_harmonic,
