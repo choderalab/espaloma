@@ -260,7 +260,10 @@ def energy_in_graph(
         if "coefficients%s" % suffix in g.nodes["n2"].data:
             g.apply_nodes(
                 lambda node: apply_bond_linear_mixture(
-                    node, suffix=suffix, phases=torch.linspace(1.5, 6.0, 16)
+                    node, suffix=suffix, phases=torch.linspace(1.5, 6.0,
+                        g.nodes['n2'].data['coefficients'].shape[-1],
+                        device=g.nodes['n2'].data['coefficients'].device,
+                    )
                 ),
                 ntype="n2",
             )
@@ -276,7 +279,11 @@ def energy_in_graph(
 
             g.apply_nodes(
                 lambda node: apply_angle_linear_mixture(
-                    node, suffix=suffix, phases=torch.linspace(0.0, math.pi, 16)
+                    node, suffix=suffix, phases=torch.linspace(
+                        0.0, math.pi,
+                        g.nodes['n3'].data['coefficients'].shape[-1],
+                        device=g.nodes['n3'].data['coefficients'].device
+                    )
                 ),
                 ntype="n3",
             )
