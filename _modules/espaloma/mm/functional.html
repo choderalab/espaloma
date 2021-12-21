@@ -355,11 +355,34 @@
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear mixture basis function.</span>
 
 <span class="sd">    x : torch.Tensor</span>
-<span class="sd">    coefficients : list or torch.Tensor</span>
-<span class="sd">    phases : list or torch.Tensor</span>
+<span class="sd">    coefficients : list or torch.Tensor of length 2</span>
+<span class="sd">    phases : list of length 2</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">coefficients</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">phases</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">phases</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Only two phases now.&quot;</span>
+    <span class="k">assert</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+
+    <span class="c1"># partition the dimensions</span>
+    <span class="c1"># (, )</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">b2</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># (batch_size, 1)</span>
+    <span class="n">k1</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">k2</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># get the original parameters</span>
+    <span class="c1"># (batch_size, )</span>
+    <span class="c1"># k, b = linear_mixture_to_original(k1, k2, b1, b2)</span>
+
+    <span class="c1"># (batch_size, 1)</span>
+    <span class="n">u1</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">u2</span> <span class="o">=</span> <span class="n">k2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">u1</span> <span class="o">+</span> <span class="n">u2</span><span class="p">)</span>  <span class="c1"># - k1 * b1 ** 2 - k2 ** b2 ** 2 + b ** 2</span>
+
+    <span class="k">return</span> <span class="n">u</span></div>
+
 
 <div class="viewcode-block" id="harmonic_periodic_coupled"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.functional.harmonic_periodic_coupled.html#espaloma.mm.functional.harmonic_periodic_coupled">[docs]</a><span class="k">def</span> <span class="nf">harmonic_periodic_coupled</span><span class="p">(</span>
     <span class="n">x_harmonic</span><span class="p">,</span>
