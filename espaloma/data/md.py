@@ -27,6 +27,7 @@ EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 def subtract_nonbonded_force(
     g,
     forcefield="gaff-1.81",
+    subtract_charges=False,
 ):
 
     # parameterize topology
@@ -104,6 +105,15 @@ def subtract_nonbonded_force(
                 )
 
             force.updateParametersInContext(simulation.context)
+
+        elif "Nonbonded" in name:
+            if subtract_charges:
+                for idx in range(force.getNumParticles()):
+                    q, sigma, epsilon = force.getParticleParameters(idx)
+                    force.setParticleParameters(idx, q, sigma, epsilon)
+                for idx in range(force.getNumExceptions()):
+                    idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
+                    force.setExceptionParameters(idx, q, sigma, epsilon)
 
     # the snapshots
     xs = (
