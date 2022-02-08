@@ -110,10 +110,10 @@ def subtract_nonbonded_force(
             if subtract_charges:
                 for idx in range(force.getNumParticles()):
                     q, sigma, epsilon = force.getParticleParameters(idx)
-                    force.setParticleParameters(idx, q, sigma, epsilon)
+                    force.setParticleParameters(idx, 0.0, sigma, epsilon)
                 for idx in range(force.getNumExceptions()):
                     idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                    force.setExceptionParameters(idx, idx0, idx1, q, sigma, epsilon)
+                    force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
 
     # the snapshots
     xs = (
