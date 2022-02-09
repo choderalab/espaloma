@@ -77,6 +77,45 @@ class Graph(BaseGraph):
         with open(path + "/mol.json", "w") as f_handle:
             json.dump(self.mol.to_json(), f_handle)
 
+    def regenerate_impropers(self, improper_def='smirnoff'):
+        """
+        Method to regenerate the improper nodes according to the specified
+        method of permuting the impropers.
+        NOTE: This will clear the data on all n4_improper nodes, including
+        previously generated improper from JanossyPoolingImproper.
+        """
+
+        import dgl
+        import numpy as np
+        import torch
+
+        from .utils.offmol_indices import improper_torsion_indices
+
+        ## First get rid of the old nodes/edges
+        g = self.heterograph
+        g = dgl.remove_nodes(g, g.nodes('n4_improper'), 'n4_improper')
+
+        ## Generate new improper torsion permutations
+        idxs = improper_torsion_indices(self.mol, improper_def)
+
+        ## Add new nodes of type n4_improper (one for each permut)
+        g = dgl.add_nodes(g, idxs.shape[0], ntype='n4_improper')
+
+        ## New edges b/n improper permuts and n1 nodes
+        permut_ids = np.arange(idxs.shape[0])
+        for i in range(4):
+            n1_ids = idxs[:,i]
+
+            # edge from improper node to n1 node
+            outgoing_etype = ('n4_improper', f'n4_improper_has_{i}_n1', 'n1')
+            g = dgl.add_edges(g, permut_ids, n1_ids, etype=outgoing_etype)
+
+            # edge from n1 to improper
+            incoming_etype = ('n1', f'n1_as_{i}_in_n4_improper', 'n4_improper')
+            g = dgl.add_edges(g, n1_ids, permut_ids, etype=incoming_etype)
+
+        self.heterograph = g
+
     @classmethod
     def load(cls, path):
         import json
