@@ -340,7 +340,7 @@ class GraphDataset(Dataset):
             graph.save(path + "/" + str(idx))
 
     @classmethod
-    def load(cls, path):
+    def load(cls, path, improper_def=None):
         import os
 
         paths = os.listdir(path)
@@ -348,6 +348,6 @@ class GraphDataset(Dataset):
 
         graphs = []
         for _path in paths:
-            graphs.append(esp.Graph.load(path + "/" + _path))
+            graphs.append(esp.Graph.load(path + "/" + _path, improper_def))
 
         return cls(graphs)

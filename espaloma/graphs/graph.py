@@ -98,6 +98,8 @@ class Graph(BaseGraph):
 
         ## Generate new improper torsion permutations
         idxs = improper_torsion_indices(self.mol, improper_def)
+        if len(idxs) == 0:
+            return
 
         ## Add new nodes of type n4_improper (one for each permut)
         g = dgl.add_nodes(g, idxs.shape[0], ntype='n4_improper')
@@ -118,7 +120,7 @@ class Graph(BaseGraph):
         self.heterograph = g
 
     @classmethod
-    def load(cls, path):
+    def load(cls, path, improper_def=None):
         import json
         import dgl
 
@@ -133,7 +135,11 @@ class Graph(BaseGraph):
             mol = Molecule.from_json(mol)
         except:
             mol = Molecule.from_dict(mol)
-        return cls(mol=mol, homograph=homograph, heterograph=heterograph)
+
+        g = cls(mol=mol, homograph=homograph, heterograph=heterograph)
+        if improper_def is not None:
+            g.regenerate_impropers(improper_def)
+        return g
 
     @staticmethod
     def get_homograph_from_mol(mol):
