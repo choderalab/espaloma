@@ -188,6 +188,7 @@ class JanossyPoolingImproper(torch.nn.Module):
             "k": 6,
         },
         out_features_dimensions=-1,
+        improper_def='smirnoff',
     ):
         super(JanossyPoolingImproper, self).__init__()
 
@@ -197,6 +198,9 @@ class JanossyPoolingImproper(torch.nn.Module):
         # bookkeeping
         self.out_features = out_features
         self.levels = ["n4_improper"]
+        if improper_def not in ('smirnoff', 'espaloma'):
+            raise ValueError(f'Unknown value for improper_def: {improper_def}')
+        self.improper_def = improper_def
 
         # get output features
         mid_features = [x for x in config if isinstance(x, int)][-1]
@@ -234,7 +238,7 @@ class JanossyPoolingImproper(torch.nn.Module):
             input graph.
         """
         import dgl
-        
+
         # copy
         g.multi_update_all(
             {
@@ -258,62 +262,31 @@ class JanossyPoolingImproper(torch.nn.Module):
         #   sum over three cyclic permutations of "h0", "h2", "h3", assuming "h1" is the central atom in the improper
         #   following the smirnoff trefoil convention [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
         #   https://github.com/openff.toolkit/openff.toolkit/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openff.toolkit/typing/engines/smirnoff/parameters.py#L3326-L3360
-        for big_idx in self.levels:
 
-            g.apply_nodes(
-                func=lambda nodes: {
-                    feature: getattr(
-                        self, "f_out_%s_to_%s" % (big_idx, feature)
-                    )(
-                        torch.sum(
-                            torch.stack(
-                                [
-                                    getattr(self, "sequential_%s" % big_idx)(
-                                        g=None,
-                                        x=torch.cat(
-                                            [
-                                                nodes.data["h0"],
-                                                nodes.data["h1"],
-                                                nodes.data["h2"],
-                                                nodes.data["h3"],
-                                            ],
-                                            dim=1,
-                                        ),
-                                    ),
-                                    getattr(self, "sequential_%s" % big_idx)(
-                                        g=None,
-                                        x=torch.cat(
-                                            [
-                                                nodes.data["h2"],
-                                                nodes.data["h1"],
-                                                nodes.data["h3"],
-                                                nodes.data["h0"],
-                                            ],
-                                            dim=1,
-                                        ),
-                                    ),
-                                    getattr(self, "sequential_%s" % big_idx)(
-                                        g=None,
-                                        x=torch.cat(
-                                            [
-                                                nodes.data["h3"],
-                                                nodes.data["h1"],
-                                                nodes.data["h0"],
-                                                nodes.data["h2"],
-                                            ],
-                                            dim=1,
-                                        ),
-                                    ),
-                                ],
-                                dim=0,
-                            ),
-                            dim=0,
-                        )
+        ## Set different permutations based on which definition of impropers
+        ##  are being used
+        if self.improper_def == 'espaloma':
+            permuts = [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
+        elif self.improper_def == 'smirnoff':
+            permuts = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
+        else:
+            raise ValueError(f'Unknown value for improper_def: {improper_def}')
+        stack_permuts = lambda nodes, p: \
+            torch.cat([nodes.data[f'h{i}'] for i in p], dim=1)
+
+        for big_idx in self.levels:
+            inner_net = getattr(self, f'sequential_{big_idx}')
+
+            g.apply_nodes(func=lambda nodes: {
+                feature: getattr(self, f'f_out_{big_idx}_to_{feature}')(
+                    torch.sum(
+                        torch.stack(
+                            [inner_net(g=None, x=stack_permuts(nodes, p)) \
+                                for p in permuts], dim=0
+                        ), dim=0
                     )
-                    for feature in self.out_features.keys()
-                },
-                ntype=big_idx,
-            )
+                ) for feature in self.out_features.keys()
+            }, ntype=big_idx)
 
         return g
 
