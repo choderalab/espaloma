@@ -102,7 +102,7 @@
 
 
 <div class="viewcode-block" id="relationship_indices_from_offmol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_heterogeneous_graph.relationship_indices_from_offmol.html#espaloma.graphs.utils.read_heterogeneous_graph.relationship_indices_from_offmol">[docs]</a><span class="k">def</span> <span class="nf">relationship_indices_from_offmol</span><span class="p">(</span>
-    <span class="n">offmol</span><span class="p">:</span> <span class="n">Molecule</span><span class="p">,</span>
+    <span class="n">offmol</span><span class="p">:</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">improper_def</span><span class="o">=</span><span class="s1">&#39;smirnoff&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Construct a dictionary that maps node names (like &quot;n2&quot;) to torch tensors of indices</span>
 
@@ -115,7 +115,8 @@
     <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">bond_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
     <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">angle_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
     <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">proper_torsion_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
-    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">improper_torsion_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+    <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4_improper&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offmol_indices</span><span class="o">.</span><span class="n">improper_torsion_indices</span><span class="p">(</span><span class="n">offmol</span><span class="p">,</span>
+        <span class="n">improper_def</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">idxs</span><span class="p">[</span><span class="s2">&quot;n4&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
@@ -138,7 +139,7 @@
     <span class="k">return</span> <span class="n">idxs</span></div>
 
 
-<div class="viewcode-block" id="from_homogeneous_and_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol.html#espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol">[docs]</a><span class="k">def</span> <span class="nf">from_homogeneous_and_mol</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">offmol</span><span class="p">):</span>
+<div class="viewcode-block" id="from_homogeneous_and_mol"><a class="viewcode-back" href="../../../../autosummary/espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol.html#espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol">[docs]</a><span class="k">def</span> <span class="nf">from_homogeneous_and_mol</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">offmol</span><span class="p">,</span> <span class="n">improper_def</span><span class="o">=</span><span class="s1">&#39;smirnoff&#39;</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Build heterogeneous graph from homogeneous ones.</span>
 
 
@@ -168,7 +169,7 @@
     <span class="n">a</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">()</span>
 
     <span class="c1"># get all the indices</span>
-    <span class="n">idxs</span> <span class="o">=</span> <span class="n">relationship_indices_from_offmol</span><span class="p">(</span><span class="n">offmol</span><span class="p">)</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="n">relationship_indices_from_offmol</span><span class="p">(</span><span class="n">offmol</span><span class="p">,</span> <span class="n">improper_def</span><span class="p">)</span>
 
     <span class="c1"># make them all numpy</span>
     <span class="n">idxs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">idxs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
