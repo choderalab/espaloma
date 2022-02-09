@@ -31,7 +31,7 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
 
 
 def relationship_indices_from_offmol(
-    offmol: Molecule,
+    offmol: Molecule, improper_def='smirnoff'
 ) -> Dict[str, torch.Tensor]:
     """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
@@ -44,7 +44,8 @@ def relationship_indices_from_offmol(
     idxs["n2"] = offmol_indices.bond_indices(offmol)
     idxs["n3"] = offmol_indices.angle_indices(offmol)
     idxs["n4"] = offmol_indices.proper_torsion_indices(offmol)
-    idxs["n4_improper"] = offmol_indices.improper_torsion_indices(offmol)
+    idxs["n4_improper"] = offmol_indices.improper_torsion_indices(offmol,
+        improper_def)
 
     if len(idxs["n4"]) == 0:
         idxs["n4"] = np.empty((0, 4))
@@ -67,7 +68,7 @@ def relationship_indices_from_offmol(
     return idxs
 
 
-def from_homogeneous_and_mol(g, offmol):
+def from_homogeneous_and_mol(g, offmol, improper_def='smirnoff'):
     r"""Build heterogeneous graph from homogeneous ones.
 
 
@@ -97,7 +98,7 @@ def from_homogeneous_and_mol(g, offmol):
     a = g.adjacency_matrix()
 
     # get all the indices
-    idxs = relationship_indices_from_offmol(offmol)
+    idxs = relationship_indices_from_offmol(offmol, improper_def)
 
     # make them all numpy
     idxs = {key: value.numpy() for key, value in idxs.items()}

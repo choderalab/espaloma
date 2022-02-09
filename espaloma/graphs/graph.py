@@ -44,7 +44,8 @@ class Graph(BaseGraph):
 
     """
 
-    def __init__(self, mol=None, homograph=None, heterograph=None):
+    def __init__(self, mol=None, homograph=None, heterograph=None,
+        improper_def='smirnoff'):
         # TODO : more pythonic way allow multiple constructors:
         #   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...
         #   rather than Graph(mol=None, homograph=None, ...)
@@ -60,7 +61,7 @@ class Graph(BaseGraph):
 
         if homograph is not None and heterograph is None:
             heterograph = self.get_heterograph_from_graph_and_mol(
-                homograph, mol
+                homograph, mol, improper_def
             )
 
         self.mol = mol
@@ -154,14 +155,14 @@ class Graph(BaseGraph):
         return graph
 
     @staticmethod
-    def get_heterograph_from_graph_and_mol(graph, mol):
+    def get_heterograph_from_graph_and_mol(graph, mol, improper_def='smirnoff'):
         import dgl
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."
 
         heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol(
-            graph, mol
+            graph, mol, improper_def
         )
 
         return heterograph
