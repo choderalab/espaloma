@@ -146,7 +146,10 @@ heterograph.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#espaloma.graphs.graph.Graph.load" title="espaloma.graphs.graph.Graph.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.graphs.graph.Graph.save" title="espaloma.graphs.graph.Graph.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.graphs.graph.Graph.regenerate_impropers" title="espaloma.graphs.graph.Graph.regenerate_impropers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regenerate_impropers</span></code></a>([improper_def])</p></td>
+<td><p>Method to regenerate the improper nodes according to the specified method of permuting the impropers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.graphs.graph.Graph.save" title="espaloma.graphs.graph.Graph.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -169,6 +172,15 @@ heterograph.</p>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.graphs.graph.Graph.regenerate_impropers">
+<span class="sig-name descname"><span class="pre">regenerate_impropers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">improper_def</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smirnoff'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/graphs/graph.html#Graph.regenerate_impropers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.graphs.graph.Graph.regenerate_impropers" title="Permalink to this definition"></a></dt>
+<dd><p>Method to regenerate the improper nodes according to the specified
+method of permuting the impropers.
+NOTE: This will clear the data on all n4_improper nodes, including
+previously generated improper from JanossyPoolingImproper.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
