@@ -48,7 +48,7 @@ def get_charges(node):
     sum_q = node.data["sum_q"]
 
     return {
-        "q_hat": -e * s ** -1
+        "q": -e * s ** -1
         + (s ** -1) * torch.div(sum_q + sum_e_s_inv, sum_s_inv)
     }
 

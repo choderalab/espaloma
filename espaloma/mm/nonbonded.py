@@ -7,17 +7,17 @@ import torch
 # CONSTANTS
 # =============================================================================
 import espaloma as esp
+from simtk import unit
 
 # CODATA 2018
 # ref https://en.wikipedia.org/wiki/Coulomb_constant
-# K_E = (
-#     8.9875517923 * 1e9
-#     * unit.kilogram
-#     * (unit.meter ** 3)
-#     * (unit.second ** (-4))
-#     * (unit.angstrom ** (-2))
-#     ).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
-
+K_E = (
+    8.9875517923 * 1e9
+    * unit.kilogram
+    * (unit.meter ** 3)
+    * (unit.second ** (-4))
+    * (unit.angstrom ** (-2))
+).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
 
 # =============================================================================
 # UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED
@@ -71,6 +71,21 @@ def lorentz_berthelot(g, suffix=""):
 
     return g
 
+def get_q_prod(g, suffix=""):
+    import dgl
+    g.multi_update_all(
+        {
+            "n1_as_%s_in_%s"
+            % (pos_idx, term): (
+                dgl.function.copy_src(src="q%s" % suffix, out="m_q"),
+                lambda node: {"q%s" % suffix: node.mailbox["m_q"].prod(dim=1)}
+            )
+            for pos_idx in [0, 1]
+            for term in ["nonbonded", "onefour"]
+        },
+    )
+
+    return g
 
 # =============================================================================
 # ENERGY FUNCTIONS
@@ -119,21 +134,20 @@ def lj_9_6(x, sigma, epsilon):
     )
 
 
-#
-# def columb(x, q_prod, k_e=K_E):
-#     """ Columb interaction without cutoff.
-#
-#     Parameters
-#     ----------
-#     x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`
-#     q_prod : `torch.Tensor`,
-#         `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`
-#
-#     Returns
-#     -------
-#     u : `torch.Tensor`,
-#         `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
-#
-#
-#     """
-#     return k_e * x / q_prod
+def columb(x, q, k_e=K_E):
+    """ Columb interaction without cutoff.
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`
+    q_prod : `torch.Tensor`,
+        `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`
+
+    Returns
+    -------
+    u : `torch.Tensor`,
+        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+
+
+    """
+    return k_e * q / x
