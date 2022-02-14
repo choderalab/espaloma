@@ -1,4 +1,4 @@
-﻿espaloma.mm.energy.EnergyInGraphII
+espaloma.mm.energy.EnergyInGraphII
 ==================================
 
 .. currentmodule:: espaloma.mm.energy

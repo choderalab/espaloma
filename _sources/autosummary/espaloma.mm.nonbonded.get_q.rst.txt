@@ -1,0 +1,6 @@
+espaloma.mm.nonbonded.get\_q
+============================
+
+.. currentmodule:: espaloma.mm.nonbonded
+
+.. autofunction:: get_q

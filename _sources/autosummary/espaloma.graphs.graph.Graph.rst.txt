@@ -1,4 +1,4 @@
-﻿espaloma.graphs.graph.Graph
+espaloma.graphs.graph.Graph
 ===========================
 
 .. currentmodule:: espaloma.graphs.graph
@@ -20,7 +20,6 @@
       ~Graph.get_heterograph_from_graph_and_mol
       ~Graph.get_homograph_from_mol
       ~Graph.load
-      ~Graph.regenerate_impropers
       ~Graph.save
    
    

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>espaloma.mm.energy.apply_bond_gaussian &mdash; espaloma  documentation</title>
+  <title>espaloma.mm.energy.apply_coulomb &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="espaloma.mm.energy.apply_bond_ii" href="espaloma.mm.energy.apply_bond_ii.html" />
-    <link rel="prev" title="espaloma.mm.energy.apply_bond" href="espaloma.mm.energy.apply_bond.html" /> 
+    <link rel="next" title="espaloma.mm.energy.apply_improper_torsion" href="espaloma.mm.energy.apply_improper_torsion.html" />
+    <link rel="prev" title="espaloma.mm.energy.apply_bond_linear_mixture" href="espaloma.mm.energy.apply_bond_linear_mixture.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,10 +53,10 @@
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_angle_ii.html">espaloma.mm.energy.apply_angle_ii</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_angle_linear_mixture.html">espaloma.mm.energy.apply_angle_linear_mixture</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond.html">espaloma.mm.energy.apply_bond</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.energy.apply_bond_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond_gaussian.html">espaloma.mm.energy.apply_bond_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond_ii.html">espaloma.mm.energy.apply_bond_ii</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond_linear_mixture.html">espaloma.mm.energy.apply_bond_linear_mixture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_coulomb.html">espaloma.mm.energy.apply_coulomb</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.energy.apply_coulomb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_improper_torsion.html">espaloma.mm.energy.apply_improper_torsion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_nonbonded.html">espaloma.mm.energy.apply_nonbonded</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_torsion.html">espaloma.mm.energy.apply_torsion</a></li>
@@ -98,9 +98,9 @@
           <li><a href="../api.html">API Documentation</a> &raquo;</li>
           <li><a href="espaloma.mm.html">espaloma.mm</a> &raquo;</li>
           <li><a href="espaloma.mm.energy.html">espaloma.mm.energy</a> &raquo;</li>
-      <li>espaloma.mm.energy.apply_bond_gaussian</li>
+      <li>espaloma.mm.energy.apply_coulomb</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/autosummary/espaloma.mm.energy.apply_bond_gaussian.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autosummary/espaloma.mm.energy.apply_coulomb.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -108,13 +108,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="espaloma-mm-energy-apply-bond-gaussian">
-<h1>espaloma.mm.energy.apply_bond_gaussian<a class="headerlink" href="#espaloma-mm-energy-apply-bond-gaussian" title="Permalink to this headline"></a></h1>
+  <section id="espaloma-mm-energy-apply-coulomb">
+<h1>espaloma.mm.energy.apply_coulomb<a class="headerlink" href="#espaloma-mm-energy-apply-coulomb" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="espaloma.mm.energy.apply_bond_gaussian">
-<span class="sig-prename descclassname"><span class="pre">espaloma.mm.energy.</span></span><span class="sig-name descname"><span class="pre">apply_bond_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/energy.html#apply_bond_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.energy.apply_bond_gaussian" title="Permalink to this definition"></a></dt>
-<dd><p>Bond energy in nodes.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="espaloma.mm.energy.apply_coulomb">
+<span class="sig-prename descclassname"><span class="pre">espaloma.mm.energy.</span></span><span class="sig-name descname"><span class="pre">apply_coulomb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/energy.html#apply_coulomb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.energy.apply_coulomb" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 
@@ -122,8 +121,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="espaloma.mm.energy.apply_bond.html" class="btn btn-neutral float-left" title="espaloma.mm.energy.apply_bond" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="espaloma.mm.energy.apply_bond_ii.html" class="btn btn-neutral float-right" title="espaloma.mm.energy.apply_bond_ii" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="espaloma.mm.energy.apply_bond_linear_mixture.html" class="btn btn-neutral float-left" title="espaloma.mm.energy.apply_bond_linear_mixture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="espaloma.mm.energy.apply_improper_torsion.html" class="btn btn-neutral float-right" title="espaloma.mm.energy.apply_improper_torsion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

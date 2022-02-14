@@ -296,6 +296,14 @@
         <span class="p">)</span>
     <span class="p">}</span></div>
 
+<div class="viewcode-block" id="apply_coulomb"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.energy.apply_coulomb.html#espaloma.mm.energy.apply_coulomb">[docs]</a><span class="k">def</span> <span class="nf">apply_coulomb</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;u</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">scaling</span> <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">nonbonded</span><span class="o">.</span><span class="n">columb</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+            <span class="n">q</span><span class="o">=</span><span class="n">nodes</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">}</span></div>
+
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># ENERGY IN GRAPH</span>
@@ -384,6 +392,23 @@
             <span class="p">),</span>
             <span class="n">ntype</span><span class="o">=</span><span class="s2">&quot;onefour&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;coulomb&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">esp</span><span class="o">.</span><span class="n">nonbonded</span><span class="o">.</span><span class="n">get_q</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_coulomb</span><span class="p">(</span>
+                    <span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;onefour&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">apply_coulomb</span><span class="p">(</span>
+                    <span class="n">node</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
     <span class="c1"># sum up energy</span>
     <span class="c1"># bonded</span>
