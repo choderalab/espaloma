@@ -18,7 +18,6 @@ K_E = (
     * unit.coulomb ** (-2)
     * esp.units.PARTICLE ** (-1)
 ).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
-print(K_E)
 
 # =============================================================================
 # UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED
@@ -72,7 +71,7 @@ def lorentz_berthelot(g, suffix=""):
 
     return g
 
-def get_q_prod(g, suffix=""):
+def get_q(g, suffix=""):
     import dgl
     g.multi_update_all(
         {
@@ -135,7 +134,7 @@ def lj_9_6(x, sigma, epsilon):
     )
 
 
-def columb(x, q, k_e=K_E):
+def coulomb(x, q, k_e=K_E):
     """ Columb interaction without cutoff.
 
     Parameters

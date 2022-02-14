@@ -225,7 +225,7 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
         )
     }
 
-def apply_columb(nodes, scaling=1.0, suffix=""):
+def apply_coulomb(nodes, scaling=1.0, suffix=""):
     return {
         "u%s" % suffix: scaling * esp.mm.nonbonded.columb(
             x=nodes.data["x"],
@@ -322,17 +322,19 @@ def energy_in_graph(
             ntype="onefour",
         )
 
-    if "columb" in terms:
+    if "coulomb" in terms:
+        esp.nonbonded.get_q(g)
+        
         if g.number_of_nodes("nonbonded") > 0:
             g.apply_nodes(
-                lambda node: apply_columb(
+                lambda node: apply_coulomb(
                     node, suffix=suffix, scaling=1.0,
                 )
             )
 
         if g.number_of_nodes("onefour") > 0:
             g.apply_nodes(
-                lambda node: apply_columb(
+                lambda node: apply_coulomb(
                     node, suffix=suffix, scaling=0.5,
                 )
             )
