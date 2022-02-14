@@ -27,8 +27,7 @@ CHARGE_UNIT = unit.elementary_charge
 FORCE_CONSTANT_UNIT = ENERGY_UNIT / (DISTANCE_UNIT ** 2)
 ANGLE_FORCE_CONSTANT_UNIT = ENERGY_UNIT / (ANGLE_UNIT ** 2)
 COULOMB_CONSTANT_UNIT = ENERGY_UNIT * DISTANCE_UNIT / (
-    unit.mole * (unit.elementary_charge ** 2))
-
+    (unit.elementary_charge ** 2))
 
 GAS_CONSTANT = (
     8.31446261815324 * unit.joule * (unit.kelvin ** -1) * (unit.mole ** -1)

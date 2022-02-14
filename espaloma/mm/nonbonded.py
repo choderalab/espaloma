@@ -13,11 +13,12 @@ from simtk import unit
 # ref https://en.wikipedia.org/wiki/Coulomb_constant
 K_E = (
     8.9875517923 * 1e9
-    * unit.kilogram
-    * (unit.meter ** 3)
-    * (unit.second ** (-4))
-    * (unit.angstrom ** (-2))
+    * unit.newton
+    * unit.meter ** 2
+    * unit.coulomb ** (-2)
+    * esp.units.PARTICLE ** (-1)
 ).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
+print(K_E)
 
 # =============================================================================
 # UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED
