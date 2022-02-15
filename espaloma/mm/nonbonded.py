@@ -83,6 +83,7 @@ def get_q(g, suffix=""):
             for pos_idx in [0, 1]
             for term in ["nonbonded", "onefour"]
         },
+        cross_reducer="sum",
     )
 
     return g
