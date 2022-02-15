@@ -117,6 +117,19 @@ class Graph(BaseGraph):
             incoming_etype = ('n1', f'n1_as_{i}_in_n4_improper', 'n4_improper')
             g = dgl.add_edges(g, n1_ids, permut_ids, etype=incoming_etype)
 
+        ## New edges b/n improper permuts and the graph (for global pooling)
+        # edge from improper node to graph
+        outgoing_etype = ('n4_improper', f'n4_improper_in_g', 'g')
+        g = dgl.add_edges(g, permut_ids, np.zeros_like(permut_ids),
+            etype=outgoing_etype)
+
+        # edge from graph to improper nodes
+        incoming_etype = ('g', 'g_has_n4_improper', 'n4_improper')
+        g = dgl.add_edges(g, np.zeros_like(permut_ids), permut_ids,
+            etype=incoming_etype)
+
+        g.nodes['n4_improper'].data['idxs'] = torch.tensor(idxs)
+
         self.heterograph = g
 
     @classmethod
