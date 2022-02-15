@@ -1,4 +1,4 @@
-﻿espaloma.mm.energy
+espaloma.mm.energy
 ==================
 
 .. automodule:: espaloma.mm.energy
@@ -21,7 +21,6 @@
       apply_bond_gaussian
       apply_bond_ii
       apply_bond_linear_mixture
-      apply_coulomb
       apply_improper_torsion
       apply_nonbonded
       apply_torsion
