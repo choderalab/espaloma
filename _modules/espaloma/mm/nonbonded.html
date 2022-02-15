@@ -78,17 +78,17 @@
 <span class="c1"># CONSTANTS</span>
 <span class="c1"># =============================================================================</span>
 <span class="kn">import</span> <span class="nn">espaloma</span> <span class="k">as</span> <span class="nn">esp</span>
+<span class="kn">from</span> <span class="nn">simtk</span> <span class="kn">import</span> <span class="n">unit</span>
 
 <span class="c1"># CODATA 2018</span>
 <span class="c1"># ref https://en.wikipedia.org/wiki/Coulomb_constant</span>
-<span class="c1"># K_E = (</span>
-<span class="c1">#     8.9875517923 * 1e9</span>
-<span class="c1">#     * unit.kilogram</span>
-<span class="c1">#     * (unit.meter ** 3)</span>
-<span class="c1">#     * (unit.second ** (-4))</span>
-<span class="c1">#     * (unit.angstrom ** (-2))</span>
-<span class="c1">#     ).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)</span>
-
+<span class="n">K_E</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mf">8.9875517923</span> <span class="o">*</span> <span class="mf">1e9</span>
+    <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">newton</span>
+    <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">meter</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">coulomb</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+    <span class="o">*</span> <span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">PARTICLE</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">esp</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">COULOMB_CONSTANT_UNIT</span><span class="p">)</span>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED</span>
@@ -142,6 +142,22 @@
 
     <span class="k">return</span> <span class="n">g</span></div>
 
+<div class="viewcode-block" id="get_q"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.nonbonded.get_q.html#espaloma.mm.nonbonded.get_q">[docs]</a><span class="k">def</span> <span class="nf">get_q</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">dgl</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span> <span class="p">(</span>
+                <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;q</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;m_q&quot;</span><span class="p">),</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;q</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">mailbox</span><span class="p">[</span><span class="s2">&quot;m_q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)}</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span> <span class="s2">&quot;onefour&quot;</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
 
 <span class="c1"># =============================================================================</span>
 <span class="c1"># ENERGY FUNCTIONS</span>
@@ -190,24 +206,23 @@
     <span class="p">)</span></div>
 
 
-<span class="c1">#</span>
-<span class="c1"># def columb(x, q_prod, k_e=K_E):</span>
-<span class="c1">#     &quot;&quot;&quot; Columb interaction without cutoff.</span>
-<span class="c1">#</span>
-<span class="c1">#     Parameters</span>
-<span class="c1">#     ----------</span>
-<span class="c1">#     x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
-<span class="c1">#     q_prod : `torch.Tensor`,</span>
-<span class="c1">#         `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`</span>
-<span class="c1">#</span>
-<span class="c1">#     Returns</span>
-<span class="c1">#     -------</span>
-<span class="c1">#     u : `torch.Tensor`,</span>
-<span class="c1">#         `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     return k_e * x / q_prod</span>
+<div class="viewcode-block" id="coulomb"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.nonbonded.coulomb.html#espaloma.mm.nonbonded.coulomb">[docs]</a><span class="k">def</span> <span class="nf">coulomb</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k_e</span><span class="o">=</span><span class="n">K_E</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Columb interaction without cutoff.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
+<span class="sd">    q_prod : `torch.Tensor`,</span>
+<span class="sd">        `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    u : `torch.Tensor`,</span>
+<span class="sd">        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">q</span> <span class="o">/</span> <span class="n">x</span></div>
 </pre></div>
 
            </div>
