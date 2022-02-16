@@ -73,17 +73,20 @@ def lorentz_berthelot(g, suffix=""):
 
 def get_q(g, suffix=""):
     import dgl
+
     g.multi_update_all(
         {
             "n1_as_%s_in_%s"
             % (pos_idx, term): (
                 dgl.function.copy_src(src="q%s" % suffix, out="m_q"),
-                lambda node: {"q%s" % suffix: node.mailbox["m_q"].prod(dim=1)}
+                dgl.function.sum(msg="m_q", out="_q")
+                # lambda node: {"q%s" % suffix: node.mailbox["m_q"].prod(dim=1)}
             )
             for pos_idx in [0, 1]
             for term in ["nonbonded", "onefour"]
         },
-        cross_reducer="sum",
+        cross_reducer="stack",
+        apply_node_func=lambda node: {"q": node.data["_q"].prod(dim=1)}
     )
 
     return g
@@ -151,4 +154,4 @@ def coulomb(x, q, k_e=K_E):
 
 
     """
-    return k_e * q / x
+    return 0.5 * k_e * q / x

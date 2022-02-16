@@ -305,8 +305,8 @@ def energy_in_graph(
             lambda node: apply_improper_torsion(node, suffix=suffix),
             ntype="n4_improper",
         )
-    
-    
+
+
     # if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:
     #     g.apply_nodes(
     #         lambda node: apply_nonbonded(node, suffix=suffix),
@@ -325,7 +325,7 @@ def energy_in_graph(
 
     if "nonbonded" in terms or "onefour" in terms:
         esp.mm.nonbonded.get_q(g)
-    
+
     if g.number_of_nodes("nonbonded") > 0:
         g.apply_nodes(
             lambda node: apply_coulomb(
@@ -337,7 +337,9 @@ def energy_in_graph(
     if g.number_of_nodes("onefour") > 0:
         g.apply_nodes(
             lambda node: apply_coulomb(
-                node, suffix=suffix, scaling=0.5,
+                node, suffix=suffix,
+                scaling=0.5,
+                # scaling=0.8333333333333334,
             ),
             ntype="onefour",
         )

@@ -115,6 +115,8 @@ def subtract_nonbonded_force(
                     idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
                     force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
 
+                force.updateParametersInContext(simulation.context)
+
     # the snapshots
     xs = (
         Quantity(
@@ -521,7 +523,6 @@ class MoleculeVacuumSimulation(object):
                     .value_in_unit(DISTANCE_UNIT)
                 )
 
-        print(samples)
         assert len(samples) == self.n_samples
 
         # put samples into an array
