@@ -61,7 +61,8 @@ def test_energy_consistent_caffeine():
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
 
     # parametrize caffeine molecule using the parametrization
-    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+    ## Should there be a second test for SMIRNOFF impropers?
+    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C", improper_def='espaloma')
     g = ff.parametrize(g)
     system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
 
