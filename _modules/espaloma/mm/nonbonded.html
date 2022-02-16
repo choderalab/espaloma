@@ -144,17 +144,20 @@
 
 <div class="viewcode-block" id="get_q"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.nonbonded.get_q.html#espaloma.mm.nonbonded.get_q">[docs]</a><span class="k">def</span> <span class="nf">get_q</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">dgl</span>
+
     <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s2">&quot;n1_as_</span><span class="si">%s</span><span class="s2">_in_</span><span class="si">%s</span><span class="s2">&quot;</span>
             <span class="o">%</span> <span class="p">(</span><span class="n">pos_idx</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span> <span class="p">(</span>
                 <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">copy_src</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;q</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;m_q&quot;</span><span class="p">),</span>
-                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;q</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">mailbox</span><span class="p">[</span><span class="s2">&quot;m_q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)}</span>
+                <span class="n">dgl</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;m_q&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s2">&quot;_q&quot;</span><span class="p">)</span>
+                <span class="c1"># lambda node: {&quot;q%s&quot; % suffix: node.mailbox[&quot;m_q&quot;].prod(dim=1)}</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span> <span class="s2">&quot;onefour&quot;</span><span class="p">]</span>
         <span class="p">},</span>
-        <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+        <span class="n">cross_reducer</span><span class="o">=</span><span class="s2">&quot;stack&quot;</span><span class="p">,</span>
+        <span class="n">apply_node_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;_q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)}</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">g</span></div>
@@ -222,7 +225,7 @@
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">q</span> <span class="o">/</span> <span class="n">x</span></div>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">q</span> <span class="o">/</span> <span class="n">x</span></div>
 </pre></div>
 
            </div>
