@@ -1,0 +1,6 @@
+espaloma.mm.nonbonded.coulomb
+=============================
+
+.. currentmodule:: espaloma.mm.nonbonded
+
+.. autofunction:: coulomb
