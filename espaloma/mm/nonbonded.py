@@ -11,6 +11,7 @@ from simtk import unit
 
 # CODATA 2018
 # ref https://en.wikipedia.org/wiki/Coulomb_constant
+# Coulomb constant
 K_E = (
     8.9875517923 * 1e9
     * unit.newton
@@ -71,7 +72,19 @@ def lorentz_berthelot(g, suffix=""):
 
     return g
 
-def get_q(g, suffix=""):
+def multiply_charges(g, suffix=""):
+    """ Multiply the charges of atoms into nonbonded and onefour terms.
+
+    Parameters
+    ----------
+    g : dgl.HeteroGraph
+        Input graph.
+
+    Returns
+    -------
+    dgl.HeteroGraph : The modified graph with charges.
+
+    """
     import dgl
 
     g.multi_update_all(
@@ -144,14 +157,21 @@ def coulomb(x, q, k_e=K_E):
     Parameters
     ----------
     x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`
-    q_prod : `torch.Tensor`,
+        Distance between atoms.
+
+    q : `torch.Tensor`,
         `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`
+        Product of charge.
 
     Returns
     -------
-    u : `torch.Tensor`,
-        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+    torch.Tensor : `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+        Coulomb energy.
 
+    Notes
+    -----
+    This computes half Coulomb energy to count for the duplication in onefour
+        and nonbonded enumerations.
 
     """
     return 0.5 * k_e * q / x

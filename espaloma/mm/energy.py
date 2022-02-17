@@ -324,7 +324,7 @@ def energy_in_graph(
     #     )
 
     if "nonbonded" in terms or "onefour" in terms:
-        esp.mm.nonbonded.get_q(g)
+        esp.mm.nonbonded.multiply_charges(g)
 
     if g.number_of_nodes("nonbonded") > 0:
         g.apply_nodes(

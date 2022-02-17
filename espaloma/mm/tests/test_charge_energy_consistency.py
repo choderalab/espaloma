@@ -10,10 +10,15 @@ from simtk import unit
 
 @pytest.mark.parametrize(
     "g",
-    # [esp.Graph("CCC")],
-    esp.data.esol(first=5),
+    esp.data.esol(first=5), # use a subset of ESOL dataset to test
 )
-def test_energy_angle_and_bond(g):
+def test_coulomb_energy_consistency(g):
+    """ We use both `esp.mm` and OpenMM to compute the Coulomb energy of
+    some molecules with generated geometries and see if the resulting Columb
+    energy matches.
+    
+
+    """
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
 
@@ -86,7 +91,7 @@ def test_energy_angle_and_bond(g):
     )
 
     g.nodes['n1'].data['q'] = torch.tensor(charges).unsqueeze(-1)
-    esp.mm.nonbonded.get_q(g.heterograph)
+    esp.mm.nonbonded.multiply_charges(g.heterograph)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
     esp.mm.energy.energy_in_graph(g.heterograph, terms=["nonbonded", "onefour"])
 
