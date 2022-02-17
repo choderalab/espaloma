@@ -11,7 +11,7 @@ from simtk import unit
 @pytest.mark.parametrize(
     "g",
     # [esp.Graph("CCC")],
-    [esp.data.esol(first=5)[3]],
+    esp.data.esol(first=5),
 )
 def test_energy_angle_and_bond(g):
     # make simulation
@@ -91,6 +91,7 @@ def test_energy_angle_and_bond(g):
     esp.mm.energy.energy_in_graph(g.heterograph, terms=["nonbonded", "onefour"])
 
     npt.assert_almost_equal(
-        g.nodes['g'].data['u'],
+        g.nodes['g'].data['u'].item(),
         energy_old - energy_new,
+        decimal=3,
     )

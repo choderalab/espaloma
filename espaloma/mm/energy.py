@@ -338,8 +338,8 @@ def energy_in_graph(
         g.apply_nodes(
             lambda node: apply_coulomb(
                 node, suffix=suffix,
-                scaling=0.5,
-                # scaling=0.8333333333333334,
+                # scaling=0.5,
+                scaling=0.8333333333333334,
             ),
             ntype="onefour",
         )
