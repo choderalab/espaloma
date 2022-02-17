@@ -82,6 +82,7 @@
 
 <span class="c1"># CODATA 2018</span>
 <span class="c1"># ref https://en.wikipedia.org/wiki/Coulomb_constant</span>
+<span class="c1"># Coulomb constant</span>
 <span class="n">K_E</span> <span class="o">=</span> <span class="p">(</span>
     <span class="mf">8.9875517923</span> <span class="o">*</span> <span class="mf">1e9</span>
     <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">newton</span>
@@ -142,7 +143,19 @@
 
     <span class="k">return</span> <span class="n">g</span></div>
 
-<div class="viewcode-block" id="get_q"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.nonbonded.get_q.html#espaloma.mm.nonbonded.get_q">[docs]</a><span class="k">def</span> <span class="nf">get_q</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="multiply_charges"><a class="viewcode-back" href="../../../autosummary/espaloma.mm.nonbonded.multiply_charges.html#espaloma.mm.nonbonded.multiply_charges">[docs]</a><span class="k">def</span> <span class="nf">multiply_charges</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Multiply the charges of atoms into nonbonded and onefour terms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g : dgl.HeteroGraph</span>
+<span class="sd">        Input graph.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dgl.HeteroGraph : The modified graph with charges.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">dgl</span>
 
     <span class="n">g</span><span class="o">.</span><span class="n">multi_update_all</span><span class="p">(</span>
@@ -215,14 +228,21 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
-<span class="sd">    q_prod : `torch.Tensor`,</span>
+<span class="sd">        Distance between atoms.</span>
+
+<span class="sd">    q : `torch.Tensor`,</span>
 <span class="sd">        `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`</span>
+<span class="sd">        Product of charge.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    u : `torch.Tensor`,</span>
-<span class="sd">        `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
+<span class="sd">    torch.Tensor : `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`</span>
+<span class="sd">        Coulomb energy.</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This computes half Coulomb energy to count for the duplication in onefour</span>
+<span class="sd">        and nonbonded enumerations.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">q</span> <span class="o">/</span> <span class="n">x</span></div>

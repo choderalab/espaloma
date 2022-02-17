@@ -395,7 +395,7 @@
     <span class="c1">#     )</span>
 
     <span class="k">if</span> <span class="s2">&quot;nonbonded&quot;</span> <span class="ow">in</span> <span class="n">terms</span> <span class="ow">or</span> <span class="s2">&quot;onefour&quot;</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
-        <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">nonbonded</span><span class="o">.</span><span class="n">get_q</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">esp</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">nonbonded</span><span class="o">.</span><span class="n">multiply_charges</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">(</span>

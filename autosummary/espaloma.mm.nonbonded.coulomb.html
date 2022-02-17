@@ -55,10 +55,10 @@
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.arithmetic_mean.html">espaloma.mm.nonbonded.arithmetic_mean</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.nonbonded.coulomb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.geometric_mean.html">espaloma.mm.nonbonded.geometric_mean</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.get_q.html">espaloma.mm.nonbonded.get_q</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lj_12_6.html">espaloma.mm.nonbonded.lj_12_6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lj_9_6.html">espaloma.mm.nonbonded.lj_9_6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lorentz_berthelot.html">espaloma.mm.nonbonded.lorentz_berthelot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.multiply_charges.html">espaloma.mm.nonbonded.multiply_charges</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.torsion.html">espaloma.mm.torsion</a></li>
@@ -107,15 +107,21 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<cite>torch.Tensor</cite>, shape=`(batch_size, 1)` or <cite>(batch_size, batch_size, 1)</cite>)</p></li>
-<li><p><strong>q_prod</strong> (<cite>torch.Tensor</cite>,) – <cite>shape=(batch_size, 1) or `(batch_size, batch_size, 1)</cite></p></li>
+<li><p><strong>x</strong> (<cite>torch.Tensor</cite>, shape=`(batch_size, 1)` or <cite>(batch_size, batch_size, 1)</cite>) – Distance between atoms.</p></li>
+<li><p><strong>q</strong> (<cite>torch.Tensor</cite>,) – <cite>shape=(batch_size, 1) or `(batch_size, batch_size, 1)</cite>
+Product of charge.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>u</strong> – <cite>shape=(batch_size, 1)</cite> or <cite>(batch_size, batch_size, 1)</cite></p>
+<dd class="field-even"><p><strong>torch.Tensor</strong> – Coulomb energy.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><cite>torch.Tensor</cite>,</p>
+<dd class="field-odd"><p><cite>shape=(batch_size, 1)</cite> or <cite>(batch_size, batch_size, 1)</cite></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<dl class="simple">
+<dt>This computes half Coulomb energy to count for the duplication in onefour</dt><dd><p>and nonbonded enumerations.</p>
 </dd>
 </dl>
 </dd></dl>

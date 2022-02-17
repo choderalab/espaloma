@@ -17,10 +17,10 @@
       arithmetic_mean
       coulomb
       geometric_mean
-      get_q
       lj_12_6
       lj_9_6
       lorentz_berthelot
+      multiply_charges
    
    
 

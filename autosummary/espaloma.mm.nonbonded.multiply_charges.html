@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>espaloma.mm.nonbonded.get_q &mdash; espaloma  documentation</title>
+  <title>espaloma.mm.nonbonded.multiply_charges &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="espaloma.mm.nonbonded.lj_12_6" href="espaloma.mm.nonbonded.lj_12_6.html" />
-    <link rel="prev" title="espaloma.mm.nonbonded.geometric_mean" href="espaloma.mm.nonbonded.geometric_mean.html" /> 
+    <link rel="next" title="espaloma.mm.torsion" href="espaloma.mm.torsion.html" />
+    <link rel="prev" title="espaloma.mm.nonbonded.lorentz_berthelot" href="espaloma.mm.nonbonded.lorentz_berthelot.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,10 +55,10 @@
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.arithmetic_mean.html">espaloma.mm.nonbonded.arithmetic_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.coulomb.html">espaloma.mm.nonbonded.coulomb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.geometric_mean.html">espaloma.mm.nonbonded.geometric_mean</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.nonbonded.get_q</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lj_12_6.html">espaloma.mm.nonbonded.lj_12_6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lj_9_6.html">espaloma.mm.nonbonded.lj_9_6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lorentz_berthelot.html">espaloma.mm.nonbonded.lorentz_berthelot</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.nonbonded.multiply_charges</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.torsion.html">espaloma.mm.torsion</a></li>
@@ -88,9 +88,9 @@
           <li><a href="../api.html">API Documentation</a> &raquo;</li>
           <li><a href="espaloma.mm.html">espaloma.mm</a> &raquo;</li>
           <li><a href="espaloma.mm.nonbonded.html">espaloma.mm.nonbonded</a> &raquo;</li>
-      <li>espaloma.mm.nonbonded.get_q</li>
+      <li>espaloma.mm.nonbonded.multiply_charges</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/autosummary/espaloma.mm.nonbonded.get_q.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autosummary/espaloma.mm.nonbonded.multiply_charges.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -98,12 +98,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="espaloma-mm-nonbonded-get-q">
-<h1>espaloma.mm.nonbonded.get_q<a class="headerlink" href="#espaloma-mm-nonbonded-get-q" title="Permalink to this headline"></a></h1>
+  <section id="espaloma-mm-nonbonded-multiply-charges">
+<h1>espaloma.mm.nonbonded.multiply_charges<a class="headerlink" href="#espaloma-mm-nonbonded-multiply-charges" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="espaloma.mm.nonbonded.get_q">
-<span class="sig-prename descclassname"><span class="pre">espaloma.mm.nonbonded.</span></span><span class="sig-name descname"><span class="pre">get_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/nonbonded.html#get_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.nonbonded.get_q" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="espaloma.mm.nonbonded.multiply_charges">
+<span class="sig-prename descclassname"><span class="pre">espaloma.mm.nonbonded.</span></span><span class="sig-name descname"><span class="pre">multiply_charges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/nonbonded.html#multiply_charges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.nonbonded.multiply_charges" title="Permalink to this definition"></a></dt>
+<dd><p>Multiply the charges of atoms into nonbonded and onefour terms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>g</strong> (<em>dgl.HeteroGraph</em>) – Input graph.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dgl.HeteroGraph</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>The modified graph with charges.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -111,8 +123,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="espaloma.mm.nonbonded.geometric_mean.html" class="btn btn-neutral float-left" title="espaloma.mm.nonbonded.geometric_mean" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="espaloma.mm.nonbonded.lj_12_6.html" class="btn btn-neutral float-right" title="espaloma.mm.nonbonded.lj_12_6" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="espaloma.mm.nonbonded.lorentz_berthelot.html" class="btn btn-neutral float-left" title="espaloma.mm.nonbonded.lorentz_berthelot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="espaloma.mm.torsion.html" class="btn btn-neutral float-right" title="espaloma.mm.torsion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
