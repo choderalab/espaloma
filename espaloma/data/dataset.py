@@ -225,6 +225,19 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         with open(path, "wb") as f_handle:
             pickle.dump(self.graphs, f_handle)
 
+    def regenerate_impropers(self, improper_def='smirnoff'):
+        """
+        Regenerate the improper nodes for all graphs.
+
+        Parameters
+        ----------
+        improper_def : str
+            Which convention to use for permuting impropers.
+        """
+        from espaloma.graphs.utils.regenerate_impropers import regenerate_impropers
+        for g in self.graphs:
+            regenerate_impropers(g, improper_def)
+
     @classmethod
     def load(cls, path):
         """Load path to dataset.
@@ -340,7 +353,7 @@ class GraphDataset(Dataset):
             graph.save(path + "/" + str(idx))
 
     @classmethod
-    def load(cls, path, improper_def=None):
+    def load(cls, path):
         import os
 
         paths = os.listdir(path)
@@ -348,6 +361,6 @@ class GraphDataset(Dataset):
 
         graphs = []
         for _path in paths:
-            graphs.append(esp.Graph.load(path + "/" + _path, improper_def))
+            graphs.append(esp.Graph.load(path + "/" + _path))
 
         return cls(graphs)
