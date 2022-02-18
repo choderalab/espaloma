@@ -44,8 +44,7 @@ class Graph(BaseGraph):
 
     """
 
-    def __init__(self, mol=None, homograph=None, heterograph=None,
-        improper_def='smirnoff'):
+    def __init__(self, mol=None, homograph=None, heterograph=None):
         # TODO : more pythonic way allow multiple constructors:
         #   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...
         #   rather than Graph(mol=None, homograph=None, ...)
@@ -61,7 +60,7 @@ class Graph(BaseGraph):
 
         if homograph is not None and heterograph is None:
             heterograph = self.get_heterograph_from_graph_and_mol(
-                homograph, mol, improper_def
+                homograph, mol
             )
 
         self.mol = mol
@@ -78,62 +77,8 @@ class Graph(BaseGraph):
         with open(path + "/mol.json", "w") as f_handle:
             json.dump(self.mol.to_json(), f_handle)
 
-    def regenerate_impropers(self, improper_def='smirnoff'):
-        """
-        Method to regenerate the improper nodes according to the specified
-        method of permuting the impropers.
-        NOTE: This will clear the data on all n4_improper nodes, including
-        previously generated improper from JanossyPoolingImproper.
-        """
-
-        import dgl
-        import numpy as np
-        import torch
-
-        from .utils.offmol_indices import improper_torsion_indices
-
-        ## First get rid of the old nodes/edges
-        g = self.heterograph
-        g = dgl.remove_nodes(g, g.nodes('n4_improper'), 'n4_improper')
-
-        ## Generate new improper torsion permutations
-        idxs = improper_torsion_indices(self.mol, improper_def)
-        if len(idxs) == 0:
-            return
-
-        ## Add new nodes of type n4_improper (one for each permut)
-        g = dgl.add_nodes(g, idxs.shape[0], ntype='n4_improper')
-
-        ## New edges b/n improper permuts and n1 nodes
-        permut_ids = np.arange(idxs.shape[0])
-        for i in range(4):
-            n1_ids = idxs[:,i]
-
-            # edge from improper node to n1 node
-            outgoing_etype = ('n4_improper', f'n4_improper_has_{i}_n1', 'n1')
-            g = dgl.add_edges(g, permut_ids, n1_ids, etype=outgoing_etype)
-
-            # edge from n1 to improper
-            incoming_etype = ('n1', f'n1_as_{i}_in_n4_improper', 'n4_improper')
-            g = dgl.add_edges(g, n1_ids, permut_ids, etype=incoming_etype)
-
-        ## New edges b/n improper permuts and the graph (for global pooling)
-        # edge from improper node to graph
-        outgoing_etype = ('n4_improper', f'n4_improper_in_g', 'g')
-        g = dgl.add_edges(g, permut_ids, np.zeros_like(permut_ids),
-            etype=outgoing_etype)
-
-        # edge from graph to improper nodes
-        incoming_etype = ('g', 'g_has_n4_improper', 'n4_improper')
-        g = dgl.add_edges(g, np.zeros_like(permut_ids), permut_ids,
-            etype=incoming_etype)
-
-        g.nodes['n4_improper'].data['idxs'] = torch.tensor(idxs)
-
-        self.heterograph = g
-
     @classmethod
-    def load(cls, path, improper_def=None):
+    def load(cls, path):
         import json
         import dgl
 
@@ -150,8 +95,6 @@ class Graph(BaseGraph):
             mol = Molecule.from_dict(mol)
 
         g = cls(mol=mol, homograph=homograph, heterograph=heterograph)
-        if improper_def is not None:
-            g.regenerate_impropers(improper_def)
         return g
 
     @staticmethod
@@ -174,14 +117,14 @@ class Graph(BaseGraph):
         return graph
 
     @staticmethod
-    def get_heterograph_from_graph_and_mol(graph, mol, improper_def='smirnoff'):
+    def get_heterograph_from_graph_and_mol(graph, mol):
         import dgl
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."
 
         heterograph = esp.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol(
-            graph, mol, improper_def
+            graph, mol
         )
 
         return heterograph
