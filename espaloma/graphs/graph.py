@@ -93,7 +93,9 @@ class Graph(BaseGraph):
             mol = Molecule.from_json(mol)
         except:
             mol = Molecule.from_dict(mol)
-        return cls(mol=mol, homograph=homograph, heterograph=heterograph)
+
+        g = cls(mol=mol, homograph=homograph, heterograph=heterograph)
+        return g
 
     @staticmethod
     def get_homograph_from_mol(mol):

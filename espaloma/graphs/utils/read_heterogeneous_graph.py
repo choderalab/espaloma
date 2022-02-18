@@ -31,7 +31,7 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
 
 
 def relationship_indices_from_offmol(
-    offmol: Molecule,
+    offmol: Molecule
 ) -> Dict[str, torch.Tensor]:
     """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
