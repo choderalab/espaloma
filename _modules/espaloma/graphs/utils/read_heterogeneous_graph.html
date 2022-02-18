@@ -275,6 +275,13 @@
         <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># idxs[&quot;onefour&quot;] = np.stack(</span>
+    <span class="c1">#     np.where(</span>
+    <span class="c1">#         np.equal(a_ + a_ @ a_, 0.0) * np.greater(a_ @ a_ @ a_, 0.0),</span>
+    <span class="c1">#     ),</span>
+    <span class="c1">#     axis=-1,</span>
+    <span class="c1"># )</span>
+
     <span class="c1"># membership</span>
     <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nonbonded&quot;</span><span class="p">,</span> <span class="s2">&quot;onefour&quot;</span><span class="p">]:</span>
         <span class="k">for</span> <span class="n">pos_idx</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
