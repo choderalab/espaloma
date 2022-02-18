@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy.JanossyPoolingImproper
+espaloma.nn.readout.janossy.JanossyPoolingImproper
 ==================================================
 
 .. currentmodule:: espaloma.nn.readout.janossy

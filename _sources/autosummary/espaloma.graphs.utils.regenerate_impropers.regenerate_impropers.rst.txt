@@ -1,0 +1,6 @@
+espaloma.graphs.utils.regenerate\_impropers.regenerate\_impropers
+=================================================================
+
+.. currentmodule:: espaloma.graphs.utils.regenerate_impropers
+
+.. autofunction:: regenerate_impropers

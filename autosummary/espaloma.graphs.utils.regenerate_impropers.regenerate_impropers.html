@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol &mdash; espaloma  documentation</title>
+  <title>espaloma.graphs.utils.regenerate_impropers.regenerate_impropers &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -59,9 +59,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol</li>
+      <li>espaloma.graphs.utils.regenerate_impropers.regenerate_impropers</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/autosummary/espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autosummary/espaloma.graphs.utils.regenerate_impropers.regenerate_impropers.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -69,29 +69,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="espaloma-graphs-utils-read-heterogeneous-graph-from-homogeneous-and-mol">
-<h1>espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol<a class="headerlink" href="#espaloma-graphs-utils-read-heterogeneous-graph-from-homogeneous-and-mol" title="Permalink to this headline"></a></h1>
+  <section id="espaloma-graphs-utils-regenerate-impropers-regenerate-impropers">
+<h1>espaloma.graphs.utils.regenerate_impropers.regenerate_impropers<a class="headerlink" href="#espaloma-graphs-utils-regenerate-impropers-regenerate-impropers" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol">
-<span class="sig-prename descclassname"><span class="pre">espaloma.graphs.utils.read_heterogeneous_graph.</span></span><span class="sig-name descname"><span class="pre">from_homogeneous_and_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offmol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">improper_def</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smirnoff'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/graphs/utils/read_heterogeneous_graph.html#from_homogeneous_and_mol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.graphs.utils.read_heterogeneous_graph.from_homogeneous_and_mol" title="Permalink to this definition"></a></dt>
-<dd><p>Build heterogeneous graph from homogeneous ones.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For now we name single node, two-, three, and four-,
-hypernodes as <cite>n1</cite>, <cite>n2</cite>, <cite>n3</cite>, and <cite>n4</cite>. These correspond
-to atom, bond, angle, and torsion nodes in chemical graphs.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>g</strong> (<cite>espaloma.HomogeneousGraph</cite> object) – the homogeneous graph to be translated.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>hg</strong> – the resulting heterogeneous graph.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><cite>espaloma.HeterogeneousGraph</cite> object</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="espaloma.graphs.utils.regenerate_impropers.regenerate_impropers">
+<span class="sig-prename descclassname"><span class="pre">espaloma.graphs.utils.regenerate_impropers.</span></span><span class="sig-name descname"><span class="pre">regenerate_impropers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="espaloma.graphs.graph.Graph.html#espaloma.graphs.graph.Graph" title="espaloma.graphs.graph.Graph"><span class="pre">espaloma.graphs.graph.Graph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">improper_def</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smirnoff'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/graphs/utils/regenerate_impropers.html#regenerate_impropers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.graphs.utils.regenerate_impropers.regenerate_impropers" title="Permalink to this definition"></a></dt>
+<dd><p>Method to regenerate the improper nodes according to the specified
+method of permuting the impropers. Modifies the esp.Graph’s heterograph
+in place and returns the new heterograph.
+NOTE: This will clear the data on all n4_improper nodes, including
+previously generated improper from JanossyPoolingImproper.</p>
 </dd></dl>
 
 </section>

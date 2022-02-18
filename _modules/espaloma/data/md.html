@@ -98,7 +98,6 @@
 <div class="viewcode-block" id="subtract_nonbonded_force"><a class="viewcode-back" href="../../../autosummary/espaloma.data.md.subtract_nonbonded_force.html#espaloma.data.md.subtract_nonbonded_force">[docs]</a><span class="k">def</span> <span class="nf">subtract_nonbonded_force</span><span class="p">(</span>
     <span class="n">g</span><span class="p">,</span>
     <span class="n">forcefield</span><span class="o">=</span><span class="s2">&quot;gaff-1.81&quot;</span><span class="p">,</span>
-    <span class="n">subtract_charges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 
     <span class="c1"># parameterize topology</span>
@@ -176,17 +175,6 @@
                 <span class="p">)</span>
 
             <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="s2">&quot;Nonbonded&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">subtract_charges</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumParticles</span><span class="p">()):</span>
-                    <span class="n">q</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getParticleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-                    <span class="n">force</span><span class="o">.</span><span class="n">setParticleParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumExceptions</span><span class="p">()):</span>
-                    <span class="n">idx0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getExceptionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-                    <span class="n">force</span><span class="o">.</span><span class="n">setExceptionParameters</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
-
-                <span class="n">force</span><span class="o">.</span><span class="n">updateParametersInContext</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
 
     <span class="c1"># the snapshots</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="p">(</span>
@@ -483,7 +471,6 @@
         <span class="c1"># set epsilon minimum to 0.05 kJ/mol</span>
         <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="n">system</span><span class="o">.</span><span class="n">getForces</span><span class="p">():</span>
             <span class="k">if</span> <span class="s2">&quot;Nonbonded&quot;</span> <span class="ow">in</span> <span class="n">force</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
-                <span class="n">force</span><span class="o">.</span><span class="n">setNonbondedMethod</span><span class="p">(</span><span class="n">openmm</span><span class="o">.</span><span class="n">NonbondedForce</span><span class="o">.</span><span class="n">NoCutoff</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">particle_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">getNumParticles</span><span class="p">()):</span>
                     <span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">getParticleParameters</span><span class="p">(</span>
                         <span class="n">particle_index</span>
@@ -595,6 +582,7 @@
                     <span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">DISTANCE_UNIT</span><span class="p">)</span>
                 <span class="p">)</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
 
         <span class="c1"># put samples into an array</span>

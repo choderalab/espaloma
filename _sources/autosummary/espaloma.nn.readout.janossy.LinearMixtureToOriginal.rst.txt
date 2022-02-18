@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy.LinearMixtureToOriginal
+espaloma.nn.readout.janossy.LinearMixtureToOriginal
 ===================================================
 
 .. currentmodule:: espaloma.nn.readout.janossy

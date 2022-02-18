@@ -1,6 +1,0 @@
-espaloma.mm.nonbonded.multiply\_charges
-=======================================
-
-.. currentmodule:: espaloma.mm.nonbonded
-
-.. autofunction:: multiply_charges
