@@ -17,7 +17,6 @@ import espaloma as esp
 
 decimal_threshold = 2
 
-
 def _create_torsion_sim(
     periodicity: int = 2, phase=0 * omm_angle_unit, k=10.0 * omm_energy_unit
 ) -> app.Simulation:

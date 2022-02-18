@@ -204,6 +204,13 @@ def from_homogeneous_and_mol(g, offmol):
         axis=1,
     )
 
+    # idxs["onefour"] = np.stack(
+    #     np.where(
+    #         np.equal(a_ + a_ @ a_, 0.0) * np.greater(a_ @ a_ @ a_, 0.0),
+    #     ),
+    #     axis=-1,
+    # )
+
     # membership
     for term in ["nonbonded", "onefour"]:
         for pos_idx in [0, 1]:

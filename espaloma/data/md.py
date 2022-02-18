@@ -412,6 +412,7 @@ class MoleculeVacuumSimulation(object):
         # set epsilon minimum to 0.05 kJ/mol
         for force in system.getForces():
             if "Nonbonded" in force.__class__.__name__:
+                force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
                 for particle_index in range(force.getNumParticles()):
                     charge, sigma, epsilon = force.getParticleParameters(
                         particle_index
