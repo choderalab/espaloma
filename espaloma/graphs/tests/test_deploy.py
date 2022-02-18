@@ -62,7 +62,7 @@ def test_energy_consistent_caffeine():
 
     # parametrize caffeine molecule using the parametrization
     ## Should there be a second test for SMIRNOFF impropers?
-    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C", improper_def='espaloma')
+    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
     g = ff.parametrize(g)
     system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
 

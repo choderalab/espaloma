@@ -2,7 +2,7 @@ import pytest
 import torch
 
 import espaloma as esp
-
+from espaloma.graphs.utils.regenerate_impropers import regenerate_impropers
 
 def test_import():
     esp.mm.geometry
@@ -13,6 +13,7 @@ smiles = "c1ccccc1"
 n_samples = 2
 ## Different number of expected terms for different improper permutations
 expected_n_terms = {
+    'none': dict(n2=24, n3=36, n4=48, n4_improper=36),
     'espaloma': dict(n2=24, n3=36, n4=48, n4_improper=36),
     'smirnoff': dict(n2=24, n3=36, n4=48, n4_improper=18)
 }
@@ -22,8 +23,10 @@ def all_g():
     from espaloma.data.md import MoleculeVacuumSimulation
 
     all_g = {}
-    for improper_def in ('espaloma', 'smirnoff'):
-        g = esp.Graph(smiles, improper_def=improper_def)
+    for improper_def in expected_n_terms.keys():
+        g = esp.Graph(smiles)
+        if improper_def != 'none':
+            regenerate_impropers(g, improper_def)
 
         simulation = MoleculeVacuumSimulation(
             n_samples=n_samples, n_steps_per_sample=1
