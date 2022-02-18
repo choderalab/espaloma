@@ -326,7 +326,7 @@ def energy_in_graph(
     if "nonbonded" in terms or "onefour" in terms:
         esp.mm.nonbonded.multiply_charges(g)
 
-    if g.number_of_nodes("nonbonded") > 0:
+    if "nonbonded" in terms and g.number_of_nodes("nonbonded") > 0:
         g.apply_nodes(
             lambda node: apply_coulomb(
                 node, suffix=suffix, scaling=1.0,
@@ -334,7 +334,7 @@ def energy_in_graph(
             ntype="nonbonded",
         )
 
-    if g.number_of_nodes("onefour") > 0:
+    if "onefour" in terms and g.number_of_nodes("onefour") > 0:
         g.apply_nodes(
             lambda node: apply_coulomb(
                 node, suffix=suffix,
