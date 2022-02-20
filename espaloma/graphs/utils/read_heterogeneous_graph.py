@@ -196,20 +196,20 @@ def from_homogeneous_and_mol(g, offmol):
     )
 
     # onefour is the two ends of torsion
-    idxs["onefour"] = np.stack(
-        [
-            idxs["n4"][:, 0],
-            idxs["n4"][:, 3],
-        ],
-        axis=1,
-    )
-
     # idxs["onefour"] = np.stack(
-    #     np.where(
-    #         np.equal(a_ + a_ @ a_, 0.0) * np.greater(a_ @ a_ @ a_, 0.0),
-    #     ),
-    #     axis=-1,
+    #     [
+    #         idxs["n4"][:, 0],
+    #         idxs["n4"][:, 3],
+    #     ],
+    #     axis=1,
     # )
+
+    idxs["onefour"] = np.stack(
+        np.where(
+            np.equal(a_ + a_ @ a_, 0.0) * np.greater(a_ @ a_ @ a_, 0.0),
+        ),
+        axis=-1,
+    )
 
     # membership
     for term in ["nonbonded", "onefour"]:

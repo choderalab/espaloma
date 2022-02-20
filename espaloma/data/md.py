@@ -24,6 +24,155 @@ EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
+def add_nonbonded_force(
+    g,
+    forcefield="gaff-1.81",
+    subtract_charges=False,
+):
+
+    # parameterize topology
+    topology = g.mol.to_topology().to_openmm()
+
+    generator = SystemGenerator(
+        small_molecule_forcefield=forcefield,
+        molecules=[g.mol],
+        forcefield_kwargs={"constraints": None, "removeCMMotion": False},
+    )
+
+    # create openmm system
+    system = generator.create_system(
+        topology,
+    )
+
+    # use langevin integrator, although it's not super useful here
+    integrator = openmm.LangevinIntegrator(
+        TEMPERATURE, COLLISION_RATE, STEP_SIZE
+    )
+
+    # create simulation
+    simulation = Simulation(
+        topology=topology, system=system, integrator=integrator
+    )
+
+    # get forces
+    forces = list(system.getForces())
+
+    # loop through forces
+    for force in forces:
+        name = force.__class__.__name__
+
+        # turn off angle
+        if "Angle" in name:
+            for idx in range(force.getNumAngles()):
+                id1, id2, id3, angle, k = force.getAngleParameters(idx)
+                force.setAngleParameters(idx, id1, id2, id3, angle, 0.0)
+
+            force.updateParametersInContext(simulation.context)
+
+        elif "Bond" in name:
+            for idx in range(force.getNumBonds()):
+                id1, id2, length, k = force.getBondParameters(idx)
+                force.setBondParameters(
+                    idx,
+                    id1,
+                    id2,
+                    length,
+                    0.0,
+                )
+
+            force.updateParametersInContext(simulation.context)
+
+        elif "Torsion" in name:
+            for idx in range(force.getNumTorsions()):
+                (
+                    id1,
+                    id2,
+                    id3,
+                    id4,
+                    periodicity,
+                    phase,
+                    k,
+                ) = force.getTorsionParameters(idx)
+                force.setTorsionParameters(
+                    idx,
+                    id1,
+                    id2,
+                    id3,
+                    id4,
+                    periodicity,
+                    phase,
+                    0.0,
+                )
+
+            force.updateParametersInContext(simulation.context)
+
+        elif "Nonbonded" in name:
+            if subtract_charges:
+                for idx in range(force.getNumParticles()):
+                    q, sigma, epsilon = force.getParticleParameters(idx)
+                    force.setParticleParameters(idx, 0.0, sigma, epsilon)
+                for idx in range(force.getNumExceptions()):
+                    idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
+                    force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
+
+                force.updateParametersInContext(simulation.context)
+
+    # the snapshots
+    xs = (
+        Quantity(
+            g.nodes["n1"].data["xyz"].detach().numpy(),
+            esp.units.DISTANCE_UNIT,
+        )
+        .value_in_unit(unit.nanometer)
+        .transpose((1, 0, 2))
+    )
+
+    # loop through the snapshots
+    energies = []
+    derivatives = []
+
+    for x in xs:
+        simulation.context.setPositions(x)
+
+        state = simulation.context.getState(
+            getEnergy=True,
+            getParameters=True,
+            getForces=True,
+        )
+
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT,
+        )
+
+        derivative = state.getForces(asNumpy=True).value_in_unit(
+            esp.units.FORCE_UNIT,
+        )
+
+        energies.append(energy)
+        derivatives.append(derivative)
+
+    # put energies to a tensor
+    energies = torch.tensor(
+        energies,
+        dtype=torch.get_default_dtype(),
+    ).flatten()[None, :]
+    derivatives = torch.tensor(
+        np.stack(derivatives, axis=1),
+        dtype=torch.get_default_dtype(),
+    )
+
+    # add the energies
+    g.heterograph.apply_nodes(
+        lambda node: {"u": node.data["u"] + energies},
+        ntype="g",
+    )
+    return g
+
+
+
+
+
+
 def subtract_nonbonded_force(
     g,
     forcefield="gaff-1.81",
