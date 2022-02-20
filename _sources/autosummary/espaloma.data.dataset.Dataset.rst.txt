@@ -19,7 +19,6 @@
       ~Dataset.__init__
       ~Dataset.apply
       ~Dataset.load
-      ~Dataset.regenerate_impropers
       ~Dataset.register_datapipe_as_function
       ~Dataset.register_function
       ~Dataset.save

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>espaloma.mm.energy.apply_bond_gaussian &mdash; espaloma  documentation</title>
+  <title>espaloma.mm.nonbonded.multiply_charges &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="espaloma.mm.energy.apply_bond_ii" href="espaloma.mm.energy.apply_bond_ii.html" />
-    <link rel="prev" title="espaloma.mm.energy.apply_bond" href="espaloma.mm.energy.apply_bond.html" /> 
+    <link rel="next" title="espaloma.mm.torsion" href="espaloma.mm.torsion.html" />
+    <link rel="prev" title="espaloma.mm.nonbonded.lorentz_berthelot" href="espaloma.mm.nonbonded.lorentz_berthelot.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,29 +48,19 @@
 <li class="toctree-l2 current"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.angle.html">espaloma.mm.angle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.bond.html">espaloma.mm.bond</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="espaloma.mm.energy.html">espaloma.mm.energy</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_angle.html">espaloma.mm.energy.apply_angle</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_angle_ii.html">espaloma.mm.energy.apply_angle_ii</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_angle_linear_mixture.html">espaloma.mm.energy.apply_angle_linear_mixture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond.html">espaloma.mm.energy.apply_bond</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.energy.apply_bond_gaussian</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond_ii.html">espaloma.mm.energy.apply_bond_ii</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_bond_linear_mixture.html">espaloma.mm.energy.apply_bond_linear_mixture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_coulomb.html">espaloma.mm.energy.apply_coulomb</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_improper_torsion.html">espaloma.mm.energy.apply_improper_torsion</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_nonbonded.html">espaloma.mm.energy.apply_nonbonded</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_torsion.html">espaloma.mm.energy.apply_torsion</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.apply_torsion_ii.html">espaloma.mm.energy.apply_torsion_ii</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.energy_in_graph.html">espaloma.mm.energy.energy_in_graph</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.energy_in_graph_ii.html">espaloma.mm.energy.energy_in_graph_ii</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.CarryII.html">espaloma.mm.energy.CarryII</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.EnergyInGraph.html">espaloma.mm.energy.EnergyInGraph</a></li>
-<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.energy.EnergyInGraphII.html">espaloma.mm.energy.EnergyInGraphII</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="espaloma.mm.energy.html">espaloma.mm.energy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.functional.html">espaloma.mm.functional</a></li>
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.geometry.html">espaloma.mm.geometry</a></li>
-<li class="toctree-l3"><a class="reference internal" href="espaloma.mm.nonbonded.html">espaloma.mm.nonbonded</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="espaloma.mm.nonbonded.html">espaloma.mm.nonbonded</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.arithmetic_mean.html">espaloma.mm.nonbonded.arithmetic_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.coulomb.html">espaloma.mm.nonbonded.coulomb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.geometric_mean.html">espaloma.mm.nonbonded.geometric_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lj_12_6.html">espaloma.mm.nonbonded.lj_12_6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lj_9_6.html">espaloma.mm.nonbonded.lj_9_6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.mm.nonbonded.lorentz_berthelot.html">espaloma.mm.nonbonded.lorentz_berthelot</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.mm.nonbonded.multiply_charges</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="espaloma.mm.torsion.html">espaloma.mm.torsion</a></li>
 </ul>
 </li>
@@ -97,10 +87,10 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API Documentation</a> &raquo;</li>
           <li><a href="espaloma.mm.html">espaloma.mm</a> &raquo;</li>
-          <li><a href="espaloma.mm.energy.html">espaloma.mm.energy</a> &raquo;</li>
-      <li>espaloma.mm.energy.apply_bond_gaussian</li>
+          <li><a href="espaloma.mm.nonbonded.html">espaloma.mm.nonbonded</a> &raquo;</li>
+      <li>espaloma.mm.nonbonded.multiply_charges</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/autosummary/espaloma.mm.energy.apply_bond_gaussian.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autosummary/espaloma.mm.nonbonded.multiply_charges.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -108,12 +98,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="espaloma-mm-energy-apply-bond-gaussian">
-<h1>espaloma.mm.energy.apply_bond_gaussian<a class="headerlink" href="#espaloma-mm-energy-apply-bond-gaussian" title="Permalink to this headline"></a></h1>
+  <section id="espaloma-mm-nonbonded-multiply-charges">
+<h1>espaloma.mm.nonbonded.multiply_charges<a class="headerlink" href="#espaloma-mm-nonbonded-multiply-charges" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="espaloma.mm.energy.apply_bond_gaussian">
-<span class="sig-prename descclassname"><span class="pre">espaloma.mm.energy.</span></span><span class="sig-name descname"><span class="pre">apply_bond_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/energy.html#apply_bond_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.energy.apply_bond_gaussian" title="Permalink to this definition"></a></dt>
-<dd><p>Bond energy in nodes.</p>
+<dt class="sig sig-object py" id="espaloma.mm.nonbonded.multiply_charges">
+<span class="sig-prename descclassname"><span class="pre">espaloma.mm.nonbonded.</span></span><span class="sig-name descname"><span class="pre">multiply_charges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/mm/nonbonded.html#multiply_charges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.mm.nonbonded.multiply_charges" title="Permalink to this definition"></a></dt>
+<dd><p>Multiply the charges of atoms into nonbonded and onefour terms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>g</strong> (<em>dgl.HeteroGraph</em>) – Input graph.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dgl.HeteroGraph</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>The modified graph with charges.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -122,8 +123,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="espaloma.mm.energy.apply_bond.html" class="btn btn-neutral float-left" title="espaloma.mm.energy.apply_bond" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="espaloma.mm.energy.apply_bond_ii.html" class="btn btn-neutral float-right" title="espaloma.mm.energy.apply_bond_ii" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="espaloma.mm.nonbonded.lorentz_berthelot.html" class="btn btn-neutral float-left" title="espaloma.mm.nonbonded.lorentz_berthelot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="espaloma.mm.torsion.html" class="btn btn-neutral float-right" title="espaloma.mm.torsion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

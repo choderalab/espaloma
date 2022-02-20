@@ -20,7 +20,6 @@
       ~GraphDataset.apply
       ~GraphDataset.batch
       ~GraphDataset.load
-      ~GraphDataset.regenerate_impropers
       ~GraphDataset.register_datapipe_as_function
       ~GraphDataset.register_function
       ~GraphDataset.save

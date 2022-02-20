@@ -1,4 +1,4 @@
-﻿espaloma.mm.energy.CarryII
+espaloma.mm.energy.CarryII
 ==========================
 
 .. currentmodule:: espaloma.mm.energy

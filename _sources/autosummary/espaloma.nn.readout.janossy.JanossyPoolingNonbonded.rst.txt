@@ -1,4 +1,4 @@
-espaloma.nn.readout.janossy.JanossyPoolingNonbonded
+﻿espaloma.nn.readout.janossy.JanossyPoolingNonbonded
 ===================================================
 
 .. currentmodule:: espaloma.nn.readout.janossy

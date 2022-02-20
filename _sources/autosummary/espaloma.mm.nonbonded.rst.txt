@@ -1,4 +1,4 @@
-espaloma.mm.nonbonded
+﻿espaloma.mm.nonbonded
 =====================
 
 .. automodule:: espaloma.mm.nonbonded
@@ -15,10 +15,12 @@ espaloma.mm.nonbonded
       :toctree:
    
       arithmetic_mean
+      coulomb
       geometric_mean
       lj_12_6
       lj_9_6
       lorentz_berthelot
+      multiply_charges
    
    
 

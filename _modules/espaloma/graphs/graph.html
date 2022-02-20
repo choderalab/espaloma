@@ -164,9 +164,7 @@
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-
-        <span class="n">g</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">mol</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span> <span class="n">homograph</span><span class="o">=</span><span class="n">homograph</span><span class="p">,</span> <span class="n">heterograph</span><span class="o">=</span><span class="n">heterograph</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">g</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">mol</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span> <span class="n">homograph</span><span class="o">=</span><span class="n">homograph</span><span class="p">,</span> <span class="n">heterograph</span><span class="o">=</span><span class="n">heterograph</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_homograph_from_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>

@@ -1,4 +1,4 @@
-espaloma.data.md
+﻿espaloma.data.md
 ================
 
 .. automodule:: espaloma.data.md
@@ -14,6 +14,7 @@ espaloma.data.md
    .. autosummary::
       :toctree:
    
+      add_nonbonded_force
       subtract_nonbonded_force
       subtract_nonbonded_force_except_14
    
