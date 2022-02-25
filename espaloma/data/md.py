@@ -168,9 +168,162 @@ def add_nonbonded_force(
     )
     return g
 
+def subtract_coulomb_force(
+    g,
+    forcefield="gaff-1.81",
+):
+
+    # parameterize topology
+    topology = g.mol.to_topology().to_openmm()
+
+    generator = SystemGenerator(
+        small_molecule_forcefield=forcefield,
+        molecules=[g.mol],
+        forcefield_kwargs={"constraints": None, "removeCMMotion": False},
+    )
+
+    # create openmm system
+    system = generator.create_system(
+        topology,
+    )
+
+    # get forces
+    forces = list(system.getForces())
+    for force in forces:
+        name = force.__class__.__name__
+        if "Nonbonded" in name:
+            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
+
+    # use langevin integrator, although it's not super useful here
+    integrator = openmm.VerletIntegrator(0.0)
+
+    # create simulation
+    simulation = Simulation(
+        topology=topology, system=system, integrator=integrator
+    )
+
+    # the snapshots
+    xs = (
+        Quantity(
+            g.nodes["n1"].data["xyz"].detach().numpy(),
+            esp.units.DISTANCE_UNIT,
+        )
+        .value_in_unit(unit.nanometer)
+        .transpose((1, 0, 2))
+    )
+
+    # loop through the snapshots
+    energies = []
+    derivatives = []
+
+    for x in xs:
+        simulation.context.setPositions(x)
+
+        state = simulation.context.getState(
+            getEnergy=True,
+            getParameters=True,
+            getForces=True,
+        )
+
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT,
+        )
+
+        derivative = state.getForces(asNumpy=True).value_in_unit(
+            esp.units.FORCE_UNIT,
+        )
+
+        energies.append(energy)
+        derivatives.append(derivative)
+
+    # put energies to a tensor
+    energies = torch.tensor(
+        energies,
+        dtype=torch.get_default_dtype(),
+    ).flatten()[None, :]
+    derivatives = torch.tensor(
+        np.stack(derivatives, axis=1),
+        dtype=torch.get_default_dtype(),
+    )
 
 
+    # loop through forces
+    forces = list(system.getForces())
+    for force in forces:
+        name = force.__class__.__name__
+        if "Nonbonded" in name:
+            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
+            print(force.getNumExceptions())
 
+            for idx in range(force.getNumParticles()):
+                q, sigma, epsilon = force.getParticleParameters(idx)
+                force.setParticleParameters(idx, 0.0, sigma, epsilon)
+            for idx in range(force.getNumExceptions()):
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
+                force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
+
+            force.updateParametersInContext(simulation.context)
+
+    # the snapshots
+    xs = (
+        Quantity(
+            g.nodes["n1"].data["xyz"].detach().numpy(),
+            esp.units.DISTANCE_UNIT,
+        )
+        .value_in_unit(unit.nanometer)
+        .transpose((1, 0, 2))
+    )
+
+    # loop through the snapshots
+    new_energies = []
+    new_derivatives = []
+
+    for x in xs:
+        simulation.context.setPositions(x)
+
+        state = simulation.context.getState(
+            getEnergy=True,
+            getParameters=True,
+            getForces=True,
+        )
+
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT,
+        )
+
+        derivative = state.getForces(asNumpy=True).value_in_unit(
+            esp.units.FORCE_UNIT,
+        )
+
+        new_energies.append(energy)
+        new_derivatives.append(derivative)
+
+    # put energies to a tensor
+    new_energies = torch.tensor(
+        new_energies,
+        dtype=torch.get_default_dtype(),
+    ).flatten()[None, :]
+
+    new_derivatives = torch.tensor(
+        np.stack(derivatives, axis=1),
+        dtype=torch.get_default_dtype(),
+    )
+
+    # subtract the energies
+    g.heterograph.apply_nodes(
+        lambda node: {"u_ref": node.data["u_ref"] - energies + new_energies},
+        ntype="g",
+    )
+
+    if "u_ref_prime" in g.nodes["n1"]:
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "u_ref_prime": node.data["u_ref_prime"] - derivatives + new_derivatives
+            },
+            ntype="n1",
+        )
+
+    return g
 
 
 def subtract_nonbonded_force(
@@ -323,6 +476,9 @@ def subtract_nonbonded_force(
             },
             ntype="n1",
         )
+
+    if subtract_charges:
+        subtract_coulomb_force(g)
 
     return g
 

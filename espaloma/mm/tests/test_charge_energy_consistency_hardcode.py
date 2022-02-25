@@ -8,56 +8,40 @@ from simtk import openmm
 from simtk import openmm as mm
 from simtk import unit
 
-def test_coulomb_energy_consistency():
+@pytest.mark.parametrize(
+    "g",
+    esp.data.esol(first=1), # use a subset of ESOL dataset to test
+)
+def test_coulomb_energy_consistency(g):
     """ We use both `esp.mm` and OpenMM to compute the Coulomb energy of
     some molecules with generated geometries and see if the resulting Columb
     energy matches.
 
 
     """
+    # make simulation
+    from espaloma.data.md import MoleculeVacuumSimulation
 
-    g = esp.Graph("C1=CC=C1")
-
-    _partial_charges = np.concatenate(
-        [
-            -np.ones(4),
-            np.ones(4),
-        ]
+    # get simulation
+    esp_simulation = MoleculeVacuumSimulation(
+        n_samples=1,
+        n_steps_per_sample=10,
+        forcefield="gaff-1.81",
+        charge_method="gasteiger",
     )
 
-    _conformers = np.array(
-        [
-            [1.0, 1.0, 0.0],
-            [1.0, -1.0, 0.0],
-            [-1.0, -1.0, 0.0],
-            [-1.0, 1.0, 0.0],
-            [2.0, 2.0, 0.0],
-            [2.0, -2.0, 0.0],
-            [-2.0, -2.0, 0.0],
-            [-2.0, 2.0, 0.0]
-        ]
-    )
+    simulation = esp_simulation.simulation_from_graph(g)
+    charges = g.mol.partial_charges.flatten()
+    system = simulation.system
 
-    g.mol._partial_charges = _partial_charges * unit.elementary_charge
-    g.nodes['n1'].data['xyz'] = torch.tensor(_conformers).unsqueeze(-2)
-    g.nodes['n1'].data['q'] = torch.tensor(_partial_charges).unsqueeze(-1)
+    esp_simulation.run(g, in_place=True)
 
-    # parameterize topology
-    topology = g.mol.to_topology().to_openmm()
-
-    from openmmforcefields.generators import SystemGenerator
-    generator = SystemGenerator(
-        small_molecule_forcefield="gaff-1.81",
-        molecules=[g.mol],
-    )
-
-    # create openmm system
-    system = generator.create_system(
-        topology,
-    )
+    # if MD blows up, forget about it
+    if g.nodes["n1"].data["xyz"].abs().max() > 100:
+        return True
 
     _simulation = openmm.app.Simulation(
-        topology,
+        simulation.topology,
         system,
         openmm.VerletIntegrator(0.0),
     )
@@ -66,12 +50,8 @@ def test_coulomb_energy_consistency():
     for force in forces:
         name = force.__class__.__name__
         if "Nonbonded" in name:
-            print("hey")
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
             force.updateParametersInContext(_simulation.context)
-            for idx in range(force.getNumParticles()):
-                q, sigma, epsilon = force.getParticleParameters(idx)
-                print(q)
 
     _simulation.context.setPositions(
         g.nodes["n1"].data["xyz"][:, 0, :].detach().numpy() * unit.bohr
@@ -88,10 +68,13 @@ def test_coulomb_energy_consistency():
 
     forces = list(system.getForces())
 
+    print(forces)
     for force in forces:
         name = force.__class__.__name__
+        print(name)
         if name == "NonbondedForce":
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
+            print(force.getNumExceptions())
             for idx in range(force.getNumParticles()):
                 q, sigma, epsilon = force.getParticleParameters(idx)
                 force.setParticleParameters(idx, 0.0, sigma, epsilon)
@@ -111,19 +94,13 @@ def test_coulomb_energy_consistency():
         esp.units.ENERGY_UNIT
     )
 
+    g.nodes['n1'].data['q'] = torch.tensor(charges).unsqueeze(-1)
     esp.mm.nonbonded.multiply_charges(g.heterograph)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
     esp.mm.energy.energy_in_graph(g.heterograph, terms=["nonbonded", "onefour"])
 
-    print(g.nodes['onefour'].data['idxs'])
-
-    print(energy_old - energy_new)
-    print(g.nodes['g'].data['u'])
-    
     npt.assert_almost_equal(
         g.nodes['g'].data['u'].item(),
         energy_old - energy_new,
         decimal=3,
     )
-
-test_coulomb_energy_consistency()
