@@ -168,11 +168,10 @@ def add_nonbonded_force(
     )
     return g
 
-def subtract_coulomb_force(
+def get_coulomb_force(
     g,
     forcefield="gaff-1.81",
 ):
-
     # parameterize topology
     topology = g.mol.to_topology().to_openmm()
 
@@ -253,7 +252,6 @@ def subtract_coulomb_force(
         name = force.__class__.__name__
         if "Nonbonded" in name:
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
-            print(force.getNumExceptions())
 
             for idx in range(force.getNumParticles()):
                 q, sigma, epsilon = force.getParticleParameters(idx)
@@ -305,26 +303,34 @@ def subtract_coulomb_force(
     ).flatten()[None, :]
 
     new_derivatives = torch.tensor(
-        np.stack(derivatives, axis=1),
+        np.stack(new_derivatives, axis=1),
         dtype=torch.get_default_dtype(),
     )
 
+    return energies - new_energies, derivatives - new_derivatives
+
+def subtract_coulomb_force(
+    g,
+    forcefield="gaff-1.81",
+):
+
+    delta_energies, delta_derivatives = get_coulomb_force(g, forcefield=forcefield)
+
     # subtract the energies
     g.heterograph.apply_nodes(
-        lambda node: {"u_ref": node.data["u_ref"] - energies + new_energies},
+        lambda node: {"u_ref": node.data["u_ref"] - delta_energies},
         ntype="g",
     )
 
     if "u_ref_prime" in g.nodes["n1"]:
         g.heterograph.apply_nodes(
             lambda node: {
-                "u_ref_prime": node.data["u_ref_prime"] - derivatives + new_derivatives
+                "u_ref_prime": node.data["u_ref_prime"] - delta_derivatives
             },
             ntype="n1",
         )
 
     return g
-
 
 def subtract_nonbonded_force(
     g,

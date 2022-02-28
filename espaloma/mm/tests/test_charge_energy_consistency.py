@@ -10,7 +10,7 @@ from simtk import unit
 
 @pytest.mark.parametrize(
     "g",
-    esp.data.esol(first=1), # use a subset of ESOL dataset to test
+    esp.data.esol(first=10), # use a subset of ESOL dataset to test
     # [esp.Graph("c1ccccc1")],
 )
 def test_coulomb_energy_consistency(g):
@@ -47,13 +47,12 @@ def test_coulomb_energy_consistency(g):
     esp.mm.nonbonded.multiply_charges(g.heterograph)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
     esp.mm.energy.energy_in_graph(g.heterograph, terms=["nonbonded", "onefour"])
-    g.nodes['g'].data['u_ref'] = g.nodes['g'].data['u'].clone()
-    esp.data.md.subtract_coulomb_force(g)
 
-
+    print(g.nodes['g'].data['u'].detach())
+    print(esp.data.md.get_coulomb_force(g)[0])
 
     npt.assert_almost_equal(
-        g.nodes['g'].data['u_ref'].item(),
-        0.0,
+        g.nodes['g'].data['u'].detach(),
+        esp.data.md.get_coulomb_force(g)[0],
         decimal=3,
     )
