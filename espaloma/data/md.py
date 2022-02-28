@@ -478,7 +478,7 @@ def subtract_nonbonded_force(
         )
 
     if subtract_charges:
-        subtract_coulomb_force(g)
+        g = subtract_coulomb_force(g)
 
     return g
 
