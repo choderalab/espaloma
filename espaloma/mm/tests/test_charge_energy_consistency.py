@@ -27,7 +27,7 @@ def test_coulomb_energy_consistency(g):
 
     # get simulation
     esp_simulation = MoleculeVacuumSimulation(
-        n_samples=1,
+        n_samples=10,
         n_steps_per_sample=10,
         forcefield="gaff-1.81",
         charge_method="gasteiger",
@@ -52,7 +52,7 @@ def test_coulomb_energy_consistency(g):
     print(esp.data.md.get_coulomb_force(g)[0])
 
     npt.assert_almost_equal(
-        g.nodes['g'].data['u'].detach(),
-        esp.data.md.get_coulomb_force(g)[0],
+        g.nodes['g'].data['u'].detach().numpy(),
+        esp.data.md.get_coulomb_force(g)[0].numpy(),
         decimal=3,
     )
