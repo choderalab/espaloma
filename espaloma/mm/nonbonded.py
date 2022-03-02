@@ -7,17 +7,18 @@ import torch
 # CONSTANTS
 # =============================================================================
 import espaloma as esp
+from simtk import unit
 
 # CODATA 2018
 # ref https://en.wikipedia.org/wiki/Coulomb_constant
-# K_E = (
-#     8.9875517923 * 1e9
-#     * unit.kilogram
-#     * (unit.meter ** 3)
-#     * (unit.second ** (-4))
-#     * (unit.angstrom ** (-2))
-#     ).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
-
+# Coulomb constant
+K_E = (
+    8.9875517923 * 1e9
+    * unit.newton
+    * unit.meter ** 2
+    * unit.coulomb ** (-2)
+    * esp.units.PARTICLE ** (-1)
+).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
 
 # =============================================================================
 # UTILITY FUNCTIONS FOR COMBINATION RULES FOR NONBONDED
@@ -71,6 +72,37 @@ def lorentz_berthelot(g, suffix=""):
 
     return g
 
+def multiply_charges(g, suffix=""):
+    """ Multiply the charges of atoms into nonbonded and onefour terms.
+
+    Parameters
+    ----------
+    g : dgl.HeteroGraph
+        Input graph.
+
+    Returns
+    -------
+    dgl.HeteroGraph : The modified graph with charges.
+
+    """
+    import dgl
+
+    g.multi_update_all(
+        {
+            "n1_as_%s_in_%s"
+            % (pos_idx, term): (
+                dgl.function.copy_src(src="q%s" % suffix, out="m_q"),
+                dgl.function.sum(msg="m_q", out="_q")
+                # lambda node: {"q%s" % suffix: node.mailbox["m_q"].prod(dim=1)}
+            )
+            for pos_idx in [0, 1]
+            for term in ["nonbonded", "onefour"]
+        },
+        cross_reducer="stack",
+        apply_node_func=lambda node: {"q": node.data["_q"].prod(dim=1)}
+    )
+
+    return g
 
 # =============================================================================
 # ENERGY FUNCTIONS
@@ -119,21 +151,27 @@ def lj_9_6(x, sigma, epsilon):
     )
 
 
-#
-# def columb(x, q_prod, k_e=K_E):
-#     """ Columb interaction without cutoff.
-#
-#     Parameters
-#     ----------
-#     x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`
-#     q_prod : `torch.Tensor`,
-#         `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`
-#
-#     Returns
-#     -------
-#     u : `torch.Tensor`,
-#         `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
-#
-#
-#     """
-#     return k_e * x / q_prod
+def coulomb(x, q, k_e=K_E):
+    """ Columb interaction without cutoff.
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, shape=`(batch_size, 1)` or `(batch_size, batch_size, 1)`
+        Distance between atoms.
+
+    q : `torch.Tensor`,
+        `shape=(batch_size, 1) or `(batch_size, batch_size, 1)`
+        Product of charge.
+
+    Returns
+    -------
+    torch.Tensor : `shape=(batch_size, 1)` or `(batch_size, batch_size, 1)`
+        Coulomb energy.
+
+    Notes
+    -----
+    This computes half Coulomb energy to count for the duplication in onefour
+        and nonbonded enumerations.
+
+    """
+    return 0.5 * k_e * q / x
