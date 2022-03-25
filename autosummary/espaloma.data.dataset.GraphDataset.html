@@ -136,38 +136,23 @@ certain attributes as <cite>torch.utils.data.DataLoader</cite></p>
 <tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.load" title="espaloma.data.dataset.GraphDataset.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
 <td><p>Load path to dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_datapipe_as_function</span></code>(function_name, ...)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.regenerate_impropers" title="espaloma.data.dataset.GraphDataset.regenerate_impropers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regenerate_impropers</span></code></a>([improper_def])</p></td>
+<td><p>Regenerate the improper nodes for all graphs.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_function</span></code>(function_name, function)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.save" title="espaloma.data.dataset.GraphDataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.save" title="espaloma.data.dataset.GraphDataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p>Save dataset to path.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle</span></code>([seed])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle</span></code>([seed])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.split" title="espaloma.data.dataset.GraphDataset.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>(partition)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.split" title="espaloma.data.dataset.GraphDataset.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code></a>(partition)</p></td>
 <td><p>Split the dataset according to some partition.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.subsample" title="espaloma.data.dataset.GraphDataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#espaloma.data.dataset.GraphDataset.subsample" title="espaloma.data.dataset.GraphDataset.subsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subsample</span></code></a>(ratio[, seed])</p></td>
 <td><p>Subsample the dataset according to some ratio.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="espaloma.data.dataset.GraphDataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="espaloma.data.dataset.GraphDataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
 <td><p>Provide a data loader.</p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">functions</span></code></p></td>
-<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -191,6 +176,17 @@ to elements and modifies them.</p>
 <dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.load">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/dataset.html#GraphDataset.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.load" title="Permalink to this definition"></a></dt>
 <dd><p>Load path to dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="espaloma.data.dataset.GraphDataset.regenerate_impropers">
+<span class="sig-name descname"><span class="pre">regenerate_impropers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">improper_def</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smirnoff'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#espaloma.data.dataset.GraphDataset.regenerate_impropers" title="Permalink to this definition"></a></dt>
+<dd><p>Regenerate the improper nodes for all graphs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>improper_def</strong> (<em>str</em>) – Which convention to use for permuting impropers.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

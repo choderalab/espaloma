@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy.JanossyPooling
+espaloma.nn.readout.janossy.JanossyPooling
 ==========================================
 
 .. currentmodule:: espaloma.nn.readout.janossy
@@ -46,6 +46,7 @@
       ~JanossyPooling.register_forward_hook
       ~JanossyPooling.register_forward_pre_hook
       ~JanossyPooling.register_full_backward_hook
+      ~JanossyPooling.register_module
       ~JanossyPooling.register_parameter
       ~JanossyPooling.requires_grad_
       ~JanossyPooling.set_extra_state

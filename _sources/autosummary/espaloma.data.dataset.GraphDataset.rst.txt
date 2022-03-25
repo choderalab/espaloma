@@ -20,8 +20,7 @@
       ~GraphDataset.apply
       ~GraphDataset.batch
       ~GraphDataset.load
-      ~GraphDataset.register_datapipe_as_function
-      ~GraphDataset.register_function
+      ~GraphDataset.regenerate_impropers
       ~GraphDataset.save
       ~GraphDataset.shuffle
       ~GraphDataset.split
@@ -31,11 +30,5 @@
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~GraphDataset.functions
    
    

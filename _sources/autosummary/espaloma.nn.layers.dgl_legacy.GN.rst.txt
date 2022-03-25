@@ -46,6 +46,7 @@
       ~GN.register_forward_hook
       ~GN.register_forward_pre_hook
       ~GN.register_full_backward_hook
+      ~GN.register_module
       ~GN.register_parameter
       ~GN.requires_grad_
       ~GN.set_extra_state

@@ -46,6 +46,7 @@
       ~BaseReadout.register_forward_hook
       ~BaseReadout.register_forward_pre_hook
       ~BaseReadout.register_full_backward_hook
+      ~BaseReadout.register_module
       ~BaseReadout.register_parameter
       ~BaseReadout.requires_grad_
       ~BaseReadout.set_extra_state

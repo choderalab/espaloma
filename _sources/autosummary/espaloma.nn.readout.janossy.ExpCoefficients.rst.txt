@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy.ExpCoefficients
+espaloma.nn.readout.janossy.ExpCoefficients
 ===========================================
 
 .. currentmodule:: espaloma.nn.readout.janossy
@@ -46,6 +46,7 @@
       ~ExpCoefficients.register_forward_hook
       ~ExpCoefficients.register_forward_pre_hook
       ~ExpCoefficients.register_full_backward_hook
+      ~ExpCoefficients.register_module
       ~ExpCoefficients.register_parameter
       ~ExpCoefficients.requires_grad_
       ~ExpCoefficients.set_extra_state

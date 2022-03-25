@@ -19,8 +19,7 @@
       ~Dataset.__init__
       ~Dataset.apply
       ~Dataset.load
-      ~Dataset.register_datapipe_as_function
-      ~Dataset.register_function
+      ~Dataset.regenerate_impropers
       ~Dataset.save
       ~Dataset.shuffle
       ~Dataset.split
@@ -29,11 +28,5 @@
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~Dataset.functions
    
    

@@ -46,6 +46,7 @@ espaloma.mm.energy.EnergyInGraph
       ~EnergyInGraph.register_forward_hook
       ~EnergyInGraph.register_forward_pre_hook
       ~EnergyInGraph.register_full_backward_hook
+      ~EnergyInGraph.register_module
       ~EnergyInGraph.register_parameter
       ~EnergyInGraph.requires_grad_
       ~EnergyInGraph.set_extra_state

@@ -1,4 +1,4 @@
-espaloma.graphs.utils
+﻿espaloma.graphs.utils
 =====================
 
 .. automodule:: espaloma.graphs.utils
@@ -32,4 +32,5 @@ espaloma.graphs.utils
    espaloma.graphs.utils.offmol_indices
    espaloma.graphs.utils.read_heterogeneous_graph
    espaloma.graphs.utils.read_homogeneous_graph
+   espaloma.graphs.utils.regenerate_impropers
 

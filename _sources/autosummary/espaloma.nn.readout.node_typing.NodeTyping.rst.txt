@@ -46,6 +46,7 @@
       ~NodeTyping.register_forward_hook
       ~NodeTyping.register_forward_pre_hook
       ~NodeTyping.register_full_backward_hook
+      ~NodeTyping.register_module
       ~NodeTyping.register_parameter
       ~NodeTyping.requires_grad_
       ~NodeTyping.set_extra_state

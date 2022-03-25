@@ -46,6 +46,7 @@ espaloma.mm.energy.CarryII
       ~CarryII.register_forward_hook
       ~CarryII.register_forward_pre_hook
       ~CarryII.register_full_backward_hook
+      ~CarryII.register_module
       ~CarryII.register_parameter
       ~CarryII.requires_grad_
       ~CarryII.set_extra_state

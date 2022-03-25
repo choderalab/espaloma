@@ -46,6 +46,7 @@
       ~FreeParameterBaseline.register_forward_hook
       ~FreeParameterBaseline.register_forward_pre_hook
       ~FreeParameterBaseline.register_full_backward_hook
+      ~FreeParameterBaseline.register_module
       ~FreeParameterBaseline.register_parameter
       ~FreeParameterBaseline.requires_grad_
       ~FreeParameterBaseline.set_extra_state

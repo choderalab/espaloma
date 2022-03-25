@@ -46,6 +46,7 @@
       ~ChargeEquilibrium.register_forward_hook
       ~ChargeEquilibrium.register_forward_pre_hook
       ~ChargeEquilibrium.register_full_backward_hook
+      ~ChargeEquilibrium.register_module
       ~ChargeEquilibrium.register_parameter
       ~ChargeEquilibrium.requires_grad_
       ~ChargeEquilibrium.set_extra_state

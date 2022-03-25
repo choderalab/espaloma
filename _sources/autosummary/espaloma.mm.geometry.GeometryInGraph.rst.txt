@@ -46,6 +46,7 @@
       ~GeometryInGraph.register_forward_hook
       ~GeometryInGraph.register_forward_pre_hook
       ~GeometryInGraph.register_full_backward_hook
+      ~GeometryInGraph.register_module
       ~GeometryInGraph.register_parameter
       ~GeometryInGraph.requires_grad_
       ~GeometryInGraph.set_extra_state

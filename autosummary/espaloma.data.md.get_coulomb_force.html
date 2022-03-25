@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>espaloma.graphs.utils &mdash; espaloma  documentation</title>
+  <title>espaloma.data.md.get_coulomb_force &mdash; espaloma  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="espaloma.data" href="espaloma.data.html" />
-    <link rel="prev" title="espaloma.graphs.legacy_force_field.LegacyForceField" href="espaloma.graphs.legacy_force_field.LegacyForceField.html" /> 
+    <link rel="next" title="espaloma.data.md.subtract_coulomb_force" href="espaloma.data.md.subtract_coulomb_force.html" />
+    <link rel="prev" title="espaloma.data.md.add_nonbonded_force" href="espaloma.data.md.add_nonbonded_force.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,14 +47,25 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="espaloma.mm.html">espaloma.mm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="espaloma.nn.html">espaloma.nn</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="espaloma.graphs.html">espaloma.graphs</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="espaloma.graphs.deploy.html">espaloma.graphs.deploy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="espaloma.graphs.graph.html">espaloma.graphs.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="espaloma.graphs.legacy_force_field.html">espaloma.graphs.legacy_force_field</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">espaloma.graphs.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="espaloma.graphs.html">espaloma.graphs</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="espaloma.data.html">espaloma.data</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="espaloma.data.collection.html">espaloma.data.collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="espaloma.data.dataset.html">espaloma.data.dataset</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="espaloma.data.md.html">espaloma.data.md</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="espaloma.data.md.add_nonbonded_force.html">espaloma.data.md.add_nonbonded_force</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">espaloma.data.md.get_coulomb_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.data.md.subtract_coulomb_force.html">espaloma.data.md.subtract_coulomb_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.data.md.subtract_nonbonded_force.html">espaloma.data.md.subtract_nonbonded_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.data.md.subtract_nonbonded_force_except_14.html">espaloma.data.md.subtract_nonbonded_force_except_14</a></li>
+<li class="toctree-l4"><a class="reference internal" href="espaloma.data.md.MoleculeVacuumSimulation.html">espaloma.data.md.MoleculeVacuumSimulation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="espaloma.data.html">espaloma.data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="espaloma.data.md17_utils.html">espaloma.data.md17_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="espaloma.data.normalize.html">espaloma.data.normalize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="espaloma.data.qcarchive_utils.html">espaloma.data.qcarchive_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="espaloma.data.utils.html">espaloma.data.utils</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -74,10 +85,11 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API Documentation</a> &raquo;</li>
-          <li><a href="espaloma.graphs.html">espaloma.graphs</a> &raquo;</li>
-      <li>espaloma.graphs.utils</li>
+          <li><a href="espaloma.data.html">espaloma.data</a> &raquo;</li>
+          <li><a href="espaloma.data.md.html">espaloma.data.md</a> &raquo;</li>
+      <li>espaloma.data.md.get_coulomb_force</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/autosummary/espaloma.graphs.utils.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/autosummary/espaloma.data.md.get_coulomb_force.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -85,37 +97,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-espaloma.graphs.utils">
-<span id="espaloma-graphs-utils"></span><h1>espaloma.graphs.utils<a class="headerlink" href="#module-espaloma.graphs.utils" title="Permalink to this headline"></a></h1>
-<p class="rubric">Modules</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">espaloma.graphs.utils.offmol_indices</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">espaloma.graphs.utils.read_heterogeneous_graph</span></code></p></td>
-<td><p>Build heterogeneous graph from homogeneous ones.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">espaloma.graphs.utils.read_homogeneous_graph</span></code></p></td>
-<td><p>Build simple graph from OpenEye or RDKit molecule object.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">espaloma.graphs.utils.regenerate_impropers</span></code></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
+  <section id="espaloma-data-md-get-coulomb-force">
+<h1>espaloma.data.md.get_coulomb_force<a class="headerlink" href="#espaloma-data-md-get-coulomb-force" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="espaloma.data.md.get_coulomb_force">
+<span class="sig-prename descclassname"><span class="pre">espaloma.data.md.</span></span><span class="sig-name descname"><span class="pre">get_coulomb_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forcefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaff-1.81'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/espaloma/data/md.html#get_coulomb_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#espaloma.data.md.get_coulomb_force" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="espaloma.graphs.legacy_force_field.LegacyForceField.html" class="btn btn-neutral float-left" title="espaloma.graphs.legacy_force_field.LegacyForceField" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="espaloma.data.html" class="btn btn-neutral float-right" title="espaloma.data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="espaloma.data.md.add_nonbonded_force.html" class="btn btn-neutral float-left" title="espaloma.data.md.add_nonbonded_force" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="espaloma.data.md.subtract_coulomb_force.html" class="btn btn-neutral float-right" title="espaloma.data.md.subtract_coulomb_force" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -46,6 +46,7 @@
       ~Sequential.register_forward_hook
       ~Sequential.register_forward_pre_hook
       ~Sequential.register_full_backward_hook
+      ~Sequential.register_module
       ~Sequential.register_parameter
       ~Sequential.requires_grad_
       ~Sequential.set_extra_state

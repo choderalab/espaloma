@@ -46,6 +46,7 @@
       ~FreeParameterBaselineInitMean.register_forward_hook
       ~FreeParameterBaselineInitMean.register_forward_pre_hook
       ~FreeParameterBaselineInitMean.register_full_backward_hook
+      ~FreeParameterBaselineInitMean.register_module
       ~FreeParameterBaselineInitMean.register_parameter
       ~FreeParameterBaselineInitMean.requires_grad_
       ~FreeParameterBaselineInitMean.set_extra_state

@@ -1,4 +1,4 @@
-﻿espaloma.nn.readout.janossy.LinearMixtureToOriginal
+espaloma.nn.readout.janossy.LinearMixtureToOriginal
 ===================================================
 
 .. currentmodule:: espaloma.nn.readout.janossy
@@ -46,6 +46,7 @@
       ~LinearMixtureToOriginal.register_forward_hook
       ~LinearMixtureToOriginal.register_forward_pre_hook
       ~LinearMixtureToOriginal.register_full_backward_hook
+      ~LinearMixtureToOriginal.register_module
       ~LinearMixtureToOriginal.register_parameter
       ~LinearMixtureToOriginal.requires_grad_
       ~LinearMixtureToOriginal.set_extra_state

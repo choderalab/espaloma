@@ -46,6 +46,7 @@
       ~GraphLevelReadout.register_forward_hook
       ~GraphLevelReadout.register_forward_pre_hook
       ~GraphLevelReadout.register_full_backward_hook
+      ~GraphLevelReadout.register_module
       ~GraphLevelReadout.register_parameter
       ~GraphLevelReadout.requires_grad_
       ~GraphLevelReadout.set_extra_state
