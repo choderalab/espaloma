@@ -19,6 +19,7 @@ dependencies:
   - smirnoff99Frosst
   - openmm
   - openmmforcefields
+  - tqdm
   # Pytorch
   - pytorch
   - dgl
