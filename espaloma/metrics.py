@@ -310,10 +310,6 @@ class GraphDerivativeMetric(Metric):
             allow_unused=True,
         )[0]
 
-        print(input_fn(g_input))
-        print(input_prime)
-        print(target_prime)
-
         # compute loss using base loss
         # NOTE:
         # use keyward argument here since torch is bad with the order with args

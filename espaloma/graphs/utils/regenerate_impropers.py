@@ -13,6 +13,7 @@ def regenerate_impropers(g: Graph, improper_def='smirnoff'):
         NOTE: This will clear the data on all n4_improper nodes, including
         previously generated improper from JanossyPoolingImproper.
         """
+        
 
         ## First get rid of the old nodes/edges
         hg = g.heterograph
@@ -21,7 +22,7 @@ def regenerate_impropers(g: Graph, improper_def='smirnoff'):
         ## Generate new improper torsion permutations
         idxs = improper_torsion_indices(g.mol, improper_def)
         if len(idxs) == 0:
-            return hg
+            return g
 
         ## Add new nodes of type n4_improper (one for each permut)
         hg = dgl.add_nodes(hg, idxs.shape[0], ntype='n4_improper')
@@ -54,4 +55,4 @@ def regenerate_impropers(g: Graph, improper_def='smirnoff'):
 
         g.heterograph = hg
 
-        return hg
+        return g # hg

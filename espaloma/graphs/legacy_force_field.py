@@ -658,7 +658,7 @@ class LegacyForceField:
                 .value_in_unit(esp.units.ENERGY_UNIT)
             )
 
-        g.nodes["g"].data["u%s" % suffix] = us
+        g.nodes["g"].data["u%s" % suffix] = torch.tensor(us)[None, :]
 
         return g
 

@@ -109,7 +109,7 @@ def openmm_system_from_graph(
 
     elif charge_method == "nn":
         g.mol.partial_charges = unit.elementary_charge * g.nodes["n1"].data[
-            "q_hat"
+            "q"
         ].flatten().detach().cpu().numpy().astype(
             np.float64,
         )

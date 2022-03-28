@@ -75,10 +75,10 @@ class ChargeEquilibrium(torch.nn.Module):
             ntype="n1",
         )
 
-        if "q" in g.nodes["n1"].data:
+        if "q_ref" in g.nodes["n1"].data:
             # get total charge
             g.update_all(
-                dgl.function.copy_src(src="q", out="m_q"),
+                dgl.function.copy_src(src="q_ref", out="m_q"),
                 dgl.function.sum(msg="m_q", out="sum_q"),
                 etype="n1_in_g",
             )
