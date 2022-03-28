@@ -180,7 +180,7 @@
 
     <span class="k">elif</span> <span class="n">charge_method</span> <span class="o">==</span> <span class="s2">&quot;nn&quot;</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">mol</span><span class="o">.</span><span class="n">partial_charges</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">elementary_charge</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span>
-            <span class="s2">&quot;q_hat&quot;</span>
+            <span class="s2">&quot;q&quot;</span>
         <span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
         <span class="p">)</span>
