@@ -19,8 +19,9 @@ dependencies:
   - smirnoff99Frosst
   - openmm
   - openmmforcefields
+  - tqdm
   # Pytorch
-  - pytorch
+  - pytorch>=1.8.0
   - dgl
   # Testing
   - pytest
@@ -29,6 +30,6 @@ dependencies:
   - nose
   - nose-timer
   - coverage
-  - qcportal
+  - qcportal>=0.15.0
   - sphinx
   - sphinx_rtd_theme
