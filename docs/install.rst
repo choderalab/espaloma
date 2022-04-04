@@ -7,12 +7,8 @@ Install dependencies::
 
     conda install \
       --yes \
-      --strict-channel-priority \
-      --channel jaimergp/label/unsupported-cudatoolkit-shim \
-      --channel omnia \
-      --channel omnia/label/cuda100 \
+      --channel conda-forge \ 
       --channel dglteam \
-      --channel numpy \
       openmm openmmtools openmmforcefields rdkit openff-toolkit dgl-cuda10.0 qcportal
 
 
