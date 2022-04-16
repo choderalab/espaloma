@@ -1,0 +1,44 @@
+name: espaloma-perses
+channels:
+  - conda-forge
+  - dglteam
+  - openeye
+  - defaults
+  - anaconda
+dependencies:
+  # Base dependencies
+  - python
+  - pip
+  # 3rd party
+  - openeye-toolkits
+  - numpy
+  - matplotlib
+  - scipy
+  - openff-toolkit
+  - openff-forcefields
+  - smirnoff99Frosst
+  - openmm
+  - openmmforcefields
+  - tqdm
+  # Pytorch
+  - pytorch>=1.8.0
+  - dgl
+  # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+  - nose
+  - nose-timer
+  - coverage
+  - qcportal>=0.15.0
+  - sphinx
+  - sphinx_rtd_theme
+  # perses
+  - perses
+  # will be added to openmmforcefields conda-forge recipe
+  - validators
+  - pip:
+    # espaloma
+    - git+https://github.com/choderalab/espaloma.git@0.2.2
+    # openmmforcefield
+    - git+https://github.com/openmm/openmmforcefields.git
