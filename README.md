@@ -70,6 +70,10 @@ espaloma_model(molecule_graph.heterograph)
 openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 ```
 
+# Using espaloma to parameterize small molecules in relative free energy calculations
+
+An example of using espaloma to parameterize small molecules in relative alchemical free energy calculations is provided in the `scripts/perses-benchmark/` directory.
+
 # License
 
 This software is licensed under [MIT license](https://opensource.org/licenses/MIT).
