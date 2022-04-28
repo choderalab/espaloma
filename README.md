@@ -4,7 +4,7 @@ espaloma: **E**xtensible **S**urrogate **P**otenti**al** **O**ptimized by **M**e
 [![CI](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml/badge.svg?branch=master)](https://github.com/choderalab/espaloma/actions/workflows/CI.yaml)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/choderalab/espaloma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/espaloma/context:python)
-[![docs stable](https://img.shields.io/badge/docs-stable-5077AB.svg?logo=read%20the%20docs)](www.espaloma.wangyq.net/)
+[![docs stable](https://img.shields.io/badge/docs-stable-5077AB.svg?logo=read%20the%20docs)](https://espaloma.wangyq.net/)
 
 
 Source code for [Wang Y, Fass J, and Chodera JD "End-to-End Differentiable Construction of Molecular Mechanics Force Fields."](https://arxiv.org/abs/2010.01196)
