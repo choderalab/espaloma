@@ -272,7 +272,7 @@ def from_homogeneous_and_mol(g, offmol):
     hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
-
+    hg.nodes["n1"].data["q_ref"] = g.ndata["formal_charge"]
     # include indices in the nodes themselves
     for term in ["n1", "n2", "n3", "n4", "n4_improper", "onefour", "nonbonded"]:
         hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])

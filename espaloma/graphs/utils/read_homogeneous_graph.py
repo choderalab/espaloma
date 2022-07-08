@@ -118,6 +118,7 @@ def fp_rdkit(atom):
 # =============================================================================
 def from_openff_toolkit_mol(mol, use_fp=True):
     import dgl
+    from openmm import unit
     # initialize graph
     from rdkit import Chem
 
@@ -130,7 +131,9 @@ def from_openff_toolkit_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.atomic_number] for atom in mol.atoms]
     )
-
+    g.ndata["formal_charge"] = torch.Tensor(
+        [[atom.formal_charge.value_in_unit(unit.elementary_charge)] for atom in mol.atoms]
+    )
     h_v = torch.zeros(
         g.ndata["type"].shape[0], 100, dtype=torch.get_default_dtype()
     )
@@ -166,7 +169,7 @@ def from_openff_toolkit_mol(mol, use_fp=True):
 
 def from_oemol(mol, use_fp=True):
     from openeye import oechem
-
+    import dgl
     # initialize graph
     g = dgl.DGLGraph()
 
@@ -176,7 +179,9 @@ def from_oemol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
     )
-
+    g.ndata["formal_charge"] = torch.Tensor(
+        [[atom.GetFormalCharge()] for atom in mol.GetAtoms()]
+    )
     h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
 
     h_v[
@@ -219,7 +224,9 @@ def from_rdkit_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
     )
-
+    g.ndata["formal_charge"] = torch.Tensor(
+        [[atom.GetFormalCharge()] for atom in mol.GetAtoms()]
+    )
     h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
 
     h_v[
