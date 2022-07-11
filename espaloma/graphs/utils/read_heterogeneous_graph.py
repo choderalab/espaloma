@@ -269,7 +269,7 @@ def from_homogeneous_and_mol(g, offmol):
         )
 
     import dgl
-    hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
+    hg = dgl.heterograph({key: value.astype(np.int32).tolist() for key, value in hg.items()})
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
 
