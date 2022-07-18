@@ -75,22 +75,23 @@ class ChargeEquilibrium(torch.nn.Module):
             ntype="n1",
         )
 
-        if "q_ref" in g.nodes["n1"].data:
-            # get total charge
-            g.update_all(
-                dgl.function.copy_src(src="q_ref", out="m_q"),
-                dgl.function.sum(msg="m_q", out="sum_q"),
-                etype="n1_in_g",
-            )
-        else:
-            g.nodes["g"].data["sum_q"] = (
-                torch.ones(
-                    g.batch_size,
-                    1,
-                    device=g.nodes["n1"].data["s"].device,
+        if "sum_q" not in g.nodes["g"].data:
+            if "q_ref" in g.nodes["n1"].data:
+                # get total charge
+                g.update_all(
+                    dgl.function.copy_src(src="q_ref", out="m_q"),
+                    dgl.function.sum(msg="m_q", out="sum_q"),
+                    etype="n1_in_g",
                 )
-                * total_charge
-            )
+            else:
+                g.nodes["g"].data["sum_q"] = (
+                    torch.ones(
+                        g.batch_size,
+                        1,
+                        device=g.nodes["n1"].data["s"].device,
+                    )
+                    * total_charge
+                )
 
         g.update_all(
             dgl.function.copy_src(src="sum_q", out="m_sum_q"),

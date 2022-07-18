@@ -131,8 +131,9 @@ def from_openff_toolkit_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.atomic_number] for atom in mol.atoms]
     )
-    g.ndata["formal_charge"] = torch.Tensor(
-        [[atom.formal_charge.value_in_unit(unit.elementary_charge)] for atom in mol.atoms]
+    total_charge = mol.total_charge.value_in_unit(unit.elementary_charge)
+    g.ndata["sum_q"] = torch.Tensor(
+        [[total_charge] for _ in range(mol.n_atoms)]
     )
     h_v = torch.zeros(
         g.ndata["type"].shape[0], 100, dtype=torch.get_default_dtype()

@@ -32,7 +32,7 @@ def test_formal_charge(molecule, charge):
     import espaloma as esp
 
     graph = esp.Graph(molecule)
-    assert torch.sum(graph.nodes["n1"].data["q_ref"]) == charge
+    assert graph.nodes["g"].data["sum_q"].numpy()[0] == charge
 
 
 def test_save_and_load(graph):
