@@ -1,4 +1,5 @@
 import pytest
+import torch
 
 
 def test_graph():
@@ -20,6 +21,18 @@ def test_ndata_consistency(graph):
     import torch
 
     assert torch.equal(graph.ndata["h0"], graph.nodes["n1"].data["h0"])
+
+
+@pytest.mark.parametrize("molecule, charge", [
+    pytest.param("C", 0, id="methane"),
+    pytest.param("[NH4+]", 1, id="Ammonium"),
+    pytest.param("CC(=O)[O-]", -1, id="Acetate")
+])
+def test_formal_charge(molecule, charge):
+    import espaloma as esp
+
+    graph = esp.Graph(molecule)
+    assert graph.nodes["g"].data["sum_q"].numpy()[0] == charge
 
 
 def test_save_and_load(graph):
