@@ -27,7 +27,7 @@ EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
 def add_nonbonded_force(
     g,
     forcefield="gaff-1.81",
-    subtract_charges=False,
+    add_charges=True,
 ):
 
     # parameterize topology
@@ -107,7 +107,7 @@ def add_nonbonded_force(
             force.updateParametersInContext(simulation.context)
 
         elif "Nonbonded" in name:
-            if subtract_charges:
+            if add_charges == False:
                 for idx in range(force.getNumParticles()):
                     q, sigma, epsilon = force.getParticleParameters(idx)
                     force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
@@ -246,14 +246,13 @@ def get_coulomb_force(
         name = force.__class__.__name__
         if "Nonbonded" in name:
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
-
+            
             for idx in range(force.getNumParticles()):
                 q, sigma, epsilon = force.getParticleParameters(idx)
                 force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
             for idx in range(force.getNumExceptions()):
                 idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
                 force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
-
             force.updateParametersInContext(simulation.context)
 
     # the snapshots
@@ -329,7 +328,7 @@ def subtract_coulomb_force(
 def subtract_nonbonded_force(
     g,
     forcefield="gaff-1.81",
-    subtract_charges=False,
+    subtract_charges=True,
 ):
 
     # parameterize topology
@@ -409,15 +408,16 @@ def subtract_nonbonded_force(
             force.updateParametersInContext(simulation.context)
 
         elif "Nonbonded" in name:
-            # subtract Coulomb interaction seperately with nocutoff method 
-            if subtract_charges:
-                for idx in range(force.getNumParticles()):
-                    q, sigma, epsilon = force.getParticleParameters(idx)
-                    force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
-                for idx in range(force.getNumExceptions()):
-                    idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                    force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
-                force.updateParametersInContext(simulation.context)
+            # only handle LJ potentials
+            # subtract Coulomb interaction seperately with nocutoff method if substract_charges==True
+            for idx in range(force.getNumParticles()):
+                q, sigma, epsilon = force.getParticleParameters(idx)
+                force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
+            for idx in range(force.getNumExceptions()):
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
+                force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
+                
+            force.updateParametersInContext(simulation.context)
 
     # the snapshots
     xs = (
@@ -566,7 +566,7 @@ def subtract_nonbonded_force_except_14(
         elif "Nonbonded" in name:
             for idx in range(force.getNumExceptions()):
                 idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                force.setExceptionParameters(idx, idx0, idx1, q, sigma, 1e-8 * epsilon)
+                force.setExceptionParameters(idx, idx0, idx1, q, sigma, epsilon * 1e-8)
             force.updateParametersInContext(simulation.context)
 
     # the snapshots
