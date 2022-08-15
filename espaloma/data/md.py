@@ -110,10 +110,10 @@ def add_nonbonded_force(
             if subtract_charges:
                 for idx in range(force.getNumParticles()):
                     q, sigma, epsilon = force.getParticleParameters(idx)
-                    force.setParticleParameters(idx, 0.0, sigma, epsilon)
+                    force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
                 for idx in range(force.getNumExceptions()):
                     idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                    force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
+                    force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
 
                 force.updateParametersInContext(simulation.context)
 
@@ -186,15 +186,10 @@ def get_coulomb_force(
         topology,
     )
 
-    # get forces
-    forces = list(system.getForces())
-    for force in forces:
-        name = force.__class__.__name__
-        if "Nonbonded" in name:
-            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
-
     # use langevin integrator, although it's not super useful here
-    integrator = openmm.VerletIntegrator(0.0)
+    integrator = openmm.LangevinIntegrator(
+        TEMPERATURE, COLLISION_RATE, STEP_SIZE
+    )
 
     # create simulation
     simulation = Simulation(
@@ -245,7 +240,6 @@ def get_coulomb_force(
         dtype=torch.get_default_dtype(),
     )
 
-
     # loop through forces
     forces = list(system.getForces())
     for force in forces:
@@ -255,10 +249,10 @@ def get_coulomb_force(
 
             for idx in range(force.getNumParticles()):
                 q, sigma, epsilon = force.getParticleParameters(idx)
-                force.setParticleParameters(idx, 0.0, sigma, epsilon)
+                force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
             for idx in range(force.getNumExceptions()):
                 idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
+                force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
 
             force.updateParametersInContext(simulation.context)
 
@@ -415,14 +409,14 @@ def subtract_nonbonded_force(
             force.updateParametersInContext(simulation.context)
 
         elif "Nonbonded" in name:
+            # subtract Coulomb interaction seperately with nocutoff method 
             if subtract_charges:
                 for idx in range(force.getNumParticles()):
                     q, sigma, epsilon = force.getParticleParameters(idx)
-                    force.setParticleParameters(idx, 0.0, sigma, epsilon)
+                    force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
                 for idx in range(force.getNumExceptions()):
                     idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                    force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
-
+                    force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
                 force.updateParametersInContext(simulation.context)
 
     # the snapshots
@@ -570,18 +564,9 @@ def subtract_nonbonded_force_except_14(
             force.updateParametersInContext(simulation.context)
 
         elif "Nonbonded" in name:
-            for exception_index in range(force.getNumExceptions()):
-                (
-                    p1,
-                    p2,
-                    chargeprod,
-                    sigma,
-                    epsilon,
-                ) = force.getExceptionParameters(exception_index)
-                force.setExceptionParameters(
-                    exception_index, p1, p2, chargeprod, sigma, 1e-8 * epsilon
-                )
-
+            for idx in range(force.getNumExceptions()):
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
+                force.setExceptionParameters(idx, idx0, idx1, q, sigma, 1e-8 * epsilon)
             force.updateParametersInContext(simulation.context)
 
     # the snapshots
