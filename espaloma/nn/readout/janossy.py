@@ -390,7 +390,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
 
 class JanossyPoolingNonbonded(torch.nn.Module):
     """Janossy pooling (arXiv:1811.01900) to average node representation
-    for improper torsions.
+    for nonbonded interactions.
 
 
     """
