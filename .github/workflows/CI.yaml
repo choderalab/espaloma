@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - master
+      - main
   push:
     branches:
       - master
+      - main 
   schedule:
     # Nightly tests run on master by default:
     #   Scheduled workflows run on the latest commit on the default or base branch.
@@ -21,11 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Linux, Python 3.7
-            os: ubuntu-latest
-            python-version: "3.7"
-            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-
           - name: Linux, Python 3.8
             os: ubuntu-latest
             python-version: "3.8"
