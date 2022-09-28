@@ -74,7 +74,6 @@ Installation and imports
 
 .. parsed-literal::
 
-    Warning: importing 'simtk.openmm' is deprecated.  Import 'openmm' instead.
     Warning: Unable to load toolkit 'OpenEye Toolkit'. The Open Force Field Toolkit does not require the OpenEye Toolkits, and can use RDKit/AmberTools instead. However, if you have a valid license for the OpenEye Toolkits, consider installing them for faster performance and additional file format support: https://docs.eyesopen.com/toolkits/python/quickstart-python/linuxosx.html OpenEye offers free Toolkit licenses for academics: https://www.eyesopen.com/academic-licensing
 
 

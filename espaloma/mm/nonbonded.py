@@ -7,7 +7,7 @@ import torch
 # CONSTANTS
 # =============================================================================
 import espaloma as esp
-from simtk import unit
+from openmm import unit
 
 # CODATA 2018
 # ref https://en.wikipedia.org/wiki/Coulomb_constant

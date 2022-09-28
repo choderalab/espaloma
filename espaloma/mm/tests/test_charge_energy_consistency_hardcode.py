@@ -4,9 +4,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
-from simtk import openmm
-from simtk import openmm as mm
-from simtk import unit
+import openmm
+from openmm import unit
 
 @pytest.mark.parametrize(
     "g",

@@ -7,9 +7,9 @@ from openff.toolkit.topology import Molecule
 import espaloma as esp
 
 from openmmforcefields.generators import SystemGenerator
-from simtk import openmm, unit
-from simtk.openmm.app import Simulation
-from simtk.unit import Quantity
+from openmm import openmm, unit
+from openmm.app import Simulation
+from openmm.unit import Quantity
 
 # =============================================================================
 # CONSTANTS

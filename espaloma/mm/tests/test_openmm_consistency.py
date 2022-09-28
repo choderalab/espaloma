@@ -2,16 +2,15 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
-from simtk import openmm
-from simtk import openmm as mm
-from simtk import unit
+import openmm
+from openmm import unit
 
 from espaloma.utils.geometry import _sample_four_particle_torsion_scan
 
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
 
-from simtk.openmm import app
+from openmm import app
 
 import espaloma as esp
 
@@ -21,14 +20,14 @@ def _create_torsion_sim(
     periodicity: int = 2, phase=0 * omm_angle_unit, k=10.0 * omm_energy_unit
 ) -> app.Simulation:
     """Create a 4-particle OpenMM Simulation containing only a PeriodicTorsionForce"""
-    system = mm.System()
+    system = openmm.System()
 
     # add 4 particles of unit mass
     for _ in range(4):
         system.addParticle(1)
 
     # add torsion force to system
-    force = mm.PeriodicTorsionForce()
+    force = openmm.PeriodicTorsionForce()
     force.addTorsion(0, 1, 2, 3, periodicity, phase, k)
     system.addForce(force)
 
@@ -38,7 +37,7 @@ def _create_torsion_sim(
     residue = topology.addResidue("torsion", chain)
     for name in ["a", "b", "c", "d"]:
         topology.addAtom(name, "C", residue)
-    integrator = mm.VerletIntegrator(1.0)
+    integrator = openmm.VerletIntegrator(1.0)
     sim = app.Simulation(topology, system, integrator)
 
     return sim

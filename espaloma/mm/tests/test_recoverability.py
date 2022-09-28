@@ -4,7 +4,7 @@
 import numpy as np
 from openff.toolkit.topology import Molecule, Topology
 from openff.toolkit.typing.engines.smirnoff import ForceField
-from simtk import openmm as mm
+import openmm as mm
 import pytest
 import espaloma as esp
 
@@ -73,9 +73,10 @@ def _create_impropers_only_system(
 
 @pytest.mark.skip(reason="too slow")
 def test_improper_recover():
-    from simtk import openmm, unit
-    from simtk.openmm.app import Simulation
-    from simtk.unit import Quantity
+    import openmm
+    from openmm import unit
+    from openmm.app import Simulation
+    from openmm.unit import Quantity
 
     TEMPERATURE = 500 * unit.kelvin
     STEP_SIZE = 1 * unit.femtosecond

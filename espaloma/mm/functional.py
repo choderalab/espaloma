@@ -8,8 +8,8 @@ import espaloma as esp
 # =============================================================================
 # CONSTANTS
 # =============================================================================
-from simtk import unit
-from simtk.unit import Quantity
+from openmm import unit
+from openmm.unit import Quantity
 
 LJ_SWITCH = Quantity(1.0, unit.angstrom).value_in_unit(
     esp.units.DISTANCE_UNIT
