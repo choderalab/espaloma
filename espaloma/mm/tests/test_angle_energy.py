@@ -2,16 +2,15 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
-from simtk import openmm
-from simtk import openmm as mm
-from simtk import unit
+import openmm
+from openmm import unit
 
 from espaloma.utils.geometry import _sample_four_particle_torsion_scan
 
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
 
-from simtk.openmm import app
+from openmm import app
 
 import espaloma as esp
 

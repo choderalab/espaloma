@@ -4,8 +4,8 @@
 import numpy as np
 import torch
 import espaloma as esp
-from simtk import unit
-from simtk.unit import Quantity
+from openmm import unit
+from openmm.unit import Quantity
 
 # =============================================================================
 # CONSTANTS

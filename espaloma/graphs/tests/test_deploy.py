@@ -1,16 +1,15 @@
 import pytest
 import numpy.testing as npt
 import espaloma as esp
-from simtk import openmm
-from simtk import openmm as mm
-from simtk import unit
+from openmm import unit
+import openmm
 import pytest
 
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
-from simtk.unit import Quantity
+from openmm.unit import Quantity
 
-from simtk.openmm import app
+from openmm import app
 
 
 def test_butane():

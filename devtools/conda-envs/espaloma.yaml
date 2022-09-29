@@ -14,11 +14,12 @@ dependencies:
   - numpy
   - matplotlib
   - scipy
-  - openff-toolkit
+  - openff-toolkit <0.11
   - openff-forcefields
+  - openff-units
   - smirnoff99Frosst
   - openmm
-  - openmmforcefields
+  - openmmforcefields >=0.11.2
   - tqdm
   # Pytorch
   - pytorch>=1.8.0

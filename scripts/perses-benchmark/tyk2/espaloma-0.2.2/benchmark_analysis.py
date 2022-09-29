@@ -17,7 +17,7 @@ import yaml
 from openmmtools.constants import kB
 from perses.analysis.load_simulations import Simulation
 
-from simtk import unit
+from openmm import unit
 
 from openff.arsenic import plotting, wrangle
 

@@ -6,8 +6,8 @@ import rdkit
 import torch
 from openff.toolkit.typing.engines.smirnoff import ForceField
 import espaloma as esp
-from simtk import unit
-from simtk.unit import Quantity
+from openmm import unit
+from openmm.unit import Quantity
 import math
 
 # =============================================================================

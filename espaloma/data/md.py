@@ -5,9 +5,10 @@ import numpy as np
 import torch
 
 from openmmforcefields.generators import SystemGenerator
-from simtk import openmm, unit
-from simtk.openmm.app import Simulation
-from simtk.unit import Quantity
+import openmm
+from openmm import unit
+from openmm.app import Simulation
+from openmm.unit import Quantity
 
 from espaloma.units import *
 import espaloma as esp
@@ -246,7 +247,7 @@ def get_coulomb_force(
         name = force.__class__.__name__
         if "Nonbonded" in name:
             force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
-            
+
             for idx in range(force.getNumParticles()):
                 q, sigma, epsilon = force.getParticleParameters(idx)
                 force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
@@ -416,7 +417,7 @@ def subtract_nonbonded_force(
             for idx in range(force.getNumExceptions()):
                 idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
                 force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
-                
+
             force.updateParametersInContext(simulation.context)
 
     # the snapshots

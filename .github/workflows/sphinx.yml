@@ -5,17 +5,9 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.7
-
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        installer-url: ${{ matrix.conda-installer }}
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.9
         activate-environment: test
         channel-priority: true
         environment-file: devtools/conda-envs/espaloma.yaml
@@ -33,6 +25,7 @@ jobs:
         cd docs && make html && cd _build/html && echo 'espaloma.wangyq.net' > CNAME
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
+      if: github.event.pull_request.merged == true
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/_build/html

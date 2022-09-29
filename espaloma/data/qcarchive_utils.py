@@ -7,8 +7,8 @@ from typing import Tuple
 import numpy as np
 import qcportal as ptl
 import torch
-from simtk import unit
-from simtk.unit import Quantity
+from openmm import unit
+from openmm.unit import Quantity
 
 import espaloma as esp
 

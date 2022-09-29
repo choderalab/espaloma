@@ -7,9 +7,9 @@ from openff.toolkit.topology import Molecule
 import espaloma as esp
 
 from openmmforcefields.generators import SystemGenerator
-from simtk import openmm, unit
-from simtk.openmm.app import Simulation
-from simtk.unit import Quantity
+from openmm import openmm, unit
+from openmm.app import Simulation
+from openmm.unit import Quantity
 
 # =============================================================================
 # CONSTANTS
@@ -117,8 +117,8 @@ class LegacyForceField:
         # parse xml
         tree = ET.parse(ffxml_path)
         root = tree.getroot()
-        nonbonded = list(root)[-1]
-        atom_types = [atom.get("type") for atom in nonbonded.findall("Atom")]
+        nonbonded = root.find("NonbondedForce")
+        atom_types = [atom.get("class") for atom in nonbonded.findall("Atom")]
 
         # remove redundant types
         [atom_types.remove(bad_type) for bad_type in REDUNDANT_TYPES.keys()]
