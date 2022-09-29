@@ -6,6 +6,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: 3.9
