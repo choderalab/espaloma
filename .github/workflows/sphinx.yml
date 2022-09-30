@@ -13,8 +13,8 @@ jobs:
         activate-environment: test
         channel-priority: true
         environment-file: devtools/conda-envs/espaloma.yaml
-        auto-activate-base: false
         use-mamba: true
+        mamba-version: "*"
 
     - name: Install package
       shell: bash -l {0}
