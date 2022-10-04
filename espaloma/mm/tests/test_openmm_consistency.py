@@ -16,6 +16,7 @@ import espaloma as esp
 
 decimal_threshold = 2
 
+
 def _create_torsion_sim(
     periodicity: int = 2, phase=0 * omm_angle_unit, k=10.0 * omm_energy_unit
 ) -> app.Simulation:
@@ -177,7 +178,7 @@ def test_energy_angle_and_bond(g):
         state = _simulation.context.getState(
             getEnergy=True,
             getParameters=True,
-            groups=2 ** idx,
+            groups=2**idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(

@@ -51,7 +51,7 @@ class DatasetNormalNormalize(BaseNormalize):
         self._prepare()
 
     def _prepare(self):
-        """ Calculate the statistics from dataset """
+        """Calculate the statistics from dataset"""
         # grab the collection of graphs in the dataset, batched
         g = self.dataset.batch(self.dataset.graphs)
 
@@ -143,7 +143,7 @@ class DatasetLogNormalNormalize(BaseNormalize):
         self._prepare()
 
     def _prepare(self):
-        """ Calculate the statistics from dataset """
+        """Calculate the statistics from dataset"""
         # grab the collection of graphs in the dataset, batched
         g = self.dataset.batch(self.dataset.graphs)
 

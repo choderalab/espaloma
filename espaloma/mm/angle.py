@@ -62,7 +62,7 @@ def urey_bradley(x_between, coefficients, phases):
 def bond_bond(u_left, u_right, k_bond_bond):
     u_left = u_left - u_left.min(dim=-1, keepdims=True)[0]
     u_right = u_right - u_right.min(dim=-1, keepdims=True)[0]
-    return k_bond_bond * (u_left ** 0.5) * (u_right ** 0.5)
+    return k_bond_bond * (u_left**0.5) * (u_right**0.5)
 
 
 def bond_angle(
@@ -75,9 +75,9 @@ def bond_angle(
     u_left = u_left - u_left.min(dim=-1, keepdims=True)[0]
     u_right = u_right - u_right.min(dim=-1, keepdims=True)[0]
     u_angle = u_angle - u_angle.min(dim=-1, keepdims=True)[0]
-    return k_bond_angle * (u_left ** 0.5) * (
-        u_angle ** 0.5
-    ) + k_bond_angle * (u_right ** 0.5) * (u_angle ** 0.5)
+    return k_bond_angle * (u_left**0.5) * (
+        u_angle**0.5
+    ) + k_bond_angle * (u_right**0.5) * (u_angle**0.5)
 
 
 def angle_high(
@@ -86,4 +86,4 @@ def angle_high(
     k4,
 ):
     u_angle = u_angle - u_angle.min(dim=-1, keepdims=True)[0]
-    return k3 * u_angle ** 1.5 + k4 * u_angle ** 2
+    return k3 * u_angle**1.5 + k4 * u_angle**2

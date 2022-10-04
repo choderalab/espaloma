@@ -7,12 +7,13 @@ import torch
 import openmm
 from openmm import unit
 
+
 @pytest.mark.parametrize(
     "g",
-    esp.data.esol(first=1), # use a subset of ESOL dataset to test
+    esp.data.esol(first=1),  # use a subset of ESOL dataset to test
 )
 def test_coulomb_energy_consistency(g):
-    """ We use both `esp.mm` and OpenMM to compute the Coulomb energy of
+    """We use both `esp.mm` and OpenMM to compute the Coulomb energy of
     some molecules with generated geometries and see if the resulting Columb
     energy matches.
 
@@ -79,8 +80,12 @@ def test_coulomb_energy_consistency(g):
                 force.setParticleParameters(idx, 0.0, sigma, epsilon)
 
             for idx in range(force.getNumExceptions()):
-                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                force.setExceptionParameters(idx, idx0, idx1, 0.0, sigma, epsilon)
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+                    idx
+                )
+                force.setExceptionParameters(
+                    idx, idx0, idx1, 0.0, sigma, epsilon
+                )
 
             force.updateParametersInContext(_simulation.context)
 
@@ -93,13 +98,15 @@ def test_coulomb_energy_consistency(g):
         esp.units.ENERGY_UNIT
     )
 
-    g.nodes['n1'].data['q'] = torch.tensor(charges).unsqueeze(-1)
+    g.nodes["n1"].data["q"] = torch.tensor(charges).unsqueeze(-1)
     esp.mm.nonbonded.multiply_charges(g.heterograph)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
-    esp.mm.energy.energy_in_graph(g.heterograph, terms=["nonbonded", "onefour"])
+    esp.mm.energy.energy_in_graph(
+        g.heterograph, terms=["nonbonded", "onefour"]
+    )
 
     npt.assert_almost_equal(
-        g.nodes['g'].data['u'].item(),
+        g.nodes["g"].data["u"].item(),
         energy_old - energy_new,
         decimal=3,
     )

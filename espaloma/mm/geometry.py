@@ -7,7 +7,7 @@ import torch
 # UTILITY FUNCTIONS
 # =============================================================================
 def reduce_stack(msg, out):
-    """ Copy massage and stack. """
+    """Copy massage and stack."""
 
     def _reduce_stack(nodes, msg=msg, out=out):
         return {out: nodes.mailbox[msg]}
@@ -16,7 +16,7 @@ def reduce_stack(msg, out):
 
 
 def copy_src(src, out):
-    """ Copy source of an edge. """
+    """Copy source of an edge."""
 
     def _copy_src(edges, src=src, out=out):
         return {out: edges.src[src].clone()}
@@ -28,12 +28,12 @@ def copy_src(src, out):
 # SINGLE GEOMETRY ENTITY
 # =============================================================================
 def distance(x0, x1):
-    """ Distance. """
+    """Distance."""
     return torch.norm(x0 - x1, p=2, dim=-1)
 
 
 def _angle(r0, r1):
-    """ Angle between vectors. """
+    """Angle between vectors."""
 
     angle = torch.atan2(
         torch.norm(torch.cross(r0, r1), p=2, dim=-1),
@@ -44,14 +44,14 @@ def _angle(r0, r1):
 
 
 def angle(x0, x1, x2):
-    """ Angle between three points. """
+    """Angle between three points."""
     left = x1 - x0
     right = x1 - x2
     return _angle(left, right)
 
 
 def _dihedral(r0, r1):
-    """ Dihedral between normal vectors. """
+    """Dihedral between normal vectors."""
     return _angle(r0, r1)
 
 
@@ -93,13 +93,13 @@ def dihedral(
 # GEOMETRY IN HYPERNODES
 # =============================================================================
 def apply_bond(nodes):
-    """ Bond length in nodes. """
+    """Bond length in nodes."""
 
     return {"x": distance(x0=nodes.data["xyz0"], x1=nodes.data["xyz1"])}
 
 
 def apply_angle(nodes):
-    """ Angle values in nodes. """
+    """Angle values in nodes."""
     return {
         "x": angle(
             x0=nodes.data["xyz0"],
@@ -122,7 +122,7 @@ def apply_angle(nodes):
 
 
 def apply_torsion(nodes):
-    """ Torsion dihedrals in nodes. """
+    """Torsion dihedrals in nodes."""
     return {
         "x": dihedral(
             x0=nodes.data["xyz0"],
@@ -181,6 +181,7 @@ def geometry_in_graph(g):
 
     """
     import dgl
+
     # Copy coordinates to higher-order nodes.
     g.multi_update_all(
         {

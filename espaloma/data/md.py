@@ -113,8 +113,16 @@ def add_nonbonded_force(
                     q, sigma, epsilon = force.getParticleParameters(idx)
                     force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
                 for idx in range(force.getNumExceptions()):
-                    idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                    force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
+                    (
+                        idx0,
+                        idx1,
+                        q,
+                        sigma,
+                        epsilon,
+                    ) = force.getExceptionParameters(idx)
+                    force.setExceptionParameters(
+                        idx, idx0, idx1, q * 1e-8, sigma, epsilon
+                    )
 
                 force.updateParametersInContext(simulation.context)
 
@@ -168,6 +176,7 @@ def add_nonbonded_force(
         ntype="g",
     )
     return g
+
 
 def get_coulomb_force(
     g,
@@ -252,8 +261,12 @@ def get_coulomb_force(
                 q, sigma, epsilon = force.getParticleParameters(idx)
                 force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
             for idx in range(force.getNumExceptions()):
-                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+                    idx
+                )
+                force.setExceptionParameters(
+                    idx, idx0, idx1, q * 1e-8, sigma, epsilon
+                )
             force.updateParametersInContext(simulation.context)
 
     # the snapshots
@@ -303,12 +316,15 @@ def get_coulomb_force(
 
     return energies - new_energies, derivatives - new_derivatives
 
+
 def subtract_coulomb_force(
     g,
     forcefield="gaff-1.81",
 ):
 
-    delta_energies, delta_derivatives = get_coulomb_force(g, forcefield=forcefield)
+    delta_energies, delta_derivatives = get_coulomb_force(
+        g, forcefield=forcefield
+    )
 
     # subtract the energies
     g.heterograph.apply_nodes(
@@ -325,6 +341,7 @@ def subtract_coulomb_force(
         )
 
     return g
+
 
 def subtract_nonbonded_force(
     g,
@@ -415,8 +432,12 @@ def subtract_nonbonded_force(
                 q, sigma, epsilon = force.getParticleParameters(idx)
                 force.setParticleParameters(idx, q * 1e-8, sigma, epsilon)
             for idx in range(force.getNumExceptions()):
-                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                force.setExceptionParameters(idx, idx0, idx1, q * 1e-8, sigma, epsilon)
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+                    idx
+                )
+                force.setExceptionParameters(
+                    idx, idx0, idx1, q * 1e-8, sigma, epsilon
+                )
 
             force.updateParametersInContext(simulation.context)
 
@@ -566,8 +587,12 @@ def subtract_nonbonded_force_except_14(
 
         elif "Nonbonded" in name:
             for idx in range(force.getNumExceptions()):
-                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(idx)
-                force.setExceptionParameters(idx, idx0, idx1, q, sigma, epsilon * 1e-8)
+                idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+                    idx
+                )
+                force.setExceptionParameters(
+                    idx, idx0, idx1, q, sigma, epsilon * 1e-8
+                )
             force.updateParametersInContext(simulation.context)
 
     # the snapshots
@@ -688,7 +713,7 @@ class MoleculeVacuumSimulation(object):
         self.charge_method = charge_method
 
     def simulation_from_graph(self, g):
-        """ Create simulation from moleucle """
+        """Create simulation from moleucle"""
         # assign partial charge
         if self.charge_method is not None:
             g.mol.assign_partial_charges(self.charge_method)

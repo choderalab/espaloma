@@ -48,8 +48,8 @@ def get_charges(node):
     sum_q = node.data["sum_q"]
 
     return {
-        "q": -e * s ** -1
-        + (s ** -1) * torch.div(sum_q + sum_e_s_inv, sum_s_inv)
+        "q": -e * s**-1
+        + (s**-1) * torch.div(sum_q + sum_e_s_inv, sum_s_inv)
     }
 
 
@@ -63,9 +63,10 @@ class ChargeEquilibrium(torch.nn.Module):
         super(ChargeEquilibrium, self).__init__()
 
     def forward(self, g, total_charge=0.0):
-        """ apply charge equilibrium to all molecules in batch """
+        """apply charge equilibrium to all molecules in batch"""
         # calculate $s ^ {-1}$ and $ es ^ {-1}$
         import dgl
+
         g.apply_nodes(
             lambda node: {"s_inv": node.data["s"] ** -1}, ntype="n1"
         )

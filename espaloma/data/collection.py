@@ -8,7 +8,7 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 def esol(*args, **kwargs):
-    """ ESOL collection.
+    """ESOL collection.
 
     ..[1] ESOL:  Estimating Aqueous Solubility Directly from Molecular Structure
         John S. Delaney
@@ -27,7 +27,7 @@ def esol(*args, **kwargs):
 
 
 def alkethoh(*args, **kwargs):
-    """ AlkEthOH collection.
+    """AlkEthOH collection.
 
     ..[1] Open Force Field Consortium: Escaping atom types using direct chemical
     perception with SMIRNOFF v0.1
@@ -64,7 +64,7 @@ def alkethoh(*args, **kwargs):
 
 
 def zinc(first=-1, *args, **kwargs):
-    """ ZINC collection.
+    """ZINC collection.
 
     ..[1] Irwin, John J, and Brian K Shoichet.
     “ZINC

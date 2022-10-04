@@ -187,7 +187,7 @@ class JanossyPoolingImproper(torch.nn.Module):
         out_features={
             "k": 6,
         },
-        out_features_dimensions=-1
+        out_features_dimensions=-1,
     ):
         super(JanossyPoolingImproper, self).__init__()
 
@@ -262,24 +262,36 @@ class JanossyPoolingImproper(torch.nn.Module):
         ## Set different permutations based on which definition of impropers
         ##  are being used
         permuts = [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
-        stack_permuts = lambda nodes, p: \
-            torch.cat([nodes.data[f'h{i}'] for i in p], dim=1)
+        stack_permuts = lambda nodes, p: torch.cat(
+            [nodes.data[f"h{i}"] for i in p], dim=1
+        )
 
         for big_idx in self.levels:
-            inner_net = getattr(self, f'sequential_{big_idx}')
+            inner_net = getattr(self, f"sequential_{big_idx}")
 
-            g.apply_nodes(func=lambda nodes: {
-                feature: getattr(self, f'f_out_{big_idx}_to_{feature}')(
-                    torch.sum(
-                        torch.stack(
-                            [inner_net(g=None, x=stack_permuts(nodes, p)) \
-                                for p in permuts], dim=0
-                        ), dim=0
+            g.apply_nodes(
+                func=lambda nodes: {
+                    feature: getattr(self, f"f_out_{big_idx}_to_{feature}")(
+                        torch.sum(
+                            torch.stack(
+                                [
+                                    inner_net(
+                                        g=None, x=stack_permuts(nodes, p)
+                                    )
+                                    for p in permuts
+                                ],
+                                dim=0,
+                            ),
+                            dim=0,
+                        )
                     )
-                ) for feature in self.out_features.keys()
-            }, ntype=big_idx)
+                    for feature in self.out_features.keys()
+                },
+                ntype=big_idx,
+            )
 
         return g
+
 
 class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
     """Janossy pooling (arXiv:1811.01900) to average node representation
@@ -293,7 +305,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
         out_features={
             "k": 6,
         },
-        out_features_dimensions=-1
+        out_features_dimensions=-1,
     ):
         super(JanossyPoolingWithSmirnoffImproper, self).__init__()
 
@@ -368,22 +380,33 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
         ## Set different permutations based on which definition of impropers
         ##  are being used
         permuts = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
-        stack_permuts = lambda nodes, p: \
-            torch.cat([nodes.data[f'h{i}'] for i in p], dim=1)
+        stack_permuts = lambda nodes, p: torch.cat(
+            [nodes.data[f"h{i}"] for i in p], dim=1
+        )
 
         for big_idx in self.levels:
-            inner_net = getattr(self, f'sequential_{big_idx}')
+            inner_net = getattr(self, f"sequential_{big_idx}")
 
-            g.apply_nodes(func=lambda nodes: {
-                feature: getattr(self, f'f_out_{big_idx}_to_{feature}')(
-                    torch.sum(
-                        torch.stack(
-                            [inner_net(g=None, x=stack_permuts(nodes, p)) \
-                                for p in permuts], dim=0
-                        ), dim=0
+            g.apply_nodes(
+                func=lambda nodes: {
+                    feature: getattr(self, f"f_out_{big_idx}_to_{feature}")(
+                        torch.sum(
+                            torch.stack(
+                                [
+                                    inner_net(
+                                        g=None, x=stack_permuts(nodes, p)
+                                    )
+                                    for p in permuts
+                                ],
+                                dim=0,
+                            ),
+                            dim=0,
+                        )
                     )
-                ) for feature in self.out_features.keys()
-            }, ntype=big_idx)
+                    for feature in self.out_features.keys()
+                },
+                ntype=big_idx,
+            )
 
         return g
 

@@ -225,7 +225,7 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         with open(path, "wb") as f_handle:
             pickle.dump(self.graphs, f_handle)
 
-    def regenerate_impropers(self, improper_def='smirnoff'):
+    def regenerate_impropers(self, improper_def="smirnoff"):
         """
         Regenerate the improper nodes for all graphs.
 
@@ -234,7 +234,10 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         improper_def : str
             Which convention to use for permuting impropers.
         """
-        from espaloma.graphs.utils.regenerate_impropers import regenerate_impropers
+        from espaloma.graphs.utils.regenerate_impropers import (
+            regenerate_impropers,
+        )
+
         for g in self.graphs:
             regenerate_impropers(g, improper_def)
 

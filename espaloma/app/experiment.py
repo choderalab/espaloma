@@ -12,7 +12,7 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 class Experiment(abc.ABC):
-    """ Base class for espaloma experiment. """
+    """Base class for espaloma experiment."""
 
     def __init__(self):
         super(Experiment, self).__init__()
@@ -99,7 +99,7 @@ class Train(Experiment):
         self.loss = loss
 
     def train_once(self):
-        """ Train the model for one batch. """
+        """Train the model for one batch."""
         for idx, g in enumerate(
             self.data
         ):  # TODO: does this have to be a single g?
@@ -189,7 +189,7 @@ class Test(Experiment):
         self.normalize = normalize()
 
     def test(self):
-        """ Run tests. """
+        """Run tests."""
 
         results = {}
 
@@ -249,7 +249,7 @@ class Test(Experiment):
 
 
 class TrainAndTest(Experiment):
-    """ Train a model and then test it. """
+    """Train a model and then test it."""
 
     def __init__(
         self,

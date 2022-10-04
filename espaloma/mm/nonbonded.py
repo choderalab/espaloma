@@ -13,9 +13,10 @@ from openmm import unit
 # ref https://en.wikipedia.org/wiki/Coulomb_constant
 # Coulomb constant
 K_E = (
-    8.9875517923 * 1e9
+    8.9875517923
+    * 1e9
     * unit.newton
-    * unit.meter ** 2
+    * unit.meter**2
     * unit.coulomb ** (-2)
     * esp.units.PARTICLE ** (-1)
 ).value_in_unit(esp.units.COULOMB_CONSTANT_UNIT)
@@ -42,6 +43,7 @@ def arithmetic_mean(msg="m", out="sigma"):
 # =============================================================================
 def lorentz_berthelot(g, suffix=""):
     import dgl
+
     g.multi_update_all(
         {
             "n1_as_%s_in_%s"
@@ -72,8 +74,9 @@ def lorentz_berthelot(g, suffix=""):
 
     return g
 
+
 def multiply_charges(g, suffix=""):
-    """ Multiply the charges of atoms into nonbonded and onefour terms.
+    """Multiply the charges of atoms into nonbonded and onefour terms.
 
     Parameters
     ----------
@@ -99,10 +102,11 @@ def multiply_charges(g, suffix=""):
             for term in ["nonbonded", "onefour"]
         },
         cross_reducer="stack",
-        apply_node_func=lambda node: {"q": node.data["_q"].prod(dim=1)}
+        apply_node_func=lambda node: {"q": node.data["_q"].prod(dim=1)},
     )
 
     return g
+
 
 # =============================================================================
 # ENERGY FUNCTIONS
@@ -152,7 +156,7 @@ def lj_9_6(x, sigma, epsilon):
 
 
 def coulomb(x, q, k_e=K_E):
-    """ Columb interaction without cutoff.
+    """Columb interaction without cutoff.
 
     Parameters
     ----------

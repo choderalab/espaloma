@@ -10,7 +10,7 @@ import espaloma as esp
 # ENERGY IN HYPERNODES---BONDED
 # =============================================================================
 def apply_bond(nodes, suffix=""):
-    """ Bond energy in nodes. """
+    """Bond energy in nodes."""
     # if suffix == '_ref':
     return {
         "u%s"
@@ -32,7 +32,7 @@ def apply_bond(nodes, suffix=""):
 
 
 def apply_angle(nodes, suffix=""):
-    """ Angle energy in nodes. """
+    """Angle energy in nodes."""
     return {
         "u%s"
         % suffix: esp.mm.angle.harmonic_angle(
@@ -85,7 +85,7 @@ def apply_bond_ii(nodes, suffix=""):
 
 
 def apply_torsion_ii(nodes, suffix=""):
-    """ Torsion energy in nodes. """
+    """Torsion energy in nodes."""
     return {
         "u_angle_angle%s"
         % suffix: esp.mm.torsion.angle_angle(
@@ -120,7 +120,7 @@ def apply_torsion_ii(nodes, suffix=""):
 
 
 def apply_torsion(nodes, suffix=""):
-    """ Torsion energy in nodes. """
+    """Torsion energy in nodes."""
     if (
         "phases%s" % suffix in nodes.data
         and "periodicity%s" % suffix in nodes.data
@@ -146,7 +146,7 @@ def apply_torsion(nodes, suffix=""):
 
 
 def apply_improper_torsion(nodes, suffix=""):
-    """ Improper torsion energy in nodes. """
+    """Improper torsion energy in nodes."""
     if (
         "phases%s" % suffix in nodes.data
         and "periodicity%s" % suffix in nodes.data
@@ -172,7 +172,7 @@ def apply_improper_torsion(nodes, suffix=""):
 
 
 def apply_bond_gaussian(nodes, suffix=""):
-    """ Bond energy in nodes. """
+    """Bond energy in nodes."""
     # if suffix == '_ref':
     return {
         "u%s"
@@ -184,7 +184,7 @@ def apply_bond_gaussian(nodes, suffix=""):
 
 
 def apply_bond_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
-    """ Bond energy in nodes. """
+    """Bond energy in nodes."""
     # if suffix == '_ref':
     return {
         "u%s"
@@ -197,7 +197,7 @@ def apply_bond_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
 
 
 def apply_angle_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
-    """ Bond energy in nodes. """
+    """Bond energy in nodes."""
     # if suffix == '_ref':
     return {
         "u%s"
@@ -213,7 +213,7 @@ def apply_angle_linear_mixture(nodes, suffix="", phases=[0.0, 1.0]):
 # ENERGY IN HYPERNODES---NONBONDED
 # =============================================================================
 def apply_nonbonded(nodes, scaling=1.0, suffix=""):
-    """ Nonbonded in nodes. """
+    """Nonbonded in nodes."""
     # TODO: should this be 9-6 or 12-6?
     return {
         "u%s"
@@ -225,9 +225,12 @@ def apply_nonbonded(nodes, scaling=1.0, suffix=""):
         )
     }
 
+
 def apply_coulomb(nodes, scaling=1.0, suffix=""):
     return {
-        "u%s" % suffix: scaling * esp.mm.nonbonded.coulomb(
+        "u%s"
+        % suffix: scaling
+        * esp.mm.nonbonded.coulomb(
             x=nodes.data["x"],
             q=nodes.data["q"],
         )
@@ -262,6 +265,7 @@ def energy_in_graph(
     # TODO: this is all very restricted for now
     # we need to make this better
     import dgl
+
     if "n2" in terms:
         # apply energy function
 
@@ -306,7 +310,6 @@ def energy_in_graph(
             ntype="n4_improper",
         )
 
-
     # if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:
     #     g.apply_nodes(
     #         lambda node: apply_nonbonded(node, suffix=suffix),
@@ -329,7 +332,9 @@ def energy_in_graph(
     if "nonbonded" in terms and g.number_of_nodes("nonbonded") > 0:
         g.apply_nodes(
             lambda node: apply_coulomb(
-                node, suffix=suffix, scaling=1.0,
+                node,
+                suffix=suffix,
+                scaling=1.0,
             ),
             ntype="nonbonded",
         )
@@ -337,7 +342,8 @@ def energy_in_graph(
     if "onefour" in terms and g.number_of_nodes("onefour") > 0:
         g.apply_nodes(
             lambda node: apply_coulomb(
-                node, suffix=suffix,
+                node,
+                suffix=suffix,
                 # scaling=0.5,
                 scaling=0.8333333333333334,
             ),

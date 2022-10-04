@@ -733,7 +733,7 @@ class LegacyForceField:
             raise NotImplementedError
 
     def multi_typing(self, g):
-        """ Type a molecular graph for hetero nodes. """
+        """Type a molecular graph for hetero nodes."""
         if "smirnoff" in self.forcefield:
             return self._multi_typing_smirnoff(g)
 

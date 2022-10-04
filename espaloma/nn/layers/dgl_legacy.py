@@ -30,6 +30,7 @@ class GN(torch.nn.Module):
     ):
         super(GN, self).__init__()
         from dgl.nn import pytorch as dgl_pytorch
+
         if kwargs == {}:
             if model_name in DEFAULT_MODEL_KWARGS:
                 kwargs = DEFAULT_MODEL_KWARGS[model_name]
@@ -53,6 +54,7 @@ class GN(torch.nn.Module):
 
 def gn(model_name="GraphConv", kwargs={}):
     from dgl.nn import pytorch as dgl_pytorch
+
     if model_name == "GINConv":
         return lambda in_features, out_features: dgl_pytorch.conv.GINConv(
             apply_func=torch.nn.Linear(in_features, out_features),

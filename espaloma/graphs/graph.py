@@ -11,14 +11,14 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 class BaseGraph(abc.ABC):
-    """ Base class of graph. """
+    """Base class of graph."""
 
     def __init__(self):
         super(BaseGraph, self).__init__()
 
 
 class Graph(BaseGraph):
-    """ A unified graph object that support translation to and from
+    """A unified graph object that support translation to and from
     message-passing graphs and MM factor graph.
 
     Methods
@@ -71,6 +71,7 @@ class Graph(BaseGraph):
         import os
         import json
         import dgl
+
         os.mkdir(path)
         dgl.save_graphs(path + "/homograph.bin", [self.homograph])
         dgl.save_graphs(path + "/heterograph.bin", [self.heterograph])
@@ -119,6 +120,7 @@ class Graph(BaseGraph):
     @staticmethod
     def get_heterograph_from_graph_and_mol(graph, mol):
         import dgl
+
         assert isinstance(
             graph, dgl.DGLGraph
         ), "graph can only be dgl Graph object."

@@ -51,7 +51,7 @@ def linear_mixture_bond(x, coefficients, phases):
 
     phases : torch.Tensor
         Phases of the linear mixture.
-        
+
     """
     return 0.5 * esp.mm.functional.linear_mixture(
         x=x, coefficients=coefficients, phases=phases
@@ -60,4 +60,4 @@ def linear_mixture_bond(x, coefficients, phases):
 
 def bond_high(u_bond, k3, k4):
     u_bond = u_bond - u_bond.min(dim=-1, keepdims=True)[0]
-    return k3 * u_bond ** 1.5 + k4 * u_bond ** 2
+    return k3 * u_bond**1.5 + k4 * u_bond**2

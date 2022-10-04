@@ -2,8 +2,9 @@
 """
 import torch
 
+
 class _Sequential(torch.nn.Module):
-    """Sequentially staggered neural networks. """
+    """Sequentially staggered neural networks."""
 
     def __init__(
         self,
@@ -132,6 +133,7 @@ class Sequential(torch.nn.Module):
             output graph
         """
         import dgl
+
         # get homogeneous subgraph
         g_ = dgl.to_homo(g.edge_type_subgraph(["n1_neighbors_n1"]))
 

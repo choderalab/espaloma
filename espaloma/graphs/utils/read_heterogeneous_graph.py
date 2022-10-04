@@ -31,7 +31,7 @@ def duplicate_index_ordering(indices: np.ndarray) -> np.ndarray:
 
 
 def relationship_indices_from_offmol(
-    offmol: Molecule
+    offmol: Molecule,
 ) -> Dict[str, torch.Tensor]:
     """Construct a dictionary that maps node names (like "n2") to torch tensors of indices
 
@@ -189,9 +189,7 @@ def from_homogeneous_and_mol(g, offmol):
     a_ = a.to_dense().detach().numpy()
 
     idxs["nonbonded"] = np.stack(
-        np.where(
-            np.equal(a_ + a_ @ a_ + a_ @ a_ @ a_, 0.0)
-        ),
+        np.where(np.equal(a_ + a_ @ a_ + a_ @ a_ @ a_, 0.0)),
         axis=-1,
     )
 
@@ -269,12 +267,23 @@ def from_homogeneous_and_mol(g, offmol):
         )
 
     import dgl
-    hg = dgl.heterograph({key: value.astype(np.int32).tolist() for key, value in hg.items()})
+
+    hg = dgl.heterograph(
+        {key: value.astype(np.int32).tolist() for key, value in hg.items()}
+    )
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
     hg.nodes["g"].data["sum_q"] = g.ndata["sum_q"][0].reshape(1, 1)
     # include indices in the nodes themselves
-    for term in ["n1", "n2", "n3", "n4", "n4_improper", "onefour", "nonbonded"]:
+    for term in [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n4_improper",
+        "onefour",
+        "nonbonded",
+    ]:
         hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
 
     return hg

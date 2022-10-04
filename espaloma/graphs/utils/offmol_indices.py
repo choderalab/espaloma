@@ -33,7 +33,7 @@ def proper_torsion_indices(offmol: Molecule) -> np.ndarray:
 
 
 def _all_improper_torsion_indices(offmol: Molecule) -> np.ndarray:
-    """"[*:1]~[*:2](~[*:3])~[*:4]" matches"""
+    """ "[*:1]~[*:2](~[*:3])~[*:4]" matches"""
 
     return np.array(
         sorted(
@@ -45,7 +45,9 @@ def _all_improper_torsion_indices(offmol: Molecule) -> np.ndarray:
     )
 
 
-def improper_torsion_indices(offmol: Molecule, improper_def='espaloma') -> np.ndarray:
+def improper_torsion_indices(
+    offmol: Molecule, improper_def="espaloma"
+) -> np.ndarray:
     """ "[*:1]~[X3:2](~[*:3])~[*:4]" matches (_all_improper_torsion_indices returns "[*:1]~[*:2](~[*:3])~[*:4]" matches)
 
     improper_def allows for choosing which atom will be the central atom in the
@@ -63,18 +65,19 @@ def improper_torsion_indices(offmol: Molecule, improper_def='espaloma') -> np.nd
     """
 
     ## Find all atoms bound to exactly 3 other atoms
-    if improper_def == 'espaloma':
+    if improper_def == "espaloma":
         ## This finds all orderings, which is what we want for the espaloma case
         ##  but not for smirnoff
-        improper_smarts = '[*:1]~[X3:2](~[*:3])~[*:4]'
+        improper_smarts = "[*:1]~[X3:2](~[*:3])~[*:4]"
         mol_idxs = offmol.chemical_environment_matches(improper_smarts)
         return np.array(mol_idxs)
-    elif improper_def == 'smirnoff':
-        improper_smarts = '[*:2]~[X3:1](~[*:3])~[*:4]'
+    elif improper_def == "smirnoff":
+        improper_smarts = "[*:2]~[X3:1](~[*:3])~[*:4]"
         ## For smirnoff ordering, we only want to find the unique combinations
         ##  of atoms forming impropers so we can permute them the way we want
-        mol_idxs = offmol.chemical_environment_matches(improper_smarts,
-            unique=True)
+        mol_idxs = offmol.chemical_environment_matches(
+            improper_smarts, unique=True
+        )
 
         ## Get all ccw orderings
         # feels like there should be some good way to do this with itertools...
@@ -83,9 +86,9 @@ def improper_torsion_indices(offmol: Molecule, improper_def='espaloma') -> np.nd
             for i in range(3):
                 idx = [c]
                 for j in range(3):
-                    idx.append(other_atoms[(i+j)%3])
+                    idx.append(other_atoms[(i + j) % 3])
                 idx_permuts.append(tuple(idx))
 
         return np.array(idx_permuts)
     else:
-        raise ValueError(f'Unknown value for improper_def: {improper_def}')
+        raise ValueError(f"Unknown value for improper_def: {improper_def}")

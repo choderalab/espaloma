@@ -105,6 +105,7 @@ def split(ds, partition):
 def batch(ds, batch_size, seed=2666):
     """Batch graphs and values after shuffling."""
     import dgl
+
     # get the numebr of data
     n_data_points = len(ds)
     n_batches = n_data_points // batch_size  # drop the rest
@@ -128,6 +129,7 @@ def batch(ds, batch_size, seed=2666):
 
 def collate_fn(graphs):
     import dgl
+
     return esp.HomogeneousGraph(dgl.batch(graphs))
 
 

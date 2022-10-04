@@ -141,7 +141,7 @@ def test_energy_consistent_caffeine():
         state = _simulation.context.getState(
             getEnergy=True,
             getParameters=True,
-            groups=2 ** idx,
+            groups=2**idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(

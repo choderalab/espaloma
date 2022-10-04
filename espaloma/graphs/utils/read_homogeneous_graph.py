@@ -119,6 +119,7 @@ def fp_rdkit(atom):
 def from_openff_toolkit_mol(mol, use_fp=True):
     import dgl
     from openmm import unit
+
     # initialize graph
     from rdkit import Chem
 
@@ -171,6 +172,7 @@ def from_openff_toolkit_mol(mol, use_fp=True):
 def from_oemol(mol, use_fp=True):
     from openeye import oechem
     import dgl
+
     # initialize graph
     g = dgl.DGLGraph()
 

@@ -8,7 +8,7 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 class GraphLevelReadout(torch.nn.Module):
-    """ Readout from graph level. """
+    """Readout from graph level."""
 
     def __init__(
         self,
@@ -21,6 +21,7 @@ class GraphLevelReadout(torch.nn.Module):
 
         super(GraphLevelReadout, self).__init__()
         import dgl
+
         if pool is None:
             pool = dgl.function.sum
         self.in_features = in_features
@@ -45,6 +46,7 @@ class GraphLevelReadout(torch.nn.Module):
 
     def forward(self, g):
         import dgl
+
         g.apply_nodes(
             lambda node: {"h_global": self.d_local(None, node.data["h"])},
             ntype="n1",
