@@ -332,7 +332,7 @@ def subtract_coulomb_force(
         ntype="g",
     )
 
-    if "u_ref_prime" in g.nodes["n1"]:
+    if "u_ref_prime" in g.nodes["n1"].data:
         g.heterograph.apply_nodes(
             lambda node: {
                 "u_ref_prime": node.data["u_ref_prime"] - delta_derivatives
@@ -491,7 +491,7 @@ def subtract_nonbonded_force(
         ntype="g",
     )
 
-    if "u_ref_prime" in g.nodes["n1"]:
+    if "u_ref_prime" in g.nodes["n1"].data:
         g.heterograph.apply_nodes(
             lambda node: {
                 "u_ref_prime": node.data["u_ref_prime"] - derivatives
