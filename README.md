@@ -46,7 +46,7 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 
 # Example: Deploy espaloma 0.2.0 pretrained force field to arbitrary MM system
 
-```  
+```python  
 # imports
 import os
 import torch
