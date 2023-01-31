@@ -155,7 +155,7 @@ def add_nonbonded_force(
 
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
-        )
+        ) * -1
 
         energies.append(energy)
         derivatives.append(derivative)
@@ -235,7 +235,7 @@ def get_coulomb_force(
 
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
-        )
+        ) * -1
 
         energies.append(energy)
         derivatives.append(derivative)
@@ -298,7 +298,7 @@ def get_coulomb_force(
 
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
-        )
+        ) * -1
 
         new_energies.append(energy)
         new_derivatives.append(derivative)
@@ -470,7 +470,7 @@ def subtract_nonbonded_force(
 
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
-        )
+        ) * -1
 
         energies.append(energy)
         derivatives.append(derivative)
@@ -624,7 +624,7 @@ def subtract_nonbonded_force_except_14(
 
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
-        )
+        ) * -1
 
         energies.append(energy)
         derivatives.append(derivative)
