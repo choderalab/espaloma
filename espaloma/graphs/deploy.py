@@ -42,7 +42,7 @@ def openmm_system_from_graph(
     g,
     forcefield="openff_unconstrained-1.2.0",
     suffix="",
-    charge_method="am1-bcc",
+    charge_method="nn",
     create_system_kwargs={},
 ):
     """Construct an openmm system from `espaloma.Graph`.
