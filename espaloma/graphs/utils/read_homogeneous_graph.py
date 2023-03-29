@@ -39,9 +39,9 @@ def fp_oe(atom):
             torch.tensor(
                 [
                     atom.GetDegree(),
-                    atom.GetValence(),
-                    atom.GetExplicitValence(),
-                    atom.GetFormalCharge(),
+                    # atom.GetValence(),
+                    # atom.GetExplicitValence(),
+                    # atom.GetFormalCharge(),
                     atom.IsAromatic() * 1.0,
                     atom.GetIsotope(),  # TODO: is this a good idea?
                     oechem.OEAtomIsInRingSize(atom, 3) * 1.0,
@@ -93,9 +93,9 @@ def fp_rdkit(atom):
             torch.tensor(
                 [
                     atom.GetTotalDegree(),
-                    atom.GetTotalValence(),
-                    atom.GetExplicitValence(),
-                    atom.GetFormalCharge(),
+                    # atom.GetTotalValence(),
+                    # atom.GetExplicitValence(),
+                    # atom.GetFormalCharge(),
                     atom.GetIsAromatic() * 1.0,
                     atom.GetMass(),
                     atom.IsInRingSize(3) * 1.0,
