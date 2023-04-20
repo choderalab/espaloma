@@ -186,10 +186,14 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         """
         n_data = len(self)
-        partition = [int(n_data * x / sum(partition)) for x in partition]
+        p_sizes = []
+        for i, _partition in enumerate(partition):
+            p_size = int((n_data - sum(p_sizes)) * _partition / sum(partition[i:]))
+            p_sizes.append(p_size)
+        assert sum(p_sizes) == n_data, f"{p_sizes}, {sum(p_sizes)}"
         ds = []
         idx = 0
-        for p_size in partition:
+        for p_size in p_sizes:
             ds.append(self[idx : idx + p_size])
             idx += p_size
 
