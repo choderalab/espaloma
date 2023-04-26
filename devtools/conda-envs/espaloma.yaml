@@ -23,7 +23,7 @@ dependencies:
   - tqdm
   # Pytorch
   - pytorch>=1.8.0
-  - dgl =0.9.0
+  - dgl ==0.8.2
   # Testing
   - pytest
   - pytest-cov
