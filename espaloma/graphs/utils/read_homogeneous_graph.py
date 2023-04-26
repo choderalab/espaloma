@@ -121,9 +121,6 @@ def from_openff_toolkit_mol(mol, use_fp=True):
     from openmm import unit
 
     # initialize graph
-    from rdkit import Chem
-
-    # initialize graph
     g = dgl.DGLGraph()
 
     # enter nodes
@@ -170,7 +167,6 @@ def from_openff_toolkit_mol(mol, use_fp=True):
 
 
 def from_oemol(mol, use_fp=True):
-    from openeye import oechem
     import dgl
 
     # initialize graph
@@ -216,7 +212,6 @@ def from_oemol(mol, use_fp=True):
 
 def from_rdkit_mol(mol, use_fp=True):
     import dgl
-    from rdkit import Chem
 
     # initialize graph
     g = dgl.DGLGraph()
