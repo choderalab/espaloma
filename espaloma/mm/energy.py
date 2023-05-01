@@ -162,11 +162,16 @@ def apply_improper_torsion(nodes, suffix=""):
         }
 
     else:
+        n_multi = nodes.data["k%s" % suffix].shape[-1]
+        periodicity=list(range(1, n_multi+1))
+        phases=[0.0 for _ in range(n_multi)]
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
                 x=nodes.data["x"],
                 k=nodes.data["k%s" % suffix],
+                phases=phases,
+                periodicity=periodicity,
             )
         }
 
