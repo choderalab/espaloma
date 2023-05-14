@@ -41,7 +41,7 @@ def test_parameter_consistent_caffeine():
             for _idx in range(force.getNumBonds()):
                 start, end, eq, k_openmm = force.getBondParameters(_idx)
 
-                k_openff = openff_forces["Bonds"][(start, end)].k
+                k_openff = openff_forces["Bonds"][(start, end)].k.to_openmm()
 
                 npt.assert_almost_equal(
                     k_openmm / k_openff,

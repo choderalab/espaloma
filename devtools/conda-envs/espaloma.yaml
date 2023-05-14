@@ -1,10 +1,8 @@
-name: test
+name: espaloma-test
 channels:
   - conda-forge
   - dglteam
   - openeye
-  - defaults
-  - anaconda
 dependencies:
   # Base dependencies
   - python
@@ -27,6 +25,8 @@ dependencies:
   # Testing
   - pytest
   - pytest-cov
+  - pytest-xdist
+  - pytest-randomly
   - codecov
   - nose
   - nose-timer

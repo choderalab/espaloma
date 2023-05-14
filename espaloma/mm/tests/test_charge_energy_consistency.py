@@ -18,7 +18,8 @@ def test_coulomb_energy_consistency(g):
 
 
     """
-    # make simulation
+    from openff.units import unit as openff_unit
+
     from espaloma.data.md import MoleculeVacuumSimulation
 
     print(g.mol)
@@ -32,7 +33,7 @@ def test_coulomb_energy_consistency(g):
     )
 
     simulation = esp_simulation.simulation_from_graph(g)
-    charges = g.mol.partial_charges.flatten()
+    charges = g.mol.partial_charges.m_as(openff_unit.elementary_charge).flatten()
     system = simulation.system
 
     esp_simulation.run(g, in_place=True)
