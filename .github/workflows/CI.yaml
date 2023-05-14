@@ -69,14 +69,6 @@ jobs:
           conda list
           mamba --version
 
-      - name: Decrypt and check OE license
-        shell: bash -l {0}
-        env:
-          OE_LICENSE_TEXT: ${{ secrets.OE_LICENSE }}
-        run: |
-          echo "${OE_LICENSE_TEXT}" > ${OE_LICENSE}
-          python -c "import openeye; assert openeye.OEChemIsLicensed()"
-
       - name: Install package
         shell: bash -l {0}
         run: |
