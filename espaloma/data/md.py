@@ -797,7 +797,7 @@ class MoleculeVacuumSimulation(object):
         samples = []
         for idx in range(true_n_conformers):
             # put conformer in simulation
-            simulation.context.setPositions(g.mol.conformers[idx])
+            simulation.context.setPositions(g.mol.conformers[idx].to_openmm())
 
             # set velocities
             simulation.context.setVelocitiesToTemperature(self.temperature)
@@ -825,7 +825,7 @@ class MoleculeVacuumSimulation(object):
             import random
 
             idx = random.choice(list(range(true_n_conformers)))
-            simulation.context.setPositions(g.mol.conformers[idx])
+            simulation.context.setPositions(g.mol.conformers[idx].to_openmm())
 
             # set velocities
             simulation.context.setVelocitiesToTemperature(self.temperature)

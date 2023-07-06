@@ -81,7 +81,7 @@ class Sequential(torch.nn.Module):
         A sequence of numbers (for units) and strings (for activation functions)
         denoting the configuration of the sequential model.
 
-    feature_units : int(default=117)
+    feature_units : int(default=114)
         The number of input channels.
 
     Methods
@@ -94,7 +94,7 @@ class Sequential(torch.nn.Module):
         self,
         layer,
         config,
-        feature_units=117,
+        feature_units=114,
         input_units=128,
         model_kwargs={},
     ):

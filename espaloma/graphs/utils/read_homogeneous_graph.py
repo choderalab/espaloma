@@ -39,9 +39,9 @@ def fp_oe(atom):
             torch.tensor(
                 [
                     atom.GetDegree(),
-                    atom.GetValence(),
-                    atom.GetExplicitValence(),
-                    atom.GetFormalCharge(),
+                    # atom.GetValence(),
+                    # atom.GetExplicitValence(),
+                    # atom.GetFormalCharge(),
                     atom.IsAromatic() * 1.0,
                     atom.GetIsotope(),  # TODO: is this a good idea?
                     oechem.OEAtomIsInRingSize(atom, 3) * 1.0,
@@ -93,9 +93,9 @@ def fp_rdkit(atom):
             torch.tensor(
                 [
                     atom.GetTotalDegree(),
-                    atom.GetTotalValence(),
-                    atom.GetExplicitValence(),
-                    atom.GetFormalCharge(),
+                    # atom.GetTotalValence(),
+                    # atom.GetExplicitValence(),
+                    # atom.GetFormalCharge(),
                     atom.GetIsAromatic() * 1.0,
                     atom.GetMass(),
                     atom.IsInRingSize(3) * 1.0,
@@ -118,10 +118,6 @@ def fp_rdkit(atom):
 # =============================================================================
 def from_openff_toolkit_mol(mol, use_fp=True):
     import dgl
-    from openmm import unit
-
-    # initialize graph
-    from rdkit import Chem
 
     # initialize graph
     g = dgl.DGLGraph()
@@ -132,7 +128,7 @@ def from_openff_toolkit_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.atomic_number] for atom in mol.atoms]
     )
-    total_charge = mol.total_charge.value_in_unit(unit.elementary_charge)
+    total_charge = mol.total_charge.magnitude
     g.ndata["sum_q"] = torch.Tensor(
         [[total_charge] for _ in range(mol.n_atoms)]
     )
@@ -170,7 +166,6 @@ def from_openff_toolkit_mol(mol, use_fp=True):
 
 
 def from_oemol(mol, use_fp=True):
-    from openeye import oechem
     import dgl
 
     # initialize graph
@@ -216,7 +211,6 @@ def from_oemol(mol, use_fp=True):
 
 def from_rdkit_mol(mol, use_fp=True):
     import dgl
-    from rdkit import Chem
 
     # initialize graph
     g = dgl.DGLGraph()

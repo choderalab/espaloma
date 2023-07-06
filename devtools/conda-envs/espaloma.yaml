@@ -1,10 +1,8 @@
-name: test
+name: espaloma-test
 channels:
   - conda-forge
   - dglteam
   - openeye
-  - defaults
-  - anaconda
 dependencies:
   # Base dependencies
   - python
@@ -14,7 +12,7 @@ dependencies:
   - numpy
   - matplotlib
   - scipy
-  - openff-toolkit <0.11
+  - openff-toolkit >=0.12
   - openff-forcefields
   - openff-units
   - smirnoff99Frosst
@@ -23,10 +21,12 @@ dependencies:
   - tqdm
   # Pytorch
   - pytorch>=1.8.0
-  - dgl
+  - dgl =0.9.0
   # Testing
   - pytest
   - pytest-cov
+  - pytest-xdist
+  - pytest-randomly
   - codecov
   - nose
   - nose-timer
