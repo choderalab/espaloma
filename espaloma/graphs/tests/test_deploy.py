@@ -26,7 +26,9 @@ def test_butane_charge_nn():
     espaloma_model_filepath = f'espaloma-0.3.0rc1.pt'
     urllib.request.urlretrieve(url, filename=espaloma_model_filepath)
     # Test deployment
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CCCC")
+    g = ff.parametrize(g)
     # apply a trained espaloma model to assign parameters
     net = torch.load(espaloma_model_filepath, map_location=torch.device('cpu'))
     net.eval()
