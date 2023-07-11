@@ -1,5 +1,4 @@
 import openmm
-import pytest
 import urllib.request
 import numpy.testing as npt
 import espaloma as esp
@@ -21,6 +20,7 @@ def test_butane_charge_am1bcc():
 def test_butane_charge_nn():
     """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane using
     the nn charge method"""
+    import torch
     # Download serialized espaloma model
     url = f'https://github.com/choderalab/espaloma/releases/download/0.3.0/espaloma-0.3.0rc1.pt'
     espaloma_model_filepath = f'espaloma-0.3.0rc1.pt'
