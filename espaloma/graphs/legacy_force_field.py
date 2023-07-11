@@ -3,11 +3,12 @@
 # =============================================================================
 import rdkit
 import torch
-from openff.toolkit.topology import Molecule
+from openff.toolkit import Molecule
 import espaloma as esp
 
 from openmmforcefields.generators import SystemGenerator
-from openmm import openmm, unit
+import openmm
+from openmm import unit
 from openmm.app import Simulation
 from openmm.unit import Quantity
 
@@ -56,12 +57,10 @@ class LegacyForceField:
 
     @staticmethod
     def _convert_to_off(mol):
-        import openff.toolkit
-
         if isinstance(mol, esp.Graph):
             return mol.mol
 
-        elif isinstance(mol, openff.toolkit.topology.molecule.Molecule):
+        elif isinstance(mol, Molecule):
             return mol
         elif isinstance(mol, rdkit.Chem.rdchem.Mol):
             return Molecule.from_rdkit(mol)
@@ -87,13 +86,13 @@ class LegacyForceField:
 
     def _prepare_openff(self):
 
-        from openff.toolkit.typing.engines.smirnoff import ForceField
+        from openff.toolkit import ForceField
 
         self.FF = ForceField("%s.offxml" % self.forcefield)
 
     def _prepare_smirnoff(self):
 
-        from openff.toolkit.typing.engines.smirnoff import ForceField
+        from openff.toolkit import ForceField
 
         self.FF = ForceField("%s.offxml" % self.forcefield)
 
@@ -429,7 +428,10 @@ class LegacyForceField:
         return g
 
     def _parametrize_smirnoff(self, g):
-        # mol = self._convert_to_off(mol)
+        from openff.units import unit as openff_unit
+
+        OPENFF_FORCE_CONSTANT_UNIT = openff_unit
+
         forces = self.FF.label_molecules(g.mol.to_topology())[0]
 
         g.heterograph.apply_nodes(
@@ -439,7 +441,7 @@ class LegacyForceField:
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].k.value_in_unit(esp.units.FORCE_CONSTANT_UNIT)
+                        ].k.to_openmm().value_in_unit(esp.units.FORCE_CONSTANT_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )[:, None]
@@ -453,7 +455,7 @@ class LegacyForceField:
                     [
                         forces["Bonds"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].length.value_in_unit(esp.units.DISTANCE_UNIT)
+                        ].length.to_openmm().value_in_unit(esp.units.DISTANCE_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )[:, None]
@@ -468,7 +470,7 @@ class LegacyForceField:
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].k.value_in_unit(esp.units.ANGLE_FORCE_CONSTANT_UNIT)
+                        ].k.to_openmm().value_in_unit(esp.units.ANGLE_FORCE_CONSTANT_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )[:, None]
@@ -482,7 +484,7 @@ class LegacyForceField:
                     [
                         forces["Angles"][
                             tuple(node.data["idxs"][idx].numpy())
-                        ].angle.value_in_unit(esp.units.ANGLE_UNIT)
+                        ].angle.to_openmm().value_in_unit(esp.units.ANGLE_UNIT)
                         for idx in range(node.data["idxs"].shape[0])
                     ]
                 )[:, None]
@@ -494,7 +496,7 @@ class LegacyForceField:
             lambda node: {
                 "epsilon_ref": torch.Tensor(
                     [
-                        forces["vdW"][(idx,)].epsilon.value_in_unit(
+                        forces["vdW"][(idx,)].epsilon.to_openmm().value_in_unit(
                             esp.units.ENERGY_UNIT
                         )
                         for idx in range(g.heterograph.number_of_nodes("n1"))
@@ -508,7 +510,7 @@ class LegacyForceField:
             lambda node: {
                 "sigma_ref": torch.Tensor(
                     [
-                        forces["vdW"][(idx,)].rmin_half.value_in_unit(
+                        forces["vdW"][(idx,)].rmin_half.to_openmm().value_in_unit(
                             esp.units.DISTANCE_UNIT
                         )
                         for idx in range(g.heterograph.number_of_nodes("n1"))
@@ -544,11 +546,11 @@ class LegacyForceField:
                         if hasattr(_force, "k%s" % sub_idx):
                             k[idx, sub_idx] = getattr(
                                 _force, "k%s" % sub_idx
-                            ).value_in_unit(esp.units.ENERGY_UNIT)
+                            ).to_openmm().value_in_unit(esp.units.ENERGY_UNIT)
 
                             phases[idx, sub_idx] = getattr(
                                 _force, "phase%s" % sub_idx
-                            ).value_in_unit(esp.units.ANGLE_UNIT)
+                            ).to_openmm().value_in_unit(esp.units.ANGLE_UNIT)
 
                             periodicity[idx, sub_idx] = getattr(
                                 _force, "periodicity%s" % sub_idx
@@ -587,11 +589,11 @@ class LegacyForceField:
                         if hasattr(_force, "k%s" % sub_idx):
                             k[idx, sub_idx] = getattr(
                                 _force, "k%s" % sub_idx
-                            ).value_in_unit(esp.units.ENERGY_UNIT)
+                            ).to_openmm().value_in_unit(esp.units.ENERGY_UNIT)
 
                             phases[idx, sub_idx] = getattr(
                                 _force, "phase%s" % sub_idx
-                            ).value_in_unit(esp.units.ANGLE_UNIT)
+                            ).to_openmm().value_in_unit(esp.units.ANGLE_UNIT)
 
                             periodicity[idx, sub_idx] = getattr(
                                 _force, "periodicity%s" % sub_idx
