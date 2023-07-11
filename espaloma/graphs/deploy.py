@@ -29,7 +29,7 @@ OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT**2)
 # =============================================================================
 
 
-def load_forcefield(forcefield="openff_unconstrained-1.2.0"):
+def load_forcefield(forcefield="openff_unconstrained-2.0.0"):
     # get a forcefield
     try:
         ff = ForceField("%s.offxml" % forcefield)
@@ -40,7 +40,7 @@ def load_forcefield(forcefield="openff_unconstrained-1.2.0"):
 
 def openmm_system_from_graph(
     g,
-    forcefield="openff_unconstrained-1.2.0",
+    forcefield="openff_unconstrained-2.0.0",
     suffix="",
     charge_method="am1-bcc",
     create_system_kwargs={},
