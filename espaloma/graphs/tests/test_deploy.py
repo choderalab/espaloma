@@ -1,37 +1,55 @@
-import pytest
+import openmm
+import urllib.request
 import numpy.testing as npt
 import espaloma as esp
 from openmm import unit
-import openmm
-import pytest
 
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
 from openmm.unit import Quantity
 
-from openmm import app
 
-
-def test_butane():
-    """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane"""
+def test_butane_charge_am1bcc():
+    """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane using
+    am1-bcc charge method"""
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CCCC")
     g = ff.parametrize(g)
-    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
+    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="am1-bcc")
 
+def test_butane_charge_nn():
+    """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane using
+    the nn charge method"""
+    import torch
+    # Download serialized espaloma model
+    url = f'https://github.com/choderalab/espaloma/releases/download/0.3.0/espaloma-0.3.0rc1.pt'
+    espaloma_model_filepath = f'espaloma-0.3.0rc1.pt'
+    urllib.request.urlretrieve(url, filename=espaloma_model_filepath)
+    # Test deployment
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
+    g = esp.Graph("CCCC")
+    g = ff.parametrize(g)
+    # apply a trained espaloma model to assign parameters
+    net = torch.load(espaloma_model_filepath, map_location=torch.device('cpu'))
+    net.eval()
+    net(g.heterograph)
+    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="nn")
 
 def test_caffeine():
+    """Test Openmm system deployment of caffeine method using the charges from the molecule runs
+    without error."""
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
     g = ff.parametrize(g)
-    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
+    g.mol.assign_partial_charges("am1bcc")  # Assign charges after parametrizing
+    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="from-molecule")
 
 
 def test_parameter_consistent_caffeine():
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
     g = ff.parametrize(g)
-    system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
+    system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="am1-bcc")
     forces = list(system.getForces())
     openff_forces = ff.FF.label_molecules(g.mol.to_topology())[0]
     for idx, force in enumerate(forces):
@@ -63,7 +81,7 @@ def test_energy_consistent_caffeine():
     ## Should there be a second test for SMIRNOFF impropers?
     g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
     g = ff.parametrize(g)
-    system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
+    system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="am1-bcc")
 
     # compute energies using espaloma
     import torch
