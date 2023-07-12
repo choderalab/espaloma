@@ -39,6 +39,8 @@ def fp_oe(atom):
             torch.tensor(
                 [
                     atom.GetDegree(),
+                    # Note: Discard resonance-variant features
+                    # Issue related to https://github.com/choderalab/espaloma_charge/issues/18
                     # atom.GetValence(),
                     # atom.GetExplicitValence(),
                     # atom.GetFormalCharge(),
@@ -93,6 +95,8 @@ def fp_rdkit(atom):
             torch.tensor(
                 [
                     atom.GetTotalDegree(),
+                    # Note: Discard resonance-variant features
+                    # Issue related to https://github.com/choderalab/espaloma_charge/issues/18
                     # atom.GetTotalValence(),
                     # atom.GetExplicitValence(),
                     # atom.GetFormalCharge(),
