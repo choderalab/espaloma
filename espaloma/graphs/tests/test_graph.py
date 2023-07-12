@@ -1,5 +1,9 @@
+import io
+import json
 import pytest
-import torch
+import shutil
+import importlib_resources
+import espaloma as esp
 
 
 def test_graph():
@@ -41,8 +45,6 @@ def test_formal_charge(molecule, charge):
 def test_save_and_load(graph):
     import tempfile
 
-    import espaloma as esp
-
     with tempfile.TemporaryDirectory() as tempdir:
         graph.save(tempdir + "/g.esp")
         new_graph = esp.Graph()
@@ -51,6 +53,45 @@ def test_save_and_load(graph):
     assert graph.homograph.number_of_nodes == graph.homograph.number_of_nodes
 
     assert graph.homograph.number_of_edges == graph.homograph.number_of_edges
+
+def test_load_from_older_openff(tmp_path_factory):
+    """Tests creating a graph from a json-serialized mol with older openff-toolkit
+    version (0.10.x)
+
+    This checks that the serialized molecule doesn't have the expected hierarchy_schemes
+    key, which will be created on the fly when loaded as a graph.
+
+    This tests creates a graph with
+    """
+    # Load json serialized off 0.10.6 molecule and save it in path
+    from openff.toolkit import Molecule
+    mol_json_path = importlib_resources.files('espaloma.data') / 'off-mol_0_10_6.json'
+    with open(str(mol_json_path), "r") as json_file:
+        # This loads it as a string -- seems like an off toolkit limitation
+        mol_json_str = json.load(json_file)
+    mol_dict = json.load(io.StringIO(mol_json_str))
+    assert "hierarchy_schemes" not in mol_dict, "Serialized json mol contains unexpected key."
+    # Save json molecule in path
+    out_esp_dir_1 = tmp_path_factory.mktemp("esp1")
+    shutil.copy(mol_json_path, out_esp_dir_1 / "mol.json")
+
+    # update dicitonary and create espaloma graph with the same molecule
+    mol_dict["hierarchy_schemes"] = dict()
+    off_molecule = Molecule.from_dict(mol_dict)
+    smiles = off_molecule.to_smiles()
+    g = esp.Graph(smiles)
+    # Save the graph
+    out_esp_dir_2 = tmp_path_factory.mktemp("esp2") / "esp-test"
+    g.save(str(out_esp_dir_2))
+    # copy homo/hetero-graphs to original dir
+    shutil.copy(out_esp_dir_2 / "homograph.bin", out_esp_dir_1)
+    shutil.copy(out_esp_dir_2 / "heterograph.bin", out_esp_dir_1)
+
+    # Load espaloma from original directory -- with mol serialized from off 0.10.6
+    esp_graph = esp.Graph.load(str(out_esp_dir_1))
+
+    assert esp_graph.mol == g.mol, f"Read molecule from esp graph, {esp_graph.mol} is not " \
+                                   f"the same as the expected molecule {off_molecule}."
 
 
 # TODO: test offmol_indices
