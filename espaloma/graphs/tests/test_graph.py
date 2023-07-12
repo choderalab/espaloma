@@ -47,12 +47,11 @@ def test_save_and_load(graph):
 
     with tempfile.TemporaryDirectory() as tempdir:
         graph.save(tempdir + "/g.esp")
-        new_graph = esp.Graph()
-        new_graph.load(tempdir + "/g.esp")
+        new_graph = esp.Graph.load(tempdir + "/g.esp")
 
-    assert graph.homograph.number_of_nodes == graph.homograph.number_of_nodes
+    assert graph.homograph.number_of_nodes() == new_graph.homograph.number_of_nodes()
 
-    assert graph.homograph.number_of_edges == graph.homograph.number_of_edges
+    assert graph.homograph.number_of_edges() == new_graph.homograph.number_of_edges()
 
 def test_load_from_older_openff(tmp_path_factory):
     """Tests creating a graph from a json-serialized mol with older openff-toolkit
