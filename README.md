@@ -9,7 +9,7 @@ Source code for [Wang Y, Fass J, and Chodera JD "End-to-End Differentiable Const
 ![abstract](docs/_static/espaloma_abstract_v2-2.png)
 
 #
-Documentation: https://espaloma.wangyq.net/
+Documentation: https://docs.espaloma.org
 
 # Paper Abstract
 Molecular mechanics (MM) potentials have long been a workhorse of computational chemistry.
