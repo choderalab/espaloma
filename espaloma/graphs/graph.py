@@ -2,6 +2,7 @@
 # IMPORTS
 # =============================================================================
 import abc
+import io
 import openff.toolkit
 
 import espaloma as esp
@@ -90,10 +91,18 @@ class Graph(BaseGraph):
             mol = json.load(f_handle)
         from openff.toolkit.topology import Molecule
 
+        # With OFF toolkit >=0.11, from_json requires the "hierarchy_schemes" key
+        # which is not created with previous toolkit versions. That means, from_json
+        # errors out when loading molecules that were json serialized with older
+        # toolkit versions.
         try:
             mol = Molecule.from_json(mol)
-        except:
-            mol = Molecule.from_dict(mol)
+        except KeyError:
+            # this probably means hierarchy_schemes key wasn't found
+            mol_dict = json.load(io.StringIO(mol))
+            if "hierarchy_schemes" not in mol_dict.keys():
+                mol_dict["hierarchy_schemes"] = dict()  # Default to empty dict if not present
+            mol = Molecule.from_dict(mol_dict)
 
         g = cls(mol=mol, homograph=homograph, heterograph=heterograph)
         return g
