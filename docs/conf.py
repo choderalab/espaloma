@@ -15,15 +15,9 @@
 # Incase the project was not installed
 import os
 import sys
+import subprocess
 
 sys.path.insert(0, os.path.abspath('..'))
-
-import espaloma
-from espaloma import mm, nn, graphs, data
-
-# download experiments
-import os
-os.system("bash download_experiments.sh")
 
 # -- Project information -----------------------------------------------------
 
@@ -36,7 +30,6 @@ github_url = "https://github.com/choderalab/espaloma"
 version = ''
 # The full version, including alpha/beta/rc tags
 release = ''
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -81,7 +74,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

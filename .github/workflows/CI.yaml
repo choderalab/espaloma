@@ -3,57 +3,50 @@ name: CI
 on:
   pull_request:
     branches:
-      - master
       - main
   push:
     branches:
-      - master
       - main 
+
   schedule:
     # Nightly tests run on master by default:
     #   Scheduled workflows run on the latest commit on the default or base branch.
     #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
     - cron: "0 0 * * *"
 
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   test:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: Linux, Python 3.8
-            os: ubuntu-latest
-            python-version: "3.8"
-            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-
-          - name: Linux, Python 3.9
-            os: ubuntu-latest
-            python-version: "3.9"
-            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-
-          - name: MacOS, Python 3.9
-            os: macOS-latest
-            python-version: "3.9"
-            conda-installer: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-MacOSX-x86_64.sh
+        os: ['macos', 'ubuntu']
+        python-version:
+          - "3.9"
+          - "3.10"
 
     env:
       OPENMM: ${{ matrix.cfg.openmm }}
       OE_LICENSE: ${{ github.workspace }}/oe_license.txt
 
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/checkout@v3
+      - uses: mamba-org/setup-micromamba@v1
         with:
-          installer-url: ${{ matrix.conda-installer }}
-          python-version: ${{ matrix.python-version }}
-          activate-environment: test
-          channel-priority: true
           environment-file: devtools/conda-envs/espaloma.yaml
-          auto-activate-base: false
-          use-mamba: true
+          cache-environment: true
+          cache-downloads: true
+          create-args: >-
+            python=${{ matrix.python-version }}
 
       - name: Additional info about the build
         shell: bash
@@ -63,35 +56,27 @@ jobs:
           ulimit -a
 
       - name: Environment Information
-        shell: bash -l {0}
         run: |
-          conda info --all
-          conda list
-          mamba --version
-
-      - name: Decrypt and check OE license
-        shell: bash -l {0}
-        env:
-          OE_LICENSE_TEXT: ${{ secrets.OE_LICENSE }}
-        run: |
-          echo "${OE_LICENSE_TEXT}" > ${OE_LICENSE}
-          python -c "import openeye; assert openeye.OEChemIsLicensed()"
+          micromamba info
+          micromamba list
+          micromamba --version
 
       - name: Install package
-        shell: bash -l {0}
         run: |
-          python -m pip install --no-deps .
+          python -m pip install --no-deps -e .
 
       - name: Run tests
-        shell: bash -l {0}
         run: |
-          pytest -v --cov=espaloma --cov-report=xml --color=yes espaloma/
+          pytest -v -n auto --cov=espaloma --cov-report=xml --color=yes espaloma/
 
       - name: CodeCov
-        uses: codecov/codecov-action@v1
-        if: always()
+        uses: codecov/codecov-action@v3
+        if: ${{ github.repository == 'choderalab/espaloma'
+                && github.event_name == 'pull_request' }} 
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           flags: unittests
           yml: ./.codecov.yml
+          fail_ci_if_error: False
+          verbose: True

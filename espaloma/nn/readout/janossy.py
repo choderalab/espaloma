@@ -185,7 +185,7 @@ class JanossyPoolingImproper(torch.nn.Module):
         config,
         in_features,
         out_features={
-            "k": 6,
+            "k": 2,
         },
         out_features_dimensions=-1,
     ):
@@ -303,7 +303,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
         config,
         in_features,
         out_features={
-            "k": 6,
+            "k": 2,
         },
         out_features_dimensions=-1,
     ):

@@ -39,6 +39,8 @@ def fp_oe(atom):
             torch.tensor(
                 [
                     atom.GetDegree(),
+                    # Note: Discard resonance-variant features
+                    # Issue related to https://github.com/choderalab/espaloma_charge/issues/18
                     # atom.GetValence(),
                     # atom.GetExplicitValence(),
                     # atom.GetFormalCharge(),
@@ -93,6 +95,8 @@ def fp_rdkit(atom):
             torch.tensor(
                 [
                     atom.GetTotalDegree(),
+                    # Note: Discard resonance-variant features
+                    # Issue related to https://github.com/choderalab/espaloma_charge/issues/18
                     # atom.GetTotalValence(),
                     # atom.GetExplicitValence(),
                     # atom.GetFormalCharge(),
@@ -118,10 +122,6 @@ def fp_rdkit(atom):
 # =============================================================================
 def from_openff_toolkit_mol(mol, use_fp=True):
     import dgl
-    from openmm import unit
-
-    # initialize graph
-    from rdkit import Chem
 
     # initialize graph
     g = dgl.DGLGraph()
@@ -132,7 +132,7 @@ def from_openff_toolkit_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.atomic_number] for atom in mol.atoms]
     )
-    total_charge = mol.total_charge.value_in_unit(unit.elementary_charge)
+    total_charge = mol.total_charge.magnitude
     g.ndata["sum_q"] = torch.Tensor(
         [[total_charge] for _ in range(mol.n_atoms)]
     )
@@ -170,7 +170,6 @@ def from_openff_toolkit_mol(mol, use_fp=True):
 
 
 def from_oemol(mol, use_fp=True):
-    from openeye import oechem
     import dgl
 
     # initialize graph
@@ -216,7 +215,6 @@ def from_oemol(mol, use_fp=True):
 
 def from_rdkit_mol(mol, use_fp=True):
     import dgl
-    from rdkit import Chem
 
     # initialize graph
     g = dgl.DGLGraph()
