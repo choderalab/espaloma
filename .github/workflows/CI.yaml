@@ -67,7 +67,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v -n auto --cov=espaloma --cov-report=xml --color=yes espaloma/
+          pytest -v --cov=espaloma --cov-report=xml --color=yes espaloma/
 
       - name: CodeCov
         uses: codecov/codecov-action@v3
