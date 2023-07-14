@@ -8,6 +8,7 @@ from .app.experiment import *
 from .graphs.graph import Graph
 from .metrics import GraphMetric
 from .mm.geometry import *
+from .utils.model_fetch import get_model, get_model_path
 
 # Add imports here
 # import espaloma
