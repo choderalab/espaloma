@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 import requests
 import torch.utils.model_zoo
@@ -35,7 +35,7 @@ def _get_model_url(version: str) -> str:
 
 
 def get_model_path(
-    model_dir: str | Path = ".espaloma/",
+    model_dir: Union[str, Path] = ".espaloma/",
     version: str = "latest",
     disable_progress_bar: bool = False,
     overwrite: bool = False,
