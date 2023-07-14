@@ -24,10 +24,16 @@ OPENMM_TORSION_PHASE_UNIT = OPENMM_ANGLE_UNIT
 OPENMM_BOND_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_LENGTH_UNIT**2)
 OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT**2)
 
+LATEST_URL = "https://github.com/choderalab/espaloma/"
+"releases/latest/download/espaloma-latest.pt"
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-
+def get_latest_model();
+    model = torch.utils.model_zoo.load_url(LATEST_URL)
+    model.eval()
+    return model
 
 def load_forcefield(forcefield="openff_unconstrained-2.0.0"):
     # get a forcefield
