@@ -3,7 +3,8 @@ import torch
 from espaloma.utils.model_fetch import get_model
 from openff.toolkit.topology import Molecule
 
-def test_get_model(tmp_path):
+
+def test_get_model_path(tmp_path):
     model_dir = tmp_path / "latest"
     model_path = get_model(model_dir=model_dir, disable_progress_bar=True)
 
