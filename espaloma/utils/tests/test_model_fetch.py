@@ -16,8 +16,6 @@ def test_get_model_path(tmp_path):
 
 
 def test_get_model(tmp_path):
-    model_dir = tmp_path / "zoo"
-
     espaloma_model = esp.get_model()
 
     molecule = Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
