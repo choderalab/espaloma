@@ -22,15 +22,12 @@ def test_butane_charge_nn():
     the nn charge method"""
     import torch
     # Download serialized espaloma model
-    url = f'https://github.com/choderalab/espaloma/releases/download/0.3.0/espaloma-0.3.0rc1.pt'
-    espaloma_model_filepath = f'espaloma-0.3.0rc1.pt'
-    urllib.request.urlretrieve(url, filename=espaloma_model_filepath)
     # Test deployment
     ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CCCC")
     g = ff.parametrize(g)
     # apply a trained espaloma model to assign parameters
-    net = torch.load(espaloma_model_filepath, map_location=torch.device('cpu'))
+    net = esp.get_latest_model()
     net.eval()
     net(g.heterograph)
     esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="nn")
