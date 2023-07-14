@@ -24,15 +24,19 @@ defaults:
 
 jobs:
   test:
-    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}, DGL ${{ matrix.dgl-version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos', 'ubuntu']
+        os: ['ubuntu']
         python-version:
           - "3.9"
           - "3.10"
+        dgl-version:
+          - "0.9.0"
+          - "1.1.0"
+          - "1.1.1"
 
     env:
       OPENMM: ${{ matrix.cfg.openmm }}
@@ -47,6 +51,7 @@ jobs:
           cache-downloads: true
           create-args: >-
             python=${{ matrix.python-version }}
+            dgl=${{ matrix.dgl-version }}
 
       - name: Additional info about the build
         shell: bash
