@@ -7,6 +7,22 @@ from tqdm import tqdm
 
 
 def _get_model_url(version: str) -> str:
+    """
+    Get the URL of the espaloma model from GitHub releases.
+
+    Parameters:
+        version (str): Version of the model. If set to "latest", the URL for the latest version will be returned.
+
+    Returns:
+        str: The URL of the espaloma model.
+
+    Note:
+        - If version is set to "latest", the URL for the latest version of the model will be returned.
+        - The URL is obtained from the GitHub releases of the espaloma repository.
+
+    Example:
+        >>> url = _get_model_url(version="0.3.0")
+    """
 
     if version == "latest":
         url = "https://github.com/choderalab/espaloma/releases/latest/download/espaloma-latest.pt"
@@ -78,6 +94,23 @@ def get_model_path(
 
 
 def get_model(version: str = "latest") -> dict[str, Any]:
+    """
+        Load an espaloma model from GitHub releases.
+
+    Parameters:
+        version (str): Version of the model to load. Default is "latest".
+
+    Returns:
+        dict[str, Any]: The loaded espaloma model.
+
+    Note:
+        - If version is set to "latest", the latest version of the model will be loaded.
+        - The model will be loaded from GitHub releases.
+        - The model will be loaded onto the CPU.
+
+    Example:
+        >>> model = get_model(version="0.3.0")
+    """
 
     url = _get_model_url(version)
     model = torch.utils.model_zoo.load_url(url, map_location="cpu")
