@@ -30,7 +30,7 @@ LATEST_URL = "https://github.com/choderalab/espaloma/"
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def get_latest_model();
+def get_latest_model():
     model = torch.utils.model_zoo.load_url(LATEST_URL, map_location="cpu")
     model.eval()
     return model
