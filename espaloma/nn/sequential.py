@@ -135,7 +135,7 @@ class Sequential(torch.nn.Module):
         import dgl
 
         # get homogeneous subgraph
-        g_ = dgl.to_homo(g.edge_type_subgraph(["n1_neighbors_n1"]))
+        g_ = dgl.to_homogeneous(g.edge_type_subgraph(["n1_neighbors_n1"]))
 
         if x is None:
             # get node attributes
