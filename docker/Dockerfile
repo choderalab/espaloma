@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:1.4.1
+FROM mambaorg/micromamba:1.4.9
 
 LABEL org.opencontainers.image.source=https://github.com/choderalab/espaloma
 LABEL org.opencontainers.image.description="Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm"
@@ -10,7 +10,7 @@ ARG VERSION
 # https://docs.python.org/3/using/cmdline.html#cmdoption-u
 ENV PYTHONUNBUFFERED=1
 
-RUN micromamba install -y -n base -c conda-forge -c dglteam dgl==0.9.0 git "espaloma==$VERSION" && \
+RUN micromamba install -y -n base -c conda-forge -c dglteam pytest "dgl<1" git "espaloma==$VERSION" && \
     micromamba clean --all --yes
 
 # Ensure that conda environment is automatically activated
