@@ -19,29 +19,14 @@ Here, we propose an alternative approach that uses _graph neural networks_ to pe
 Since all stages are built from smooth neural functions, the entire process---spanning chemical perception to parameter assignment---is modular and end-to-end differentiable with respect to model parameters, allowing new force fields to be easily constructed, extended, and applied to arbitrary molecules.
 We show that this approach is not only sufficiently expressive to reproduce legacy atom types, but that it can learn and extend existing molecular mechanics force fields, construct entirely new force fields applicable to both biopolymers and small molecules from quantum chemical calculations, and even learn to accurately predict free energies from experimental observables.
 
-# Manifest
 
-* `espaloma/` core code for graph-parametrized potential energy functions.
-    * `graphs/` data objects that contain various level of information we need.
-        * `graph.py` base modules for graphs.
-        * `molecule_graph.py` provide APIs to various molecular modelling toolkits.
-        * `homogeneous_graph.py` simplest graph representation of a molecule.
-        * `heterogeneous_graph.py` graph representation of a molecule that contains information regarding membership of lower-level nodes to higher-level nodes.
-        * `parametrized_graph.py` graph representation of a molecule with all parameters needed for energy evaluation.
-    * `nn/` neural network models that facilitates translation between graphs.
-        * `dgl_legacy.py` API to dgl models for atom-level message passing.
-    * `mm/` molecular mechanics functionalities for energy evaluation.
-        * `i/` energy terms used in Class-I force field.
-            * `bond.py` bond energy
-            * `angle.py` angle energy
-            * `torsion.py` torsion energy
-            * `nonbonded.py` nonbonded energy
-        * `ii/` energy terms used in Class-II force field.
-            * `coupling.py` coupling terms
-            * `polynomial.py` higher order polynomials.
+# Installation
 
+```bash
+$ conda install -c conda-forge -c dglteam "espaloma=0.3.1" "dgl<1"
+```
 
-# Example: Deploy espaloma 0.2.0 pretrained force field to arbitrary MM system
+# Example: Deploy espaloma 0.3.1 pretrained force field to arbitrary MM system
 
 ```python  
 # imports
@@ -69,6 +54,27 @@ openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 # Using espaloma to parameterize small molecules in relative free energy calculations
 
 An example of using espaloma to parameterize small molecules in relative alchemical free energy calculations is provided in the `scripts/perses-benchmark/` directory.
+
+# Manifest
+
+* `espaloma/` core code for graph-parametrized potential energy functions.
+    * `graphs/` data objects that contain various level of information we need.
+        * `graph.py` base modules for graphs.
+        * `molecule_graph.py` provide APIs to various molecular modelling toolkits.
+        * `homogeneous_graph.py` simplest graph representation of a molecule.
+        * `heterogeneous_graph.py` graph representation of a molecule that contains information regarding membership of lower-level nodes to higher-level nodes.
+        * `parametrized_graph.py` graph representation of a molecule with all parameters needed for energy evaluation.
+    * `nn/` neural network models that facilitates translation between graphs.
+        * `dgl_legacy.py` API to dgl models for atom-level message passing.
+    * `mm/` molecular mechanics functionalities for energy evaluation.
+        * `i/` energy terms used in Class-I force field.
+            * `bond.py` bond energy
+            * `angle.py` angle energy
+            * `torsion.py` torsion energy
+            * `nonbonded.py` nonbonded energy
+        * `ii/` energy terms used in Class-II force field.
+            * `coupling.py` coupling terms
+            * `polynomial.py` higher order polynomials.
 
 # License
 
