@@ -42,6 +42,7 @@ jobs:
           LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
           echo $LATEST_TAG
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+          VERSION=LATEST_TAG
           echo $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
