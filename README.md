@@ -26,7 +26,7 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 $ conda install -c conda-forge -c dglteam "espaloma=0.3.1" "dgl<1"
 ```
 
-# Example: Deploy espaloma 0.2.0 pretrained force field to arbitrary MM system
+# Example: Deploy espaloma 0.3.1 pretrained force field to arbitrary MM system
 
 ```python  
 # imports
