@@ -41,6 +41,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: mamba-org/setup-micromamba@v1
+        env:
+          CONDA_OVERRIDE_CUDA: 11.8
         with:
           environment-file: devtools/conda-envs/espaloma.yaml
           cache-environment: true
