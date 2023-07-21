@@ -1,5 +1,6 @@
 name: espaloma-test
 channels:
+  - jaimergp/label/unsupported-cudatoolkit-shim
   - conda-forge
   - mmh
   - openeye
@@ -21,7 +22,7 @@ dependencies:
   - tqdm
   - pydantic <2  # We need our deps to fix this
   # Pytorch
-  - pytorch>=1.8.0
+  - pytorch 
   - dgl =1.1.0
   # Testing
   - pytest
