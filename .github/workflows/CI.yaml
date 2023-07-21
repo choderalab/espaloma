@@ -32,7 +32,6 @@ jobs:
         os: ['macos', 'ubuntu']
         python-version:
           - "3.9"
-          - "3.10"
 
     env:
       OPENMM: ${{ matrix.cfg.openmm }}
