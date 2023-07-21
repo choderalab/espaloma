@@ -1,6 +1,5 @@
 name: espaloma-test
 channels:
-  - jaimergp/label/unsupported-cudatoolkit-shim
   - conda-forge
   - mmh
   - openeye
