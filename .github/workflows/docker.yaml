@@ -10,9 +10,6 @@
 name: Create and publish a Docker image
 
 on:
-  push:
-    branches:
-      - feat/add_docker_and_apptainer
   workflow_dispatch:
 
 defaults:
