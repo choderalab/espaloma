@@ -20,8 +20,6 @@ dependencies:
   - openmmforcefields >=0.11.2
   - tqdm
   - pydantic <2  # We need our deps to fix this
-  # Pytorch
-  - pytorch 
   - dgl =1.1.0
   # Testing
   - pytest
