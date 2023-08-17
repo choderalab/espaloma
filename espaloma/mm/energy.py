@@ -361,7 +361,7 @@ def energy_in_graph(
         {
             "%s_in_g"
             % term: (
-                dgl.function.copy_src(src="u%s" % suffix, out="m_%s" % term),
+                dgl.function.copy_u(u="u%s" % suffix, out="m_%s" % term),
                 dgl.function.sum(
                     msg="m_%s" % term, out="u_%s%s" % (term, suffix)
                 ),
@@ -462,31 +462,31 @@ class CarryII(torch.nn.Module):
         g.multi_update_all(
             {
                 "n2_as_0_in_n3": (
-                    dgl.function.copy_src("u", "m_u_0"),
+                    dgl.function.copy_u("u", "m_u_0"),
                     dgl.function.sum("m_u_0", "u_left"),
                 ),
                 "n2_as_1_in_n3": (
-                    dgl.function.copy_src("u", "m_u_1"),
+                    dgl.function.copy_u("u", "m_u_1"),
                     dgl.function.sum("m_u_1", "u_right"),
                 ),
                 "n2_as_0_in_n4": (
-                    dgl.function.copy_src("u", "m_u_0"),
+                    dgl.function.copy_u("u", "m_u_0"),
                     dgl.function.sum("m_u_0", "u_bond_left"),
                 ),
                 "n2_as_1_in_n4": (
-                    dgl.function.copy_src("u", "m_u_1"),
+                    dgl.function.copy_u("u", "m_u_1"),
                     dgl.function.sum("m_u_1", "u_bond_center"),
                 ),
                 "n2_as_2_in_n4": (
-                    dgl.function.copy_src("u", "m_u_2"),
+                    dgl.function.copy_u("u", "m_u_2"),
                     dgl.function.sum("m_u_2", "u_bond_right"),
                 ),
                 "n3_as_0_in_n4": (
-                    dgl.function.copy_src("u", "m3_u_0"),
+                    dgl.function.copy_u("u", "m3_u_0"),
                     dgl.function.sum("m3_u_0", "u_angle_left"),
                 ),
                 "n3_as_1_in_n4": (
-                    dgl.function.copy_src("u", "m3_u_1"),
+                    dgl.function.copy_u("u", "m3_u_1"),
                     dgl.function.sum("m3_u_1", "u_angle_right"),
                 ),
             },

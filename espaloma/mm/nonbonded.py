@@ -48,8 +48,8 @@ def lorentz_berthelot(g, suffix=""):
         {
             "n1_as_%s_in_%s"
             % (pos_idx, term): (
-                dgl.function.copy_src(
-                    src="epsilon%s" % suffix, out="m_epsilon"
+                dgl.function.copy_u(
+                    u="epsilon%s" % suffix, out="m_epsilon"
                 ),
                 geometric_mean(msg="m_epsilon", out="epsilon%s" % suffix),
             )
@@ -63,7 +63,7 @@ def lorentz_berthelot(g, suffix=""):
         {
             "n1_as_%s_in_%s"
             % (pos_idx, term): (
-                dgl.function.copy_src(src="sigma%s" % suffix, out="m_sigma"),
+                dgl.function.copy_u(u="sigma%s" % suffix, out="m_sigma"),
                 arithmetic_mean(msg="m_sigma", out="sigma%s" % suffix),
             )
             for pos_idx in [0, 1]
@@ -94,7 +94,7 @@ def multiply_charges(g, suffix=""):
         {
             "n1_as_%s_in_%s"
             % (pos_idx, term): (
-                dgl.function.copy_src(src="q%s" % suffix, out="m_q"),
+                dgl.function.copy_u(u="q%s" % suffix, out="m_q"),
                 dgl.function.sum(msg="m_q", out="_q")
                 # lambda node: {"q%s" % suffix: node.mailbox["m_q"].prod(dim=1)}
             )
