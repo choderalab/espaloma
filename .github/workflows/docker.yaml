@@ -1,0 +1,159 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Create and publish a Docker image
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: choderalab/espaloma
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Free disk space
+        run: |
+          run: |
+          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          sudo rm -rf \
+            /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
+            /usr/lib/jvm || true
+          echo "some directories deleted"
+          sudo apt install aptitude -y >/dev/null 2>&1
+          sudo aptitude purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
+            esl-erlang firefox gfortran-8 gfortran-9 google-chrome-stable \
+            google-cloud-sdk imagemagick \
+            libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
+            mercurial apt-transport-https mono-complete libmysqlclient \
+            unixodbc-dev yarn chrpath libssl-dev libxft-dev \
+            libfreetype6 libfreetype6-dev libfontconfig1 libfontconfig1-dev \
+            snmp pollinate libpq-dev postgresql-client powershell ruby-full \
+            sphinxsearch subversion mongodb-org azure-cli microsoft-edge-stable \
+            -y -f >/dev/null 2>&1
+          sudo aptitude purge google-cloud-sdk -f -y >/dev/null 2>&1
+          sudo aptitude purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
+          sudo apt purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
+          sudo aptitude purge '~n ^mysql' -f -y >/dev/null 2>&1
+          sudo aptitude purge '~n ^php' -f -y >/dev/null 2>&1
+          sudo aptitude purge '~n ^dotnet' -f -y >/dev/null 2>&1
+          sudo apt-get autoremove -y >/dev/null 2>&1
+          sudo apt-get autoclean -y >/dev/null 2>&1
+          echo "some packages purged"
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Latest Version
+        id: latest-version
+        run: |
+          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo $LATEST_TAG
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+          VERSION=$LATEST_TAG
+          echo $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Print Latest Version
+        run: echo ${{ steps.latest-version.outputs.VERSION }}
+
+      # Now that we got the version, we don't need the .git folder
+      - name: Get more space
+        run: |
+          df . -h
+          sudo rm -rf ${GITHUB_WORKSPACE}/.git
+          df . -h
+
+      - name: Create fully qualified image registry path
+        id: fqirp
+        run: |
+          FQIRP=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.latest-version.outputs.VERSION }}
+          echo "FQIRP=$FQIRP" >> $GITHUB_OUTPUT
+
+      - name: Print FQIRP
+        run: echo ${{ steps.fqirp.outputs.FQIRP  }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=schedule,pattern=nightly,enable=true,priority=1000
+            type=ref,event=branch,enable=true,priority=600
+            type=ref,event=tag,enable=true,priority=600
+            type=ref,event=pr,prefix=pr-,enable=true,priority=600
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}}
+            type=sha
+            ${{ steps.latest-version.outputs.VERSION }}
+
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.latest-version.outputs.VERSION }}
+
+      - name: Test image
+        run: |
+          docker run --rm ${{ steps.fqirp.outputs.FQIRP }} python -c "import espaloma; print(espaloma.__version__)"
+          docker run --rm ${{ steps.fqirp.outputs.FQIRP }} pytest --pyargs espaloma -v
+
+      - name: Push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.latest-version.outputs.VERSION }}
+
+      - name: Setup Apptainer
+        uses: eWaterCycle/setup-apptainer@v2
+        with:
+          apptainer-version: 1.1.2
+
+      - name: Build Apptainer Image
+        run: singularity build espaloma_${{ steps.latest-version.outputs.VERSION }}.sif docker-daemon:${{ steps.fqirp.outputs.FQIRP }}
+
+      - name: Test & Push Apptainer Image
+        run: |
+          mkdir test_apptainer
+          cd test_apptainer
+          singularity run ../espaloma_${{ steps.latest-version.outputs.VERSION }}.sif pytest --pyargs espaloma -v
+          echo ${{ secrets.GITHUB_TOKEN }} | singularity remote login -u ${{ secrets.GHCR_USERNAME }} --password-stdin oras://ghcr.io
+          singularity push ../espaloma_${{ steps.latest-version.outputs.VERSION }}.sif oras://${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.latest-version.outputs.VERSION }}-apptainer
