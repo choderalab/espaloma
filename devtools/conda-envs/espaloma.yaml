@@ -1,7 +1,6 @@
 name: espaloma-test
 channels:
   - conda-forge
-  - mmh/label/beta-post-patch
   - openeye
 dependencies:
   # Base dependencies
