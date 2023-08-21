@@ -29,10 +29,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos', 'ubuntu']
+        os: ['ubuntu','macos']
         python-version:
-          - "3.9"
+          - "3.11"
           - "3.10"
+          - "3.9"
 
     env:
       OPENMM: ${{ matrix.cfg.openmm }}

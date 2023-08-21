@@ -1,7 +1,6 @@
 name: espaloma-test
 channels:
   - conda-forge
-  - dglteam
   - openeye
 dependencies:
   # Base dependencies
@@ -20,9 +19,7 @@ dependencies:
   - openmmforcefields >=0.11.2
   - tqdm
   - pydantic <2  # We need our deps to fix this
-  # Pytorch
-  - pytorch>=1.8.0
-  - dgl <1
+  - dgl =1.1.0
   # Testing
   - pytest
   - pytest-cov

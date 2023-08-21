@@ -53,7 +53,7 @@ class GraphLevelReadout(torch.nn.Module):
         )
 
         g.update_all(
-            dgl.function.copy_src("h_global", "m"),
+            dgl.function.copy_u("h_global", "m"),
             self.pool("m", "h_global"),
             etype="n1_in_g",
         )

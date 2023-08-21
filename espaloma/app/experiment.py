@@ -201,7 +201,7 @@ class Test(Experiment):
         # from time to time
         # make it just one giant graph
         # g = list(self.data)
-        # g = dgl.batch_hetero(g)
+        # g = dgl.batch(g)
         # g = g.to(self.device)
 
         if self.states is None:
