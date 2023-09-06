@@ -51,6 +51,21 @@ espaloma_model(molecule_graph.heterograph)
 openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 ```
 
+If using espaloma from a local `.pt` file, say for example `espaloma-0.3.1.pt`,
+then you would need to run the `eval` method of the model to get the correct
+inference/predictions, as follows:
+
+```python
+import torch
+...
+# load local pretrained model
+espaloma_model = torch.load("espaloma-0.3.1.pt")
+espaloma_model.eval()
+...
+```
+
+The rest of the code should be the same as in the previous code block example.
+
 # Using espaloma to parameterize small molecules in relative free energy calculations
 
 An example of using espaloma to parameterize small molecules in relative alchemical free energy calculations is provided in the `scripts/perses-benchmark/` directory.
