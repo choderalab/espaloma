@@ -24,3 +24,12 @@ systems in a few lines::
     # create an OpenMM System for the specified molecule
     openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 
+If using espaloma from a local ``.pt`` file, say for example ``espaloma-0.3.1.pt``,
+then you would need to run the ``eval`` method of the model to get the correct
+inference/predictions, as follows:
+
+    # load local pretrained model
+    espaloma_model = torch.load("espaloma-0.3.1.pt")
+    espaloma_model.eval()
+
+The rest of the code should be the same as in the previous example.
