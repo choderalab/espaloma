@@ -22,34 +22,34 @@ import espaloma as esp
 # UTILITY FUNCTIONS
 # =============================================================================
 def get_client():
-    return ptl.FractalClient()
+    return ptl.PortalClient("api.qcarchive.molssi.org")
 
 
 def get_collection(
-    client,
-    collection_type="OptimizationDataset",
-    name="OpenFF Full Optimization Benchmark 1",
+        client,
+        collection_type="OptimizationDataset",
+        name="OpenFF Full Optimization Benchmark 1",
 ):
-    collection = client.get_collection(
-        collection_type,
-        name,
+    collection = client.get_dataset(
+        dataset_type=collection_type,
+        dataset_name=name,
     )
 
-    record_names = list(collection.data.records)
+    record_names = collection.entry_names
 
     return collection, record_names
 
 
 def get_graph(collection, record_name):
     # get record and trajectory
-    record = collection.get_record(record_name, specification="default")
+    record = collection.get_record(record_name, specification_name="default")
     entry = collection.get_entry(record_name)
     from openff.toolkit.topology import Molecule
 
     mol = Molecule.from_qcschema(entry)
 
     try:
-        trajectory = record.get_trajectory()
+        trajectory = record.trajectory
     except:
         return None
 
@@ -62,7 +62,7 @@ def get_graph(collection, record_name):
     g.nodes["g"].data["u_ref"] = torch.tensor(
         [
             Quantity(
-                snapshot.properties.scf_total_energy,
+                snapshot.properties["scf_total_energy"],
                 esp.units.HARTREE_PER_PARTICLE,
             ).value_in_unit(esp.units.ENERGY_UNIT)
             for snapshot in trajectory
@@ -74,7 +74,7 @@ def get_graph(collection, record_name):
         np.stack(
             [
                 Quantity(
-                    snapshot.get_molecule().geometry,
+                    snapshot.molecule.geometry,
                     unit.bohr,
                 ).value_in_unit(esp.units.DISTANCE_UNIT)
                 for snapshot in trajectory
@@ -89,7 +89,7 @@ def get_graph(collection, record_name):
         [
             torch.tensor(
                 Quantity(
-                    snapshot.dict()["return_result"],
+                    np.array(snapshot.properties["return_result"]).reshape((-1, 3)),
                     esp.units.HARTREE_PER_PARTICLE / unit.bohr,
                 ).value_in_unit(esp.units.FORCE_UNIT),
                 dtype=torch.get_default_dtype(),
@@ -147,7 +147,7 @@ def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
 
 
 def get_energy_and_gradient(
-    snapshot: ptl.models.records.ResultRecord,
+        snapshot: ptl.models.records.ResultRecord,
 ) -> Tuple[float, np.ndarray]:
     """Note: force = - gradient"""
 
@@ -184,9 +184,9 @@ def h5_to_dataset(df):
         g = esp.Graph(mol_ref)
 
         u_ref = np.concatenate(group["energies"].values)
-        u_ref_prime = np.concatenate(
-            group["gradients"].values, axis=0
-        ).transpose(1, 0, 2)
+        u_ref_prime = np.concatenate(group["gradients"].values, axis=0).transpose(
+            1, 0, 2
+        )
         xyz = np.concatenate(group["xyz"].values, axis=0).transpose(1, 0, 2)
 
         assert u_ref_prime.shape[0] == xyz.shape[0] == mol_ref.n_atoms
@@ -229,7 +229,7 @@ def breakdown_along_time_axis(g, batch_size=32):
 
     shuffle(idxs)
     chunks = [
-        idxs[_idx * batch_size : (_idx + 1) * batch_size]
+        idxs[_idx * batch_size: (_idx + 1) * batch_size]
         for _idx in range(n_snapshots // batch_size)
     ]
 
@@ -259,10 +259,7 @@ def make_batch_size_consistent(ds, batch_size=32):
     return esp.data.dataset.GraphDataset(
         list(
             itertools.chain.from_iterable(
-                [
-                    breakdown_along_time_axis(g, batch_size=batch_size)
-                    for g in ds
-                ]
+                [breakdown_along_time_axis(g, batch_size=batch_size) for g in ds]
             )
         )
     )
