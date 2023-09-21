@@ -26,9 +26,9 @@ def get_client():
 
 
 def get_collection(
-    client,
-    collection_type="optimization",
-    name="OpenFF Full Optimization Benchmark 1",
+        client,
+        collection_type="optimization",
+        name="OpenFF Full Optimization Benchmark 1",
 ):
     collection = client.get_dataset(
         dataset_type=collection_type,
@@ -99,7 +99,7 @@ def process_record(record, entry):
     return g
 
 
-def get_graph(collection, record_name, spec_name="default")):
+def get_graph(collection, record_name, spec_name="default"):
     # get record and trajectory
     record = collection.get_record(record_name, specification_name=spec_name)
     entry = collection.get_entry(record_name)
@@ -110,22 +110,10 @@ def get_graph(collection, record_name, spec_name="default")):
 
 
 def get_graphs(collection, record_names, spec_name="default"):
-    """
-
-    Parameters
-    ----------
-    collection :
-    record_names
-
-    Returns
-    -------
-
-    """
     g_list = []
     for record, entry in zip(
-
-        collection.iterate_records(record_names, specification_names=[spec_name]),
-        collection.iterate_entries(record_names),
+            collection.iterate_records(record_names, specification_names=[spec_name]),
+            collection.iterate_entries(record_names),
     ):
         g = process_record(record, entry)
         g_list.append(g)
@@ -251,7 +239,7 @@ def breakdown_along_time_axis(g, batch_size=32):
 
     shuffle(idxs)
     chunks = [
-        idxs[_idx * batch_size : (_idx + 1) * batch_size]
+        idxs[_idx * batch_size: (_idx + 1) * batch_size]
         for _idx in range(n_snapshots // batch_size)
     ]
 
