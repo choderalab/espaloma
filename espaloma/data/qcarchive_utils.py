@@ -27,7 +27,7 @@ def get_client():
 
 def get_collection(
         client,
-        collection_type="OptimizationDataset",
+        collection_type="optimization",
         name="OpenFF Full Optimization Benchmark 1",
 ):
     collection = client.get_dataset(

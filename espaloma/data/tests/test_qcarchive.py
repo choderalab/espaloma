@@ -15,7 +15,7 @@ def test_get_graph():
 
 
 def test_get_torsiondrive():
-    import espaloma.data.qcarchive_utils
+    from espaloma.data import qcarchive_utils
     import numpy as np
 
     record_name = "[h]c1c(c(c(c([c:1]1[n:2]([c:3](=[o:4])c(=c([h])[h])[h])c([h])([h])[h])[h])[h])n(=o)=o)[h]"
