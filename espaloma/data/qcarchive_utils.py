@@ -46,7 +46,7 @@ def get_graph(collection, record_name):
     entry = collection.get_entry(record_name)
     from openff.toolkit.topology import Molecule
 
-    mol = Molecule.from_qcschema(entry)
+    mol = Molecule.from_qcschema(entry.dict())
 
     try:
         trajectory = record.trajectory
