@@ -102,10 +102,10 @@ def get_graph(collection, record_name):
     return g
 
 
-def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
-    molecule_optimization = record_info.optimizations
+def fetch_td_record(record: ptl.torsiondrive.record_models.TorsiondriveRecord):
+    molecule_optimization = record.optimizations
 
-    angle_keys = list(record_info.optimizations.keys())
+    angle_keys = list(molecule_optimization.keys())
 
     xyzs = []
     energies = []
@@ -116,9 +116,14 @@ def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
         # this gives the same value as the prior implementation, but I wonder if it
         # should be molecule_optimization[angle][-1] in both cases
         mol = molecule_optimization[angle][0].final_molecule
-        result = molecule_optimization[angle[0]][0].trajectory[-1].properties
+        result = molecule_optimization[angle][0].trajectory[-1].properties
 
-        e, g = get_energy_and_gradient(result)
+        """Note: force = - gradient"""
+
+        # TODO: attach units here? or later?
+
+        e = result["current energy"]
+        g = np.array(result["current gradient"]).reshape(-1, 3)
 
         xyzs.append(mol.geometry)
         energies.append(e)
@@ -146,19 +151,6 @@ def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
 
     # TODO: put this return blob into a better struct
     return flat_angles, xyz_in_order, energies_in_order, gradients_in_order
-
-
-def get_energy_and_gradient(
-        snapshot: ptl.models.records.ResultRecord,
-) -> Tuple[float, np.ndarray]:
-    """Note: force = - gradient"""
-
-    # TODO: attach units here? or later?
-
-    energy = snapshot["current energy"]
-    gradient = np.array(snapshot["current gradient"]).reshape(-1, 3)
-
-    return energy, gradient
 
 
 MolWithTargets = namedtuple(
