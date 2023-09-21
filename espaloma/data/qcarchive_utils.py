@@ -103,18 +103,20 @@ def get_graph(collection, record_name):
 
 
 def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
-    final_molecules = record.get_final_molecules()
-    final_results = record.get_final_results()
+    molecule_optimization = record_info.optimizations
 
-    angle_keys = list(final_molecules.keys())
+    angle_keys = list(record_info.optimizations.keys())
 
     xyzs = []
     energies = []
     gradients = []
 
     for angle in angle_keys:
-        result = final_results[angle]
-        mol = final_molecules[angle]
+        # NOTE: this is calling the first index of the optimization array
+        # this gives the same value as the prior implementation, but I wonder if it
+        # should be molecule_optimization[angle][-1] in both cases
+        mol = molecule_optimization[angle][0].final_molecule
+        result = molecule_optimization[angle[0]][0].trajectory[-1].properties
 
         e, g = get_energy_and_gradient(result)
 
@@ -153,12 +155,9 @@ def get_energy_and_gradient(
 
     # TODO: attach units here? or later?
 
-    d = snapshot.dict()
-    qcvars = d["extras"]["qcvars"]
-    energy = qcvars["CURRENT ENERGY"]
-    flat_gradient = np.array(qcvars["CURRENT GRADIENT"])
-    num_atoms = len(flat_gradient) // 3
-    gradient = flat_gradient.reshape((num_atoms, 3))
+    energy = snapshot["current energy"]
+    gradient = np.array(snapshot["current gradient"]).reshape(-1, 3)
+
     return energy, gradient
 
 
