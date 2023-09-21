@@ -5,7 +5,7 @@ from collections import namedtuple
 from typing import Tuple
 
 import numpy as np
-import qcportal as ptl
+import qcportal
 import torch
 from openmm import unit
 from openmm.unit import Quantity
@@ -21,8 +21,22 @@ import espaloma as esp
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
-def get_client():
-    return ptl.PortalClient("api.qcarchive.molssi.org")
+def get_client(url: str = "api.qcarchive.molssi.org") -> qcportal.client.PortalClient:
+    """
+    Returns a instance of the qcportal client.
+
+    Parameters
+    ----------
+    url: str, default="api.qcarchive.molssi.org"
+        qcportal instance to connect
+
+    Returns
+    -------
+    qcportal.client.PortalClient
+        qcportal client instance.
+    """
+    # Note, this may need to be modified to include username/password for non-public servers
+    return qcportal.PortalClient(url)
 
 
 def get_collection(
@@ -30,6 +44,25 @@ def get_collection(
         collection_type="optimization",
         name="OpenFF Full Optimization Benchmark 1",
 ):
+    """
+    Connects to a specific dataset on qcportal
+
+    Parameters
+    ----------
+    client: qcportal.client, required
+        The qcportal client instance
+    collection_type: str, default="optimization"
+        The type of qcarchive collection, options are
+        "torsiondrive", "optimization", "gridoptimization", "reaction", "singlepoint" "manybody"
+    name: str, default="OpenFF Full Optimization Benchmark 1"
+        Name of the dataset
+
+    Returns
+    -------
+    (qcportal dataset, list(str))
+        Tuple with an instance of qcportal dataset and list of record names
+
+    """
     collection = client.get_dataset(
         dataset_type=collection_type,
         dataset_name=name,
@@ -41,6 +74,10 @@ def get_collection(
 
 
 def process_record(record, entry):
+    """
+    Processes a given record/entry pair from a dataset and returns the graph
+    """
+
     from openff.toolkit.topology import Molecule
 
     mol = Molecule.from_qcschema(entry.dict())
@@ -100,6 +137,21 @@ def process_record(record, entry):
 
 
 def get_graph(collection, record_name, spec_name="default"):
+    """
+    Processes the qcportal data for a given record name.
+
+    Parameters
+    ----------
+    collection, qcportal dataset, required
+        The instance of the qcportal dataset
+    record_name, str, required
+        The name of a give record
+    spec_name, str, default="default"
+        Retrieve data for a given qcportal specification.
+    Returns
+    -------
+        Graph
+    """
     # get record and trajectory
     record = collection.get_record(record_name, specification_name=spec_name)
     entry = collection.get_entry(record_name)
@@ -110,6 +162,24 @@ def get_graph(collection, record_name, spec_name="default"):
 
 
 def get_graphs(collection, record_names, spec_name="default"):
+    """
+    Processes the qcportal data for a given set of record names.
+    This uses the qcportal iteration functions which are faster than processing
+    records one at a time
+
+    Parameters
+    ----------
+    collection, qcportal dataset, required
+        The instance of the qcportal dataset
+    record_name, str, required
+        The name of a give record
+    spec_name, str, default="default"
+        Retrieve data for a given qcportal specification.
+    Returns
+    -------
+    list(graph)
+        Returns a list of the corresponding graph for each record name
+    """
     g_list = []
     for record, entry in zip(
             collection.iterate_records(record_names, specification_names=[spec_name]),
@@ -121,7 +191,7 @@ def get_graphs(collection, record_names, spec_name="default"):
     return g_list
 
 
-def fetch_td_record(record: ptl.torsiondrive.record_models.TorsiondriveRecord):
+def fetch_td_record(record: qcportal.torsiondrive.record_models.TorsiondriveRecord):
     molecule_optimization = record.optimizations
 
     angle_keys = list(molecule_optimization.keys())
