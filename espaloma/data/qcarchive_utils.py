@@ -202,7 +202,10 @@ def fetch_td_record(record: qcportal.torsiondrive.record_models.TorsiondriveReco
     Returns
     -------
     tuple, ( numpy.array, numpy.array, numpy.array,numpy.array)
-        Returned data represents flat_angles, xyz_in_order, energies_in_order, gradients_in_order
+        Returned data is a tuple of numpy arrays.
+        The first index contains angles and subsequent arrays represent
+        molecule coordinate, energy and gradients associated with each angle.
+
     """
     molecule_optimization = record.optimizations
 
