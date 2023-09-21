@@ -27,7 +27,7 @@ def test_get_torsiondrive():
     collection, record_names = qcarchive_utils.get_collection(
         qcarchive_utils.get_client(), collection_type, name
     )
-    record_info = collection.get_record(record_names, specification_name="default")
+    record_info = collection.get_record(record_name, specification_name="default")
 
     (
         flat_angles,
