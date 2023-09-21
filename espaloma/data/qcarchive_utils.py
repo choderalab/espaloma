@@ -192,6 +192,18 @@ def get_graphs(collection, record_names, spec_name="default"):
 
 
 def fetch_td_record(record: qcportal.torsiondrive.record_models.TorsiondriveRecord):
+    """
+    Fetches configuration, energy, and gradients for a given torsiondrive record as a function of different angles.
+
+    Parameters
+    ----------
+    record: qcportal.torsiondrive.record_models.TorsiondriveRecord, required
+        Torsiondrive record of interest
+    Returns
+    -------
+    tuple, ( numpy.array, numpy.array, numpy.array,numpy.array)
+        Returned data represents flat_angles, xyz_in_order, energies_in_order, gradients_in_order
+    """
     molecule_optimization = record.optimizations
 
     angle_keys = list(molecule_optimization.keys())
@@ -202,8 +214,9 @@ def fetch_td_record(record: qcportal.torsiondrive.record_models.TorsiondriveReco
 
     for angle in angle_keys:
         # NOTE: this is calling the first index of the optimization array
-        # this gives the same value as the prior implementation, but I wonder if it
-        # should be molecule_optimization[angle][-1] in both cases
+        # this gives the same value as the prior implementation.
+        # however it seems to be that this contains multiple different initial configurations
+        # that have been optimized.  Should all conformers and energies/gradients be considered?
         mol = molecule_optimization[angle][0].final_molecule
         result = molecule_optimization[angle][0].trajectory[-1].properties
 
