@@ -30,6 +30,5 @@ dependencies:
   - nose
   - nose-timer
   - coverage
-  - qcportal>=0.50
   - sphinx
   - sphinx_rtd_theme
