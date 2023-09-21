@@ -19,7 +19,8 @@ dependencies:
   - openmmforcefields >=0.11.2
   - tqdm
   - pydantic <2  # We need our deps to fix this
-  - dgl =1.1.0
+  - dgl =1.1.2
+  - qcportal =0.15.8
   # Testing
   - pytest
   - pytest-cov
