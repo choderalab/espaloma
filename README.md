@@ -23,10 +23,10 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 # Installation
 
 ```bash
-$ conda install -c conda-forge -c dglteam "espaloma=0.3.1" "dgl<1"
+$ conda install -c conda-forge "espaloma=0.3.2"
 ```
 
-# Example: Deploy espaloma 0.3.1 pretrained force field to arbitrary MM system
+# Example: Deploy espaloma 0.3.2 pretrained force field to arbitrary MM system
 
 ```python  
 # imports
@@ -51,7 +51,7 @@ espaloma_model(molecule_graph.heterograph)
 openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 ```
 
-If using espaloma from a local `.pt` file, say for example `espaloma-0.3.1.pt`,
+If using espaloma from a local `.pt` file, say for example `espaloma-0.3.2.pt`,
 then you would need to run the `eval` method of the model to get the correct
 inference/predictions, as follows:
 
@@ -59,7 +59,7 @@ inference/predictions, as follows:
 import torch
 ...
 # load local pretrained model
-espaloma_model = torch.load("espaloma-0.3.1.pt")
+espaloma_model = torch.load("espaloma-0.3.2.pt")
 espaloma_model.eval()
 ...
 ```
