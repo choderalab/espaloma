@@ -24,8 +24,8 @@ def test_singlepoint():
 
     name = "QM9"
     collection_type = "singlepoint"
-    collection, record_names = get_collection(
-        get_client("ml.qcarchive.molssi.org"), collection_type, name
+    collection, record_names = qcarchive_utils.get_collection(
+        qcarchive_utils.get_client("ml.qcarchive.molssi.org"), collection_type, name
     )
 
     record_name = record_names[0]
@@ -39,8 +39,8 @@ def test_notsupported_dataset():
 
     name = "DBH24"
     collection_type = "reaction"
-    collection, record_names = get_collection(
-        get_client("ml.qcarchive.molssi.org"), collection_type, name
+    collection, record_names = qcarchive_utils.get_collection(
+        qcarchive_utils.get_client("ml.qcarchive.molssi.org"), collection_type, name
     )
     record_name = record_names[0]
 
