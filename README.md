@@ -23,10 +23,10 @@ We show that this approach is not only sufficiently expressive to reproduce lega
 # Installation
 
 ```bash
-$ conda install -c conda-forge -c dglteam "espaloma=0.3.1" "dgl<1"
+$ conda install -c conda-forge "espaloma=0.3.2"
 ```
 
-# Example: Deploy espaloma 0.3.1 pretrained force field to arbitrary MM system
+# Example: Deploy espaloma 0.3.2 pretrained force field to arbitrary MM system
 
 ```python  
 # imports
@@ -51,7 +51,7 @@ espaloma_model(molecule_graph.heterograph)
 openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 ```
 
-If using espaloma from a local `.pt` file, say for example `espaloma-0.3.1.pt`,
+If using espaloma from a local `.pt` file, say for example `espaloma-0.3.2.pt`,
 then you would need to run the `eval` method of the model to get the correct
 inference/predictions, as follows:
 
@@ -59,12 +59,25 @@ inference/predictions, as follows:
 import torch
 ...
 # load local pretrained model
-espaloma_model = torch.load("espaloma-0.3.1.pt")
+espaloma_model = torch.load("espaloma-0.3.2.pt")
 espaloma_model.eval()
 ...
 ```
 
 The rest of the code should be the same as in the previous code block example.
+
+# Compatible models
+
+Below is a compatibility matrix for different versions of `espaloma` code and `espaloma` models (the `.pt` file).
+
+| Model 🧪             | DOI 📝 | Supported Espaloma version 💻 | Release Date 🗓️ | Espaloma architecture change 📐? |
+|---------------------|-------|------------------------------|----------------|---------------------------------|
+| `espaloma-0.3.2.pt` |       | 0.3.1, 0.3.2                 | Sep 22, 2023   | ✅ No                            |
+| `espaloma-0.3.1.pt` |       | 0.3.1, 0.3.2                 | Jul 17, 2023   | ⚠️ Yes                           |
+| `espaloma-0.3.0.pt` |       | 0.3.0                        | Apr 26, 2023   | ⚠️Yes                            |
+
+> [!NOTE]  
+> `espaloma-0.3.1.pt` and `espaloma-0.3.2.pt` are the same model.
 
 # Using espaloma to parameterize small molecules in relative free energy calculations
 
