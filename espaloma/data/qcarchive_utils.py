@@ -82,13 +82,17 @@ def process_record(record, entry):
 
     mol = Molecule.from_qcschema(entry.dict())
 
-    try:
+    if record.record_type == "optimization":
         trajectory = record.trajectory
-    except:
-        return None
-
-    if trajectory is None:
-        return None
+        if trajectory is None:
+            return None
+    elif record.record_type == "singlepoint":
+        # the syntax for energy would be the same if we just place
+        trajectory = [record]
+    else:
+        raise Exception(
+            f"{record.record_type} is not supported: only optimization and singlepoint datasets can be processed."
+        )
 
     g = esp.Graph(mol)
 
@@ -104,21 +108,38 @@ def process_record(record, entry):
         dtype=torch.get_default_dtype(),
     )[None, :]
 
-    g.nodes["n1"].data["xyz"] = torch.tensor(
-        np.stack(
-            [
-                Quantity(
-                    snapshot.molecule.geometry,
-                    unit.bohr,
-                ).value_in_unit(esp.units.DISTANCE_UNIT)
-                for snapshot in trajectory
-            ],
-            axis=1,
-        ),
-        requires_grad=True,
-        dtype=torch.get_default_dtype(),
-    )
-
+    if record.record_type == "optimization":
+        g.nodes["n1"].data["xyz"] = torch.tensor(
+            np.stack(
+                [
+                    Quantity(
+                        snapshot.molecule.geometry,
+                        unit.bohr,
+                    ).value_in_unit(esp.units.DISTANCE_UNIT)
+                    for snapshot in trajectory
+                ],
+                axis=1,
+            ),
+            requires_grad=True,
+            dtype=torch.get_default_dtype(),
+        )
+    elif record.record_type == "singlepoint":
+        # singlepoint datasets have configuration stored in entry
+        # rather than in the trajectory.
+        g.nodes["n1"].data["xyz"] = torch.tensor(
+            np.stack(
+                [
+                    Quantity(
+                        entry.molecule.geometry,
+                        unit.bohr,
+                    ).value_in_unit(esp.units.DISTANCE_UNIT)
+                    for snapshot in trajectory
+                ],
+                axis=1,
+            ),
+            requires_grad=True,
+            dtype=torch.get_default_dtype(),
+        )
     g.nodes["n1"].data["u_ref_prime"] = torch.stack(
         [
             torch.tensor(
@@ -139,6 +160,8 @@ def process_record(record, entry):
 def get_graph(collection, record_name, spec_name="default"):
     """
     Processes the qcportal data for a given record name.
+
+    This supports optimization and singlepoint datasets.
 
     Parameters
     ----------
@@ -165,7 +188,10 @@ def get_graphs(collection, record_names, spec_name="default"):
     """
     Processes the qcportal data for a given set of record names.
     This uses the qcportal iteration functions which are faster than processing
-    records one at a time
+    records one at a time.
+
+    This supports optimization and singlepoint datasets.
+
 
     Parameters
     ----------
