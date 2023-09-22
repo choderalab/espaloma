@@ -80,8 +80,6 @@ def process_record(record, entry):
 
     from openff.toolkit.topology import Molecule
 
-    mol = Molecule.from_qcschema(entry.dict())
-
     if record.record_type == "optimization":
         trajectory = record.trajectory
         if trajectory is None:
@@ -93,6 +91,7 @@ def process_record(record, entry):
         raise Exception(
             f"{record.record_type} is not supported: only optimization and singlepoint datasets can be processed."
         )
+    mol = Molecule.from_qcschema(entry.dict())
 
     g = esp.Graph(mol)
 
