@@ -22,7 +22,7 @@ def test_get_graph():
 def test_singlepoint():
     from espaloma.data import qcarchive_utils
 
-    name = "QM9"
+    name = "SPICE PubChem Set 1 Single Points Dataset v1.2"
     collection_type = "singlepoint"
     collection, record_names = qcarchive_utils.get_collection(
         qcarchive_utils.get_client("ml.qcarchive.molssi.org"), collection_type, name
@@ -31,7 +31,7 @@ def test_singlepoint():
     record_name = record_names[0]
 
     with pytest.raises(Exception):
-        graph = qcarchive_utils.get_graph(collection, record_name, spec_name="spec_2")
+        graph = qcarchive_utils.get_graph(collection, record_name, spec_name="spec_1")
 
 
 def test_notsupported_dataset():
