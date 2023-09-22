@@ -12,6 +12,11 @@ def test_get_graph():
     collection, record_names = qcarchive_utils.get_collection(client)
     record_name = record_names[0]
     graph = qcarchive_utils.get_graph(collection, record_name)
+    assert graph is not None
+
+    graphs = qcarchive_utils.get_graphs(collection, record_names[0:2])
+    assert len(graphs) == 2
+    assert graphs[0] is not None
 
 
 def test_get_torsiondrive():
