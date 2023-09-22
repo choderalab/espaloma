@@ -76,6 +76,17 @@ def get_collection(
 def process_record(record, entry):
     """
     Processes a given record/entry pair from a dataset and returns the graph
+
+    Parameters
+    ----------
+    record: qcportal.optimization.record_models.OptimizationRecord
+        qcportal record
+    entry: cportal.optimization.dataset_models.OptimizationDatasetEntry
+        qcportal entry
+
+    Returns
+    -------
+        esp.Graph
     """
 
     from openff.toolkit.topology import Molecule
@@ -84,12 +95,9 @@ def process_record(record, entry):
         trajectory = record.trajectory
         if trajectory is None:
             return None
-    elif record.record_type == "singlepoint":
-        # the syntax for energy would be the same if we just place
-        trajectory = [record]
     else:
         raise Exception(
-            f"{record.record_type} is not supported: only optimization and singlepoint datasets can be processed."
+            f"{record.record_type} is not supported: only optimization datasets can be processed."
         )
     mol = Molecule.from_qcschema(entry.dict())
 
@@ -107,38 +115,21 @@ def process_record(record, entry):
         dtype=torch.get_default_dtype(),
     )[None, :]
 
-    if record.record_type == "optimization":
-        g.nodes["n1"].data["xyz"] = torch.tensor(
-            np.stack(
-                [
-                    Quantity(
-                        snapshot.molecule.geometry,
-                        unit.bohr,
-                    ).value_in_unit(esp.units.DISTANCE_UNIT)
-                    for snapshot in trajectory
-                ],
-                axis=1,
-            ),
-            requires_grad=True,
-            dtype=torch.get_default_dtype(),
-        )
-    elif record.record_type == "singlepoint":
-        # singlepoint datasets have configuration stored in entry
-        # rather than in the trajectory.
-        g.nodes["n1"].data["xyz"] = torch.tensor(
-            np.stack(
-                [
-                    Quantity(
-                        entry.molecule.geometry,
-                        unit.bohr,
-                    ).value_in_unit(esp.units.DISTANCE_UNIT)
-                    for snapshot in trajectory
-                ],
-                axis=1,
-            ),
-            requires_grad=True,
-            dtype=torch.get_default_dtype(),
-        )
+    g.nodes["n1"].data["xyz"] = torch.tensor(
+        np.stack(
+            [
+                Quantity(
+                    snapshot.molecule.geometry,
+                    unit.bohr,
+                ).value_in_unit(esp.units.DISTANCE_UNIT)
+                for snapshot in trajectory
+            ],
+            axis=1,
+        ),
+        requires_grad=True,
+        dtype=torch.get_default_dtype(),
+    )
+
     g.nodes["n1"].data["u_ref_prime"] = torch.stack(
         [
             torch.tensor(

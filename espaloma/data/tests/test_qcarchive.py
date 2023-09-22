@@ -19,21 +19,6 @@ def test_get_graph():
     assert graphs[0] is not None
 
 
-def test_singlepoint():
-    from espaloma.data import qcarchive_utils
-
-    name = "SPICE PubChem Set 1 Single Points Dataset v1.2"
-    collection_type = "singlepoint"
-    collection, record_names = qcarchive_utils.get_collection(
-        qcarchive_utils.get_client("ml.qcarchive.molssi.org"), collection_type, name
-    )
-
-    record_name = record_names[0]
-
-    with pytest.raises(Exception):
-        graph = qcarchive_utils.get_graph(collection, record_name, spec_name="spec_2")
-
-
 def test_notsupported_dataset():
     from espaloma.data import qcarchive_utils
 
@@ -44,7 +29,8 @@ def test_notsupported_dataset():
     )
     record_name = record_names[0]
 
-    graph = qcarchive_utils.get_graph(collection, record_name, spec_name="spec_2")
+    with pytest.raises(Exception):
+        graph = qcarchive_utils.get_graph(collection, record_name, spec_name="spec_2")
 
 
 def test_get_torsiondrive():
