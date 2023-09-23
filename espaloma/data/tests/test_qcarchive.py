@@ -39,7 +39,7 @@ def test_get_torsiondrive():
 
     record_name = "[h]c1c(c(c(c([c:1]1[n:2]([c:3](=[o:4])c(=c([h])[h])[h])c([h])([h])[h])[h])[h])n(=o)=o)[h]"
 
-    # example dataset
+    # example dataset 
     name = "OpenFF Amide Torsion Set v1.0"
     collection_type = "torsiondrive"
 
