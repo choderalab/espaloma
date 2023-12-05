@@ -10,13 +10,6 @@ from .metrics import GraphMetric
 from .mm.geometry import *
 from .utils.model_fetch import get_model, get_model_path
 
-# Add imports here
-# import espaloma
-
-
-# Handle versioneer
-from ._version import get_versions
-
 #
 # from openff.toolkit.utils.toolkits import ToolkitRegistry, OpenEyeToolkitWrapper, RDKitToolkitWrapper, AmberToolsToolkitWrapper
 # toolkit_registry = ToolkitRegistry()
@@ -24,8 +17,5 @@ from ._version import get_versions
 # [ toolkit_registry.register_toolkit(toolkit) for toolkit in toolkit_precedence if toolkit.is_available() ]
 #
 
-
-versions = get_versions()
-__version__ = versions["version"]
-__git_revision__ = versions["full-revisionid"]
-del get_versions, versions
+from . import _version
+__version__ = _version.get_versions()['version']
