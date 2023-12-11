@@ -147,16 +147,11 @@ class LegacyForceField:
         mol = g.mol
 
         from rdkit.Chem import AllChem
-        from rdkit import Chem
-
-        SM = mol.to_smiles()
-        m = Chem.MolFromSmiles(SM)
-        m2=Chem.AddHs(m)
-
         import rdkit.Chem.rdForceFieldHelpers as ff
-        mmff = ff.MMFFGetMoleculeProperties(m2)
+        mol = mol.to_rdkit()
+        mmff = ff.MMFFGetMoleculeProperties(mol)
 
-        mmff_types = [mmff.GetMMFFAtomType(i) for i in range(m2.GetNumAtoms())]
+        mmff_types = [mmff.GetMMFFAtomType(i) for i in range(mol.GetNumAtoms())]
 
         # put types into graph object
         if g is None: # really needed?
