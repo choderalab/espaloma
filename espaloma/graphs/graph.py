@@ -3,9 +3,9 @@
 # =============================================================================
 import abc
 import io
+import openff.toolkit
 
 import espaloma as esp
-import openff.toolkit
 
 
 # =============================================================================
@@ -46,7 +46,7 @@ class Graph(BaseGraph):
     """
 
     def __init__(self, mol=None, homograph=None, heterograph=None):
-        # TODO : more pythonic way allow multipcalle constructors:
+        # TODO : more pythonic way allow multiple constructors:
         #   Graph.from_smiles(...), Graph.from_mol(...), Graph.from_homograph(...), ...
         #   rather than Graph(mol=None, homograph=None, ...)
 
@@ -69,12 +69,11 @@ class Graph(BaseGraph):
         self.heterograph = heterograph
 
     def save(self, path):
-        import json
         import os
-
+        import json
         import dgl
 
-        os.makedirs(path, exist_ok=True)
+        os.mkdir(path)
         dgl.save_graphs(path + "/homograph.bin", [self.homograph])
         dgl.save_graphs(path + "/heterograph.bin", [self.heterograph])
         with open(path + "/mol.json", "w") as f_handle:
@@ -83,7 +82,6 @@ class Graph(BaseGraph):
     @classmethod
     def load(cls, path):
         import json
-
         import dgl
 
         homograph = dgl.load_graphs(path + "/homograph.bin")[0][0]
@@ -104,9 +102,6 @@ class Graph(BaseGraph):
             mol_dict = json.load(io.StringIO(mol))
             if "hierarchy_schemes" not in mol_dict.keys():
                 mol_dict["hierarchy_schemes"] = dict()  # Default to empty dict if not present
-
-            if "partial_charges_unit" in mol_dict.keys():
-                mol_dict['partial_charge_unit'] = mol_dict['partial_charges_unit']
             mol = Molecule.from_dict(mol_dict)
 
         g = cls(mol=mol, homograph=homograph, heterograph=heterograph)
