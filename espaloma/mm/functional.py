@@ -90,8 +90,9 @@ def quartic_expansion(x, k, eq, order=[2]):
     delta = ((x - eq))
     delta_squared =((x - eq)).pow(order[:, None, None])
     cs = -2
-    
+    breakpoint()
     out = k * delta_squared / 2 * (1 + cs * delta + 7/12 * cs**2 * delta_squared)
+    # 1 x N_atoms x 50
     return out.permute(1, 2, 0).sum(dim=-1)
 
 
