@@ -33,6 +33,33 @@ def harmonic_angle(x, k, eq):
     return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
 
+def harmonic_angle_mmff(x, k, eq):
+    """Harmonic angle energy.
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, `shape = (batch_size, 1)`
+        angle value
+    k : `torch.Tensor`, `shape = (batch_size, 1)`
+        force constant
+    eq : `torch.Tensor`, `shape = (batch_size, 1)`
+        equilibrium angle
+
+    Returns
+    -------
+    u : `torch.Tensor`, `shape = (batch_size, 1)`
+        energy
+
+    """
+    # NOTE:
+    # the constant 0.5 is included here but not in the functional forms
+
+    # NOTE:
+    
+    return 0.043844 * esp.mm.functional.cubic_expansion(x=x, k=k, eq=eq)
+
+
+
 def linear_mixture_angle(x, coefficients, phases):
     """Angle energy with Linear basis function.
 

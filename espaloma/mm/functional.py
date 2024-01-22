@@ -2,9 +2,9 @@
 # IMPORTS
 # =============================================================================
 import math
-import torch
-import espaloma as esp
 
+import espaloma as esp
+import torch
 # =============================================================================
 # CONSTANTS
 # =============================================================================
@@ -57,6 +57,43 @@ def harmonic(x, k, eq, order=[2]):
         * k
         * ((x - eq)).pow(order[:, None, None]).permute(1, 2, 0).sum(dim=-1)
     )
+
+def cubic_expansion(x, k, eq, order=[2]):
+    """
+    Cubic expansion, eq (3) from Merck94
+    """
+    if isinstance(order, list):
+        order = torch.tensor(order, device=x.device)
+
+    
+    delta = ((x - eq))
+    delta_squared =((x - eq)).pow(order[:, None, None])
+    cb = -0.007
+    
+    out = k * delta_squared / 2 * (1 + cb * delta)
+    return out.permute(1, 2, 0).sum(dim=-1)
+
+
+def quartic_expansion(x, k, eq, order=[2]):
+    """
+    Eq (2) MMFF94
+
+    Delta_r = x - eq
+    k force constant md/A
+    cs A
+
+    """
+    if isinstance(order, list):
+        order = torch.tensor(order, device=x.device)
+
+    
+    delta = ((x - eq))
+    delta_squared =((x - eq)).pow(order[:, None, None])
+    cs = -2
+    
+    out = k * delta_squared / 2 * (1 + cs * delta + 7/12 * cs**2 * delta_squared)
+    return out.permute(1, 2, 0).sum(dim=-1)
+
 
 
 def periodic_fixed_phases(
@@ -185,6 +222,13 @@ def periodic(
 
     return energy
 
+def torsion_merck():
+    """
+    cos_n_theta_minus_phases multiplied by constants
+    MMFF94
+    """
+    pass
+
 
 # simple implementation
 # def harmonic(x, k, eq):
@@ -198,7 +242,6 @@ def periodic(
 #     c = ((ka * a + kb * b) / (ka + kb)) ** 2 - a ** 2 - b ** 2
 #
 #     return ka * (x - a) ** 2 + kb * (x - b) ** 2
-
 
 def lj(
     x,

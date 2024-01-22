@@ -33,6 +33,32 @@ def harmonic_bond(x, k, eq):
     return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
 
+def harmonic_bond_mmff(x, k, eq):
+    """Harmonic bond energy.
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, `shape = (batch_size, 1)`
+        bond length
+    k : `torch.Tensor`, `shape = (batch_size, 1)`
+        force constant
+    eq : `torch.Tensor`, `shape = (batch_size, 1)`
+        equilibrium bond length
+
+    Returns
+    -------
+    u : `torch.Tensor`, `shape = (batch_size, 1)`
+        energy
+
+    """
+    # NOTE:
+    # the constant is included here but not in the functional forms
+
+    return (143.9325 * esp.mm.functional.quartic_expansion(x=x, k=k, eq=eq)).float()
+
+
+
+
 def gaussian_bond(x, coefficients):
     """Bond energy with Gaussian basis function."""
     return esp.mm.functional.gaussian(

@@ -1,9 +1,8 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
-
 import espaloma as esp
+import torch
 
 
 # =============================================================================
@@ -20,6 +19,20 @@ def apply_bond(nodes, suffix=""):
             eq=nodes.data["eq%s" % suffix],
         )
     }
+
+
+def apply_bond_mmff(nodes, suffix=""):
+    """Bond energy in nodes."""
+    # if suffix == '_ref':
+    return {
+        "u%s"
+        % suffix: esp.mm.bond.harmonic_bond_mmff( # change for MMFF
+            x=nodes.data["x"],
+            k=nodes.data["k%s" % suffix],
+            eq=nodes.data["eq%s" % suffix],
+        )
+    }
+
 
     # else:
     #     return {
@@ -41,6 +54,19 @@ def apply_angle(nodes, suffix=""):
             eq=nodes.data["eq%s" % suffix],
         )
     }
+
+def apply_angle_mmff(nodes, suffix=""):
+    """Angle energy in nodes."""
+    return {
+        "u%s"
+        % suffix: esp.mm.angle.harmonic_angle_mmff(
+            x=nodes.data["x"],
+            k=nodes.data["k%s" % suffix],
+            eq=nodes.data["eq%s" % suffix],
+        )
+    }
+
+
 
 
 def apply_angle_ii(nodes, suffix=""):
@@ -393,6 +419,159 @@ def energy_in_graph(
     return g
 
 
+
+# =============================================================================
+# ENERGY IN GRAPH
+# =============================================================================
+def energy_in_graph_mmff(
+    g,
+    suffix="",
+    terms=["n2", "n3", "n4"],
+):  # "onefour", "nonbonded"]):
+    """Calculate the energy of a small molecule given parameters and geometry.
+
+    Parameters
+    ----------
+    g : `dgl.DGLHeteroGraph`
+        Input graph.
+
+    Returns
+    -------
+    g : `dgl.DGLHeteroGraph`
+        Output graph.
+
+    Notes
+    -----
+    This function modifies graphs in-place.
+
+    """
+    # TODO: this is all very restricted for now
+    # we need to make this better
+    import dgl
+
+    breakpoint()
+    if "n2" in terms:
+        # apply energy function
+
+        # if "coefficients%s" % suffix in g.nodes["n2"].data:
+        #     g.apply_nodes(
+        #         lambda node: apply_bond_linear_mixture(
+        #             node, suffix=suffix, phases=[1.5, 6.0]
+        #         ),
+        #         ntype="n2",
+        #     )
+        # else:
+        g.apply_nodes(
+            lambda node: apply_bond_mmff(node, suffix=suffix),
+            ntype="n2",
+        )
+
+    if "n3" in terms:
+        # if "coefficients%s" % suffix in g.nodes["n3"].data:
+        #     import math
+
+        #     g.apply_nodes(
+        #         lambda node: apply_angle_linear_mixture(
+        #             node, suffix=suffix, phases=[0.0, math.pi]
+        #         ),
+        #         ntype="n3",
+        #     )
+        # else:
+        g.apply_nodes(
+            lambda node: apply_angle_mmff(node, suffix=suffix),
+            ntype="n3",
+        )
+
+    if g.number_of_nodes("n4") > 0 and "n4" in terms:
+        g.apply_nodes(
+            lambda node: apply_torsion(node, suffix=suffix),
+            ntype="n4",
+        )
+
+    if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
+        g.apply_nodes(
+            lambda node: apply_improper_torsion(node, suffix=suffix),
+            ntype="n4_improper",
+        )
+
+    # if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:
+    #     g.apply_nodes(
+    #         lambda node: apply_nonbonded(node, suffix=suffix),
+    #         ntype="nonbonded",
+    #     )
+
+    # if g.number_of_nodes("onefour") > 0 and "onefour" in terms:
+    #     g.apply_nodes(
+    #         lambda node: apply_nonbonded(
+    #             node,
+    #             suffix=suffix,
+    #             scaling=0.5,
+    #         ),
+    #         ntype="onefour",
+    #     )
+
+    if "nonbonded" in terms or "onefour" in terms:
+        esp.mm.nonbonded.multiply_charges(g)
+
+    if "nonbonded" in terms and g.number_of_nodes("nonbonded") > 0:
+        g.apply_nodes(
+            lambda node: apply_coulomb(
+                node,
+                suffix=suffix,
+                scaling=1.0,
+            ),
+            ntype="nonbonded",
+        )
+
+    if "onefour" in terms and g.number_of_nodes("onefour") > 0:
+        g.apply_nodes(
+            lambda node: apply_coulomb(
+                node,
+                suffix=suffix,
+                # scaling=0.5,
+                scaling=0.8333333333333334,
+            ),
+            ntype="onefour",
+        )
+
+    # sum up energy
+    # bonded
+    g.multi_update_all(
+        {
+            "%s_in_g"
+            % term: (
+                dgl.function.copy_u(u="u%s" % suffix, out="m_%s" % term),
+                dgl.function.sum(
+                    msg="m_%s" % term, out="u_%s%s" % (term, suffix)
+                ),
+            )
+            for term in terms
+            if "u%s" % suffix in g.nodes[term].data
+        },
+        cross_reducer="sum",
+    )
+
+    g.apply_nodes(
+        lambda node: {
+            "u%s"
+            % suffix: sum(
+                node.data["u_%s%s" % (term, suffix)]
+                for term in terms
+                if "u_%s%s" % (term, suffix) in node.data
+            )
+        },
+        ntype="g",
+    )
+
+    if "u0" in g.nodes["g"].data:
+        g.apply_nodes(
+            lambda node: {"u": node.data["u"] + node.data["u0"]},
+            ntype="g",
+        )
+
+    return g
+
+
 def energy_in_graph_ii(
     g,
     suffix="",
@@ -439,6 +618,7 @@ class EnergyInGraph(torch.nn.Module):
         super(EnergyInGraph, self).__init__()
         self.args = args
         self.kwargs = kwargs
+        breakpoint()
 
     def forward(self, g):
         return energy_in_graph(g, *self.args, **self.kwargs)
@@ -454,9 +634,20 @@ class EnergyInGraphII(torch.nn.Module):
         return energy_in_graph_ii(g, *self.args, **self.kwargs)
 
 
+class EnergyInGraphMMFF(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super(EnergyInGraphMMFF, self).__init__()
+        self.args = args
+        self.kwargs = kwargs
+
+    def forward(self, g):
+        return energy_in_graph_mmff(g, *self.args, **self.kwargs)
+
+
 class CarryII(torch.nn.Module):
     def forward(self, g):
         import math
+
         import dgl
 
         g.multi_update_all(
