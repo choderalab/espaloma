@@ -1,9 +1,8 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
-
 import espaloma as esp
+import torch
 
 
 # =============================================================================
@@ -265,10 +264,10 @@ class JanossyPoolingImproper(torch.nn.Module):
         stack_permuts = lambda nodes, p: torch.cat(
             [nodes.data[f"h{i}"] for i in p], dim=1
         )
-
+        breakpoint()
         for big_idx in self.levels:
             inner_net = getattr(self, f"sequential_{big_idx}")
-
+            
             g.apply_nodes(
                 func=lambda nodes: {
                     feature: getattr(self, f"f_out_{big_idx}_to_{feature}")(
@@ -377,6 +376,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
         #   following the smirnoff trefoil convention [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
         #   https://github.com/openff.toolkit/openff.toolkit/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openff.toolkit/typing/engines/smirnoff/parameters.py#L3326-L3360
 
+        # TODO to check
         ## Set different permutations based on which definition of impropers
         ##  are being used
         permuts = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
@@ -407,7 +407,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
                 },
                 ntype=big_idx,
             )
-
+        breakpoint()
         return g
 
 

@@ -43,6 +43,10 @@ def apply_bond_mmff(nodes, suffix=""):
     #         )
     #     }
 
+def stretch_bend(self):
+    """
+    TODO copy from contribution 2 and 3 into eq 5
+    """
 
 def apply_angle(nodes, suffix=""):
     """Angle energy in nodes."""
@@ -171,7 +175,62 @@ def apply_torsion(nodes, suffix=""):
         }
 
 
+def apply_torsion(nodes, suffix=""):
+    """Torsion energy in nodes."""
+    return {
+        "u%s"
+        % suffix: esp.mm.torsion.periodic_torsion(
+            x=nodes.data["x"],
+            k=nodes.data["k%s" % suffix],
+        )
+    }
+
+def apply_torsion_mmff(nodes, suffix=""):
+    """Torsion energy in nodes."""
+    return {
+        "u%s"
+        % suffix: esp.mm.torsion.periodic_torsion_mmff(
+            x=nodes.data["x"],
+            k=nodes.data["k%s" % suffix],
+        )
+    }
+
+
+
+
 def apply_improper_torsion(nodes, suffix=""):
+    """Improper torsion energy in nodes."""
+    if (
+        "phases%s" % suffix in nodes.data
+        and "periodicity%s" % suffix in nodes.data
+    ):
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=nodes.data["phases%s" % suffix],
+                periodicity=nodes.data["periodicity%s" % suffix],
+            )
+        }
+
+    else:
+        n_multi = nodes.data["k%s" % suffix].shape[-1]
+        periodicity=list(range(1, n_multi+1))
+        phases=[0.0 for _ in range(n_multi)]
+        breakpoint()
+        return {
+            "u%s"
+            % suffix: esp.mm.torsion.periodic_torsion(
+                x=nodes.data["x"],
+                k=nodes.data["k%s" % suffix],
+                phases=phases,
+                periodicity=periodicity,
+            )
+        }
+
+
+def apply_improper_torsion_mmff(nodes, suffix=""):
     """Improper torsion energy in nodes."""
     if (
         "phases%s" % suffix in nodes.data
@@ -484,7 +543,7 @@ def energy_in_graph_mmff(
 
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
-            lambda node: apply_torsion(node, suffix=suffix),
+            lambda node: apply_torsion_mmff(node, suffix=suffix),
             ntype="n4",
         )
 
@@ -551,6 +610,7 @@ def energy_in_graph_mmff(
         cross_reducer="sum",
     )
 
+    
     g.apply_nodes(
         lambda node: {
             "u%s"
@@ -563,12 +623,13 @@ def energy_in_graph_mmff(
         ntype="g",
     )
 
+    breakpoint()
     if "u0" in g.nodes["g"].data:
         g.apply_nodes(
             lambda node: {"u": node.data["u"] + node.data["u0"]},
             ntype="g",
         )
-
+    
     return g
 
 

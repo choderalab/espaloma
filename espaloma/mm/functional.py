@@ -90,7 +90,7 @@ def quartic_expansion(x, k, eq, order=[2]):
     delta = ((x - eq))
     delta_squared =((x - eq)).pow(order[:, None, None])
     cs = -2
-    breakpoint()
+    
     out = k * delta_squared / 2 * (1 + cs * delta + 7/12 * cs**2 * delta_squared)
     # 1 x N_atoms x 50
     return out.permute(1, 2, 0).sum(dim=-1)
@@ -183,7 +183,7 @@ def periodic(
             device=x.device,
             dtype=torch.get_default_dtype(),
         )
-
+    
     if periodicity.ndim == 1:
         periodicity = periodicity[None, None, :].repeat(
             x.shape[0], x.shape[1], 1
@@ -223,12 +223,35 @@ def periodic(
 
     return energy
 
-def torsion_merck():
+def periodic_mmff(
+    x, k, periodicity=list(range(1, 4))
+):
     """
     cos_n_theta_minus_phases multiplied by constants
     MMFF94
     """
-    pass
+    if isinstance(periodicity, list):
+        periodicity = torch.tensor(
+            periodicity,
+            device=x.device,
+            dtype=torch.get_default_dtype(),
+        )
+    
+    if periodicity.ndim == 1:
+        periodicity = periodicity[None, None, :].repeat(
+            x.shape[0], x.shape[1], 1
+        )
+
+    elif periodicity.ndim == 2:
+        periodicity = periodicity[:, None, :].repeat(1, x.shape[1], 1)
+
+
+    n_theta = periodicity * x[:, :, None]
+    
+    cos_n_theta = n_theta.cos()
+    k = torch.nn.functional.relu(k[:, None, :].repeat(1, 1, x.shape[1]))
+
+    return k[:, :, 0] * (1 + cos_n_theta[:, :, 0]) + k[:, :, 1] * (1 - cos_n_theta[:, :, 1]) + k[:, :, 2] * (1 + cos_n_theta[:, :, 2])
 
 
 # simple implementation

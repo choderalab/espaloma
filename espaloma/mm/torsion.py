@@ -41,6 +41,40 @@ def periodic_torsion(
     # assert(out.shape == (len(x), 1))
     return out
 
+def periodic_torsion_mmff(
+    x, k, periodicity=list(range(1, 4))
+):
+    """Periodic torsion potential
+
+    Parameters
+    ----------
+    x : `torch.Tensor`, `shape = (batch_size, 1)`
+        Dihedral value.
+    k : `torch.Tensor`, `shape = (batch_size, n_phases)`
+        Force constants.
+    periodicity : `torch.Tensor`, `shape = (batch_size, n_phases)`
+        Periodicities
+    phases : `torch.Tensor`, `shape = (batch_size, n_phases)`
+        Phase offsets
+
+    Returns
+    -------
+    u : `torch.Tensor`, `shape = (batch_size, 1)`
+        Energy.
+
+    """
+
+    # NOTE:
+    # 0.5 because all torsions are calculated twice
+    out = 0.5 * esp.mm.functional.periodic_mmff(
+        x=x,
+        k=k,
+        periodicity=periodicity,
+    )
+    # assert(out.shape == (len(x), 1))
+    return out
+
+
 
 def angle_angle(
     u_angle_left,

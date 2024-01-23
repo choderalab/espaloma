@@ -2,8 +2,8 @@ import dgl
 import numpy as np
 import torch
 
-from .offmol_indices import improper_torsion_indices
 from ..graph import Graph
+from .offmol_indices import improper_torsion_indices
 
 
 def regenerate_impropers(g: Graph, improper_def="smirnoff"):
@@ -54,7 +54,7 @@ def regenerate_impropers(g: Graph, improper_def="smirnoff"):
     )
 
     hg.nodes["n4_improper"].data["idxs"] = torch.tensor(idxs)
-
+    
     g.heterograph = hg
 
     return g  # hg
