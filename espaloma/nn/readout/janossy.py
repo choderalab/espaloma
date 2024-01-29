@@ -101,6 +101,7 @@ class JanossyPooling(torch.nn.Module):
         # copy
         g.multi_update_all(
             {
+                
                 "n1_as_%s_in_n%s"
                 % (relationship_idx, big_idx): (
                     dgl.function.copy_u("h", "m%s" % relationship_idx),
@@ -264,7 +265,7 @@ class JanossyPoolingImproper(torch.nn.Module):
         stack_permuts = lambda nodes, p: torch.cat(
             [nodes.data[f"h{i}"] for i in p], dim=1
         )
-        breakpoint()
+
         for big_idx in self.levels:
             inner_net = getattr(self, f"sequential_{big_idx}")
             
@@ -407,7 +408,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
                 },
                 ntype=big_idx,
             )
-        breakpoint()
+
         return g
 
 
@@ -569,4 +570,161 @@ class LinearMixtureToOriginal(torch.nn.Module):
 
         g.nodes["n3"].data.pop("coefficients")
         g.nodes["n2"].data.pop("coefficients")
+        return g
+
+
+
+
+
+class JanossyPoolingStretchBend(torch.nn.Module):
+    """Janossy pooling (arXiv:1811.01900) to average node representation
+    for higher-order nodes.
+
+
+    """
+
+    def __init__(
+        self,
+        config,
+        in_features,
+        out_features={
+            5: ["k", "eq"],
+        },
+        out_features_dimensions=-1,
+        pool=torch.add,
+    ):
+        super(JanossyPoolingStretchBend, self).__init__()
+
+        # bookkeeping
+        self.out_features = out_features
+        self.levels = ["n23_stretch_bend"]
+        self.pool = pool
+
+        # get output features
+        mid_features = [x for x in config if isinstance(x, int)][-1]
+
+
+        # set up networks
+        for level in self.levels:
+
+            # set up individual sequential networks
+            setattr(
+                self,
+                "sequential_%s" % level,
+                esp.nn.sequential._Sequential(
+                    in_features=in_features * 4,
+                    config=config,
+                    layer=torch.nn.Linear,
+                ),
+            )
+
+            for feature, dimension in self.out_features.items():
+                setattr(
+                    self,
+                    "f_out_%s_to_%s" % (level, feature),
+                    torch.nn.Linear(
+                        mid_features,
+                        dimension,
+                    ),
+                )
+
+        # if 1 not in self.out_features:
+        #     return
+
+        # # atom level
+        # self.sequential_1 = esp.nn.sequential._Sequential(
+        #     in_features=in_features, config=config, layer=torch.nn.Linear
+        # )
+
+        # for feature, dimension in self.out_features[1].items():
+        #     setattr(
+        #         self,
+        #         "f_out_1_to_%s" % feature,
+        #         torch.nn.Linear(
+        #             mid_features,
+        #             dimension,
+        #         ),
+        #     )
+
+    def forward(self, g):
+        """Forward pass.
+
+        Parameters
+        ----------
+        g : dgl.DGLHeteroGraph,
+            input graph.
+        """
+        import dgl
+        breakpoint()
+        # copy
+        # g.multi_update_all(
+        #     {
+        #         "n1_as_%s_in_%s"
+        #         % (relationship_idx, big_idx): (
+        #             dgl.function.copy_u("h", "m%s" % relationship_idx),
+        #             dgl.function.mean(
+        #                 "m%s" % relationship_idx, "h%s" % relationship_idx
+        #             ),
+        #         )
+        #         for big_idx in self.levels
+        #         for relationship_idx in range(4)
+        #     },
+        #     cross_reducer="sum",
+        # )
+        breakpoint()
+        # pool
+        for big_idx in self.levels:
+
+            if g.number_of_nodes("n%s" % big_idx) == 0:
+                continue
+
+            g.apply_nodes(
+                func=lambda nodes: {
+                    feature: getattr(
+                        self, "f_out_%s_to_%s" % (big_idx, feature)
+                    )(
+                        self.pool(
+                            getattr(self, "sequential_%s" % big_idx)(
+                                None,
+                                torch.cat(
+                                    [
+                                        nodes.data["h%s" % relationship_idx]
+                                        for relationship_idx in range(big_idx)
+                                    ],
+                                    dim=1,
+                                ),
+                            ),
+                            getattr(self, "sequential_%s" % big_idx)(
+                                None,
+                                torch.cat(
+                                    [
+                                        nodes.data["h%s" % relationship_idx]
+                                        for relationship_idx in range(
+                                            big_idx - 1, -1, -1
+                                        )
+                                    ],
+                                    dim=1,
+                                ),
+                            ),
+                        ),
+                    )
+                    for feature in self.out_features[big_idx].keys()
+                },
+                ntype="n%s" % big_idx,
+            )
+
+        if 1 not in self.out_features:
+            return g
+
+        # atom level
+        g.apply_nodes(
+            func=lambda nodes: {
+                feature: getattr(self, "f_out_1_to_%s" % feature)(
+                    self.sequential_1(g=None, x=nodes.data["h"])
+                )
+                for feature in self.out_features[1].keys()
+            },
+            ntype="n1",
+        )
+
         return g

@@ -74,6 +74,21 @@ def cubic_expansion(x, k, eq, order=[2]):
     return out.permute(1, 2, 0).sum(dim=-1)
 
 
+def near_linear_expansion(x, k, eq, order=[2]):
+    """
+    Cubic expansion, eq (4) from Merck94
+    """
+    if isinstance(order, list):
+        order = torch.tensor(order, device=x.device)
+
+    
+    
+    delta_cos = ((x - eq)).cos()
+    
+    out = k * (1 + delta_cos)
+    return out
+
+
 def quartic_expansion(x, k, eq, order=[2]):
     """
     Eq (2) MMFF94
@@ -96,6 +111,26 @@ def quartic_expansion(x, k, eq, order=[2]):
     return out.permute(1, 2, 0).sum(dim=-1)
 
 
+def stretch_bend_expansion(x, k, eq, eq_ij, eq_kj, x_ij, x_kj):
+    """
+    Eq (5) MMFF. Note that it's not applied when angle is near-linear
+    """
+
+    
+    delta_ij = ((x_ij - eq_ij))
+    delta_kj = ((x_kj - eq_kj))
+
+    delta_ijk = ((x - eq))
+    k_ijk = k[:, 0][:, None]
+    k_kji = k[:, 1][:, None]
+
+    
+    # Condition for eq4 to apply
+    #is_linear = torch.all((delta_ijk < torch.pi) * (delta_ijk > torch.pi/2), 1)[:, None].repeat(1, delta_ijk.shape[1])
+    is_linear =esp.mm.angle.is_nearlinear(x, eq)
+    out = ((k_ijk * delta_ij + k_kji * delta_kj) * delta_ijk) #.permute(1, 2, 0).sum(dim=-1)
+    
+    return torch.where(is_linear, torch.zeros_like(out), out)
 
 def periodic_fixed_phases(
     dihedrals: torch.Tensor, ks: torch.Tensor

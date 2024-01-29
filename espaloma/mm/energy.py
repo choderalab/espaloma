@@ -43,10 +43,24 @@ def apply_bond_mmff(nodes, suffix=""):
     #         )
     #     }
 
-def stretch_bend(self):
+def apply_stretch_bend(nodes, suffix):
     """
     TODO copy from contribution 2 and 3 into eq 5
     """
+    
+    return {
+        "u%s"
+        % suffix: esp.mm.angle.harmonic_stretch_bend_mmff( # change for MMFF
+            x=nodes.data["x"],
+            eq=nodes.data['eq'],
+            k=nodes.data["kstretch"],
+            # Coming from n2
+            eq_ij=nodes.data['eq2_ij'],
+            eq_kj=nodes.data['eq2_kj'],
+            x_ij=nodes.data['x2_ij'],
+            x_kj=nodes.data['x2_kj']
+        )
+    }
 
 def apply_angle(nodes, suffix=""):
     """Angle energy in nodes."""
@@ -218,7 +232,7 @@ def apply_improper_torsion(nodes, suffix=""):
         n_multi = nodes.data["k%s" % suffix].shape[-1]
         periodicity=list(range(1, n_multi+1))
         phases=[0.0 for _ in range(n_multi)]
-        breakpoint()
+        
         return {
             "u%s"
             % suffix: esp.mm.torsion.periodic_torsion(
@@ -508,7 +522,6 @@ def energy_in_graph_mmff(
     # we need to make this better
     import dgl
 
-    breakpoint()
     if "n2" in terms:
         # apply energy function
 
@@ -541,6 +554,37 @@ def energy_in_graph_mmff(
             ntype="n3",
         )
 
+        # copy n2 into n3
+        
+        ijk = g.nodes['n3'].data['idxs']
+        ij = ijk[:, :2]
+        
+        breakpoint()
+
+        # Extract x and eq by indexing `g.nodes['n2']`
+        mask = torch.all(torch.eq(g.nodes['n2'].data['idxs'][:, None, :], ij), dim=-1)
+        ij_idx = torch.argmax(mask.int(), dim=0)
+        eq2_ij = g.nodes['n2'].data['eq'][ij_idx]
+        x_ij = g.nodes['n2'].data['x'][ij_idx]
+
+
+        kj = torch.roll(ijk, 1, 1)[:, :2]
+        mask = torch.all(torch.eq(g.nodes['n2'].data['idxs'][:, None, :], kj), dim=-1)      
+        kj_idx = torch.argmax(mask.int(), dim=0)
+        eq2_kj = g.nodes['n2'].data['eq'][kj_idx]
+        x_kj = g.nodes['n2'].data['x'][kj_idx]
+
+        g.nodes['n3'].data['eq2_ij'] = eq2_ij
+        g.nodes['n3'].data['eq2_kj'] = eq2_kj
+
+        g.nodes['n3'].data['x2_ij'] = x_ij
+        g.nodes['n3'].data['x2_kj'] = x_kj
+
+        g.apply_nodes(
+            lambda node: apply_stretch_bend(node, suffix=suffix),
+            ntype="n3",
+        )
+        
     if g.number_of_nodes("n4") > 0 and "n4" in terms:
         g.apply_nodes(
             lambda node: apply_torsion_mmff(node, suffix=suffix),
@@ -623,7 +667,7 @@ def energy_in_graph_mmff(
         ntype="g",
     )
 
-    breakpoint()
+    
     if "u0" in g.nodes["g"].data:
         g.apply_nodes(
             lambda node: {"u": node.data["u"] + node.data["u0"]},
@@ -679,7 +723,7 @@ class EnergyInGraph(torch.nn.Module):
         super(EnergyInGraph, self).__init__()
         self.args = args
         self.kwargs = kwargs
-        breakpoint()
+        
 
     def forward(self, g):
         return energy_in_graph(g, *self.args, **self.kwargs)
