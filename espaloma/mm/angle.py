@@ -68,9 +68,9 @@ def is_nearlinear(x, eq):
     Implement MMFF definition of near-linear angles (related to eq3 and eq 5)
 
     """
-    delta = ((x - eq))
+    theta = x
 
-    return torch.all((delta < torch.pi) * (delta > torch.pi/2), 1)[:, None].repeat(1, delta.shape[1])
+    return torch.all((theta < torch.pi) * (theta > torch.pi/2), 1)[:, None].repeat(1, theta.shape[1])
 
 
 def harmonic_stretch_bend_mmff(x, k, eq, eq_ij, eq_kj, x_ij, x_kj):

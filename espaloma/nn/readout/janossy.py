@@ -575,12 +575,9 @@ class LinearMixtureToOriginal(torch.nn.Module):
 
 
 
-
-class JanossyPoolingStretchBend(torch.nn.Module):
+class JanossyPoolingOOP(torch.nn.Module):
     """Janossy pooling (arXiv:1811.01900) to average node representation
-    for higher-order nodes.
-
-
+    for oop bending.
     """
 
     def __init__(
@@ -588,21 +585,21 @@ class JanossyPoolingStretchBend(torch.nn.Module):
         config,
         in_features,
         out_features={
-            5: ["k", "eq"],
+            "k": 2,
         },
         out_features_dimensions=-1,
-        pool=torch.add,
     ):
-        super(JanossyPoolingStretchBend, self).__init__()
+        super(JanossyPoolingOOP, self).__init__()
+
+        # if users specify out features as lists,
+        # assume dimensions to be all zero
 
         # bookkeeping
         self.out_features = out_features
-        self.levels = ["n23_stretch_bend"]
-        self.pool = pool
+        self.levels = ["n4_oop"]
 
         # get output features
         mid_features = [x for x in config if isinstance(x, int)][-1]
-
 
         # set up networks
         for level in self.levels:
@@ -612,7 +609,7 @@ class JanossyPoolingStretchBend(torch.nn.Module):
                 self,
                 "sequential_%s" % level,
                 esp.nn.sequential._Sequential(
-                    in_features=in_features * 4,
+                    in_features=4 * in_features,
                     config=config,
                     layer=torch.nn.Linear,
                 ),
@@ -628,24 +625,6 @@ class JanossyPoolingStretchBend(torch.nn.Module):
                     ),
                 )
 
-        # if 1 not in self.out_features:
-        #     return
-
-        # # atom level
-        # self.sequential_1 = esp.nn.sequential._Sequential(
-        #     in_features=in_features, config=config, layer=torch.nn.Linear
-        # )
-
-        # for feature, dimension in self.out_features[1].items():
-        #     setattr(
-        #         self,
-        #         "f_out_1_to_%s" % feature,
-        #         torch.nn.Linear(
-        #             mid_features,
-        #             dimension,
-        #         ),
-        #     )
-
     def forward(self, g):
         """Forward pass.
 
@@ -655,76 +634,61 @@ class JanossyPoolingStretchBend(torch.nn.Module):
             input graph.
         """
         import dgl
-        breakpoint()
-        # copy
-        # g.multi_update_all(
-        #     {
-        #         "n1_as_%s_in_%s"
-        #         % (relationship_idx, big_idx): (
-        #             dgl.function.copy_u("h", "m%s" % relationship_idx),
-        #             dgl.function.mean(
-        #                 "m%s" % relationship_idx, "h%s" % relationship_idx
-        #             ),
-        #         )
-        #         for big_idx in self.levels
-        #         for relationship_idx in range(4)
-        #     },
-        #     cross_reducer="sum",
-        # )
-        breakpoint()
-        # pool
-        for big_idx in self.levels:
 
-            if g.number_of_nodes("n%s" % big_idx) == 0:
-                continue
+        # copy
+        g.multi_update_all(
+            {
+                "n1_as_%s_in_%s"
+                % (relationship_idx, big_idx): (
+                    dgl.function.copy_u("h", "m%s" % relationship_idx),
+                    dgl.function.mean(
+                        "m%s" % relationship_idx, "h%s" % relationship_idx
+                    ),
+                )
+                for big_idx in self.levels
+                for relationship_idx in range(4)
+            },
+            cross_reducer="sum",
+        )
+
+        if g.number_of_nodes("n4_improper") == 0:
+            return g
+
+        # pool
+        #   sum over three cyclic permutations of "h0", "h2", "h3", assuming "h1" is the central atom in the improper
+        #   following the smirnoff trefoil convention [(0, 1, 2, 3), (2, 1, 3, 0), (3, 1, 0, 2)]
+        #   https://github.com/openff.toolkit/openff.toolkit/blob/166c9864de3455244bd80b2c24656bd7dda3ae2d/openff.toolkit/typing/engines/smirnoff/parameters.py#L3326-L3360
+
+        # TODO to check
+        ## Set different permutations based on which definition of impropers
+        ##  are being used
+        permuts = [(0, 1, 2, 3), (0, 2, 3, 1), (0, 3, 1, 2)]
+        stack_permuts = lambda nodes, p: torch.cat(
+            [nodes.data[f"h{i}"] for i in p], dim=1
+        )
+
+        for big_idx in self.levels:
+            inner_net = getattr(self, f"sequential_{big_idx}")
 
             g.apply_nodes(
                 func=lambda nodes: {
-                    feature: getattr(
-                        self, "f_out_%s_to_%s" % (big_idx, feature)
-                    )(
-                        self.pool(
-                            getattr(self, "sequential_%s" % big_idx)(
-                                None,
-                                torch.cat(
-                                    [
-                                        nodes.data["h%s" % relationship_idx]
-                                        for relationship_idx in range(big_idx)
-                                    ],
-                                    dim=1,
-                                ),
+                    feature: getattr(self, f"f_out_{big_idx}_to_{feature}")(
+                        torch.sum(
+                            torch.stack(
+                                [
+                                    inner_net(
+                                        g=None, x=stack_permuts(nodes, p)
+                                    )
+                                    for p in permuts
+                                ],
+                                dim=0,
                             ),
-                            getattr(self, "sequential_%s" % big_idx)(
-                                None,
-                                torch.cat(
-                                    [
-                                        nodes.data["h%s" % relationship_idx]
-                                        for relationship_idx in range(
-                                            big_idx - 1, -1, -1
-                                        )
-                                    ],
-                                    dim=1,
-                                ),
-                            ),
-                        ),
+                            dim=0,
+                        )
                     )
-                    for feature in self.out_features[big_idx].keys()
+                    for feature in self.out_features.keys()
                 },
-                ntype="n%s" % big_idx,
+                ntype=big_idx,
             )
-
-        if 1 not in self.out_features:
-            return g
-
-        # atom level
-        g.apply_nodes(
-            func=lambda nodes: {
-                feature: getattr(self, "f_out_1_to_%s" % feature)(
-                    self.sequential_1(g=None, x=nodes.data["h"])
-                )
-                for feature in self.out_features[1].keys()
-            },
-            ntype="n1",
-        )
 
         return g

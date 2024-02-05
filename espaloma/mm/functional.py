@@ -76,16 +76,14 @@ def cubic_expansion(x, k, eq, order=[2]):
 
 def near_linear_expansion(x, k, eq, order=[2]):
     """
-    Cubic expansion, eq (4) from Merck94
+    Near-linear angles from eq (4) from Merck94. It's basically constant
     """
     if isinstance(order, list):
         order = torch.tensor(order, device=x.device)
 
+    theta_cos = x.cos() # eq (4)
     
-    
-    delta_cos = ((x - eq)).cos()
-    
-    out = k * (1 + delta_cos)
+    out = k * (1 + theta_cos)
     return out
 
 

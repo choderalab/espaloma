@@ -90,6 +90,24 @@ def dihedral(
 
     return theta
 
+# TODO(gianscarpe) check implementation
+def oop(
+    x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor
+) -> torch.Tensor:
+    """
+
+    Ref http://www.ccl.net/chemistry/resources/messages/1996/09/19.008-dir/
+    """
+    # compute displacements 0->1, 2->1, 2->3
+    e_42 = x3 - x1 + torch.randn_like(x0) * 1e-5
+    e_43 = x3 - x2 + torch.randn_like(x0) * 1e-5
+    e_41 = x3 - x0 + torch.randn_like(x0) * 1e-5
+    breakpoint()
+    phi = _angle(e_43, e_42)
+    
+    out = np.mul(torch.cross(e_42, e_43) / np.sin(angle), e_41)
+    return out
+
 
 # =============================================================================
 # GEOMETRY IN HYPERNODES
@@ -156,6 +174,15 @@ def apply_torsion(nodes):
         ),
     }
 
+def apply_oop(nodes):
+    """Torsion dihedrals in nodes."""
+    return {
+        "x": oop(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"],
+            x2=nodes.data["xyz2"],
+            x3=nodes.data["xyz3"],
+        )}
 
 # =============================================================================
 # GEOMETRY IN GRAPH
@@ -220,6 +247,17 @@ def geometry_in_graph(g):
                 for term in ["n4_improper"]
                 for pos_idx in [0, 1, 2, 3]
             },
+            **{
+                "n1_as_%s_in_%s"
+                % (pos_idx, term): (
+                    dgl.function.copy_u(u="xyz", out="m_xyz%s" % pos_idx),
+                    dgl.function.sum(
+                        msg="m_xyz%s" % pos_idx, out="xyz%s" % pos_idx
+                    ),
+                )
+                for term in ["n4_oop"]
+                for pos_idx in [0, 1, 2, 3]
+            },
         },
         cross_reducer="sum",
     )
@@ -238,8 +276,15 @@ def geometry_in_graph(g):
     if g.number_of_nodes("onefour") > 0:
         g.apply_nodes(apply_bond, ntype="onefour")
 
+        
     if g.number_of_nodes("n4_improper") > 0:
         g.apply_nodes(apply_torsion, ntype="n4_improper")
+
+
+    breakpoint()
+    if g.number_of_nodes("n4_oop") > 0:
+        breakpoint()
+        g.apply_nodes(apply_oop, ntype="n4_oop")
 
     return g
 
