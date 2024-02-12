@@ -81,6 +81,10 @@ class LegacyForceField:
         elif "openff" in self.forcefield:
             self._prepare_openff()
 
+        elif "mmff" in self.forcefield:
+            # do nothing for now
+            pass
+
         else:
             raise NotImplementedError
 
@@ -134,6 +138,29 @@ class LegacyForceField:
         self._str_2_idx = str_2_idx
         self._idx_2_str = idx_2_str
 
+    def _type_mmff(self, g):
+        """Type a molecular graph using rdkit implementation of mmff94 force field."""
+        # assert the forcefield is indeed of gaff family
+        assert "mmff" in self.forcefield
+
+        # make sure mol is in openff.toolkit format `
+        mol = g.mol
+
+        from rdkit.Chem import AllChem
+        import rdkit.Chem.rdForceFieldHelpers as ff
+        mol = mol.to_rdkit()
+        mmff = ff.MMFFGetMoleculeProperties(mol)
+
+        mmff_types = [mmff.GetMMFFAtomType(i) for i in range(mol.GetNumAtoms())]
+
+        # put types into graph object
+        if g is None: # really needed?
+            g = esp.Graph(mol)
+
+        g.nodes["n1"].data["legacy_typing"] = torch.tensor(mmff_types)
+
+        return g
+    
     def _type_gaff(self, g):
         """Type a molecular graph using gaff force fields."""
         # assert the forcefield is indeed of gaff family
@@ -730,6 +757,9 @@ class LegacyForceField:
         """Type a molecular graph."""
         if "gaff" in self.forcefield:
             return self._type_gaff(g)
+        
+        elif "mmff" in self.forcefield:
+            return self._type_mmff(g)
 
         else:
             raise NotImplementedError

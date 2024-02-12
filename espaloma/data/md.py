@@ -1,17 +1,17 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import espaloma as esp
 import numpy as np
-import torch
-
-from openmmforcefields.generators import SystemGenerator
 import openmm
+import torch
+from espaloma import graphs
+from espaloma.data import rdkit_utils
+from espaloma.units import *
 from openmm import unit
 from openmm.app import Simulation
 from openmm.unit import Quantity
-
-from espaloma.units import *
-import espaloma as esp
+from openmmforcefields.generators import SystemGenerator
 
 # =============================================================================
 # CONSTANTS
@@ -21,6 +21,7 @@ TEMPERATURE = 350 * unit.kelvin
 STEP_SIZE = 1.0 * unit.femtosecond
 COLLISION_RATE = 1.0 / unit.picosecond
 EPSILON_MIN = 0.05 * unit.kilojoules_per_mole
+
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -33,7 +34,7 @@ def add_nonbonded_force(
 
     # parameterize topology
     topology = g.mol.to_topology().to_openmm()
-
+    
     generator = SystemGenerator(
         small_molecule_forcefield=forcefield,
         molecules=[g.mol],
@@ -143,15 +144,19 @@ def add_nonbonded_force(
     for x in xs:
         simulation.context.setPositions(x)
 
+
         state = simulation.context.getState(
             getEnergy=True,
             getParameters=True,
             getForces=True,
         )
 
+    
         energy = state.getPotentialEnergy().value_in_unit(
             esp.units.ENERGY_UNIT,
         )
+        
+
 
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
@@ -348,10 +353,66 @@ def subtract_nonbonded_force(
     forcefield="gaff-1.81",
     subtract_charges=True,
 ):
+    if forcefield == 'mmff94':
+        return subtract_nonbonded_force_mmff94(g)
+    else:
+        return subtract_nonbonded_force_openmm(g, forcefield, subtract_charges)
+
+
+def subtract_nonbonded_force_mmff94(
+        g,
+        *args, **kwargs
+        ):
+
+    poses = Quantity(g.heterograph.nodes['n1'][0]['xyz'], unit=esp.units.DISTANCE_UNIT).value_in_unit(unit.angstrom)
+    prepared_poses = poses.permute(1, 0, 2).reshape(poses.shape[1], -1).tolist()
+    
+
+    non_bonded_kwargs = {'angle_term': False, 'bond_term': False, 'oop_term': False, 'bend_term':False, 'torsion_term':False, 'vdw_term':True, 'ele_term':True}
+    energies, derivatives = rdkit_utils.get_energy_and_derivative_from_conformers(g.mol.to_rdkit(), prepared_poses, **non_bonded_kwargs) # pos rdkit in unit?
+    
+    n_confs = len(energies)
+    n_atoms = g.mol.n_atoms
+
+    # put energies to a tensor
+
+    energies = torch.tensor(
+        Quantity(energies, unit=rdkit_utils.RDKIT_ENERGY_UNIT).value_in_unit(esp.units.ENERGY_UNIT),
+        dtype=torch.get_default_dtype(),
+    ).flatten()[None, :] 
+    
+    
+    derivatives = torch.tensor(
+        Quantity(np.array(derivatives), unit=rdkit_utils.RDKIT_FORCE_UNIT).value_in_unit(esp.units.FORCE_UNIT)
+    ).reshape(n_confs, n_atoms, 3).permute(1, 0, 2)
+
+
+    # subtract the energies
+    g.heterograph.apply_nodes(
+        lambda node: {"u_ref": node.data["u_ref"] - energies},
+        ntype="g",
+    )
+
+    if "u_ref_prime" in g.nodes["n1"].data:
+        g.heterograph.apply_nodes(
+            lambda node: {
+                "u_ref_prime": node.data["u_ref_prime"] - derivatives
+            },
+            ntype="n1",
+        )
+
+    return g
+
+def subtract_nonbonded_force_openmm(
+    g,
+    forcefield="gaff-1.81",
+    subtract_charges=True,
+):
+    
 
     # parameterize topology
     topology = g.mol.to_topology().to_openmm()
-
+    
     generator = SystemGenerator(
         small_molecule_forcefield=forcefield,
         molecules=[g.mol],
@@ -464,10 +525,11 @@ def subtract_nonbonded_force(
             getForces=True,
         )
 
+        
         energy = state.getPotentialEnergy().value_in_unit(
             esp.units.ENERGY_UNIT,
         )
-
+        
         derivative = state.getForces(asNumpy=True).value_in_unit(
             esp.units.FORCE_UNIT,
         ) * -1
@@ -480,11 +542,13 @@ def subtract_nonbonded_force(
         energies,
         dtype=torch.get_default_dtype(),
     ).flatten()[None, :]
+
+
     derivatives = torch.tensor(
         np.stack(derivatives, axis=1),
         dtype=torch.get_default_dtype(),
     )
-
+    
     # subtract the energies
     g.heterograph.apply_nodes(
         lambda node: {"u_ref": node.data["u_ref"] - energies},
@@ -509,6 +573,7 @@ def subtract_nonbonded_force_except_14(
     g,
     forcefield="gaff-1.81",
 ):
+    
 
     # parameterize topology
     topology = g.mol.to_topology().to_openmm()
