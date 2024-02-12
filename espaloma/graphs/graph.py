@@ -3,9 +3,9 @@
 # =============================================================================
 import abc
 import io
-import openff.toolkit
 
 import espaloma as esp
+import openff.toolkit
 
 
 # =============================================================================
@@ -69,11 +69,12 @@ class Graph(BaseGraph):
         self.heterograph = heterograph
 
     def save(self, path):
-        import os
         import json
+        import os
+
         import dgl
 
-        os.mkdir(path)
+        os.makedirs(path)
         dgl.save_graphs(path + "/homograph.bin", [self.homograph])
         dgl.save_graphs(path + "/heterograph.bin", [self.heterograph])
         with open(path + "/mol.json", "w") as f_handle:
@@ -82,6 +83,7 @@ class Graph(BaseGraph):
     @classmethod
     def load(cls, path):
         import json
+
         import dgl
 
         homograph = dgl.load_graphs(path + "/homograph.bin")[0][0]
