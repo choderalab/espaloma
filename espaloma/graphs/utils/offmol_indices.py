@@ -102,7 +102,7 @@ def out_of_plane_indices(
     improper_def allows for choosing which atom will be the central atom in the
     permutations:
     smirnoff: central atom is listed first
-    espaloma: central atom is listed second
+    
 
     Addtionally, for smirnoff, only take the subset of atoms that corresponds
     to the ccw traversal of connected atoms.

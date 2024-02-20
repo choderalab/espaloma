@@ -209,6 +209,16 @@ def apply_torsion_mmff(nodes, suffix=""):
         )
     }
 
+def apply_oop_mmff(nodes, suffix=""):
+    """Torsion energy in nodes."""
+    return {
+        "u%s"
+        % suffix: esp.mm.angle.oop_bend_mmff(
+            x=nodes.data["x"],
+            k=nodes.data["k%s" % suffix],
+        )
+    }
+
 
 
 
@@ -559,7 +569,7 @@ def energy_in_graph_mmff(
         ijk = g.nodes['n3'].data['idxs']
         ij = ijk[:, :2]
         
-        breakpoint()
+
 
         # Extract x and eq by indexing `g.nodes['n2']`
         mask = torch.all(torch.eq(g.nodes['n2'].data['idxs'][:, None, :], ij), dim=-1)
@@ -591,27 +601,18 @@ def energy_in_graph_mmff(
             ntype="n4",
         )
 
+    
     if g.number_of_nodes("n4_improper") > 0 and "n4_improper" in terms:
         g.apply_nodes(
             lambda node: apply_improper_torsion(node, suffix=suffix),
             ntype="n4_improper",
         )
-
-    # if g.number_of_nodes("nonbonded") > 0 and "nonbonded" in terms:
-    #     g.apply_nodes(
-    #         lambda node: apply_nonbonded(node, suffix=suffix),
-    #         ntype="nonbonded",
-    #     )
-
-    # if g.number_of_nodes("onefour") > 0 and "onefour" in terms:
-    #     g.apply_nodes(
-    #         lambda node: apply_nonbonded(
-    #             node,
-    #             suffix=suffix,
-    #             scaling=0.5,
-    #         ),
-    #         ntype="onefour",
-    #     )
+    
+    if g.number_of_nodes('n4_oop') > 0 and "n4_oop" in terms:
+        g.apply_nodes(
+            lambda node: apply_oop_mmff(node, suffix=suffix),
+            ntype="n4_oop",
+        )
 
     if "nonbonded" in terms or "onefour" in terms:
         esp.mm.nonbonded.multiply_charges(g)

@@ -74,6 +74,22 @@ def cubic_expansion(x, k, eq, order=[2]):
     return out.permute(1, 2, 0).sum(dim=-1)
 
 
+def oop_expansion(x, k, order=[2]):
+    """
+    Cubic expansion, eq (3) from Merck94
+    """
+    if isinstance(order, list):
+        order = torch.tensor(order, device=x.device)
+
+
+    delta_squared = x.pow(order[:, None, None])
+    
+    out = k * delta_squared / 2
+    return out.permute(1, 2, 0).sum(dim=-1)
+
+
+
+
 def near_linear_expansion(x, k, eq, order=[2]):
     """
     Near-linear angles from eq (4) from Merck94. It's basically constant

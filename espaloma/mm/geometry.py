@@ -90,22 +90,32 @@ def dihedral(
 
     return theta
 
-# TODO(gianscarpe) check implementation
+# TODO(gianscarpe) check implementation (ask for clarification)
 def oop(
-    x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor
+    i: torch.Tensor, j: torch.Tensor, k: torch.Tensor, l: torch.Tensor
 ) -> torch.Tensor:
     """
 
     Ref http://www.ccl.net/chemistry/resources/messages/1996/09/19.008-dir/
+
+    l ikj -> 1 234
     """
     # compute displacements 0->1, 2->1, 2->3
-    e_42 = x3 - x1 + torch.randn_like(x0) * 1e-5
-    e_43 = x3 - x2 + torch.randn_like(x0) * 1e-5
-    e_41 = x3 - x0 + torch.randn_like(x0) * 1e-5
-    breakpoint()
-    phi = _angle(e_43, e_42)
+    e_ji = j - i + torch.randn_like(i) * 1e-11
+    e_jk = j - k + torch.randn_like(i) * 1e-11
+    e_jl = j - l + torch.randn_like(i) * 1e-11
+
+    ejl_normed = e_jl / torch.norm(e_jl, dim=-1, keepdim=True)
+    eji_normed = e_ji / torch.norm(e_ji, dim=-1, keepdim=True)
+    ejk_normed = e_jk / torch.norm(e_jk, dim=-1, keepdim=True)
+
+    phi = angle(i, j, k)
+    phi = phi + torch.randn_like(phi) * 1e-11
+    n_residues = i.shape[1]
+
+
+    out = torch.arcsin(((torch.cross(eji_normed, ejk_normed)) / torch.sin(phi)[:, :, None] @ ejl_normed.permute(0, 2, 1))[:, torch.arange(n_residues), torch.arange(n_residues)])
     
-    out = np.mul(torch.cross(e_42, e_43) / np.sin(angle), e_41)
     return out
 
 
@@ -178,10 +188,10 @@ def apply_oop(nodes):
     """Torsion dihedrals in nodes."""
     return {
         "x": oop(
-            x0=nodes.data["xyz0"],
-            x1=nodes.data["xyz1"],
-            x2=nodes.data["xyz2"],
-            x3=nodes.data["xyz3"],
+            j=nodes.data["xyz0"],
+            i=nodes.data["xyz1"],
+            k=nodes.data["xyz2"],
+            l=nodes.data["xyz3"],
         )}
 
 # =============================================================================
@@ -212,6 +222,7 @@ def geometry_in_graph(g):
     import dgl
 
     # Copy coordinates to higher-order nodes.
+    
     g.multi_update_all(
         {
             **{
@@ -257,6 +268,7 @@ def geometry_in_graph(g):
                 )
                 for term in ["n4_oop"]
                 for pos_idx in [0, 1, 2, 3]
+                if "n4_oop" in g._ntypes
             },
         },
         cross_reducer="sum",
@@ -281,9 +293,8 @@ def geometry_in_graph(g):
         g.apply_nodes(apply_torsion, ntype="n4_improper")
 
 
-    breakpoint()
-    if g.number_of_nodes("n4_oop") > 0:
-        breakpoint()
+    if "n4_oop" in g._ntypes and g.number_of_nodes("n4_oop") > 0:
+
         g.apply_nodes(apply_oop, ntype="n4_oop")
 
     return g
