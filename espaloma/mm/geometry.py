@@ -276,6 +276,7 @@ def geometry_in_graph(g):
 
     # apply geometry functions
     g.apply_nodes(apply_bond, ntype="n2")
+    
     g.apply_nodes(apply_angle, ntype="n3")
 
     if g.number_of_nodes("n4") > 0:

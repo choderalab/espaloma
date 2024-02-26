@@ -34,7 +34,7 @@ def harmonic_angle(x, k, eq):
     return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
 
-def harmonic_angle_mmff(x, k, eq):
+def harmonic_angle_mmff(x, k, eq, lin):
     """Harmonic angle energy.
 
     Parameters
@@ -60,26 +60,15 @@ def harmonic_angle_mmff(x, k, eq):
     eq3_mmff = 0.043844 * esp.mm.functional.cubic_expansion(x=x, k=k, eq=eq)
     eq4_mmff = 143.9325 * esp.mm.functional.near_linear_expansion(x=x, k=k, eq=eq)
     
-    return torch.where(is_nearlinear(x, eq), eq4_mmff, eq3_mmff)
+    return torch.where(lin, eq4_mmff, eq3_mmff)
 
 
 def oop_bend_mmff(x, k):
     return .043844 * esp.mm.functional.oop_expansion(x=x, k=k)
 
 
-def is_nearlinear(x, eq):
-    """
-    TODO (gianscarpe): fix with correct formula
-    Implement MMFF definition of near-linear angles (related to eq3 and eq 5)
-
-    """
-    theta = x
-    
-    return torch.all((theta == torch.pi), 1)[:, None].repeat(1, theta.shape[1])
-
-
-def harmonic_stretch_bend_mmff(x, k, eq, eq_ij, eq_kj, x_ij, x_kj):
-    return 2.51210 * esp.mm.functional.stretch_bend_expansion(x=x, k=k, eq=eq, eq_ij=eq_ij, eq_kj=eq_kj, x_ij=x_ij, x_kj=x_kj)
+def harmonic_stretch_bend_mmff(x, k, eq, eq_ij, eq_kj, x_ij, x_kj,is_linear):
+    return 2.51210 * esp.mm.functional.stretch_bend_expansion(x=x, k=k, eq=eq, eq_ij=eq_ij, eq_kj=eq_kj, x_ij=x_ij, x_kj=x_kj, is_linear=is_linear)
 
 
 

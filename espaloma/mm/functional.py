@@ -125,7 +125,7 @@ def quartic_expansion(x, k, eq, order=[2]):
     return out.permute(1, 2, 0).sum(dim=-1)
 
 
-def stretch_bend_expansion(x, k, eq, eq_ij, eq_kj, x_ij, x_kj):
+def stretch_bend_expansion(x, k, eq, eq_ij, eq_kj, x_ij, x_kj, is_linear):
     """
     Eq (5) MMFF. Note that it's not applied when angle is near-linear
     """
@@ -141,7 +141,7 @@ def stretch_bend_expansion(x, k, eq, eq_ij, eq_kj, x_ij, x_kj):
     
     # Condition for eq4 to apply
     #is_linear = torch.all((delta_ijk < torch.pi) * (delta_ijk > torch.pi/2), 1)[:, None].repeat(1, delta_ijk.shape[1])
-    is_linear =esp.mm.angle.is_nearlinear(x, eq)
+
     out = ((k_ijk * delta_ij + k_kji * delta_kj) * delta_ijk) #.permute(1, 2, 0).sum(dim=-1)
     
     return torch.where(is_linear, torch.zeros_like(out), out)

@@ -58,7 +58,8 @@ def apply_stretch_bend(nodes, suffix):
             eq_ij=nodes.data['eq2_ij'],
             eq_kj=nodes.data['eq2_kj'],
             x_ij=nodes.data['x2_ij'],
-            x_kj=nodes.data['x2_kj']
+            x_kj=nodes.data['x2_kj'],
+            is_linear=nodes.data['lin']
         )
     }
 
@@ -74,6 +75,7 @@ def apply_angle(nodes, suffix=""):
     }
 
 def apply_angle_mmff(nodes, suffix=""):
+
     """Angle energy in nodes."""
     return {
         "u%s"
@@ -81,6 +83,7 @@ def apply_angle_mmff(nodes, suffix=""):
             x=nodes.data["x"],
             k=nodes.data["k%s" % suffix],
             eq=nodes.data["eq%s" % suffix],
+            lin=nodes.data["lin"]
         )
     }
 
