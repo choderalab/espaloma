@@ -1,4 +1,4 @@
-Deploy espaloma 0.3.1 force field to parametrize your MM system
+Deploy espaloma 0.3.2 force field to parametrize your MM system
 ===============================================================
 Pretrained espaloma force field could be deployed on arbitrary small molecule
 systems in a few lines::
@@ -24,12 +24,12 @@ systems in a few lines::
     # create an OpenMM System for the specified molecule
     openmm_system = esp.graphs.deploy.openmm_system_from_graph(molecule_graph)
 
-If using espaloma from a local ``.pt`` file, say for example ``espaloma-0.3.1.pt``,
+If using espaloma from a local ``.pt`` file, say for example ``espaloma-0.3.2.pt``,
 then you would need to run the ``eval`` method of the model to get the correct
 inference/predictions, as follows::
 
     # load local pretrained model
-    espaloma_model = torch.load("espaloma-0.3.1.pt")
+    espaloma_model = torch.load("espaloma-0.3.2.pt")
     espaloma_model.eval()
 
 The rest of the code should be the same as in the previous example.
