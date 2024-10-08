@@ -20,7 +20,7 @@ concurrency:
 
 defaults:
   run:
-    shell: bash -l {0}
+    shell: bash -leo pipefail {0}
 
 jobs:
   test:
@@ -31,9 +31,9 @@ jobs:
       matrix:
         os: ['ubuntu','macos']
         python-version:
+          - "3.12"
           - "3.11"
           - "3.10"
-          - "3.9"
 
     env:
       OPENMM: ${{ matrix.cfg.openmm }}
