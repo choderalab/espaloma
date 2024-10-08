@@ -29,7 +29,7 @@ OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT**2)
 # =============================================================================
 
 
-def load_forcefield(forcefield="openff_unconstrained-2.1.0"):
+def load_forcefield(forcefield="openff_unconstrained-2.2.1"):
     # get a forcefield
     try:
         ff = ForceField("%s.offxml" % forcefield)
@@ -41,7 +41,7 @@ def load_forcefield(forcefield="openff_unconstrained-2.1.0"):
 
 def openmm_system_from_graph(
     g,
-    forcefield="openff_unconstrained-2.1.0",
+    forcefield="openff_unconstrained-2.1.1",
     suffix="",
     charge_method="nn",
     create_system_kwargs={},
@@ -53,7 +53,7 @@ def openmm_system_from_graph(
     g : `espaloma.Graph`
         Input graph.
 
-    forcefield : `str`, optional, default='openff_unconstrained-2.1.0'
+    forcefield : `str`, optional, default='openff_unconstrained-2.1.1'
         Name of the force field. Have to be Open Force Field.
         (this forcefield will be used to assign nonbonded parameters, but all of its valence parameters will be overwritten)
 
