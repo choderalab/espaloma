@@ -28,16 +28,6 @@ We recommend using [`mamba`](https://mamba.readthedocs.io/en/latest/mamba-instal
 $ mamba create --name espaloma -c conda-forge "espaloma=0.3.2"
 ```
 
-Note: If you are using a Mac with a M1/M2 chip, you will need to install and run `espaloma` using [Rosetta](https://support.apple.com/en-au/HT211861) by using the following commands:
-
-```bash
-CONDA_SUBDIR=osx-64 mamba create --name espaloma -c conda-forge "espaloma=0.3.2"
-mamba activate espaloma
-mamba config --env --set subdir osx-64
-```
-
-This will ensure that any other packages installed in the `espaloma` will also use Rosetta.
-
 # Example: Deploy espaloma 0.3.2 pretrained force field to arbitrary MM system
 
 ```python  
