@@ -21,6 +21,7 @@ dependencies:
   - pydantic <2  # We need our deps to fix this
   - dgl =2.3.0
   - qcportal =0.15.8
+  - torchdata <=0.10.0  # New versions of torchdata require new versions of PyTorch which are not supported by DGL
   # Testing
   - pytest
   - pytest-cov
