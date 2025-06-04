@@ -201,7 +201,7 @@ def get_graphs(collection, record_names, spec_name="default"):
             collection.iterate_records(record_names, specification_names=[spec_name]),
             collection.iterate_entries(record_names),
     ):
-        # note interate records returns a tuple of lenth 3 (name, spec_name, actual record)
+        # note iterate records returns a tuple of length 3 (name, spec_name, actual record information)
         g = process_record(record[2], entry)
         g_list.append(g)
 
