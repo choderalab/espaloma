@@ -55,7 +55,6 @@ class Graph(BaseGraph):
             from openff.toolkit.topology import Molecule
 
             mol = Molecule.from_smiles(mol, allow_undefined_stereo=True)
-
         if mol is not None and homograph is None and heterograph is None:
             homograph = self.get_homograph_from_mol(mol)
 

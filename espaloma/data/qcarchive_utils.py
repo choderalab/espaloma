@@ -100,7 +100,6 @@ def process_record(record, entry):
             f"{record.record_type} is not supported: only optimization datasets can be processed."
         )
     mol = Molecule.from_qcschema(entry.dict())
-
     g = esp.Graph(mol)
 
     # energy is already hartree
@@ -187,8 +186,8 @@ def get_graphs(collection, record_names, spec_name="default"):
     ----------
     collection, qcportal dataset, required
         The instance of the qcportal dataset
-    record_name, str, required
-        The name of a give record
+    record_name, List[str], required
+        A list of the record_names of a give record
     spec_name, str, default="default"
         Retrieve data for a given qcportal specification.
     Returns
@@ -202,6 +201,7 @@ def get_graphs(collection, record_names, spec_name="default"):
             collection.iterate_entries(record_names),
     ):
         # note iterate records returns a tuple of length 3 (name, spec_name, actual record information)
+
         g = process_record(record[2], entry)
         g_list.append(g)
 

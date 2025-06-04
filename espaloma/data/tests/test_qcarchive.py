@@ -13,13 +13,16 @@ def test_get_graph():
     # The order records are received is not guaranteed, and can change if,
     # e.g., the underlying database ends up being replaced by a copy during a database migration.
     # as such we need to use a specific record name.
+    records_names_for_testing = ['c1c2c(c(c(c1f)n3cc(c3)o)cl)n(cc(c2=o)c(=o)[o-])c4c(cc(c(n4)n)f)f-3', 'c1c2c(cc(c1f)n3ccncc3)n(cc(c2=o)c(=o)[o-])c4cc4-0']
 
-    record_name = record_names[0]
-    print(f"Using record: {record_name}")
+    record_name = records_names_for_testing[0]
+    assert record_name in record_names
+
     graph = qcarchive_utils.get_graph(collection, record_name)
     assert graph is not None
 
-    graphs = qcarchive_utils.get_graphs(collection, record_names[0:2])
+
+    graphs = qcarchive_utils.get_graphs(collection, records_names_for_testing)
     assert len(graphs) == 2
     assert graphs[0] is not None
 
