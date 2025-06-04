@@ -21,6 +21,7 @@ dependencies:
   - pydantic <2  # We need our deps to fix this
   - qcportal >=0.50
   - dgl =2.3.0
+  - torchdata <= 0.10.0
   # Testing
   - pytest
   - pytest-cov

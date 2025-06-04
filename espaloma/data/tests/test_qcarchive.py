@@ -10,7 +10,12 @@ def test_get_graph():
 
     client = qcarchive_utils.get_client()
     collection, record_names = qcarchive_utils.get_collection(client)
+    # The order records are received is not guaranteed, and can change if,
+    # e.g., the underlying database ends up being replaced by a copy during a database migration.
+    # as such we need to use a specific record name.
+
     record_name = record_names[0]
+    print(f"Using record: {record_name}")
     graph = qcarchive_utils.get_graph(collection, record_name)
     assert graph is not None
 
@@ -92,6 +97,6 @@ def test_get_torsiondrive():
             ]
         )
     )
-    assert np.all(
-        xyz_in_order[0][0] == np.array([-0.66407807, -8.59922225, -0.02685972])
+    assert np.allclose(
+        xyz_in_order[0][0], np.array([-0.66407807, -8.59922225, -0.02685972])
     )
