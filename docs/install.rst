@@ -1,19 +1,11 @@
 Installation
 ============
 
-While we are working to put `espaloma` on conda-forge, please follow the instructions below to install dependencies and the `espaloma` package separately.
+mamba
+-----
 
-Install dependencies::
+We recommend using `mamba <https://mamba.readthedocs.io/en/latest/mamba-installation.html#mamba-installation>`_ which is a drop-in replacement for ``conda`` and is much faster.
 
-    conda install \
-      --yes \
-      --channel conda-forge \ 
-      --channel dglteam \
-      openmm openmmtools openmmforcefields rdkit openff-toolkit dgl-cuda10.0 qcportal
+.. code-block:: bash
 
-
-Install the package::
-
-    git clone https://github.com/choderalab/espaloma.git
-    cd espaloma
-    python setup.py install
+   $ mamba create --name espaloma -c conda-forge "espaloma=0.3.2"

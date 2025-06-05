@@ -1,7 +1,6 @@
 name: espaloma-test
 channels:
   - conda-forge
-  - dglteam
   - openeye
 dependencies:
   # Base dependencies
@@ -20,9 +19,9 @@ dependencies:
   - openmmforcefields >=0.11.2
   - tqdm
   - pydantic <2  # We need our deps to fix this
-  # Pytorch
-  - pytorch>=1.8.0
-  - dgl =0.9.0
+  - qcportal >=0.50
+  - dgl =2.3.0
+  - torchdata <= 0.10.0
   # Testing
   - pytest
   - pytest-cov
@@ -32,6 +31,5 @@ dependencies:
   - nose
   - nose-timer
   - coverage
-  - qcportal>=0.15.0
   - sphinx
   - sphinx_rtd_theme

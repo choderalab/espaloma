@@ -80,7 +80,7 @@ class ChargeEquilibrium(torch.nn.Module):
             if "q_ref" in g.nodes["n1"].data:
                 # get total charge
                 g.update_all(
-                    dgl.function.copy_src(src="q_ref", out="m_q"),
+                    dgl.function.copy_u(u="q_ref", out="m_q"),
                     dgl.function.sum(msg="m_q", out="sum_q"),
                     etype="n1_in_g",
                 )
@@ -95,32 +95,32 @@ class ChargeEquilibrium(torch.nn.Module):
                 )
 
         g.update_all(
-            dgl.function.copy_src(src="sum_q", out="m_sum_q"),
+            dgl.function.copy_u(u="sum_q", out="m_sum_q"),
             dgl.function.sum(msg="m_sum_q", out="sum_q"),
             etype="g_has_n1",
         )
 
         # get the sum of $s^{-1}$ and $m_s^{-1}$
         g.update_all(
-            dgl.function.copy_src(src="s_inv", out="m_s_inv"),
+            dgl.function.copy_u(u="s_inv", out="m_s_inv"),
             dgl.function.sum(msg="m_s_inv", out="sum_s_inv"),
             etype="n1_in_g",
         )
 
         g.update_all(
-            dgl.function.copy_src(src="e_s_inv", out="m_e_s_inv"),
+            dgl.function.copy_u(u="e_s_inv", out="m_e_s_inv"),
             dgl.function.sum(msg="m_e_s_inv", out="sum_e_s_inv"),
             etype="n1_in_g",
         )
 
         g.update_all(
-            dgl.function.copy_src(src="sum_s_inv", out="m_sum_s_inv"),
+            dgl.function.copy_u(u="sum_s_inv", out="m_sum_s_inv"),
             dgl.function.sum(msg="m_sum_s_inv", out="sum_s_inv"),
             etype="g_has_n1",
         )
 
         g.update_all(
-            dgl.function.copy_src(src="sum_e_s_inv", out="m_sum_e_s_inv"),
+            dgl.function.copy_u(u="sum_e_s_inv", out="m_sum_e_s_inv"),
             dgl.function.sum(msg="m_sum_e_s_inv", out="sum_e_s_inv"),
             etype="g_has_n1",
         )

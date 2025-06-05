@@ -104,7 +104,7 @@ class JanossyPooling(torch.nn.Module):
             {
                 "n1_as_%s_in_n%s"
                 % (relationship_idx, big_idx): (
-                    dgl.function.copy_src("h", "m%s" % relationship_idx),
+                    dgl.function.copy_u("h", "m%s" % relationship_idx),
                     dgl.function.mean(
                         "m%s" % relationship_idx, "h%s" % relationship_idx
                     ),
@@ -240,7 +240,7 @@ class JanossyPoolingImproper(torch.nn.Module):
             {
                 "n1_as_%s_in_%s"
                 % (relationship_idx, big_idx): (
-                    dgl.function.copy_src("h", "m%s" % relationship_idx),
+                    dgl.function.copy_u("h", "m%s" % relationship_idx),
                     dgl.function.mean(
                         "m%s" % relationship_idx, "h%s" % relationship_idx
                     ),
@@ -358,7 +358,7 @@ class JanossyPoolingWithSmirnoffImproper(torch.nn.Module):
             {
                 "n1_as_%s_in_%s"
                 % (relationship_idx, big_idx): (
-                    dgl.function.copy_src("h", "m%s" % relationship_idx),
+                    dgl.function.copy_u("h", "m%s" % relationship_idx),
                     dgl.function.mean(
                         "m%s" % relationship_idx, "h%s" % relationship_idx
                     ),
@@ -475,7 +475,7 @@ class JanossyPoolingNonbonded(torch.nn.Module):
             {
                 "n1_as_%s_in_%s"
                 % (relationship_idx, big_idx): (
-                    dgl.function.copy_src("h", "m%s" % relationship_idx),
+                    dgl.function.copy_u("h", "m%s" % relationship_idx),
                     dgl.function.mean(
                         "m%s" % relationship_idx, "h%s" % relationship_idx
                     ),

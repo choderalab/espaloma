@@ -297,13 +297,13 @@ class GraphDataset(Dataset):
         import dgl
 
         if all(isinstance(graph, esp.graphs.graph.Graph) for graph in graphs):
-            return dgl.batch_hetero([graph.heterograph for graph in graphs])
+            return dgl.batch([graph.heterograph for graph in graphs])
 
         elif all(isinstance(graph, dgl.DGLGraph) for graph in graphs):
             return dgl.batch(graphs)
 
         elif all(isinstance(graph, dgl.DGLHeteroGraph) for graph in graphs):
-            return dgl.batch_hetero(graphs)
+            return dgl.batch(graphs)
 
         else:
             raise RuntimeError(
