@@ -38,7 +38,9 @@ def test_coulomb_energy_consistency(g):
 
     # if MD blows up, forget about it
     if g.nodes["n1"].data["xyz"].abs().max() > 100:
-        return True
+        pytest.skip(
+            "MD simulation blew up, skipping test. "
+        )
 
     _simulation = openmm.app.Simulation(
         simulation.topology,
