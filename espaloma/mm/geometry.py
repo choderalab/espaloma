@@ -30,6 +30,9 @@ def copy_src(src, out):
 # =============================================================================
 def distance(x0, x1):
     """ Distance. """
+    # TODO:
+    # assertions / shape docstrings
+    # p=2 indicates Euclidian distance
     return torch.norm(x0 - x1, p=2, dim=-1)
 
 
@@ -54,7 +57,6 @@ def angle(x0, x1, x2):
 def _dihedral(r0, r1):
     """ Dihedral between normal vectors. """
     return _angle(r0, r1)
-
 
 def dihedral(
     x0: torch.Tensor, x1: torch.Tensor, x2: torch.Tensor, x3: torch.Tensor
@@ -90,14 +92,19 @@ def dihedral(
     return theta
 
 
+    return torch.atan2(top, bottom)
+
 # =============================================================================
 # GEOMETRY IN HYPERNODES
 # =============================================================================
 def apply_bond(nodes):
     """ Bond length in nodes. """
-
-    return {"x": distance(x0=nodes.data["xyz0"], x1=nodes.data["xyz1"])}
-
+    return {
+        "x": distance(
+            x0=nodes.data["xyz0"],
+            x1=nodes.data["xyz1"]
+        ),
+    }
 
 def apply_angle(nodes):
     """ Angle values in nodes. """
@@ -120,7 +127,6 @@ def apply_angle(nodes):
             x1=nodes.data["xyz2"],
         )
     }
-
 
 def apply_torsion(nodes):
     """ Torsion dihedrals in nodes. """
@@ -155,14 +161,11 @@ def apply_torsion(nodes):
         )
     }
 
-
-
 # =============================================================================
 # GEOMETRY IN GRAPH
 # =============================================================================
 # NOTE:
 # The following functions modify graphs in-place.
-
 
 def geometry_in_graph(g):
     """ Assign values to geometric entities in graphs.
