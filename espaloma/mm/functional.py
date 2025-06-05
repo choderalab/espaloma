@@ -251,7 +251,7 @@ def lj(
         sigma_over_x,
     )
 
-    return epsilon * (
+    return 4.0 * epsilon * (
         coefficients[0] * sigma_over_x ** order[0]
         - coefficients[1] * sigma_over_x ** order[1]
     )
