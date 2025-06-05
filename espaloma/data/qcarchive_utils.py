@@ -5,7 +5,7 @@ from collections import namedtuple
 from typing import Tuple
 
 import numpy as np
-import qcportal as ptl
+import qcportal
 import torch
 from openmm import unit
 from openmm.unit import Quantity
@@ -21,48 +21,92 @@ import espaloma as esp
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
-def get_client():
-    return ptl.FractalClient()
+def get_client(url: str = "api.qcarchive.molssi.org") -> qcportal.client.PortalClient:
+    """
+    Returns a instance of the qcportal client.
+
+    Parameters
+    ----------
+    url: str, default="api.qcarchive.molssi.org"
+        qcportal instance to connect
+
+    Returns
+    -------
+    qcportal.client.PortalClient
+        qcportal client instance.
+    """
+    # Note, this may need to be modified to include username/password for non-public servers
+    return qcportal.PortalClient(url)
 
 
 def get_collection(
-    client,
-    collection_type="OptimizationDataset",
-    name="OpenFF Full Optimization Benchmark 1",
+        client,
+        collection_type="optimization",
+        name="OpenFF Full Optimization Benchmark 1",
 ):
-    collection = client.get_collection(
-        collection_type,
-        name,
+    """
+    Connects to a specific dataset on qcportal
+
+    Parameters
+    ----------
+    client: qcportal.client, required
+        The qcportal client instance
+    collection_type: str, default="optimization"
+        The type of qcarchive collection, options are
+        "torsiondrive", "optimization", "gridoptimization", "reaction", "singlepoint" "manybody"
+    name: str, default="OpenFF Full Optimization Benchmark 1"
+        Name of the dataset
+
+    Returns
+    -------
+    (qcportal dataset, list(str))
+        Tuple with an instance of qcportal dataset and list of record names
+
+    """
+    collection = client.get_dataset(
+        dataset_type=collection_type,
+        dataset_name=name,
     )
 
-    record_names = list(collection.data.records)
+    record_names = collection.entry_names
 
     return collection, record_names
 
 
-def get_graph(collection, record_name):
-    # get record and trajectory
-    record = collection.get_record(record_name, specification="default")
-    entry = collection.get_entry(record_name)
+def process_record(record, entry):
+    """
+    Processes a given record/entry pair from a dataset and returns the graph
+
+    Parameters
+    ----------
+    record: qcportal.optimization.record_models.OptimizationRecord
+        qcportal record
+    entry: cportal.optimization.dataset_models.OptimizationDatasetEntry
+        qcportal entry
+
+    Returns
+    -------
+        esp.Graph
+    """
+
     from openff.toolkit.topology import Molecule
 
-    mol = Molecule.from_qcschema(entry)
-
-    try:
-        trajectory = record.get_trajectory()
-    except:
-        return None
-
-    if trajectory is None:
-        return None
-
+    if record.record_type == "optimization":
+        trajectory = record.trajectory
+        if trajectory is None:
+            return None
+    else:
+        raise Exception(
+            f"{record.record_type} is not supported: only optimization datasets can be processed."
+        )
+    mol = Molecule.from_qcschema(entry.dict())
     g = esp.Graph(mol)
 
     # energy is already hartree
     g.nodes["g"].data["u_ref"] = torch.tensor(
         [
             Quantity(
-                snapshot.properties.scf_total_energy,
+                snapshot.properties["scf_total_energy"],
                 esp.units.HARTREE_PER_PARTICLE,
             ).value_in_unit(esp.units.ENERGY_UNIT)
             for snapshot in trajectory
@@ -74,7 +118,7 @@ def get_graph(collection, record_name):
         np.stack(
             [
                 Quantity(
-                    snapshot.get_molecule().geometry,
+                    snapshot.molecule.geometry,
                     unit.bohr,
                 ).value_in_unit(esp.units.DISTANCE_UNIT)
                 for snapshot in trajectory
@@ -89,7 +133,7 @@ def get_graph(collection, record_name):
         [
             torch.tensor(
                 Quantity(
-                    snapshot.dict()["return_result"],
+                    np.array(snapshot.properties["return_result"]).reshape((-1, 3)),
                     esp.units.HARTREE_PER_PARTICLE / unit.bohr,
                 ).value_in_unit(esp.units.FORCE_UNIT),
                 dtype=torch.get_default_dtype(),
@@ -102,21 +146,106 @@ def get_graph(collection, record_name):
     return g
 
 
-def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
-    final_molecules = record.get_final_molecules()
-    final_results = record.get_final_results()
+def get_graph(collection, record_name, spec_name="default"):
+    """
+    Processes the qcportal data for a given record name.
 
-    angle_keys = list(final_molecules.keys())
+    This supports optimization and singlepoint datasets.
+
+    Parameters
+    ----------
+    collection, qcportal dataset, required
+        The instance of the qcportal dataset
+    record_name, str, required
+        The name of a give record
+    spec_name, str, default="default"
+        Retrieve data for a given qcportal specification.
+    Returns
+    -------
+        Graph
+    """
+    # get record and trajectory
+    record = collection.get_record(record_name, specification_name=spec_name)
+    entry = collection.get_entry(record_name)
+
+    g = process_record(record, entry)
+
+    return g
+
+
+def get_graphs(collection, record_names, spec_name="default"):
+    """
+    Processes the qcportal data for a given set of record names.
+    This uses the qcportal iteration functions which are faster than processing
+    records one at a time.
+
+    This supports optimization and singlepoint datasets.
+
+
+    Parameters
+    ----------
+    collection, qcportal dataset, required
+        The instance of the qcportal dataset
+    record_name, List[str], required
+        A list of the record_names of a give record
+    spec_name, str, default="default"
+        Retrieve data for a given qcportal specification.
+    Returns
+    -------
+    list(graph)
+        Returns a list of the corresponding graph for each record name
+    """
+    g_list = []
+    for record, entry in zip(
+            collection.iterate_records(record_names, specification_names=[spec_name]),
+            collection.iterate_entries(record_names),
+    ):
+        # note iterate records returns a tuple of length 3 (name, spec_name, actual record information)
+
+        g = process_record(record[2], entry)
+        g_list.append(g)
+
+    return g_list
+
+
+def fetch_td_record(record: qcportal.torsiondrive.record_models.TorsiondriveRecord):
+    """
+    Fetches configuration, energy, and gradients for a given torsiondrive record as a function of different angles.
+
+    Parameters
+    ----------
+    record: qcportal.torsiondrive.record_models.TorsiondriveRecord, required
+        Torsiondrive record of interest
+    Returns
+    -------
+    tuple, ( numpy.array, numpy.array, numpy.array,numpy.array)
+        Returned data is a tuple of numpy arrays.
+        The first index contains angles and subsequent arrays represent
+        molecule coordinate, energy and gradients associated with each angle.
+
+    """
+    molecule_optimization = record.optimizations
+
+    angle_keys = list(molecule_optimization.keys())
 
     xyzs = []
     energies = []
     gradients = []
 
     for angle in angle_keys:
-        result = final_results[angle]
-        mol = final_molecules[angle]
+        # NOTE: this is calling the first index of the optimization array
+        # this gives the same value as the prior implementation.
+        # however it seems to be that this contains multiple different initial configurations
+        # that have been optimized.  Should all conformers and energies/gradients be considered?
+        mol = molecule_optimization[angle][0].final_molecule
+        result = molecule_optimization[angle][0].trajectory[-1].properties
 
-        e, g = get_energy_and_gradient(result)
+        """Note: force = - gradient"""
+
+        # TODO: attach units here? or later?
+
+        e = result["current energy"]
+        g = np.array(result["current gradient"]).reshape(-1, 3)
 
         xyzs.append(mol.geometry)
         energies.append(e)
@@ -146,22 +275,6 @@ def fetch_td_record(record: ptl.models.torsiondrive.TorsionDriveRecord):
     return flat_angles, xyz_in_order, energies_in_order, gradients_in_order
 
 
-def get_energy_and_gradient(
-    snapshot: ptl.models.records.ResultRecord,
-) -> Tuple[float, np.ndarray]:
-    """Note: force = - gradient"""
-
-    # TODO: attach units here? or later?
-
-    d = snapshot.dict()
-    qcvars = d["extras"]["qcvars"]
-    energy = qcvars["CURRENT ENERGY"]
-    flat_gradient = np.array(qcvars["CURRENT GRADIENT"])
-    num_atoms = len(flat_gradient) // 3
-    gradient = flat_gradient.reshape((num_atoms, 3))
-    return energy, gradient
-
-
 MolWithTargets = namedtuple(
     "MolWithTargets", ["offmol", "xyz", "energies", "gradients"]
 )
@@ -184,9 +297,9 @@ def h5_to_dataset(df):
         g = esp.Graph(mol_ref)
 
         u_ref = np.concatenate(group["energies"].values)
-        u_ref_prime = np.concatenate(
-            group["gradients"].values, axis=0
-        ).transpose(1, 0, 2)
+        u_ref_prime = np.concatenate(group["gradients"].values, axis=0).transpose(
+            1, 0, 2
+        )
         xyz = np.concatenate(group["xyz"].values, axis=0).transpose(1, 0, 2)
 
         assert u_ref_prime.shape[0] == xyz.shape[0] == mol_ref.n_atoms
@@ -229,7 +342,7 @@ def breakdown_along_time_axis(g, batch_size=32):
 
     shuffle(idxs)
     chunks = [
-        idxs[_idx * batch_size : (_idx + 1) * batch_size]
+        idxs[_idx * batch_size: (_idx + 1) * batch_size]
         for _idx in range(n_snapshots // batch_size)
     ]
 
@@ -259,10 +372,7 @@ def make_batch_size_consistent(ds, batch_size=32):
     return esp.data.dataset.GraphDataset(
         list(
             itertools.chain.from_iterable(
-                [
-                    breakdown_along_time_axis(g, batch_size=batch_size)
-                    for g in ds
-                ]
+                [breakdown_along_time_axis(g, batch_size=batch_size) for g in ds]
             )
         )
     )
