@@ -1,12 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import numpy as np
 import rdkit
 import torch
-from openforcefield.typing.engines.smirnoff import ForceField
+from openff.toolkit.typing.engines.smirnoff import ForceField
 import espaloma as esp
-from simtk import unit
-from simtk.unit.quantity import Quantity
+from openmm import unit
+from openmm.unit import Quantity
+import math
 
 # =============================================================================
 # CONSTANTS
@@ -19,42 +21,51 @@ OPENMM_BOND_EQ_UNIT = OPENMM_LENGTH_UNIT
 OPENMM_ANGLE_EQ_UNIT = OPENMM_ANGLE_UNIT
 OPENMM_TORSION_K_UNIT = OPENMM_ENERGY_UNIT
 OPENMM_TORSION_PHASE_UNIT = OPENMM_ANGLE_UNIT
-OPENMM_BOND_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_LENGTH_UNIT ** 2)
-OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT ** 2)
+OPENMM_BOND_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_LENGTH_UNIT**2)
+OPENMM_ANGLE_K_UNIT = OPENMM_ENERGY_UNIT / (OPENMM_ANGLE_UNIT**2)
 
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
 
 
-def load_forcefield(forcefield="openff_unconstrained-1.1.0"):
+def load_forcefield(forcefield="openff_unconstrained-2.2.1"):
     # get a forcefield
     try:
         ff = ForceField("%s.offxml" % forcefield)
-    except:
-        try:
-            ff = ForceField("test_forcefields/%s.offxml" % forcefield)
-        except:
-            raise NotImplementedError
+    except Exception as e:
+        print(e)
+        raise NotImplementedError
     return ff
 
 
 def openmm_system_from_graph(
-    g, forcefield="openff_unconstrained-1.1.0", suffix=""
+    g,
+    forcefield="openff_unconstrained-2.1.1",
+    suffix="",
+    charge_method="nn",
+    create_system_kwargs={},
 ):
-    """ Construct an openmm system from `espaloma.Graph`.
+    """Construct an openmm system from `espaloma.Graph`.
 
     Parameters
     ----------
     g : `espaloma.Graph`
         Input graph.
 
-    forcefield : `str`
+    forcefield : `str`, optional, default='openff_unconstrained-2.1.1'
         Name of the force field. Have to be Open Force Field.
         (this forcefield will be used to assign nonbonded parameters, but all of its valence parameters will be overwritten)
 
     suffix : `str`
         Suffix for the force terms.
+
+    charge_method : str, optional, default='nn'
+        Method to use for assigning partial charges:
+        'nn' : Assign partial charges from the espaloma graph net model
+        'am1-bcc' : Allow the OpenFF toolkit to assign AM1-BCC charges using default backend
+        'gasteiger' : Assign Gasteiger partial charges (not recommended)
+        'from-molecule' : Use partial charges provided in the original `Molecule` object
 
     Returns
     -------
@@ -76,8 +87,44 @@ def openmm_system_from_graph(
         for position, idxs in enumerate(g.nodes["n3"].data["idxs"])
     }
 
-    # create openmm system
-    sys = ff.create_openmm_system(g.mol.to_topology())
+    if charge_method == "gasteiger":
+        # from rdkit.Chem.AllChem import ComputeGasteigerCharges
+        # rdkit_mol = g.mol.to_rdkit()
+        # ComputeGasteigerCharges(rdkit_mol)
+        # charges = [atom.GetDoubleProp("_GasteigerCharge") for atom in rdkit_mol.GetAtoms()]
+        g.mol.assign_partial_charges("gasteiger")
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol]
+        )
+
+    elif charge_method == "am1-bcc":
+        g.mol.assign_partial_charges("am1bcc")
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol]
+        )
+
+    elif charge_method == "from-molecule":
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(), charge_from_molecules=[g.mol]
+        )
+
+    elif charge_method == "nn":
+        g.mol.partial_charges = unit.elementary_charge * g.nodes["n1"].data[
+            "q"
+        ].flatten().detach().cpu().numpy().astype(
+            np.float64,
+        )
+        sys = ff.create_openmm_system(
+            g.mol.to_topology(),
+            charge_from_molecules=[g.mol],
+            allow_nonintegral_charges=True,
+        )
+
+    else:
+        # create openmm system
+        raise RuntimeError(
+            "Charge method %s is not supported. " % charge_method
+        )
 
     for force in sys.getForces():
         name = force.__class__.__name__
@@ -105,10 +152,11 @@ def openmm_system_from_graph(
                 )
 
                 _eq = Quantity(  # bond length
-                    _eq, esp.units.DISTANCE_UNIT,
+                    _eq,
+                    esp.units.DISTANCE_UNIT,
                 ).value_in_unit(OPENMM_BOND_EQ_UNIT)
 
-                _k = 2.0 * Quantity(  # bond force constant:
+                _k = Quantity(  # bond force constant:
                     # since everything is enumerated twice in espaloma
                     # and once in OpenMM,
                     # we insert a coefficient of 2.0
@@ -141,11 +189,12 @@ def openmm_system_from_graph(
                     .item()
                 )
 
-                _eq = Quantity(_eq, esp.units.ANGLE_UNIT,).value_in_unit(
-                    OPENMM_ANGLE_EQ_UNIT
-                )
+                _eq = Quantity(
+                    _eq,
+                    esp.units.ANGLE_UNIT,
+                ).value_in_unit(OPENMM_ANGLE_EQ_UNIT)
 
-                _k = 2.0 * Quantity(  # force constant
+                _k = Quantity(  # force constant
                     # since everything is enumerated twice in espaloma
                     # and once in OpenMM,
                     # we insert a coefficient of 2.0
@@ -157,10 +206,6 @@ def openmm_system_from_graph(
 
         if "PeriodicTorsionForce" in name:
             number_of_torsions = force.getNumTorsions()
-            assert number_of_torsions <= g.heterograph.number_of_nodes("n4")
-
-            # TODO: An alternative would be to start with an empty PeriodicTorsionForce and always call force.addTorsion
-
             if (
                 "periodicity%s" % suffix not in g.nodes["n4"].data
                 or "phase%s" % suffix not in g.nodes["n4"].data
@@ -172,6 +217,18 @@ def openmm_system_from_graph(
 
                 g.nodes["n4"].data["phases%s" % suffix] = torch.zeros(
                     g.heterograph.number_of_nodes("n4"), 6
+                )
+
+                g.nodes["n4_improper"].data[
+                    "periodicity%s" % suffix
+                ] = torch.arange(1, 7)[None, :].repeat(
+                    g.heterograph.number_of_nodes("n4_improper"), 1
+                )
+
+                g.nodes["n4_improper"].data[
+                    "phases%s" % suffix
+                ] = torch.zeros(
+                    g.heterograph.number_of_nodes("n4_improper"), 6
                 )
 
             count_idx = 0
@@ -194,9 +251,16 @@ def openmm_system_from_graph(
                             _periodicity = periodicities[sub_idx].item()
                             _phase = phases[sub_idx].item()
 
+                            if k < 0:
+                                k = -k
+                                _phase = math.pi - _phase
+
                             k = Quantity(
-                                k, esp.units.ENERGY_UNIT,
-                            ).value_in_unit(OPENMM_ENERGY_UNIT,)
+                                k,
+                                esp.units.ENERGY_UNIT,
+                            ).value_in_unit(
+                                OPENMM_ENERGY_UNIT,
+                            )
 
                             if count_idx < number_of_torsions:
                                 force.setTorsionParameters(
@@ -211,7 +275,7 @@ def openmm_system_from_graph(
                                     idx3,
                                     _periodicity,
                                     _phase,
-                                    2.0 * k,
+                                    k,
                                 )
 
                             else:
@@ -226,7 +290,73 @@ def openmm_system_from_graph(
                                     idx3,
                                     _periodicity,
                                     _phase,
-                                    2.0 * k,
+                                    k,
+                                )
+
+                            count_idx += 1
+
+            if "k%s" % suffix in g.nodes["n4_improper"].data:
+                for idx in range(
+                    g.heterograph.number_of_nodes("n4_improper")
+                ):
+                    idx0 = g.nodes["n4_improper"].data["idxs"][idx, 0].item()
+                    idx1 = g.nodes["n4_improper"].data["idxs"][idx, 1].item()
+                    idx2 = g.nodes["n4_improper"].data["idxs"][idx, 2].item()
+                    idx3 = g.nodes["n4_improper"].data["idxs"][idx, 3].item()
+
+                    periodicities = g.nodes["n4_improper"].data[
+                        "periodicity%s" % suffix
+                    ][idx]
+                    phases = g.nodes["n4_improper"].data["phases%s" % suffix][
+                        idx
+                    ]
+                    ks = g.nodes["n4_improper"].data["k%s" % suffix][idx]
+                    for sub_idx in range(ks.flatten().shape[0]):
+                        k = ks[sub_idx].item()
+                        if k != 0.0:
+                            _periodicity = periodicities[sub_idx].item()
+                            _phase = phases[sub_idx].item()
+
+                            if k < 0:
+                                k = -k
+                                _phase = math.pi - _phase
+
+                            k = Quantity(
+                                k,
+                                esp.units.ENERGY_UNIT,
+                            ).value_in_unit(
+                                OPENMM_ENERGY_UNIT,
+                            )
+
+                            if count_idx < number_of_torsions:
+                                force.setTorsionParameters(
+                                    # since everything is enumerated
+                                    # twice in espaloma
+                                    # and once in OpenMM,
+                                    # we insert a coefficient of 2.0
+                                    count_idx,
+                                    idx0,
+                                    idx1,
+                                    idx2,
+                                    idx3,
+                                    _periodicity,
+                                    _phase,
+                                    0.5 * k,
+                                )
+
+                            else:
+                                force.addTorsion(
+                                    # since everything is enumerated
+                                    # twice in espaloma
+                                    # and once in OpenMM,
+                                    # we insert a coefficient of 2.0
+                                    idx0,
+                                    idx1,
+                                    idx2,
+                                    idx3,
+                                    _periodicity,
+                                    _phase,
+                                    0.5 * k,
                                 )
 
                             count_idx += 1

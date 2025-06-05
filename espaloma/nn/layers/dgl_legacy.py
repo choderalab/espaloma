@@ -2,16 +2,10 @@
 
 """
 
-import math
-from copy import deepcopy
-
-import dgl
-
 # =============================================================================
 # IMPORTS
 # =============================================================================
 import torch
-from dgl.nn import pytorch as dgl_pytorch
 
 # =============================================================================
 # CONSTANT
@@ -28,9 +22,14 @@ DEFAULT_MODEL_KWARGS = {
 # =============================================================================
 class GN(torch.nn.Module):
     def __init__(
-        self, in_features, out_features, model_name="GraphConv", kwargs={},
+        self,
+        in_features,
+        out_features,
+        model_name="GraphConv",
+        kwargs={},
     ):
         super(GN, self).__init__()
+        from dgl.nn import pytorch as dgl_pytorch
 
         if kwargs == {}:
             if model_name in DEFAULT_MODEL_KWARGS:
@@ -54,6 +53,8 @@ class GN(torch.nn.Module):
 
 
 def gn(model_name="GraphConv", kwargs={}):
+    from dgl.nn import pytorch as dgl_pytorch
+
     if model_name == "GINConv":
         return lambda in_features, out_features: dgl_pytorch.conv.GINConv(
             apply_func=torch.nn.Linear(in_features, out_features),

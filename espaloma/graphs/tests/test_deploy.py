@@ -1,14 +1,194 @@
-import pytest
+import openmm
+import urllib.request
+import numpy.testing as npt
 import espaloma as esp
+from openmm import unit
+
+omm_angle_unit = unit.radian
+omm_energy_unit = unit.kilojoule_per_mole
+from openmm.unit import Quantity
 
 
-def test_butane():
-    """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane"""
-    ff = esp.graphs.legacy_force_field.LegacyForceField("smirnoff99Frosst")
+def test_butane_charge_am1bcc():
+    """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane using
+    am1-bcc charge method"""
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
     g = esp.Graph("CCCC")
     g = ff.parametrize(g)
-    print(g.mol)
-    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref")
+    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="am1-bcc")
+
+def test_butane_charge_nn():
+    """check that esp.graphs.deploy.openmm_system_from_graph runs without error on butane using
+    the nn charge method"""
+    import torch
+    # Download serialized espaloma model
+    url = f'https://github.com/choderalab/espaloma/releases/download/0.3.0/espaloma-0.3.0rc1.pt'
+    espaloma_model_filepath = f'espaloma-0.3.0rc1.pt'
+    urllib.request.urlretrieve(url, filename=espaloma_model_filepath)
+    # Test deployment
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
+    g = esp.Graph("CCCC")
+    g = ff.parametrize(g)
+    # apply a trained espaloma model to assign parameters
+    net = torch.load(espaloma_model_filepath, map_location=torch.device('cpu'))
+    net.eval()
+    net(g.heterograph)
+    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="nn")
+
+def test_caffeine():
+    """Test Openmm system deployment of caffeine method using the charges from the molecule runs
+    without error."""
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
+    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+    g = ff.parametrize(g)
+    g.mol.assign_partial_charges("am1bcc")  # Assign charges after parametrizing
+    esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="from-molecule")
+
+
+def test_parameter_consistent_caffeine():
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
+    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+    g = ff.parametrize(g)
+    system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="am1-bcc")
+    forces = list(system.getForces())
+    openff_forces = ff.FF.label_molecules(g.mol.to_topology())[0]
+    for idx, force in enumerate(forces):
+        force.setForceGroup(idx)
+        name = force.__class__.__name__
+        if "HarmonicBondForce" in name:
+            for _idx in range(force.getNumBonds()):
+                start, end, eq, k_openmm = force.getBondParameters(_idx)
+
+                k_openff = openff_forces["Bonds"][(start, end)].k.to_openmm()
+
+                npt.assert_almost_equal(
+                    k_openmm / k_openff,
+                    2.0,
+                    decimal=3,
+                )
+
+
+def test_energy_consistent_caffeine():
+    """Deploy a caffeine molecule parametrized by a traditional force field
+    and deployed by espaloma, make sure the energies computed using espaloma
+    and OpenMM are same or close.
+
+    """
+    # grab a force field
+    ff = esp.graphs.legacy_force_field.LegacyForceField("openff-1.2.0")
+
+    # parametrize caffeine molecule using the parametrization
+    ## Should there be a second test for SMIRNOFF impropers?
+    g = esp.Graph("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+    g = ff.parametrize(g)
+    system = esp.graphs.deploy.openmm_system_from_graph(g, suffix="_ref", charge_method="am1-bcc")
+
+    # compute energies using espaloma
+    import torch
+
+    g.nodes["n1"].data["xyz"] = torch.randn(
+        g.heterograph.number_of_nodes("n1"), 1, 3
+    )
+    esp.mm.geometry.geometry_in_graph(g.heterograph)
+    esp.mm.energy.energy_in_graph(
+        g.heterograph, terms=["n2", "n3", "n4", "n4_improper"], suffix="_ref"
+    )
+
+    # compute energies using OpenMM with bond, angle, and torsion breakdown
+    forces = list(system.getForces())
+
+    energies = {}
+
+    for idx, force in enumerate(forces):
+        force.setForceGroup(idx)
+
+        name = force.__class__.__name__
+
+        if "Nonbonded" in name:
+            force.setNonbondedMethod(openmm.NonbondedForce.NoCutoff)
+
+            # epsilons = {}
+            # sigmas = {}
+
+            # for _idx in range(force.getNumParticles()):
+            #     q, sigma, epsilon = force.getParticleParameters(_idx)
+
+            #     # record parameters
+            #     epsilons[_idx] = epsilon
+            #     sigmas[_idx] = sigma
+
+            #     force.setParticleParameters(_idx, 0., sigma, epsilon)
+
+            # def sigma_combining_rule(sig1, sig2):
+            #     return (sig1 + sig2) / 2
+
+            # def eps_combining_rule(eps1, eps2):
+            #     return np.sqrt(np.abs(eps1 * eps2))
+
+            # for _idx in range(force.getNumExceptions()):
+            #     idx0, idx1, q, sigma, epsilon = force.getExceptionParameters(
+            #         _idx)
+            #     force.setExceptionParameters(
+            #         _idx,
+            #         idx0,
+            #         idx1,
+            #         0.0,
+            #         sigma_combining_rule(sigmas[idx0], sigmas[idx1]),
+            #         eps_combining_rule(epsilons[idx0], epsilons[idx1])
+            #     )
+
+            # force.updateParametersInContext(_simulation.context)
+
+    # create new simulation
+    _simulation = openmm.app.Simulation(
+        g.mol.to_topology().to_openmm(),
+        system,
+        openmm.VerletIntegrator(0.0),
+    )
+
+    _simulation.context.setPositions(
+        Quantity(
+            g.nodes["n1"].data["xyz"][:, 0, :].numpy(),
+            unit=esp.units.DISTANCE_UNIT,
+        ).value_in_unit(unit.nanometer)
+    )
+
+    for idx, force in enumerate(forces):
+        name = force.__class__.__name__
+
+        state = _simulation.context.getState(
+            getEnergy=True,
+            getParameters=True,
+            groups=2**idx,
+        )
+
+        energy = state.getPotentialEnergy().value_in_unit(
+            esp.units.ENERGY_UNIT
+        )
+
+        energies[name] = energy
+
+    # test if bond energies are equal
+    npt.assert_almost_equal(
+        g.nodes["g"].data["u_n2_ref"].numpy(),
+        energies["HarmonicBondForce"],
+        decimal=3,
+    )
+
+    # test if angle energies are equal
+    npt.assert_almost_equal(
+        g.nodes["g"].data["u_n3_ref"].numpy(),
+        energies["HarmonicAngleForce"],
+        decimal=3,
+    )
+
+    # test if torsion energies are equal
+    npt.assert_almost_equal(
+        g.nodes["g"].data["u_n4_ref"].numpy()
+        + g.nodes["g"].data["u_n4_improper_ref"].numpy(),
+        energies["PeriodicTorsionForce"],
+        decimal=3,
+    )
 
 
 # TODO: test that desired parameters are assigned

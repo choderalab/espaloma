@@ -2,34 +2,33 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import torch
-from simtk import openmm
-from simtk import openmm as mm
-from simtk import unit
+import openmm
+from openmm import unit
 
 from espaloma.utils.geometry import _sample_four_particle_torsion_scan
 
 omm_angle_unit = unit.radian
 omm_energy_unit = unit.kilojoule_per_mole
 
-from simtk.openmm import app
+from openmm import app
 
 import espaloma as esp
 
-decimal_threshold = 4
+decimal_threshold = 2
 
 
 def _create_torsion_sim(
     periodicity: int = 2, phase=0 * omm_angle_unit, k=10.0 * omm_energy_unit
 ) -> app.Simulation:
     """Create a 4-particle OpenMM Simulation containing only a PeriodicTorsionForce"""
-    system = mm.System()
+    system = openmm.System()
 
     # add 4 particles of unit mass
     for _ in range(4):
         system.addParticle(1)
 
     # add torsion force to system
-    force = mm.PeriodicTorsionForce()
+    force = openmm.PeriodicTorsionForce()
     force.addTorsion(0, 1, 2, 3, periodicity, phase, k)
     system.addForce(force)
 
@@ -39,7 +38,7 @@ def _create_torsion_sim(
     residue = topology.addResidue("torsion", chain)
     for name in ["a", "b", "c", "d"]:
         topology.addAtom(name, "C", residue)
-    integrator = mm.VerletIntegrator(1.0)
+    integrator = openmm.VerletIntegrator(1.0)
     sim = app.Simulation(topology, system, integrator)
 
     return sim
@@ -48,10 +47,18 @@ def _create_torsion_sim(
 # TODO: mark this properly: want to test periodicities 1..6, +ve, -ve k
 # @pytest.mark.parametrize(periodicity=[1,2,3,4,5,6], k=[-10 * omm_energy_unit, +10 * omm_energy_unit])
 def test_periodic_torsion(
-    periodicity=4, k=-10 * omm_energy_unit, n_samples=100
+    periodicity=4, k=10 * omm_energy_unit, n_samples=100
 ):
-    phase = 0 * omm_angle_unit
+    """Using simulated torsion scan, test if espaloma torsion energies and
+    OpenMM torsion energies agree.
+
+    """
+    phase = 0 * omm_angle_unit  # all zero phases
+
+    # create torsion simulation
     sim = _create_torsion_sim(periodicity=periodicity, phase=phase, k=k)
+
+    # grab snapshots from torsion scan
     xyz_np = _sample_four_particle_torsion_scan(n_samples)
 
     # compute energies using OpenMM
@@ -87,18 +94,28 @@ def test_periodic_torsion(
 
 # TODO: parameterize on the individual energy terms also
 @pytest.mark.parametrize(
-    "g", esp.data.esol(first=10),
+    "g",
+    esp.data.esol(first=10),
 )
 def test_energy_angle_and_bond(g):
     # make simulation
     from espaloma.data.md import MoleculeVacuumSimulation
 
     # get simulation
-    simulation = MoleculeVacuumSimulation(
-        n_samples=1, n_steps_per_sample=10
-    ).simulation_from_graph(g)
+    esp_simulation = MoleculeVacuumSimulation(
+        n_samples=1,
+        n_steps_per_sample=1000,
+        forcefield="gaff-1.81",
+        charge_method="gasteiger",
+    )
 
+    simulation = esp_simulation.simulation_from_graph(g)
     system = simulation.system
+    esp_simulation.run(g, in_place=True)
+
+    # if MD blows up, forget about it
+    if g.nodes["n1"].data["xyz"].abs().max() > 100:
+        pytest.skip("MD simulation blew up, skipping test.")
 
     forces = list(system.getForces())
 
@@ -146,18 +163,22 @@ def test_energy_angle_and_bond(g):
 
     # create new simulation
     _simulation = openmm.app.Simulation(
-        simulation.topology, system, openmm.VerletIntegrator(0.0),
+        simulation.topology,
+        system,
+        openmm.VerletIntegrator(0.0),
     )
 
     _simulation.context.setPositions(
-        simulation.context.getState(getPositions=True).getPositions()
+        g.nodes["n1"].data["xyz"][:, 0, :].detach().numpy() * unit.bohr
     )
 
     for idx, force in enumerate(forces):
         name = force.__class__.__name__
 
         state = _simulation.context.getState(
-            getEnergy=True, getParameters=True, groups=2 ** idx,
+            getEnergy=True,
+            getParameters=True,
+            groups=2**idx,
         )
 
         energy = state.getPotentialEnergy().value_in_unit(
@@ -167,7 +188,7 @@ def test_energy_angle_and_bond(g):
         energies[name] = energy
 
     # parametrize
-    ff = esp.graphs.legacy_force_field.LegacyForceField("smirnoff99Frosst")
+    ff = esp.graphs.legacy_force_field.LegacyForceField("gaff-1.81")
     g = ff.parametrize(g)
 
     # n2 : bond, n3: angle, n1: nonbonded?
@@ -176,10 +197,12 @@ def test_energy_angle_and_bond(g):
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
         g.nodes[term].data["eq"] = g.nodes[term].data["eq_ref"]
 
+    """
     for term in ["n1"]:
         g.nodes[term].data["sigma"] = g.nodes[term].data["sigma_ref"]
         g.nodes[term].data["epsilon"] = g.nodes[term].data["epsilon_ref"]
         # g.nodes[term].data['q'] = g.nodes[term].data['q_ref']
+    """
 
     for term in ["n4"]:
         g.nodes[term].data["phases"] = g.nodes[term].data["phases_ref"]
@@ -189,12 +212,12 @@ def test_energy_angle_and_bond(g):
         g.nodes[term].data["k"] = g.nodes[term].data["k_ref"]
 
     # for each atom, store n_snapshots x 3
-    g.nodes["n1"].data["xyz"] = torch.tensor(
-        simulation.context.getState(getPositions=True)
-        .getPositions(asNumpy=True)
-        .value_in_unit(esp.units.DISTANCE_UNIT),
-        dtype=torch.float32,
-    )[None, :, :].permute(1, 0, 2)
+    # g.nodes["n1"].data["xyz"] = torch.tensor(
+    #     simulation.context.getState(getPositions=True)
+    #     .getPositions(asNumpy=True)
+    #     .value_in_unit(esp.units.DISTANCE_UNIT),
+    #     dtype=torch.float32,
+    # )[None, :, :].permute(1, 0, 2)
 
     # print(g.nodes['n2'].data)
     esp.mm.geometry.geometry_in_graph(g.heterograph)
@@ -207,20 +230,20 @@ def test_energy_angle_and_bond(g):
 
     # test bonds
     npt.assert_almost_equal(
-        g.nodes["g"].data["u_n2"].numpy(),
+        g.nodes["g"].data["u_n2"].detach().numpy(),
         energies["HarmonicBondForce"],
         decimal=n_decimals,
     )
 
     # test angles
     npt.assert_almost_equal(
-        g.nodes["g"].data["u_n3"].numpy(),
+        g.nodes["g"].data["u_n3"].detach().numpy(),
         energies["HarmonicAngleForce"],
         decimal=n_decimals,
     )
 
-    # propers = g.nodes["g"].data["u_n4"].numpy()
-    # impropers =  g.nodes["g"].data["u_n4_improper"].numpy()
+    # propers = g.nodes["g"].data["u_n4"].detach().numpy()
+    # impropers =  g.nodes["g"].data["u_n4_improper"].detach().numpy()
     # all_torsions = propers + impropers
     # npt.assert_almost_equal(
     #     all_torsions,

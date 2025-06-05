@@ -3,5 +3,10 @@ API Documentation
 
 .. autosummary::
    :toctree: autosummary
+   :template: custom-module-template.rst
+   :recursive:
 
-   espaloma.canvas
+   espaloma.mm
+   espaloma.nn
+   espaloma.graphs
+   espaloma.data 

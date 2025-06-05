@@ -1,2 +1,3 @@
 *.ipynb linguist-documentation
 *.html linguist-documentation
+espaloma/_version.py export-subst

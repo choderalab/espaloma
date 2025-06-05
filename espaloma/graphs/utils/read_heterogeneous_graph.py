@@ -4,11 +4,10 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import numpy as np
 import torch
 from espaloma.graphs.utils import offmol_indices
-from openforcefield.topology import Molecule
+from openff.toolkit.topology import Molecule
 from typing import Dict
 
 # =============================================================================
@@ -69,7 +68,7 @@ def relationship_indices_from_offmol(
 
 
 def from_homogeneous_and_mol(g, offmol):
-    r""" Build heterogeneous graph from homogeneous ones.
+    r"""Build heterogeneous graph from homogeneous ones.
 
 
     Note
@@ -190,14 +189,25 @@ def from_homogeneous_and_mol(g, offmol):
     a_ = a.to_dense().detach().numpy()
 
     idxs["nonbonded"] = np.stack(
-        np.where(
-            np.equal(a_ + a_ @ a_ + a_ @ a_ @ a_ + a_ @ a_ @ a_ @ a_, 0.0)
-        ),
+        np.where(np.equal(a_ + a_ @ a_ + a_ @ a_ @ a_, 0.0)),
         axis=-1,
     )
 
     # onefour is the two ends of torsion
-    idxs["onefour"] = np.stack([idxs["n4"][:, 0], idxs["n4"][:, 3],], axis=1)
+    # idxs["onefour"] = np.stack(
+    #     [
+    #         idxs["n4"][:, 0],
+    #         idxs["n4"][:, 3],
+    #     ],
+    #     axis=1,
+    # )
+
+    idxs["onefour"] = np.stack(
+        np.where(
+            np.equal(a_ + a_ @ a_, 0.0) * np.greater(a_ @ a_ @ a_, 0.0),
+        ),
+        axis=-1,
+    )
 
     # membership
     for term in ["nonbonded", "onefour"]:
@@ -208,7 +218,10 @@ def from_homogeneous_and_mol(g, offmol):
             )
 
             hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
-                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                [
+                    idxs[term][:, pos_idx],
+                    np.arange(idxs[term].shape[0]),
+                ],
                 axis=-1,
             )
 
@@ -221,7 +234,10 @@ def from_homogeneous_and_mol(g, offmol):
             )
 
             hg[("n1", "n1_as_%s_in_%s" % (pos_idx, term), term)] = np.stack(
-                [idxs[term][:, pos_idx], np.arange(idxs[term].shape[0]),],
+                [
+                    idxs[term][:, pos_idx],
+                    np.arange(idxs[term].shape[0]),
+                ],
                 axis=-1,
             )
 
@@ -238,19 +254,36 @@ def from_homogeneous_and_mol(g, offmol):
         "onefour",
     ]:
         hg[(term, "%s_in_g" % term, "g",)] = np.stack(
-            [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))], axis=1,
+            [np.arange(len(idxs[term])), np.zeros(len(idxs[term]))],
+            axis=1,
         )
 
         hg[("g", "g_has_%s" % term, term)] = np.stack(
-            [np.zeros(len(idxs[term])), np.arange(len(idxs[term])),], axis=1,
+            [
+                np.zeros(len(idxs[term])),
+                np.arange(len(idxs[term])),
+            ],
+            axis=1,
         )
 
-    hg = dgl.heterograph({key: list(value) for key, value in hg.items()})
+    import dgl
+
+    hg = dgl.heterograph(
+        {key: value.astype(np.int32).tolist() for key, value in hg.items()}
+    )
 
     hg.nodes["n1"].data["h0"] = g.ndata["h0"]
-
+    hg.nodes["g"].data["sum_q"] = g.ndata["sum_q"][0].reshape(1, 1)
     # include indices in the nodes themselves
-    for term in ["n1", "n2", "n3", "n4", "n4_improper"]:
+    for term in [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n4_improper",
+        "onefour",
+        "nonbonded",
+    ]:
         hg.nodes[term].data["idxs"] = torch.tensor(idxs[term])
 
     return hg

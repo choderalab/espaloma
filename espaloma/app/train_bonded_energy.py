@@ -53,7 +53,8 @@ def run(args):
     units = [x for x in args.config if isinstance(x, int)][-1]
 
     readout = esp.nn.readout.janossy.JanossyPooling(
-        in_features=units, config=args.janossy_config,
+        in_features=units,
+        config=args.janossy_config,
     )
 
     net = torch.nn.Sequential(
@@ -141,7 +142,9 @@ if __name__ == "__main__":
     parser.add_argument("--first", default=-1, type=int)
     parser.add_argument("--partition", default="4:1", type=str)
     parser.add_argument("--batch_size", default=8, type=int)
-    parser.add_argument("--forcefield", default="smirnoff99Frosst", type=str)
+    parser.add_argument(
+        "--forcefield", default="smirnoff99Frosst-1.1.0", type=str
+    )
     parser.add_argument("--layer", default="GraphConv", type=str)
     parser.add_argument("--n_classes", default=100, type=int)
     parser.add_argument(

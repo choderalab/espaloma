@@ -8,7 +8,7 @@ import espaloma as esp
 # MODULE FUNCTIONS
 # =============================================================================
 def harmonic_bond(x, k, eq):
-    """ Harmonic bond energy.
+    """Harmonic bond energy.
 
     Parameters
     ----------
@@ -30,18 +30,34 @@ def harmonic_bond(x, k, eq):
 
     # NOTE:
     # 0.25 because all bonds are calculated twice
-    return 0.25 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
+    return 0.5 * esp.mm.functional.harmonic(x=x, k=k, eq=eq)
 
 
 def gaussian_bond(x, coefficients):
-    """ Bond energy with Gaussian basis function.
+    """Bond energy with Gaussian basis function."""
+    return esp.mm.functional.gaussian(
+        x=x,
+        coefficients=coefficients,
+    )
+
+
+def linear_mixture_bond(x, coefficients, phases):
+    """Bond energy with Linear basis function.
+
+    Parameters
+    ----------
+    coefficients : torch.Tensor
+        Coefficients of the linear mixuture.
+
+    phases : torch.Tensor
+        Phases of the linear mixture.
 
     """
-    return esp.mm.functional.gaussian(x=x, coefficients=coefficients,)
+    return 0.5 * esp.mm.functional.linear_mixture(
+        x=x, coefficients=coefficients, phases=phases
+    )
 
 
-def linear_mixture_bond(x, coefficients):
-    """ Bond energy with Linear basis function.
-
-    """
-    return esp.mm.functional.linear_mixture(x=x, coefficients=coefficients,)
+def bond_high(u_bond, k3, k4):
+    u_bond = u_bond - u_bond.min(dim=-1, keepdims=True)[0]
+    return k3 * u_bond**1.5 + k4 * u_bond**2

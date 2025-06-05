@@ -1,0 +1,44 @@
+package:
+  name: espaloma
+  version: !!str 0.0.0
+
+source:
+  path: ../../
+
+build:
+  preserve_egg_dir: True
+  number: 0
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy >=1.14
+
+  run:
+    - python
+    - pip
+    - openeye-toolkits
+    - numpy
+    - matplotlib
+    - scipy
+    - openff-toolkit
+    - openff-forcefields
+    - smirnoff99Frosst
+    - openmm
+    - openmmforcefields
+    - pytorch
+    - dgl
+    - pytest
+    - pytest-cov
+    - codecov
+    - nose
+    - nose-timer
+    - coverage
+    - qcportal
+    - torchdata <= 0.10.0
+
+about:
+  home: https://github.com/choderalab/perses
+  license: MIT
+  license_file: LICENSE

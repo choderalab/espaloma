@@ -2,9 +2,9 @@
 # Initially, interested in recovering a molecular mechanics model containing only improper torsion terms
 
 import numpy as np
-from openforcefield.topology import Molecule, Topology
-from openforcefield.typing.engines.smirnoff import ForceField
-from simtk import openmm as mm
+from openff.toolkit.topology import Molecule, Topology
+from openff.toolkit.typing.engines.smirnoff import ForceField
+import openmm as mm
 import pytest
 import espaloma as esp
 
@@ -40,7 +40,9 @@ def _create_impropers_only_system(
     indices = set(
         map(
             tuple,
-            esp.graphs.utils.offmol_indices.improper_torsion_indices(molecule),
+            esp.graphs.utils.offmol_indices.improper_torsion_indices(
+                molecule
+            ),
         )
     )
     num_impropers_retained = 0
@@ -71,9 +73,10 @@ def _create_impropers_only_system(
 
 @pytest.mark.skip(reason="too slow")
 def test_improper_recover():
-    from simtk import openmm, unit
-    from simtk.openmm.app import Simulation
-    from simtk.unit.quantity import Quantity
+    import openmm
+    from openmm import unit
+    from openmm.app import Simulation
+    from openmm.unit import Quantity
 
     TEMPERATURE = 500 * unit.kelvin
     STEP_SIZE = 1 * unit.femtosecond
@@ -91,11 +94,11 @@ def test_improper_recover():
         topology=topology, system=system, integrator=integrator
     )
 
-    import openforcefield
+    import openff.toolkit
 
     # get conformer
     g.mol.generate_conformers(
-        toolkit_registry=openforcefield.utils.RDKitToolkitWrapper(),
+        toolkit_registry=openff.toolkit.utils.RDKitToolkitWrapper(),
     )
 
     # put conformer in simulation
@@ -149,7 +152,11 @@ def test_improper_recover():
     net = torch.nn.Sequential(
         esp.nn.Sequential(layer, [32, "tanh", 32, "tanh", 32, "tanh"]),
         esp.nn.readout.janossy.JanossyPoolingImproper(
-            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
+            in_features=32,
+            config=[32, "tanh"],
+            out_features={
+                "k": 6,
+            },
         ),
         esp.mm.geometry.GeometryInGraph(),
         esp.mm.energy.EnergyInGraph(terms=["n4_improper"]),

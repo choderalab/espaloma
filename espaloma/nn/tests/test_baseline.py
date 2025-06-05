@@ -9,7 +9,7 @@ def baseline():
 
     # get force field
     forcefield = esp.graphs.legacy_force_field.LegacyForceField(
-        "smirnoff99Frosst"
+        "smirnoff99Frosst-1.1.0"
     )
 
     # param / typing

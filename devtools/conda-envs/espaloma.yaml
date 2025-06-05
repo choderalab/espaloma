@@ -1,30 +1,35 @@
-name: test
+name: espaloma-test
 channels:
   - conda-forge
-  - defaults
-  - salilab
-  - omnia
+  - openeye
 dependencies:
   # Base dependencies
   - python
   - pip
   # 3rd party
-  - modeller
-  - rdkit
+  - openeye-toolkits
   - numpy
   - matplotlib
   - scipy
-  - openforcefield
-  - openmmforcefields
+  - openff-toolkit >=0.12
+  - openff-forcefields
+  - openff-units
+  - smirnoff99Frosst
+  - openmm
+  - openmmforcefields >=0.11.2
+  - tqdm
+  - pydantic <2  # We need our deps to fix this
+  - qcportal >=0.50
+  - dgl =2.3.0
+  - torchdata <= 0.10.0
   # Testing
   - pytest
   - pytest-cov
+  - pytest-xdist
+  - pytest-randomly
   - codecov
   - nose
   - nose-timer
   - coverage
-  - qcportal
-  # Pip-only installs
-  - pip:
-      - torch
-      - dgl
+  - sphinx
+  - sphinx_rtd_theme

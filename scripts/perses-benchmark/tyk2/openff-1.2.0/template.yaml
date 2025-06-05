@@ -1,0 +1,83 @@
+# Path to protein file
+protein_pdb: null
+# Path to ligand SDF file
+ligand_file: null
+# Indices of old and new ligands within SDF file
+old_ligand_index: null
+new_ligand_index: null
+
+#
+# Force fields
+#
+
+# OpenMM ffxml force field files installed via the openmm-forcefields package
+# for biopolymers and solvents.
+# Note that small molecule force field files should NOT be included here.
+forcefield_files:
+    - amber/ff14SB.xml # ff14SB protein force field
+    - amber/tip3p_standard.xml # TIP3P and recommended monovalent ion parameters
+    - amber/tip3p_HFE_multivalent.xml # for divalent ions
+    - amber/phosaa10.xml # HANDLES THE TPO
+
+# Small molecule force field
+# Options include anything allowed by the openmmforcefields SystemGenerator
+# e.g. one of ['openff-2.0.0', 'gaff-2.11']
+small_molecule_forcefield: openff-1.2.0
+
+#
+# Simulation conditions
+#
+
+# Simulation setup options
+solvent_padding: 9.0 # angstroms
+
+# Use geometry-derived mapping
+use_given_geometries: true
+given_geometries_tolerance: 0.2 # angstroms
+
+# Atom mapping specification
+atom_expression:
+    - IntType
+bond_expession:
+    - DefaultBonds
+
+# Multi-state sampling scheme
+# One of ['repex', 'nonequilibrium', 'sams']
+fe_type: repex
+
+# Checkpoint interval
+checkpoint_interval: 50 # number of iterations
+
+# Number of equilibration iterations
+n_equilibration_iterations: 0
+
+# Number of iterations to run
+n_cycles: 5000
+
+# Number of alchemical intermediate states to use
+n_states: 12
+
+pressure: 1.0 # atmsopheres
+temperature: 300.0 # kelvin
+timestep: 4.0 # femtoseconds
+# remove_constraints: false
+
+# Number of integration stpes per iteration
+n_steps_per_move_application: 250
+
+# Location for storing trajectories
+trajectory_directory: null
+
+# Prefix for trajectory files (project-specific name)
+trajectory_prefix: out
+
+# Atoms to store in NetCDF files (MDTraj selection syntax)
+atom_selection: not water
+
+# Calculation phases to run
+# Permitted phases: ['complex', 'solvent', 'vacuum']
+phases:
+    - complex
+    - solvent
+
+

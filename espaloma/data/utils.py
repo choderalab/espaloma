@@ -3,10 +3,10 @@
 # =============================================================================
 import random
 
-import dgl
 import numpy as np
 import pandas as pd
 import torch
+import contextlib
 
 import espaloma as esp
 
@@ -20,13 +20,25 @@ OFFSETS = {
 # ==============================================================================
 # UTILITY FUNCTIONS
 # ==============================================================================
+
+
+@contextlib.contextmanager
+def make_temp_directory():
+    import tempfile, shutil
+
+    temp_dir = tempfile.mkdtemp()
+    try:
+        yield temp_dir
+    finally:
+        shutil.rmtree(temp_dir)
+
+
 def sum_offsets(elements):
     return sum([OFFSETS[element] for element in elements])
 
 
 def from_csv(path, toolkit="rdkit", smiles_col=-1, y_cols=[-2], seed=2666):
-    """ Read csv from file.
-    """
+    """Read csv from file."""
 
     def _from_csv():
         df = pd.read_csv(path)
@@ -59,8 +71,7 @@ def from_csv(path, toolkit="rdkit", smiles_col=-1, y_cols=[-2], seed=2666):
 
 
 def normalize(ds):
-    """ Get mean and std.
-    """
+    """Get mean and std."""
 
     gs, ys = tuple(zip(*ds))
     y_mean = np.mean(ys)
@@ -76,8 +87,7 @@ def normalize(ds):
 
 
 def split(ds, partition):
-    """ Split the dataset according to some partition.
-    """
+    """Split the dataset according to some partition."""
     n_data = len(ds)
 
     # get the actual size of partition
@@ -93,8 +103,9 @@ def split(ds, partition):
 
 
 def batch(ds, batch_size, seed=2666):
-    """ Batch graphs and values after shuffling.
-    """
+    """Batch graphs and values after shuffling."""
+    import dgl
+
     # get the numebr of data
     n_data_points = len(ds)
     n_batches = n_data_points // batch_size  # drop the rest
@@ -117,28 +128,30 @@ def batch(ds, batch_size, seed=2666):
 
 
 def collate_fn(graphs):
+    import dgl
+
     return esp.HomogeneousGraph(dgl.batch(graphs))
 
 
 def infer_mol_from_coordinates(
-    coordinates, species, smiles_ref=None, coordinates_unit="angstrom",
+    coordinates,
+    species,
+    smiles_ref=None,
+    coordinates_unit="angstrom",
 ):
 
     # local import
     from openeye import oechem
-    from simtk import unit
-    from simtk.unit.quantity import Quantity
+    from openmm import unit
+    from openmm.unit import Quantity
 
     if isinstance(coordinates_unit, str):
         coordinates_unit = getattr(unit, coordinates_unit)
 
     # make sure we have the coordinates
     # in the unit system
-    coordinates = Quantity(
-        coordinates,
-        coordinates_unit
-    ).value_in_unit(
-        unit.angstrom # to make openeye happy
+    coordinates = Quantity(coordinates, coordinates_unit).value_in_unit(
+        unit.angstrom  # to make openeye happy
     )
 
     # initialize molecule
@@ -153,7 +166,9 @@ def infer_mol_from_coordinates(
     elif all(isinstance(symbol, int) for symbol in species):
         [
             mol.NewAtom(
-                getattr(oechem, "OEElemNo_" + oechem.OEGetAtomicSymbol(symbol))
+                getattr(
+                    oechem, "OEElemNo_" + oechem.OEGetAtomicSymbol(symbol)
+                )
             )
             for symbol in species
         ]
@@ -176,14 +191,14 @@ def infer_mol_from_coordinates(
         ims.openstring(smiles_ref)
         mol_ref = next(ims.GetOEMols())
         smiles_ref = oechem.OECreateCanSmiString(mol_ref)
-        assert smiles_ref == smiles_can, (
-            "SMILES different. Input is %s, ref is %s" % (
-                smiles_can,
-                smiles_ref,
-            )
+        assert (
+            smiles_ref == smiles_can
+        ), "SMILES different. Input is %s, ref is %s" % (
+            smiles_can,
+            smiles_ref,
         )
 
-    from openforcefield.topology import Molecule
+    from openff.toolkit.topology import Molecule
 
     _mol = Molecule.from_openeye(mol, allow_undefined_stereo=True)
     g = esp.Graph(_mol)

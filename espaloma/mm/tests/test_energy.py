@@ -18,7 +18,7 @@ def test_energy():
     g = simulation.run(g, in_place=True)
 
     param = esp.graphs.legacy_force_field.LegacyForceField(
-        "smirnoff99Frosst"
+        "smirnoff99Frosst-1.1.0"
     ).parametrize
 
     g = param(g)
@@ -38,7 +38,11 @@ def test_energy():
             },
         ),
         esp.nn.readout.janossy.JanossyPoolingImproper(
-            in_features=32, config=[32, "tanh"], out_features={"k": 6,}
+            in_features=32,
+            config=[32, "tanh"],
+            out_features={
+                "k": 6,
+            },
         ),
     )
 
@@ -61,7 +65,7 @@ def test_energy():
 #     g = simulation.run(g, in_place=True)
 #
 #     param = esp.graphs.legacy_force_field.LegacyForceField(
-#         "smirnoff99Frosst"
+#         "smirnoff99Frosst-1.1.0"
 #     ).parametrize
 #
 #     g = param(g)

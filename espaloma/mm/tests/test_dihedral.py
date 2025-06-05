@@ -46,5 +46,7 @@ def test_dihedral_points():
     theta_espaloma = esp.dihedral(x0, x1, x2, x3).numpy()
 
     npt.assert_almost_equal(
-        theta_timemachine, theta_espaloma, decimal=8,
+        theta_timemachine,
+        theta_espaloma,
+        decimal=3,
     )

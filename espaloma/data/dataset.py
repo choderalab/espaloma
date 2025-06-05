@@ -12,12 +12,33 @@ import espaloma as esp
 # MODULE CLASSES
 # =============================================================================
 class Dataset(abc.ABC, torch.utils.data.Dataset):
-    """ The base class of map-style dataset.
+    """The base class of map-style dataset.
 
     Parameters
     ----------
-    graphs : list
+    graphs : List
         objects in the dataset
+
+    Methods
+    -------
+    shuffle
+        Randomly shuffle the graphs in the dataset.
+
+    apply(fn, in_place=True)
+        Apply a function to every graph in the dataset.
+        If `in_place=True`, modify the graph in-place.
+
+    split(partitions)
+        Split the dataset into partitions
+
+    subsample(ratio, seed=None)
+        Subsample the dataset.
+
+    save(path)
+        Save the dataset to a local path.
+
+    load(path)
+        Load a dataset from local path.
 
     Note
     ----
@@ -28,6 +49,10 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
     ----------
     transforms : an iterable of callables that transforms the input.
         the `__getiem__` method applies these transforms later.
+
+    Examples
+    --------
+    >>> data = Dataset([esp.Graph("C")])
 
     """
 
@@ -95,7 +120,6 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
                 return self.__class__(graphs=graphs)
 
-
     def __iter__(self):
         if self.transforms is None:
             return iter(self.graphs)
@@ -109,14 +133,18 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
             return graphs
 
-    def shuffle(self):
+    def shuffle(self, seed=None):
+        import random
         from random import shuffle
+
+        if seed is not None:
+            random.seed(seed)
 
         shuffle(self.graphs)
         return self
 
     def apply(self, fn, in_place=False):
-        r""" Apply functions to the elements of the dataset.
+        r"""Apply functions to the elements of the dataset.
 
         Parameters
         ----------
@@ -144,13 +172,13 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
                 try:
                     _graphs.append(fn(graph))
                 except:
-                    continue
+                    pass
             self.graphs = _graphs
 
         return self  # to allow grammar: ds = ds.apply(...)
 
     def split(self, partition):
-        """ Split the dataset according to some partition.
+        """Split the dataset according to some partition.
 
         Parameters
         ----------
@@ -167,8 +195,8 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
 
         return ds
 
-    def subsample(self, ratio):
-        """ Subsample the dataset according to some ratio.
+    def subsample(self, ratio, seed=None):
+        """Subsample the dataset according to some ratio.
 
         Parameters
         ----------
@@ -180,13 +208,13 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         n_data = len(self)
         idxs = list(range(n_data))
         import random
-        _idxs = random.choices(idxs, k=int(n_data*ratio))
-        print(_idxs)
-        print(self[_idxs])
+
+        random.seed(seed)
+        _idxs = random.choices(idxs, k=int(n_data * ratio))
         return self[_idxs]
 
     def save(self, path):
-        """ Save dataset to path.
+        """Save dataset to path.
 
         Parameters
         ----------
@@ -197,8 +225,25 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         with open(path, "wb") as f_handle:
             pickle.dump(self.graphs, f_handle)
 
-    def load(self, path):
-        """ Load path to dataset.
+    def regenerate_impropers(self, improper_def="smirnoff"):
+        """
+        Regenerate the improper nodes for all graphs.
+
+        Parameters
+        ----------
+        improper_def : str
+            Which convention to use for permuting impropers.
+        """
+        from espaloma.graphs.utils.regenerate_impropers import (
+            regenerate_impropers,
+        )
+
+        for g in self.graphs:
+            regenerate_impropers(g, improper_def)
+
+    @classmethod
+    def load(cls, path):
+        """Load path to dataset.
 
         Parameters
         ----------
@@ -206,26 +251,29 @@ class Dataset(abc.ABC, torch.utils.data.Dataset):
         import pickle
 
         with open(path, "rb") as f_handle:
-            self.graphs = pickle.load(f_handle)
+            graphs = pickle.load(f_handle)
 
-        return self
+        return cls(graphs)
 
     def __add__(self, x):
-        return self.__class__(
-            self.graphs + x.graphs
-        )
+        return self.__class__(self.graphs + x.graphs)
 
 
 class GraphDataset(Dataset):
-    """ Dataset with additional support for only viewing
+    """Dataset with additional support for only viewing
     certain attributes as `torch.utils.data.DataLoader`
 
+    Methods
+    -------
+    view(collate_fn, *args, **kwargs)
+        Provide a `torch.utils.data.DataLoader` view of the dataset.
 
+    Note
     """
 
     def __init__(self, graphs=[], first=None):
         super(GraphDataset, self).__init__()
-        from openforcefield.topology import Molecule
+        from openff.toolkit.topology import Molecule
 
         if all(
             isinstance(graph, Molecule) or isinstance(graph, str)
@@ -245,13 +293,13 @@ class GraphDataset(Dataset):
         import dgl
 
         if all(isinstance(graph, esp.graphs.graph.Graph) for graph in graphs):
-            return dgl.batch_hetero([graph.heterograph for graph in graphs])
+            return dgl.batch([graph.heterograph for graph in graphs])
 
         elif all(isinstance(graph, dgl.DGLGraph) for graph in graphs):
             return dgl.batch(graphs)
 
         elif all(isinstance(graph, dgl.DGLHeteroGraph) for graph in graphs):
-            return dgl.batch_hetero(graphs)
+            return dgl.batch(graphs)
 
         else:
             raise RuntimeError(
@@ -260,7 +308,7 @@ class GraphDataset(Dataset):
             )
 
     def view(self, collate_fn="graph", *args, **kwargs):
-        """ Provide a data loader.
+        """Provide a data loader.
 
         Parameters
         ----------
@@ -299,3 +347,23 @@ class GraphDataset(Dataset):
         return torch.utils.data.DataLoader(
             dataset=self, collate_fn=collate_fn, *args, **kwargs
         )
+
+    def save(self, path):
+        import os
+
+        os.mkdir(path)
+        for idx, graph in enumerate(self.graphs):
+            graph.save(path + "/" + str(idx))
+
+    @classmethod
+    def load(cls, path):
+        import os
+
+        paths = os.listdir(path)
+        paths = [_path for _path in paths]
+
+        graphs = []
+        for _path in paths:
+            graphs.append(esp.Graph.load(path + "/" + _path))
+
+        return cls(graphs)

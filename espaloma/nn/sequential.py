@@ -1,16 +1,17 @@
 """ Chain mutiple layers of GN together.
 """
-import dgl
 import torch
 
 
 class _Sequential(torch.nn.Module):
-    """ Sequentially staggered neural networks.
-
-    """
+    """Sequentially staggered neural networks."""
 
     def __init__(
-        self, layer, config, in_features, model_kwargs={},
+        self,
+        layer,
+        config,
+        in_features,
+        model_kwargs={},
     ):
         super(_Sequential, self).__init__()
 
@@ -39,9 +40,12 @@ class _Sequential(torch.nn.Module):
 
             # str -> activation
             elif isinstance(exe, str):
-                activation = getattr(torch.nn.functional, exe)
+                if exe == "bn":
+                    setattr(self, "a" + str(idx), torch.nn.BatchNorm1d(dim))
 
-                setattr(self, "a" + str(idx), activation)
+                else:
+                    activation = getattr(torch.nn.functional, exe)
+                    setattr(self, "a" + str(idx), activation)
 
                 self.exes.append("a" + str(idx))
 
@@ -66,15 +70,31 @@ class _Sequential(torch.nn.Module):
 
 
 class Sequential(torch.nn.Module):
-    """ Sequential neural network with input layers.
+    """Sequential neural network with input layers.
 
+    Parameters
+    ----------
+    layer : torch.nn.Module
+        DGL graph convolution layers.
+
+    config : List
+        A sequence of numbers (for units) and strings (for activation functions)
+        denoting the configuration of the sequential model.
+
+    feature_units : int(default=114)
+        The number of input channels.
+
+    Methods
+    -------
+    forward(g, x)
+        Forward pass.
     """
 
     def __init__(
         self,
         layer,
         config,
-        feature_units=117,
+        feature_units=114,
         input_units=128,
         model_kwargs={},
     ):
@@ -90,9 +110,7 @@ class Sequential(torch.nn.Module):
         )
 
     def _forward(self, g, x):
-        """ Forward pass with graph and features.
-
-        """
+        """Forward pass with graph and features."""
         for exe in self.exes:
             if exe.startswith("d"):
                 x = getattr(self, exe)(g, x)
@@ -102,7 +120,7 @@ class Sequential(torch.nn.Module):
         return x
 
     def forward(self, g, x=None):
-        """ Forward pass.
+        """Forward pass.
 
         Parameters
         ----------
@@ -114,9 +132,10 @@ class Sequential(torch.nn.Module):
         g : `dgl.DGLHeteroGraph`
             output graph
         """
+        import dgl
 
         # get homogeneous subgraph
-        g_ = dgl.to_homo(g.edge_type_subgraph(["n1_neighbors_n1"]))
+        g_ = dgl.to_homogeneous(g.edge_type_subgraph(["n1_neighbors_n1"]))
 
         if x is None:
             # get node attributes

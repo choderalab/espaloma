@@ -15,23 +15,21 @@
 # Incase the project was not installed
 import os
 import sys
+import subprocess
 
 sys.path.insert(0, os.path.abspath('..'))
-
-import espaloma
 
 # -- Project information -----------------------------------------------------
 
 project = 'espaloma'
-copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC. Project structure based on the "
-             "Computational Molecular Science Python Cookiecutter version 1.2")
-author = 'Yuanqing Wang @ choderalab // MSKCC'
+copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC.")
+author = 'Yuanqing Wang'
+github_url = "https://github.com/choderalab/espaloma"
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
 release = ''
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -50,6 +48,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinx.ext.coverage',
+    # 'numpydoc',
 ]
 
 autosummary_generate = True
@@ -74,7 +74,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

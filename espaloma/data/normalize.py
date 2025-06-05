@@ -12,9 +12,7 @@ import espaloma as esp
 # BASE CLASSES
 # =============================================================================
 class BaseNormalize(abc.ABC):
-    """ Base class for normalizing operation.
-
-    """
+    """Base class for normalizing operation."""
 
     def __init__(self):
         super(BaseNormalize, self).__init__()
@@ -30,7 +28,7 @@ class BaseNormalize(abc.ABC):
 # MODULE CLASSES
 # =============================================================================
 class DatasetNormalNormalize(BaseNormalize):
-    """ Normalizing operation based on a dataset of molecules,
+    """Normalizing operation based on a dataset of molecules,
     assuming parameters having normal distribution.
 
     Parameters
@@ -53,7 +51,7 @@ class DatasetNormalNormalize(BaseNormalize):
         self._prepare()
 
     def _prepare(self):
-        """ Calculate the statistics from dataset """
+        """Calculate the statistics from dataset"""
         # grab the collection of graphs in the dataset, batched
         g = self.dataset.batch(self.dataset.graphs)
 
@@ -69,9 +67,9 @@ class DatasetNormalNormalize(BaseNormalize):
                     key.replace("_ref", "_mean")
                 ] = torch.mean(g.nodes[term].data[key], axis=0)
 
-                self.statistics[term][key.replace("_ref", "_std")] = torch.std(
-                    g.nodes[term].data[key], axis=0
-                )
+                self.statistics[term][
+                    key.replace("_ref", "_std")
+                ] = torch.std(g.nodes[term].data[key], axis=0)
 
         # get normalize and unnormalize functions
         def norm(g):
@@ -122,7 +120,7 @@ class DatasetNormalNormalize(BaseNormalize):
 
 
 class DatasetLogNormalNormalize(BaseNormalize):
-    """ Normalizing operation based on a dataset of molecules,
+    """Normalizing operation based on a dataset of molecules,
     assuming parameters having log normal distribution.
 
     Parameters
@@ -145,7 +143,7 @@ class DatasetLogNormalNormalize(BaseNormalize):
         self._prepare()
 
     def _prepare(self):
-        """ Calculate the statistics from dataset """
+        """Calculate the statistics from dataset"""
         # grab the collection of graphs in the dataset, batched
         g = self.dataset.batch(self.dataset.graphs)
 
@@ -161,9 +159,9 @@ class DatasetLogNormalNormalize(BaseNormalize):
                     key.replace("_ref", "_mean")
                 ] = torch.mean(g.nodes[term].data[key].log(), axis=0)
 
-                self.statistics[term][key.replace("_ref", "_std")] = torch.std(
-                    g.nodes[term].data[key].log(), axis=0
-                )
+                self.statistics[term][
+                    key.replace("_ref", "_std")
+                ] = torch.std(g.nodes[term].data[key].log(), axis=0)
 
         # get normalize and unnormalize functions
         def norm(g):
@@ -226,7 +224,7 @@ class ESOL100NormalNormalize(DatasetNormalNormalize):
         super(ESOL100NormalNormalize, self).__init__(
             dataset=esp.data.esol(first=100).apply(
                 esp.graphs.legacy_force_field.LegacyForceField(
-                    "smirnoff99Frosst"
+                    "smirnoff99Frosst-1.1.0"
                 ).parametrize,
                 in_place=True,
             )
@@ -238,7 +236,7 @@ class ESOL100LogNormalNormalize(DatasetLogNormalNormalize):
         super(ESOL100LogNormalNormalize, self).__init__(
             dataset=esp.data.esol(first=100).apply(
                 esp.graphs.legacy_force_field.LegacyForceField(
-                    "smirnoff99Frosst"
+                    "smirnoff99Frosst-1.1.0"
                 ).parametrize,
                 in_place=True,
             )

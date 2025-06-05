@@ -4,7 +4,6 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import dgl
 import torch
 
 # =============================================================================
@@ -40,9 +39,11 @@ def fp_oe(atom):
             torch.tensor(
                 [
                     atom.GetDegree(),
-                    atom.GetValence(),
-                    atom.GetExplicitValence(),
-                    atom.GetFormalCharge(),
+                    # Note: Discard resonance-variant features
+                    # Issue related to https://github.com/choderalab/espaloma_charge/issues/18
+                    # atom.GetValence(),
+                    # atom.GetExplicitValence(),
+                    # atom.GetFormalCharge(),
                     atom.IsAromatic() * 1.0,
                     atom.GetIsotope(),  # TODO: is this a good idea?
                     oechem.OEAtomIsInRingSize(atom, 3) * 1.0,
@@ -65,22 +66,28 @@ def fp_rdkit(atom):
 
     HYBRIDIZATION_RDKIT = {
         Chem.rdchem.HybridizationType.SP: torch.tensor(
-            [1, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
+            [1, 0, 0, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP2: torch.tensor(
-            [0, 1, 0, 0, 0], dtype=torch.get_default_dtype(),
+            [0, 1, 0, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3: torch.tensor(
-            [0, 0, 1, 0, 0], dtype=torch.get_default_dtype(),
+            [0, 0, 1, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3D: torch.tensor(
-            [0, 0, 0, 1, 0], dtype=torch.get_default_dtype(),
+            [0, 0, 0, 1, 0],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.SP3D2: torch.tensor(
-            [0, 0, 0, 0, 1], dtype=torch.get_default_dtype(),
+            [0, 0, 0, 0, 1],
+            dtype=torch.get_default_dtype(),
         ),
         Chem.rdchem.HybridizationType.S: torch.tensor(
-            [0, 0, 0, 0, 0], dtype=torch.get_default_dtype(),
+            [0, 0, 0, 0, 0],
+            dtype=torch.get_default_dtype(),
         ),
     }
     return torch.cat(
@@ -88,9 +95,11 @@ def fp_rdkit(atom):
             torch.tensor(
                 [
                     atom.GetTotalDegree(),
-                    atom.GetTotalValence(),
-                    atom.GetExplicitValence(),
-                    atom.GetFormalCharge(),
+                    # Note: Discard resonance-variant features
+                    # Issue related to https://github.com/choderalab/espaloma_charge/issues/18
+                    # atom.GetTotalValence(),
+                    # atom.GetExplicitValence(),
+                    # atom.GetFormalCharge(),
                     atom.GetIsAromatic() * 1.0,
                     atom.GetMass(),
                     atom.IsInRingSize(3) * 1.0,
@@ -111,9 +120,8 @@ def fp_rdkit(atom):
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
-def from_openforcefield_mol(mol, use_fp=True):
-    # initialize graph
-    from rdkit import Chem
+def from_openff_toolkit_mol(mol, use_fp=True):
+    import dgl
 
     # initialize graph
     g = dgl.DGLGraph()
@@ -124,7 +132,10 @@ def from_openforcefield_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.atomic_number] for atom in mol.atoms]
     )
-
+    total_charge = mol.total_charge.magnitude
+    g.ndata["sum_q"] = torch.Tensor(
+        [[total_charge] for _ in range(mol.n_atoms)]
+    )
     h_v = torch.zeros(
         g.ndata["type"].shape[0], 100, dtype=torch.get_default_dtype()
     )
@@ -159,7 +170,7 @@ def from_openforcefield_mol(mol, use_fp=True):
 
 
 def from_oemol(mol, use_fp=True):
-    from openeye import oechem
+    import dgl
 
     # initialize graph
     g = dgl.DGLGraph()
@@ -170,7 +181,9 @@ def from_oemol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
     )
-
+    g.ndata["formal_charge"] = torch.Tensor(
+        [[atom.GetFormalCharge()] for atom in mol.GetAtoms()]
+    )
     h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
 
     h_v[
@@ -201,7 +214,7 @@ def from_oemol(mol, use_fp=True):
 
 
 def from_rdkit_mol(mol, use_fp=True):
-    from rdkit import Chem
+    import dgl
 
     # initialize graph
     g = dgl.DGLGraph()
@@ -212,7 +225,9 @@ def from_rdkit_mol(mol, use_fp=True):
     g.ndata["type"] = torch.Tensor(
         [[atom.GetAtomicNum()] for atom in mol.GetAtoms()]
     )
-
+    g.ndata["formal_charge"] = torch.Tensor(
+        [[atom.GetFormalCharge()] for atom in mol.GetAtoms()]
+    )
     h_v = torch.zeros(g.ndata["type"].shape[0], 100, dtype=torch.float32)
 
     h_v[
