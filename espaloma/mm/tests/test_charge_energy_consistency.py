@@ -40,7 +40,9 @@ def test_coulomb_energy_consistency(g):
 
     # if MD blows up, forget about it
     if g.nodes["n1"].data["xyz"].abs().max() > 100:
-        return True
+        pytest.skip(
+            "MD simulation blew up, skipping test. "
+        )
 
     g.nodes["n1"].data["q"] = torch.tensor(charges).unsqueeze(-1)
     esp.mm.nonbonded.multiply_charges(g.heterograph)
