@@ -100,6 +100,15 @@ def apply_angle_ii(nodes, suffix=""):
 def apply_torsion_ii(nodes, suffix=""):
     """ Torsion energy in nodes. """
     return {
+        "u_angle_torsion%s"
+        % suffix: esp.mm.torsion.angle_torsion(
+            x=nodes.data["x"],
+            x_angle_left=nodes.data["x_angle_left"],
+            x_angle_right=nodes.data["x_angle_right"],
+            eq_angle_left=nodes.data["eq_angle_left"],
+            eq_angle_right=nodes.data["eq_angle_right"],
+            k_angle_torsion=nodes.data["k_angle_torsion"],
+        ),
         "u_angle_angle%s"
         % suffix: esp.mm.torsion.angle_angle(
             x_angle_left=nodes.data["x_angle_left"],
@@ -312,7 +321,8 @@ def energy_in_graph(
             g.apply_nodes(
                 lambda node: {
                     'u%s' % suffix:
-                    node.data['u_urey_bradley%s' % suffix]\
+                    node.data['u%s' % suffix]\
+                    + node.data['u_urey_bradley%s' % suffix]\
                     + node.data['u_bond_bond%s' % suffix]\
                     + node.data['u_bond_angle%s' % suffix]
                 },
@@ -332,7 +342,9 @@ def energy_in_graph(
             g.apply_nodes(
                 lambda node: {
                     'u%s' % suffix:
-                    node.data['u_angle_angle%s' % suffix]\
+                    node.data['u%s' % suffix]\
+                    + node.data['u_angle_torsion%s' % suffix]\
+                    + node.data['u_angle_angle%s' % suffix]\
                     + node.data['u_angle_angle_torsion%s' % suffix]\
                     + node.data['u_bond_torsion%s' % suffix]
                 },
