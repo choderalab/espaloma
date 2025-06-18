@@ -73,9 +73,9 @@ The rest of the code should be the same as in the previous code block example.
 Below is a compatibility matrix for different versions of `espaloma` code and `espaloma` models (the `.pt` file).
 
 | Model 🧪             | DOI 📝 | Supported Espaloma version 💻 | Release Date 🗓️ | Espaloma architecture change 📐? |
-|---------------------|-------|------------------------------|----------------|---------------------------------|
-| `espaloma-0.3.2.pt` |       | 0.3.1, 0.3.2                 | Sep 22, 2023   | ✅ No                            |
-| `espaloma-0.3.1.pt` |       | 0.3.1, 0.3.2                 | Jul 17, 2023   | ⚠️ Yes                           |
+|---------------------|-------|------------------------------|----------------|----------------------------------|
+| `espaloma-0.3.2.pt` |       | 0.3.1, 0.3.2, 0.4.0          | Sep 22, 2023   | ✅ No                            |
+| `espaloma-0.3.1.pt` |       | 0.3.1, 0.3.2, 0.4.0          | Jul 17, 2023   | ⚠️ Yes                           |
 | `espaloma-0.3.0.pt` |       | 0.3.0                        | Apr 26, 2023   | ⚠️Yes                            |
 
 > [!NOTE]  
