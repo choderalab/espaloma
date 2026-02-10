@@ -14,7 +14,7 @@ dependencies:
   - openff-toolkit >=0.12
   - openff-forcefields
   - openff-units
-  - smirnoff99Frosst
+  - smirnoff99frosst>=1.1.0.1  #https://github.com/openforcefield/smirnoff99Frosst/issues/109
   - openmm
   - openmmforcefields >=0.11.2
   - tqdm
